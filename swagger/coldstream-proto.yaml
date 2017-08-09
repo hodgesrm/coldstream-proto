@@ -1,0 +1,327 @@
+swagger: '2.0'
+info:
+  description: 'Coldstream model for invoice processing. '
+  version: 1.0.0
+  title: Coldstream Prototype
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: rhodges@skylineresearch.comm
+host: api.coldstream.io
+basePath: /api/v1
+tags:
+  - name: core
+    description: Core processing model
+  - name: server
+    description: Server API
+schemes:
+  - http
+paths:
+  /server/version:
+    get:
+      tags:
+        - server
+      summary: Return server version.
+      description: Return server version information.
+      operationId: serverVersion
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/VersionInfo'
+definitions:
+  VersionInfo:
+    type: object
+    properties:
+      version:
+        type: string
+        description: Server version
+  Document:
+    description: 'A document, for example a PDF invoice'
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Document ID
+      name:
+        type: string
+        description: Name of the document
+      locator:
+        type: string
+        format: url
+        description: URL of the source
+      thumbprint:
+        type: string
+        description: SHA-256 thumbprint of documentation content
+  OcrScan:
+    description: OCR scan of a document
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Scan ID
+      docId:
+        type: string
+        format: uuid
+        description: ID of source document
+      locator:
+        type: string
+        format: url
+        description: URL of the scan document
+      thumbprint:
+        type: string
+        description: SHA-256 thumbprint of scan content
+  DocumentRegion:
+    description: >-
+      Location within a document page expressed in page number and pixel region
+      coordinates on the page
+    type: object
+    properties:
+      page:
+        type: integer
+        format: int32
+        description: Page number
+      left:
+        type: integer
+        format: int32
+        description: Left pixel coordinate
+      top:
+        type: integer
+        format: int32
+        description: Top pixel coordinate
+      right:
+        type: integer
+        format: int32
+        description: Right pixel coordinate
+      bottom:
+        type: integer
+        format: int32
+        description: Bottom pixel coordinate
+  Range:
+    description: A time range associated with an item.
+    properties:
+      start:
+        type: string
+        format: timestamp
+        description: Begining of the time range
+      end:
+        type: string
+        format: timestamp
+        description: End of the time range
+  Invoice:
+    description: An invoice for services
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique invoice id
+      docId:
+        type: string
+        format: uuid
+        description: ID of the source document
+      invoiceNumber:
+        type: string
+        description: Invoice identifier
+      invoiceDate:
+        type: string
+        format: date-time
+        description: Invoice date
+      vendor:
+        type: string
+        description: Vendor name
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/InvoiceItem'
+  InvoiceItem:
+    description: An invoice item
+    properties:
+      itemNumber:
+        type: string
+        description: Invoice item ID
+      period:
+        $ref: '#/definitions/Range'
+      region:
+        $ref: '#/definitions/DocumentRegion'
+      quantity:
+        type: integer
+        description: Number of items
+      unitCost:
+        type: number
+        description: Cost per unit
+      totalCost:
+        type: number
+        description: Total cost for all units
+      currency:
+        type: string
+        description: Item currency
+        enum:
+          - USD
+          - EURO
+  Host:
+    description: >-
+      A host configuration including CPU, RAM, OS, storage devices, and network
+      connections
+    properties:
+      identifier:
+        type: string
+        description: Host identification key
+      name:
+        type: string
+        description: The host name
+      cpu:
+        type: array
+        items:
+          $ref: '#/definitions/CPU'
+      memory:
+        type: array
+        items:
+          $ref: '#/definitions/Memory'
+      os:
+        $ref: '#/definitions/OperatingSystem'
+      storage:
+        type: array
+        items:
+          $ref: '#/definitions/StorageDevice'
+      network:
+        type: array
+        items:
+          $ref: '#/definitions/NetworkConnection'
+      power:
+        type: array
+        items:
+          $ref: '#/definitions/PowerSupply'
+  CPU:
+    description: CPU description
+    properties:
+      model:
+        type: string
+        description: CPU model name
+      manufacturer:
+        type: string
+        description: CPU manufacturer
+      cores:
+        type: integer
+        format: int32
+        description: Number of cores
+  Memory:
+    description: Memory allocation description
+    properties:
+      capacity:
+        type: integer
+        format: int64
+        description: Memory capacity in bytes
+  OperatingSystem:
+    description: Operating system information
+    properties:
+      name:
+        type: string
+        description: 'OS major version e.g., Linux'
+      distribution:
+        type: string
+        description: 'Distribution, e.g, Debian or Ubuntu'
+      majorVersion:
+        type: string
+        description: 'OS major version e.g., ''Waxing Wombat'' or 10'
+      minorVersion:
+        type: string
+        description: 'OS minor version e.g., ''0'''
+  StorageDevice:
+    description: A storage device such as SSD or HD
+    properties:
+      name:
+        type: string
+        description: Device name
+      capacity:
+        type: integer
+        format: int64
+        description: Capacity in bytes
+      storageType:
+        type: string
+        description: Storage type
+        enum:
+          - SSD
+          - HD
+      model:
+        type: string
+        description: Device model name
+      manufacturer:
+        type: string
+        description: Device manufacturer
+      interfaceType:
+        type: string
+        description: Storage interface type
+        enum:
+          - SATA-2
+          - SATA-3
+          - NFS
+          - ISCSI
+          - FIBERCHANNEL
+          - OTHER
+      raidType:
+        type: string
+        description: RAID type
+        enum:
+          - NONE
+          - RAID1
+          - RAID5
+          - RAID10
+          - OTHER
+  NetworkConnection:
+    description: A network connection
+    properties:
+      name:
+        type: string
+        description: Network connection name
+      speed:
+        type: integer
+        format: int64
+        description: Speed in bytes per second
+      model:
+        type: string
+        description: Device model name
+      manufacturer:
+        type: string
+        description: Device manufacturer
+      mac:
+        type: string
+        description: MAC address
+      ipv4Address:
+        type: string
+        description: IPv4 address
+  PowerSupply:
+    description: A power supply
+    properties:
+      watts:
+        type: integer
+        format: int32
+        description: Available power
+      model:
+        type: string
+        description: Device model name
+      manufacturer:
+        type: string
+        description: Device manufacturer
+  Tag:
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
