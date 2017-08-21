@@ -132,40 +132,61 @@ definitions:
       vendor:
         type: string
         description: Vendor name
-      items:
+      hosts:
         type: array
+        description: Invoice items related to managed hosts
         items:
-          $ref: '#/definitions/InvoiceItem'
+          $ref: '#/definitions/HostInvoiceItem'
   InvoiceItem:
-    description: An invoice item
-    properties:
-      itemNumber:
-        type: string
-        description: Invoice item ID
-      period:
-        $ref: '#/definitions/Range'
-      region:
-        $ref: '#/definitions/DocumentRegion'
-      quantity:
-        type: integer
-        description: Number of items
-      unitCost:
-        type: number
-        description: Cost per unit
-      totalCost:
-        type: number
-        description: Total cost for all units
-      currency:
-        type: string
-        description: Item currency
-        enum:
-          - USD
-          - EURO
+    description: Common fields for all invoice line items
+    allOf:
+      - type: object
+        properties:
+          itemNumber:
+            type: string
+            description: Invoice item ID
+          itemType:
+            type: string
+            description: The type of invoice item
+            enum:
+              - MANAGED_HOST
+          itemId:
+            type: string
+            format: uuid
+            description: Item specifier ID
+          unitCost:
+            type: number
+            description: Cost per unit
+          units:
+            type: integer
+            description: Number of units
+          totalCost:
+            type: number
+            description: Total cost for all units
+          currency:
+            type: string
+            description: Item currency
+            enum:
+              - USD
+              - EURO
+      - $ref: '#/definitions/Range'
+      - $ref: '#/definitions/DocumentRegion'
+  HostInvoiceItem:
+    description: An invoice entry related to a managed host
+    allOf:
+      - $ref: '#/definitions/InvoiceItem'
+      - properties:
+          host:
+            $ref: '#/definitions/Host'
   Host:
     description: >-
       A host configuration including CPU, RAM, OS, storage devices, and network
       connections
     properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique host descriptor ID
       identifier:
         type: string
         description: Host identification key

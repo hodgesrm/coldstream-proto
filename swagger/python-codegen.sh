@@ -1,34 +1,41 @@
 #!/bin/sh
 # Generate python code for Swagger model.
-
+# (Source for this script: $CODEGEN/bin/python-petstore.sh)
 
 CODEGEN=$HOME/git/swagger-codegen
+SCRIPT="$0"
+SCRIPT_DIR=`dirname $SCRIPT`
+CS_HOME=`cd $SCRIPT_DIR/..;pwd`
+CS_CODEGEN_DIR=$CS_HOME/python/coldstream/generated
+OPT=$1
 
-#SCRIPT="$0"
-#while [ -h "$SCRIPT" ] ; do
-#  ls=`ls -ld "$SCRIPT"`
-#  link=`expr "$ls" : '.*-> \(.*\)$'`
-#  if expr "$link" : '/.*' > /dev/null; then
-#    SCRIPT="$link"
-#  else
-#    SCRIPT=`dirname "$SCRIPT"`/"$link"
-#  fi
-#done
+# Check option. 
+if [ "$OPT" = "clean" ]; then
+  # Wipe out existing generated code. 
+  rm -r $CS_CODEGEN_DIR
+  exit 0
+elif [ "$OPT" = "help" ]; then
+  shift
+  args="help $@"
+elif [ "$OPT" = "config-help" ]; then
+  shift
+  args="config-help $@"
+elif [ "$OPT" = "generate" ]; then
+  shift
+  mkdir -p $CS_HOME/python/generated
+  args="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i $CS_HOME/swagger/coldstream-proto.yaml -l python -o $CS_CODEGEN_DIR -DpackageName=api $@"
+else
+  echo "Usage: ${SCRIPT} { generate | clean | help } [ options ]"
+  exit 1
+fi
 
-#if [ ! -d "${APP_DIR}" ]; then
-#  APP_DIR=`dirname "$SCRIPT"`/..
-#  APP_DIR=`cd "${APP_DIR}"; pwd`
-#fi
-
+# Generate and help require an executable. 
 executable="$CODEGEN/modules/swagger-codegen-cli/target/swagger-codegen-cli.jar"
-
 if [ ! -f "$executable" ]
 then
   (cd $CODEGEN; mvn clean package)
 fi
 
-# if you've executed sbt assembly previously it will use that instead.
+# Set standard values and execute. 
 export JAVA_OPTS="${JAVA_OPTS} -XX:MaxPermSize=256M -Xmx1024M -DloggerPath=conf/log4j.properties"
-ags="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i coldstream-proto.yaml -l python -o ../generated/python -DpackageName=coldstream_api $@"
-
-java $JAVA_OPTS -jar $executable $ags
+java $JAVA_OPTS -jar $executable $args
