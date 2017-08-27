@@ -37,6 +37,20 @@ definitions:
       version:
         type: string
         description: Server version
+  Invoice:
+    description: Complete description of an invoice
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Document ID
+      document:
+        $ref: '#/definitions/Document'
+      ocr:
+        $ref: '#/definitions/OcrScan'
+      content:
+        $ref: '#/definitions/InvoiceContent'
   Document:
     description: 'A document, for example a PDF invoice'
     type: object
@@ -100,19 +114,8 @@ definitions:
         type: integer
         format: int32
         description: Bottom pixel coordinate
-  Range:
-    description: A time range associated with an item.
-    properties:
-      start:
-        type: string
-        format: timestamp
-        description: Begining of the time range
-      end:
-        type: string
-        format: timestamp
-        description: End of the time range
-  Invoice:
-    description: An invoice for services
+  InvoiceContent:
+    description: Root of invoice content model
     properties:
       id:
         type: string
@@ -139,43 +142,51 @@ definitions:
           $ref: '#/definitions/HostInvoiceItem'
   InvoiceItem:
     description: Common fields for all invoice line items
-    allOf:
-      - type: object
-        properties:
-          itemNumber:
-            type: string
-            description: Invoice item ID
-          itemType:
-            type: string
-            description: The type of invoice item
-            enum:
-              - MANAGED_HOST
-          itemId:
-            type: string
-            format: uuid
-            description: Item specifier ID
-          unitCost:
-            type: number
-            description: Cost per unit
-          units:
-            type: integer
-            description: Number of units
-          totalCost:
-            type: number
-            description: Total cost for all units
-          currency:
-            type: string
-            description: Item currency
-            enum:
-              - USD
-              - EURO
-      - $ref: '#/definitions/Range'
-      - $ref: '#/definitions/DocumentRegion'
+    type: object
+    properties:
+      itemNumber:
+        type: string
+        description: Invoice item ID
+      itemType:
+        type: string
+        description: The type of invoice item
+        enum:
+          - MANAGED_HOST
+      itemId:
+        type: string
+        format: uuid
+        description: Item specifier ID
+      unitCost:
+        type: number
+        description: Cost per unit
+      units:
+        type: integer
+        description: Number of units
+      totalCost:
+        type: number
+        description: Total cost for all units
+      currency:
+        type: string
+        description: Item currency
+        enum:
+          - USD
+          - EURO
+      startDate:
+        type: string
+        format: timestamp
+        description: Begining of the time range
+      endDate:
+        type: string
+        format: timestamp
+        description: End of the time range
+      invoiceRegion:
+        $ref: '#/definitions/DocumentRegion'
   HostInvoiceItem:
-    description: An invoice entry related to a managed host
     allOf:
       - $ref: '#/definitions/InvoiceItem'
-      - properties:
+      - type: object
+        description: Invoice entry for a managed host
+        properties:
           host:
             $ref: '#/definitions/Host'
   Host:
@@ -278,9 +289,6 @@ definitions:
         enum:
           - SATA-2
           - SATA-3
-          - NFS
-          - ISCSI
-          - FIBERCHANNEL
           - OTHER
       raidType:
         type: string
