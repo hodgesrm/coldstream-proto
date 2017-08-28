@@ -43,8 +43,7 @@ definitions:
     properties:
       id:
         type: string
-        format: uuid
-        description: Document ID
+        description: Invoice ID
       document:
         $ref: '#/definitions/Document'
       ocr:
@@ -57,7 +56,6 @@ definitions:
     properties:
       id:
         type: string
-        format: uuid
         description: Document ID
       name:
         type: string
@@ -75,7 +73,6 @@ definitions:
     properties:
       id:
         type: string
-        format: uuid
         description: Scan ID
       docId:
         type: string

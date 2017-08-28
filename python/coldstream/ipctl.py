@@ -118,7 +118,8 @@ class CommandInvoiceShow(object):
         args = self._parser.parse_args(command_options)
         api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
         metadata = api.get_invoice(args.id)
-        metadata_as_json = json.dumps(metadata, indent=2, sort_keys=True)
+        metadata_as_json = dump_swagger_object_to_json(metadata, 
+            indent=2, sort_keys=True)
         print(metadata_as_json)
 
 class CommandInvoiceDelete(object):
@@ -134,8 +135,6 @@ class CommandInvoiceDelete(object):
         args = self._parser.parse_args(command_options)
         api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
         metadata = api.delete_invoice(args.id)
-
-#############################################################################
 
 #############################################################################
 # Utility functions
@@ -176,7 +175,14 @@ def standard_options(parser, option_names):
                 default=os.getenv("REPO_CFG"))
         else:
             raise Exception("Unknown option: {0}".format(option))
-            
+
+def dump_swagger_object_to_json(obj, indent=None, sort_keys=None):
+    """Dumps a generated swagger object to JSON by supplying default to
+    convert objects to dictionaries. 
+    a dictionary"""
+    converter_fn = lambda unserializable_obj: unserializable_obj.to_dict()
+    return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
+
 #############################################################################
 # Command line processor
 #############################################################################
