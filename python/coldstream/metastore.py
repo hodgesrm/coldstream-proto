@@ -2,11 +2,9 @@
 
 """Public API for invoice processing"""
 
-import configparser
 import jsonpickle
 import os
 import shutil
-import tempfile
 import unittest
 import uuid
 
@@ -34,7 +32,7 @@ class MetadataStore:
         return id
 
     def get(self, id, metadata_class):
-        """Retrieve and deserialize a single instance"""
+        """ Retrieve and deserialize a single instance"""
         metadata_path = self._make_meta_file_path(id, metadata_class.__name__)
         with open(metadata_path, "r") as meta_fp:
             serialized = meta_fp.read()

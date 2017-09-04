@@ -2,7 +2,6 @@
 
 """Public API for invoice processing"""
 
-import configparser
 import os
 import uuid
 

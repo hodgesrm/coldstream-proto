@@ -2,12 +2,10 @@
 
 """Public API for invoice processing"""
 
-import configparser
 import hashlib
 import json
 import os
 import shutil
-import tempfile
 import unittest
 import uuid
 
