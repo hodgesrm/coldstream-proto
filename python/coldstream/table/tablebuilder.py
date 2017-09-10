@@ -3,139 +3,155 @@
 
 """Functions to transform scanned PDF invoice to a generic tabular model"""
 import io
-import sys
+import json
 from lxml import etree
-import tabularmodel as tm
+import unittest
+import table.tabularmodel as tm
 
-def _set_location(page, target_tag, source_tag):
-    """Set the tag page and pixel extent"""
-    target_tag.set("page", page) 
-    target_tag.set("l", source_tag.get("l"))
-    target_tag.set("t", source_tag.get("t"))
-    target_tag.set("r", source_tag.get("r"))
-    target_tag.set("b", source_tag.get("b"))
+
+def _create_region(page, source_tag):
+    """Return region that contains page and pixel coordinates of a location"""
+    return tm.Region(page, int(source_tag.get("l")),
+                     int(source_tag.get("t")), int(source_tag.get("r")),
+                     int(source_tag.get("b")))
+
 
 def build_model(xml):
     """Parse ABBYY XML scan output into a tabular model"""
     # Load XML and strip namespaces. 
-    xml_input = io.StringIO(xml)
+    xml_input = io.BytesIO(xml)
     it = etree.iterparse(xml_input)
     for _, el in it:
         if '}' in el.tag:
             el.tag = el.tag.split('}', 1)[1]  # strip all namespaces
     root = it.root
- 
+
     # Extract tabular data. 
-    #print('<document>')
-    doc = etree.Element("document")
+    doc = tm.TabularModel()
     page_no = 0
+    page = None
     for next_elem in root.iter():
         # Handle a page tag by incrementing. 
         if next_elem.tag == 'page':
             page_no += 1
-            page_no_str = str(page_no)
-            #print("Found a page: {0}".format(page_no))
-    
+            page = tm.Page(page_no)
+            doc.add_page(page)
+            print("Found page: {0}".format(page_no))
+
         # Handle a block by processing tables and ignoring other structures. 
         elif next_elem.tag == 'block':
             in_block = next_elem
-            blockType = in_block.get('blockType')
-            if blockType == 'Separator':
+            block_type = in_block.get('blockType')
+            print("Found block, blockType=" + block_type)
+            if block_type == 'Separator':
                 continue
-            elif blockType == 'SeparatorsBox':
+            elif block_type == 'SeparatorsBox':
                 continue
-            elif blockType == 'Table':
-                #print('<table>')
-                table = etree.SubElement(doc, "table")
-                _set_location(page_no_str, table, in_block)
-    
-                # Process rows.  Set the row top to start at the top of the 
-                # table. 
-                row_num = 0
-                row_t = int(table.get("t"))
-                for in_row in in_block.iter('row'):
-                    #print('<row>')
-                    row = etree.SubElement(table, "row")
-                    row_num += 1
-           
-                    # Rows do not have pixel location, so we derive it 
-                    # from the cell sizes by incrementing across and down. 
-                    row.set("page_num", page_no_str)
-                    row.set("row_num", str(row_num))
-                    row.set("l", table.get("l"))
-                    row_l = int(table.get("l"))
-                    row.set("t", str(row_t))
-                    # Start with left and top and increment as we read cells.
-                    row_r = row_l
-                    row_b = row_t
-    
-                    # Iterate across cells, tracking columns. 
-                    column = 0
-                    for in_cell in in_row.iter('cell'):
-                        #print('<cell>')
-                        cell = etree.SubElement(row, "cell")
-                        column += 1
-    
-                        # Let page, column, and left/top coordinates of cell.
-                        cell.set("page_num", page_no_str)
-                        cell.set("row_num", str(row_num))
-                        cell.set("column_num", str(column))
-                        cell.set("width", in_cell.get("width"))
-                        cell.set("height", in_cell.get("height"))
-                        cell_height = int(in_cell.get("height"))
-                        cell_width = int(in_cell.get("width"))
-    
-                        # Left edge of cell is current right edge of row.
-                        cell.set("l", str(row_r))
-                        cell.set("t", str(row_t))
-    
-                        # Increment row bottom/right of row and use values to set
-                        # cell bottom/right
-                        row_r += cell_width
-                        cell.set("r", str(row_r))
-                        if (row_t + cell_height > row_b):
-                            row_b = row_t + cell_height
-                        cell.set("b", str(row_b))
-    
-                        #set_location(page_no_str, cell, in_cell)
-                        for in_text in in_cell.iter('text'):
-                            #print('<text>')
-                            text = etree.SubElement(cell, "text")
-                            #set_location(page_no_str, text, in_text)
-                            for in_line in in_text.iter('line'):
-                                for in_formatting in in_line.iter('formatting'):
-                                    str_value = ""
-                                    for in_char in in_formatting.iter('charParams'):
-                                        str_value = str_value + in_char.text
-                                    #print("<line>" + str + "</line>")
-                                    etree.SubElement(text, "line").text = str_value
-                    # At end of row, set the right/bottom coordinates and advance
-                    # the row position. 
-                    row.set("r", str(row_r))
-                    row.set("b", str(row_b))
-                    row_t = row_b 
-    
-            elif blockType == 'Text':
-                #print('<text>')
-                text = etree.SubElement(doc, "text")
-                #set_location(page_no_str, text, in_block)
+            elif block_type == 'Text':
+                block = tm.TextBlock()
+                page.add_block(block)
+                block.region = _create_region(page_no, in_block)
+
                 for in_text in in_block.iter('text'):
                     for in_line in in_text.iter('line'):
                         for in_formatting in in_line.iter('formatting'):
                             str_value = ""
                             for in_char in in_formatting.iter('charParams'):
                                 str_value = str_value + in_char.text
-                            #print("<line>" + str + "</line>")
-                            etree.SubElement(text, "line").text = str_value
-            else:
-                block = etree.SubElement(doc, "block", blockType = blockType)
-                #print('<block blockType="' + blockType + '"/>')
-    
+                            block.add_text(str_value)
+                            print("Found text: " + str_value)
+
+            elif block_type == 'Table':
+                table = tm.Table()
+                page.add_table(table)
+                print("Found table")
+
+                # Process rows.
+                row_num = 0
+                for in_row in in_block.iter('row'):
+                    row_num += 1
+                    row = tm.Row(row_num)
+                    table.add_row(row)
+                    print("Found row: {0}".format(row_num))
+
+                    # Iterate across cells, tracking columns. 
+                    col_num = 0
+                    for in_cell in in_row.iter('cell'):
+                        col_num += 1
+                        cell = tm.Cell(col_num)
+                        print("Found cell: {0}".format(col_num))
+                        row.add_cell(cell)
+                        cell.height = int(in_cell.get("height"))
+                        cell.width = int(in_cell.get("width"))
+
+                        for in_text in in_cell.iter('text'):
+                            for in_line in in_text.iter('line'):
+                                for in_formatting in in_line.iter('formatting'):
+                                    str_value = ""
+                                    for in_char in in_formatting.iter('charParams'):
+                                        str_value = str_value + in_char.text
+                                    cell.add_text(str_value)
+                                    print("Found text: " + str_value)
         # Ignore remaining tags. 
         else:
-            #print("--Ignored tag: {0}".format(next_elem.tag))
-            continue
-    
-    # Print the result, nicely. 
-    output = etree.tostring(doc, pretty_print=True).decode()
-    print(output)
+            # print("Found " + next_elem.tag)
+            pass
+
+    # Return the document. 
+    return doc
+
+
+class TableBuilderTest(unittest.TestCase):
+    ovh_xml = "/home/rhodges/coldstream/abbyy/code/ocrsdk.com/Bash_cURL/processing/ovh/invoice_WE666184.xml"
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_build(self):
+        """Validate that we can set up a model with pages"""
+        with open(self.ovh_xml, "rb") as xml_file:
+            xml = xml_file.read()
+
+        # print(xml)
+        model = build_model(xml)
+        self.assertIsNotNone(model)
+
+        # Ensure we find a block with OVH.com in it.
+        def ovh_predicate(block):
+            return (len(block.select_text(r'OVH\.com')) > 0)
+
+        ovh_com_blocks = model.select_blocks(ovh_predicate)
+        self.assertTrue(len(ovh_com_blocks) == 1)
+        print(self._dump_to_json(ovh_com_blocks))
+
+        # Ensure we can find the total by finding a block with "TOTAL" then
+        # finding a block that overlaps horizontally.
+        def total_predicate(block):
+            return (len(block.select_text(r'^TOTAL$')) > 0)
+        total_blocks = model.select_blocks(total_predicate)
+        print(self._dump_to_json(total_blocks))
+        self.assertTrue(len(total_blocks) == 1)
+        total_region = total_blocks[0].region
+
+        def total_value_predicate(block):
+            return (block.region.overlaps_horizontally(total_region) and
+                    block != total_blocks[0])
+        total_value_blocks = model.select_blocks(total_value_predicate)
+        print(self._dump_to_json(total_value_blocks))
+        self.assertTrue(len(total_blocks) == 1)
+
+        print(self._dump_to_json(model))
+
+    def _dump_to_json(self, obj, indent=2, sort_keys=True):
+        """Dumps a object to JSON by supplying default to
+        convert objects to dictionaries.
+        """
+        converter_fn = lambda unserializable_obj: unserializable_obj.__dict__
+        return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
+
+
+if __name__ == '__main__':
+    unittest.main()
