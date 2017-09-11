@@ -9,9 +9,9 @@ import unittest
 import table.tabularmodel as tm
 
 
-def _create_region(page, source_tag):
+def _create_region(page_number, source_tag):
     """Return region that contains page and pixel coordinates of a location"""
-    return tm.Region(page, int(source_tag.get("l")),
+    return tm.Region(int(page_number), int(source_tag.get("l")),
                      int(source_tag.get("t")), int(source_tag.get("r")),
                      int(source_tag.get("b")))
 
@@ -103,6 +103,7 @@ def build_model(xml):
 
 class TableBuilderTest(unittest.TestCase):
     ovh_xml = "/home/rhodges/coldstream/abbyy/code/ocrsdk.com/Bash_cURL/processing/ovh/invoice_WE666184.xml"
+    inap_xml = "/home/rhodges/coldstream/abbyy/code/ocrsdk.com/Bash_cURL/processing/inap/Invoice-14066-486955.xml"
 
     def setUp(self):
         pass
@@ -110,8 +111,8 @@ class TableBuilderTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_build(self):
-        """Validate that we can set up a model with pages"""
+    def test_build_1_small(self):
+        """Validate that we can set up a model from a single-page invoice from OVH"""
         with open(self.ovh_xml, "rb") as xml_file:
             xml = xml_file.read()
 
@@ -131,19 +132,59 @@ class TableBuilderTest(unittest.TestCase):
         # finding a block that overlaps horizontally.
         def total_predicate(block):
             return (len(block.select_text(r'^TOTAL$')) > 0)
+
         total_blocks = model.select_blocks(total_predicate)
         print(self._dump_to_json(total_blocks))
         self.assertTrue(len(total_blocks) == 1)
         total_region = total_blocks[0].region
 
         def total_value_predicate(block):
-            return (block.region.overlaps_horizontally(total_region) and
+            return (block.region.overlaps_vertically(total_region) and
                     block != total_blocks[0])
+
         total_value_blocks = model.select_blocks(total_value_predicate)
         print(self._dump_to_json(total_value_blocks))
         self.assertTrue(len(total_blocks) == 1)
 
+        # print(self._dump_to_json(model))
+
+    def test_build_2_large(self):
+        """Validate that we can set up a model from a multi-page invoice from Internap"""
+        with open(self.inap_xml, "rb") as xml_file:
+            xml = xml_file.read()
+        print("Reading data " + self.inap_xml)
+
+        # print(xml)
+        model = build_model(xml)
+        self.assertIsNotNone(model)
         print(self._dump_to_json(model))
+
+        # Ensure we find a block with Internap Corporation in it.
+        def inap_predicate(block):
+            return (len(block.select_text(r'Internap Corporation')) > 0)
+
+        inap_blocks = model.select_blocks(inap_predicate)
+        self.assertTrue(len(inap_blocks) == 1)
+        print(self._dump_to_json(inap_blocks))
+
+        # Ensure we can find the total by finding a block with "Invoice Total"
+        # then finding a block that overlaps horizontally.
+        def total_predicate(block):
+            return (len(block.select_text(r'^Invoice Total')) > 0 and block.region.page_number == 1)
+
+        total_blocks = model.select_blocks(total_predicate)
+        print(self._dump_to_json(total_blocks))
+        self.assertTrue(len(total_blocks) == 1)
+        total_region = total_blocks[0].region
+
+        def total_value_predicate(block):
+            return (block.region.overlaps_vertically(total_region) and
+                    block != total_blocks[0] and
+                    block.region.is_to_right_of(total_region))
+
+        total_value_blocks = model.select_blocks(total_value_predicate)
+        print(self._dump_to_json(total_value_blocks))
+        self.assertTrue(len(total_value_blocks) == 1)
 
     def _dump_to_json(self, obj, indent=2, sort_keys=True):
         """Dumps a object to JSON by supplying default to

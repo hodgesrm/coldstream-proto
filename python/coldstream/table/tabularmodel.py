@@ -14,12 +14,6 @@ class TabularModel:
 
     def add_page(self, page):
         self._pages[page.number] = page
-        page.previous_page = self._pages.get(page.number - 1)
-        page.next_page = self._pages.get(page.number + 1)
-        if page.previous_page is not None:
-            page.previous_page.next_page = page
-        if page.next_page is not None:
-            page.next_page.previous_page = page
 
     @property
     def pages(self):
@@ -39,6 +33,7 @@ class TabularModel:
             blocks += page.select_blocks(predicate)
         return blocks
 
+
 class Page:
     """Denotes a page in the document, which may contain one or more tables"""
 
@@ -46,8 +41,6 @@ class Page:
         self._number = number
         self._tables = []
         self._blocks = []
-        self._next_page = None
-        self._previous_page = None
 
     @property
     def number(self):
@@ -67,22 +60,6 @@ class Page:
     def blocks(self):
         return self._blocks
 
-    @property
-    def next_page(self):
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        self._next_page = next_page
-
-    @property
-    def previous_page(self):
-        return self._previous_page
-
-    @previous_page.setter
-    def previous_page(self, previous):
-        self._previous_page = previous
-
     def select_blocks(self, predicate):
         blocks = []
         for block in self._blocks:
@@ -90,20 +67,21 @@ class Page:
                 blocks.append(block)
         return blocks
 
+
 class Region:
     """Defines a location within a scanned document using the page number
     and pixel coordinates"""
 
-    def __init__(self, page, left, top, right, bottom):
-        self._page = page
+    def __init__(self, page_number, left, top, right, bottom):
+        self._page_number = page_number
         self._left = left
         self._top = top
         self._right = right
         self._bottom = bottom
 
     @property
-    def page(self):
-        return self._page
+    def page_number(self):
+        return self._page_number
 
     @property
     def left(self):
@@ -121,28 +99,60 @@ class Region:
     def bottom(self):
         return self._bottom
 
-    def overlaps_horizontally(self, another):
-        if self.page != another.page:
+    def overlaps_vertically(self, other):
+        """Returns true if regions overlap along vertical axis"""
+        if self.page_number != other.page_number:
             return False
         else:
-            min_bottom = min(self.bottom, another.bottom)
-            max_top = max(self.top, another.top)
+            min_bottom = min(self.bottom, other.bottom)
+            max_top = max(self.top, other.top)
             return (min_bottom - max_top) >= 0
 
-    def overlaps_vertically(self, another):
-        if self.page != another.page:
+    def overlaps_horizontally(self, other):
+        """Returns true if regions overlap along horizontal axis"""
+        if self.page_number != other.page_number:
             return False
         else:
-            min_right = min(self.right, another.right)
-            max_left = max(self.left, another.left)
+            min_right = min(self.right, other.right)
+            max_left = max(self.left, other.left)
             return (min_right - max_left) >= 0
 
-    def contains(self, another):
-        return (self.page == another.page and
-                self.top <= another.top and
-                self.bottom >= another.bottom and
-                self.left <= another.left and
-                self.right >= another.right)
+    def is_to_left_of(self, other):
+        """Returns true if this region is to left of other region"""
+        if self.page_number != other.page_number:
+            return False
+        else:
+            return self.right < other.left
+
+    def is_to_right_of(self, other):
+        """Returns true if this region is to right of other region"""
+        if self.page_number != other.page_number:
+            return False
+        else:
+            return self.left > other.right
+
+    def is_above(self, other):
+        """Returns true if this region is above other region"""
+        if self.page_number != other.page_number:
+            return False
+        else:
+            return self.bottom > other.top
+
+    def is_below(self, other):
+        """Returns true if this region is below other region"""
+        if self.page_number != other.page_number:
+            return False
+        else:
+            return self.top < other.bottom
+
+    def contains(self, other):
+        """Returns true if this region contains other region"""
+        return (self.page_number == other.page_number and
+                self.top <= other.top and
+                self.bottom >= other.bottom and
+                self.left <= other.left and
+                self.right >= other.right)
+
 
 class Table:
     """Defines a table consisting of 0 or more rows"""
@@ -244,20 +254,11 @@ class Cell:
 
 
 class TextBlock:
-    """Defines a region outside a table with one or more lines of text"""
+    """Defines an area outside a table with one or more lines of text"""
 
-    def __init__(self, page=None):
-        self._page = page
+    def __init__(self):
         self._text = []
         self._region = None
-
-    @property
-    def page(self):
-        return self._page
-
-    @page.setter
-    def page(self, page):
-        self._page = page
 
     def add_text(self, text):
         self._text.append(text)
@@ -280,6 +281,28 @@ class TextBlock:
             if re.match(regex, text):
                 selected.append(text)
         return selected
+
+class Line:
+    """Defines a line of text"""
+    def __init__(self, text=None, region=None):
+        self._text = text
+        self._region = region
+
+    @property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, text):
+        self._text = text
+
+    @property
+    def region(self):
+        return self._region
+
+    @region.setter
+    def region(self, region):
+        self._region = region
 
 
 class TableModelTest(unittest.TestCase):
@@ -304,21 +327,11 @@ class TableModelTest(unittest.TestCase):
         self.assertEqual(3, model.page_count)
 
         # Check prev/next relationships.
+        page_number = 0
         for page in pages:
+            page_number += 1
             print("Verifying: " + str(page.__dict__))
-            prev = page.previous_page
-            if page.number > 1:
-                self.assertIsNotNone(prev)
-                self.assertEqual(prev.next_page.number, page.number)
-            else:
-                self.assertIsNone(prev)
-
-            next_page = page.next_page
-            if page.number < 3:
-                self.assertIsNotNone(next_page)
-                self.assertEqual(next_page.previous_page.number, page.number)
-            else:
-                self.assertIsNone(next_page)
+            self.assertEqual(page_number, page.number)
 
     def test_tables(self):
         """Validate that we can add tables to pages"""
@@ -358,7 +371,7 @@ class TableModelTest(unittest.TestCase):
         self.assertIsNotNone(cells)
         region = cells[0].region
         self.assertIsNotNone(region)
-        self.assertEqual(13, region.page)
+        self.assertEqual(13, region.page_number)
 
     def test_regions(self):
         """Validate that we can create and compare regions"""
@@ -369,20 +382,21 @@ class TableModelTest(unittest.TestCase):
         r4 = Region(2, 1, 1, 100, 100)
 
         self.assertFalse(r0.contains(r2))
-        self.assertFalse(r0.overlaps_horizontally(r1))
-        self.assertFalse(r0.overlaps_vertically(r2))
+        self.assertFalse(r0.overlaps_vertically(r1))
+        self.assertFalse(r0.overlaps_horizontally(r2))
 
         self.assertTrue(r4.contains(r1))
         self.assertTrue(r4.contains(r2))
         self.assertTrue(r4.contains(r4))
         self.assertFalse(r2.contains(r3))
 
-        self.assertTrue(r1.overlaps_vertically(r2))
         self.assertTrue(r1.overlaps_horizontally(r2))
-        self.assertTrue(r1.overlaps_vertically(r4))
-        self.assertTrue(r4.overlaps_horizontally(r3))
-        self.assertFalse(r1.overlaps_vertically(r3))
+        self.assertTrue(r1.overlaps_vertically(r2))
+        self.assertTrue(r1.overlaps_horizontally(r4))
+        self.assertTrue(r4.overlaps_vertically(r3))
         self.assertFalse(r1.overlaps_horizontally(r3))
+        self.assertFalse(r1.overlaps_vertically(r3))
+
 
 if __name__ == '__main__':
     unittest.main()
