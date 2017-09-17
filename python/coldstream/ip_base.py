@@ -34,31 +34,42 @@ class Repo:
             raise BaseError("Must provide a file path or config instance")
 
     def create_repo(repo_cfg):
-        """Class method to create a repository"""
+        """Class method to create a new file-based repository"""
+        if repo_cfg is None:
+            raise BaseError("Repo config file name is required")
+        elif os.path.isdir(repo_cfg):
+            raise BaseError("Repo config must be a file not a directory: {0}".format(repo_cfg))
+
         root = os.path.dirname(repo_cfg)
         docs = root + "/documents"
         meta = root + "/metadata"
-        ocr = root + "/ocr/cache"
+        ocr = root + "/ocr"
+        ocr_cache = ocr + "/cache"
 
-        # Don't create a repo twice. 
+        # Don't create a repo twice or in a location that has other
+        # directory entries.  The target directory must be empty.
         if os.path.exists(repo_cfg):
-            raise BaseError("Repo already exists: {0}".format(root))
+            raise BaseError("Repo config file already exists: {0}".format(repo_cfg))
+        elif os.path.exists(root) and len(os.listdir(root)) > 0:
+            raise BaseError("Repo root directory is not empty: {0}".format(root))
 
+        # Create the required directories and add repo.cfg file.
         if not os.path.exists(root):
             os.makedirs(root)
         if not os.path.exists(docs):
             os.makedirs(docs)
         if not os.path.exists(meta):
             os.makedirs(meta)
-        if not os.path.exists(ocr):
-            os.makedirs(ocr)
+        if not os.path.exists(ocr_cache):
+            os.makedirs(ocr_cache)
         with open(repo_cfg, "w") as f:
             f.write("[documents]\n")
             f.write("dir = {0}\n".format(docs))
             f.write("[metadata]\n")
             f.write("dir = {0}\n".format(meta))
             f.write("[ocr]\n")
-            f.write("cache_dir = {0}\n".format(ocr))
+            f.write("dir = {0}\n".format(ocr))
+            f.write("cache_dir = {0}\n".format(ocr_cache))
 
         return repo_cfg
 
@@ -76,7 +87,7 @@ class Repo:
         repo = Repo(repo_cfg)
         Repo._delete_dir(repo, "documents", "dir")
         Repo._delete_dir(repo, "metadata", "dir")
-        Repo._delete_dir(repo, "ocr", "cache_dir")
+        Repo._delete_dir(repo, "ocr", "dir")
         os.remove(repo_cfg)
 
     def _delete_dir(repo, section, key):

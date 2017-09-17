@@ -1,0 +1,12 @@
+certifi==2017.7.27.1
+cycler==0.10.0
+jsonpickle==0.9.5
+lxml==3.8.0
+matplotlib==2.0.2
+numpy==1.13.1
+opencv-python==3.3.0.10
+pyparsing==2.2.0
+python-dateutil==2.6.1
+pytz==2017.2
+six==1.10.0
+urllib3==1.22

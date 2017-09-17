@@ -31,7 +31,7 @@ class Ocr:
         sha256 = ip_base.sha256(source_path)
         ocr_path = self._make_ocr_path(sha256)
         if os.path.exists(ocr_path):
-            shutil.copyfile(source_path, output_path)
+            shutil.copyfile(ocr_path, output_path)
             return True
 
         # Otherwise submit doc for scanning. 

@@ -170,6 +170,9 @@ class Table:
     def header_row(self):
         return self._rows[0]
 
+    def detail_rows(self):
+        return self._rows[1:]
+
     def row_count(self):
         """Number of rows"""
         return len(self._rows)
@@ -205,6 +208,27 @@ class Row:
     def cell_count(self):
         """Return number of cells in the row"""
         return len(self._cells)
+
+    def select_text(self, regex):
+        """Return any text that matches regex"""
+        selected = []
+        for cell in self._cells:
+            selected = selected + cell.select_text(regex)
+        return selected
+
+    def matches_text(self, regex):
+        """Return true if we have this text"""
+        for cell in self._cells:
+            if cell.matches_text(regex):
+                return True
+        return False
+
+    def joined_text(self, join_by=" "):
+        """Return text joined by optional string argument joined_by"""
+        substrings = []
+        for cell in self._cells:
+            substrings = substrings + cell.joined_text(join_by)
+        return join_by.join(substrings)
 
 
 class Cell:
@@ -252,6 +276,25 @@ class Cell:
     def region(self, region):
         self._region = region
 
+    def select_text(self, regex):
+        """Return any text that matches regex"""
+        selected = []
+        for text in self._text:
+            if re.match(regex, text):
+                selected.append(text)
+        return selected
+
+    def matches_text(self, regex):
+        """Return true if we have this text"""
+        for text in self._text:
+            if re.match(regex, text):
+                return True
+        return False
+
+    def joined_text(self, join_by=" "):
+        """Return text joined by optional string argument joined_by"""
+        return join_by.join(self._text)
+
 
 class TextBlock:
     """Defines an area outside a table with one or more lines of text"""
@@ -267,6 +310,10 @@ class TextBlock:
     def text(self):
         return self._text
 
+    def joined_text(self, join_by=" "):
+        """Return text joined by optional string argument joined_by"""
+        return join_by.join(self._text)
+
     @property
     def region(self):
         return self._region
@@ -276,14 +323,28 @@ class TextBlock:
         self._region = region
 
     def select_text(self, regex):
+        """Return any text that matches regex"""
         selected = []
         for text in self._text:
             if re.match(regex, text):
                 selected.append(text)
         return selected
 
+    def matches(self, regex):
+        """Return true if we have this text"""
+        for text in self._text:
+            if re.match(regex, text):
+                return True
+        return False
+
+    def joined_text(self, join_by=" "):
+        """Return text joined by optional string argument joined_by"""
+        return join_by.join(self._text)
+
+
 class Line:
     """Defines a line of text"""
+
     def __init__(self, text=None, region=None):
         self._text = text
         self._region = region

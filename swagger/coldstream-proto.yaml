@@ -118,20 +118,28 @@ definitions:
         type: string
         format: uuid
         description: Unique invoice id
-      docId:
-        type: string
-        format: uuid
-        description: ID of the source document
-      invoiceNumber:
+      identifier:
         type: string
         description: Invoice identifier
-      invoiceDate:
+      effectiveDate:
         type: string
         format: date-time
-        description: Invoice date
+        description: Invoice effective date
       vendor:
         type: string
         description: Vendor name
+      subtotalAmount:
+        type: number
+        description: Invoice subtotal amount
+      tax:
+        type: number
+        description: Invoice tax amount
+      totalAmount:
+        type: number
+        description: Invoice total (subtotal + tax)
+      currency:
+        type: string
+        description: Currency type
       hosts:
         type: array
         description: Invoice items related to managed hosts
@@ -141,33 +149,24 @@ definitions:
     description: Common fields for all invoice line items
     type: object
     properties:
-      itemNumber:
-        type: string
-        description: Invoice item ID
-      itemType:
-        type: string
-        description: The type of invoice item
-        enum:
-          - MANAGED_HOST
       itemId:
         type: string
-        format: uuid
-        description: Item specifier ID
-      unitCost:
+        description: Invoice item ID if specified
+      resourceId:
+        type: string
+        description: Inventory resource ID
+      unitAmount:
         type: number
         description: Cost per unit
       units:
         type: integer
         description: Number of units
-      totalCost:
+      totalAmount:
         type: number
         description: Total cost for all units
       currency:
         type: string
         description: Item currency
-        enum:
-          - USD
-          - EURO
       startDate:
         type: string
         format: timestamp
