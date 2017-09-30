@@ -2,9 +2,13 @@
 
 """Model of tabular documents"""
 
+import hashlib
+import logging
 import re
 import unittest
 
+# Define logger
+logger = logging.getLogger(__name__)
 
 class TabularModel:
     """Root of a page-oriented table model"""
@@ -27,12 +31,19 @@ class TabularModel:
     def page_count(self):
         return len(self._pages.keys())
 
-    def select_blocks(self, predicate):
+    def select_blocks(self, predicate=None):
+        """Return all blocks that match the predicate or all blocks if predicate is None"""
         blocks = []
         for page in self.pages:
             blocks += page.select_blocks(predicate)
         return blocks
 
+    def select_tables(self, predicate=None):
+        """Return all tables that match the predicate or all tables if predicate is None"""
+        tables = []
+        for page in self.pages:
+            tables += page.select_tables(predicate)
+        return tables
 
 class Page:
     """Denotes a page in the document, which may contain one or more tables"""
@@ -63,14 +74,21 @@ class Page:
     def select_blocks(self, predicate):
         blocks = []
         for block in self._blocks:
-            if predicate(block):
+            if predicate is None or predicate(block):
                 blocks.append(block)
         return blocks
 
+    def select_tables(self, predicate):
+        tables = []
+        for table in self._tables:
+            if predicate is None or predicate(table):
+                tables.append(table)
+        return tables
+
 
 class Region:
-    """Defines a location within a scanned document using the page number
-    and pixel coordinates"""
+    """Defines an area within a scanned document using the page number
+    and pixel coordinates.  Regions can be thought of as a set for pixels"""
 
     def __init__(self, page_number, left, top, right, bottom):
         self._page_number = page_number
@@ -98,6 +116,26 @@ class Region:
     @property
     def bottom(self):
         return self._bottom
+
+    def sort_key(self):
+        """Return a comparable value that supports > and < operators."""
+        return [self.page_number, self.left, self.top, self.right, self.bottom]
+
+    def width(self):
+        return self.right - self.left
+
+    def height(self):
+        return self.bottom - self.top
+
+    def merge(self, other):
+        """Returns a region set that contains both this and the other region or None if
+        the regions are on different pages and therefore not able to merge"""
+        if self.page_number != other.page_number:
+            return None
+        else:
+            return Region(self.page_number, min(self.left, other.left),
+                          min(self.top, other.top), max(self.right, other.right),
+                          max(self.bottom, other.bottom))
 
     def overlaps_vertically(self, other):
         """Returns true if regions overlap along vertical axis"""
@@ -157,11 +195,11 @@ class Region:
 class Table:
     """Defines a table consisting of 0 or more rows"""
 
-    def __init__(self):
-        self._rows = []
-
     def add_row(self, row):
         self._rows.append(row)
+
+    def __init__(self):
+        self._rows = []
 
     @property
     def rows(self):
@@ -181,22 +219,8 @@ class Table:
 class Row:
     """Defines a row consisting of cells"""
 
-    def __init__(self, number):
+    def __init__(self):
         self._cells = []
-        self._number = number
-        self._region = None
-
-    @property
-    def number(self):
-        return self._number
-
-    @property
-    def region(self):
-        return self._region
-
-    @region.setter
-    def region(self, region):
-        self._region = region
 
     def add_cell(self, cell):
         self._cells.append(cell)
@@ -208,6 +232,27 @@ class Row:
     def cell_count(self):
         """Return number of cells in the row"""
         return len(self._cells)
+
+    def merge(self, other):
+        """Return new row that merges this row with other row"""
+        if self.cell_count() != other.cell_count:
+            raise RuntimeError("Cannot merge rows of different length")
+        else:
+            merged_row = Row()
+            for cell, other_cell in zip(self.cells, other.cells):
+                merged_row.add_cell(cell.merge(other_cell))
+            return merged_row
+
+    def joined_text(self, join_by=" ", cell_join_by=" "):
+        """Return row text joined by optional string argument joined_by"""
+        substrings = []
+        for cell in self._cells:
+            substrings.append(cell.joined_text(cell_join_by))
+        return join_by.join(substrings)
+
+    def hexdigest(self):
+        """Returns a SHA-256 hex digest of the row text obtained by joining cells"""
+        return hashlib.sha256(self.joined_text().encode('utf-8')).hexdigest()
 
     def select_text(self, regex):
         """Return any text that matches regex"""
@@ -223,12 +268,10 @@ class Row:
                 return True
         return False
 
-    def joined_text(self, join_by=" "):
-        """Return text joined by optional string argument joined_by"""
-        substrings = []
-        for cell in self._cells:
-            substrings = substrings + cell.joined_text(join_by)
-        return join_by.join(substrings)
+    def is_like(self, other):
+        """Returns true if the other row has same cell length and digest"""
+        return (self.cell_count() == other.cell_count() and
+                self.hexdigest() == other.hex_digest())
 
 
 class Cell:
@@ -276,6 +319,28 @@ class Cell:
     def region(self, region):
         self._region = region
 
+    def merge(self, other):
+        """Return a new cell that is merged with the other"""
+        merged_cell = Cell(self.page)
+        merged_cell.text = merged_cell.text + other.text
+
+        merged_region = self.region.merge(other.region)
+        if merged_region is None:
+            merged_region = self.region
+        merged_cell.region = merged_region
+        merged_cell.width = merged_region.width()
+        merged_cell.height = merged_region.height()
+
+        return merged_cell
+
+    def joined_text(self, join_by=" "):
+        """Return text joined by optional string argument joined_by"""
+        return join_by.join(self._text)
+
+    def hexdigest(self):
+        """Returns a SHA-256 hex digest of the cell text"""
+        return hashlib.sha256(self.joined_text().encode('utf-8')).hexdigest()
+
     def select_text(self, regex):
         """Return any text that matches regex"""
         selected = []
@@ -291,9 +356,9 @@ class Cell:
                 return True
         return False
 
-    def joined_text(self, join_by=" "):
-        """Return text joined by optional string argument joined_by"""
-        return join_by.join(self._text)
+    def is_like(self, other):
+        """Returns true if the other cell has same digest"""
+        return self.hexdigest() == other.hex_digest()
 
 
 class TextBlock:
@@ -379,7 +444,7 @@ class TableModelTest(unittest.TestCase):
         for p in range(1, 4):
             page = Page(p)
             self.assertEqual(p, page.number)
-            print("Adding: " + str(page.__dict__))
+            logger.info("Adding: " + str(page.__dict__))
             model.add_page(page)
 
         # Check page counts.
@@ -391,7 +456,7 @@ class TableModelTest(unittest.TestCase):
         page_number = 0
         for page in pages:
             page_number += 1
-            print("Verifying: " + str(page.__dict__))
+            logger.info("Verifying: " + str(page.__dict__))
             self.assertEqual(page_number, page.number)
 
     def test_tables(self):
@@ -408,8 +473,8 @@ class TableModelTest(unittest.TestCase):
     def test_rows(self):
         """Validate that we can create rows and add them to tables"""
         table = Table()
-        r1 = Row(1)
-        r2 = Row(2)
+        r1 = Row()
+        r2 = Row()
         table.add_row(r1)
         table.add_row(r2)
 
@@ -419,7 +484,7 @@ class TableModelTest(unittest.TestCase):
 
     def test_cells(self):
         """Validate that we can add cells to a row"""
-        row = Row(0)
+        row = Row()
         for c in range(1, 3):
             cell = Cell(c)
             cell.add_text('a')

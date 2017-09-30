@@ -6,11 +6,15 @@
 # Standard Python libraries. 
 import argparse
 import json
+import logging
 import os
 
 # Coldstream invoice processing libraries. 
 import ip_api
 import ip_base
+
+# Standard logging initialization.
+logger = logging.getLogger(__name__)
 
 #############################################################################
 # Command classes
@@ -125,14 +129,40 @@ class CommandInvoiceShow(object):
     def __init__(self):
         self._parser = standard_command_parser(self.name, ["--repo-cfg"])
         self._parser.add_argument("--id", help="ID of single invoice to show")
+        self._parser.add_argument("--summary", dest='summary', action='store_true', help="Print summmary list only")
+        self._parser.set_defaults(summary=False)
 
     def execute(self, command_options):
         args = self._parser.parse_args(command_options)
         api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
-        metadata = api.get_invoice(args.id)
-        metadata_as_json = dump_swagger_object_to_json(metadata,
+        if args.id:
+            invoice = api.get_invoice(args.id)
+            if args.summary is True:
+                self._print_invoice_summary(invoice)
+            else:
+                self._print_invoice_json(invoice)
+        else:
+            invoice_list = api.get_all_invoices()
+            if args.summary == True:
+                for invoice in invoice_list:
+                    self._print_invoice_summary(invoice)
+            else:
+                self._print_invoice_json(invoice_list)
+
+    def _print_invoice_summary(self, invoice):
+        invoice_content = invoice.content
+        print("INVOICE: id={0}".format(invoice.id))
+        print("  identifer={0}".format(invoice_content.identifier))
+        print("  vendor={0}".format(invoice_content.vendor))
+        print("  effective_date={0}".format(invoice_content.effective_date))
+        print("  total_amount={0}".format(invoice_content.total_amount))
+        print("  currency={0}".format(invoice_content.currency))
+
+    def _print_invoice_json(self, invoice_data):
+        metadata_as_json = dump_swagger_object_to_json(invoice_data,
                                                        indent=2, sort_keys=True)
         print(metadata_as_json)
+
 
 class CommandInvoiceDelete(object):
     name = "invoice-delete"
@@ -213,6 +243,28 @@ def dump_swagger_object_to_json(obj, indent=None, sort_keys=None):
     converter_fn = lambda unserializable_obj: unserializable_obj.to_dict()
     return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
 
+def init_logging(log_level, log_file=None):
+    """Validates log level and starts logging"""
+    if log_level == "CRITICAL":
+        level = logging.CRITICAL
+    elif log_level == "ERROR":
+        level = logging.ERROR
+    elif log_level == "WARNING":
+        level = logging.WARNING
+    elif log_level == "INFO":
+        level = logging.INFO
+    elif log_level == "DEBUG":
+        level = logging.DEBUG
+    else:
+        raise Exception("Unknown log level: " + log_level)
+
+    if log_file is None:
+        logging.basicConfig(level=level)
+    else:
+        logging.basicConfig(filename=log_file, level=level)
+
+    logger.debug("Initializing log: log_file={0}, log_level={1}".format(log_file, log_level))
+
 
 #############################################################################
 # Command line processor
@@ -239,11 +291,20 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=generate_command_help(commands),
     epilog="For more information try -h on specific commands")
+parser.add_argument("--log-level",
+                        help="CRITICAL/ERROR/WARNING/INFO/DEBUG (default: %(default)s)",
+                        default=os.getenv("LOG_LEVEL", "INFO"))
+parser.add_argument("--log-file",
+                        help="Name of log file (default: %(default)s)",
+                        default=os.getenv("LOG_FILE", None))
 parser.add_argument("command", default=None)
 parser.add_argument("command_options", nargs=argparse.REMAINDER)
 
 # Process options.  This will automatically print help. 
 global_args = parser.parse_args()
+
+# Start logging.
+init_logging(log_level=global_args.log_level, log_file=global_args.log_file)
 
 # Dereference the command and locate command class or help. 
 command = global_args.command

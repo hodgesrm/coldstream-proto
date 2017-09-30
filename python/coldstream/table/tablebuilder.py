@@ -4,10 +4,13 @@
 """Functions to transform scanned PDF invoice to a generic tabular model"""
 import io
 import json
+import logging
 from lxml import etree
 import unittest
 import table.tabularmodel as tm
 
+# Define logger
+logger = logging.getLogger(__name__)
 
 def _create_region(page_number, source_tag):
     """Return region that contains page and pixel coordinates of a location"""
@@ -36,13 +39,13 @@ def build_model(xml):
             page_no += 1
             page = tm.Page(page_no)
             doc.add_page(page)
-            print("Found page: {0}".format(page_no))
+            logger.debug("Found page: {0}".format(page_no))
 
         # Handle a block by processing tables and ignoring other structures. 
         elif next_elem.tag == 'block':
             in_block = next_elem
             block_type = in_block.get('blockType')
-            print("Found block, blockType=" + block_type)
+            logger.debug("Found block, blockType=" + block_type)
             if block_type == 'Separator':
                 continue
             elif block_type == 'SeparatorsBox':
@@ -59,27 +62,27 @@ def build_model(xml):
                             for in_char in in_formatting.iter('charParams'):
                                 str_value = str_value + in_char.text
                             block.add_text(str_value)
-                            print("Found text: " + str_value)
+                            logger.debug("Found text: " + str_value)
 
             elif block_type == 'Table':
                 table = tm.Table()
                 page.add_table(table)
-                print("Found table")
+                logger.debug("Found table")
 
                 # Process rows.
                 row_num = 0
                 for in_row in in_block.iter('row'):
                     row_num += 1
-                    row = tm.Row(row_num)
+                    row = tm.Row()
                     table.add_row(row)
-                    print("Found row: {0}".format(row_num))
+                    logger.debug("Found row: {0}".format(row_num))
 
                     # Iterate across cells, tracking columns. 
                     col_num = 0
                     for in_cell in in_row.iter('cell'):
                         col_num += 1
                         cell = tm.Cell(col_num)
-                        print("Found cell: {0}".format(col_num))
+                        logger.debug("Found cell: {0}".format(col_num))
                         row.add_cell(cell)
                         cell.height = int(in_cell.get("height"))
                         cell.width = int(in_cell.get("width"))
@@ -91,10 +94,9 @@ def build_model(xml):
                                     for in_char in in_formatting.iter('charParams'):
                                         str_value = str_value + in_char.text
                                     cell.add_text(str_value)
-                                    print("Found text: " + str_value)
+                                    logger.debug("Found text: " + str_value)
         # Ignore remaining tags. 
         else:
-            # print("Found " + next_elem.tag)
             pass
 
     # Return the document. 
@@ -116,7 +118,6 @@ class TableBuilderTest(unittest.TestCase):
         with open(self.ovh_xml, "rb") as xml_file:
             xml = xml_file.read()
 
-        # print(xml)
         model = build_model(xml)
         self.assertIsNotNone(model)
 
@@ -126,7 +127,7 @@ class TableBuilderTest(unittest.TestCase):
 
         ovh_com_blocks = model.select_blocks(ovh_predicate)
         self.assertTrue(len(ovh_com_blocks) == 1)
-        print(self._dump_to_json(ovh_com_blocks))
+        logger.info(self._dump_to_json(ovh_com_blocks))
 
         # Ensure we can find the total by finding a block with "TOTAL" then
         # finding a block that overlaps horizontally.
@@ -134,7 +135,7 @@ class TableBuilderTest(unittest.TestCase):
             return (len(block.select_text(r'^TOTAL$')) > 0)
 
         total_blocks = model.select_blocks(total_predicate)
-        print(self._dump_to_json(total_blocks))
+        logger.info(self._dump_to_json(total_blocks))
         self.assertTrue(len(total_blocks) == 1)
         total_region = total_blocks[0].region
 
@@ -143,21 +144,18 @@ class TableBuilderTest(unittest.TestCase):
                     block != total_blocks[0])
 
         total_value_blocks = model.select_blocks(total_value_predicate)
-        print(self._dump_to_json(total_value_blocks))
+        logger.info(self._dump_to_json(total_value_blocks))
         self.assertTrue(len(total_blocks) == 1)
-
-        # print(self._dump_to_json(model))
 
     def test_build_2_large(self):
         """Validate that we can set up a model from a multi-page invoice from Internap"""
         with open(self.inap_xml, "rb") as xml_file:
             xml = xml_file.read()
-        print("Reading data " + self.inap_xml)
+        logger.info("Reading data " + self.inap_xml)
 
-        # print(xml)
         model = build_model(xml)
         self.assertIsNotNone(model)
-        print(self._dump_to_json(model))
+        logger.info(self._dump_to_json(model))
 
         # Ensure we find a block with Internap Corporation in it.
         def inap_predicate(block):
@@ -165,7 +163,7 @@ class TableBuilderTest(unittest.TestCase):
 
         inap_blocks = model.select_blocks(inap_predicate)
         self.assertTrue(len(inap_blocks) == 1)
-        print(self._dump_to_json(inap_blocks))
+        logger.info(self._dump_to_json(inap_blocks))
 
         # Ensure we can find the total by finding a block with "Invoice Total"
         # then finding a block that overlaps horizontally.
@@ -173,7 +171,7 @@ class TableBuilderTest(unittest.TestCase):
             return (len(block.select_text(r'^Invoice Total')) > 0 and block.region.page_number == 1)
 
         total_blocks = model.select_blocks(total_predicate)
-        print(self._dump_to_json(total_blocks))
+        logger.info(self._dump_to_json(total_blocks))
         self.assertTrue(len(total_blocks) == 1)
         total_region = total_blocks[0].region
 
@@ -183,7 +181,7 @@ class TableBuilderTest(unittest.TestCase):
                     block.region.is_to_right_of(total_region))
 
         total_value_blocks = model.select_blocks(total_value_predicate)
-        print(self._dump_to_json(total_value_blocks))
+        logger.info(self._dump_to_json(total_value_blocks))
         self.assertTrue(len(total_value_blocks) == 1)
 
     def _dump_to_json(self, obj, indent=2, sort_keys=True):

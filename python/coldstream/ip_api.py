@@ -3,6 +3,7 @@
 """Public API for invoice processing"""
 
 import json
+import logging
 import os
 import uuid
 
@@ -14,6 +15,9 @@ import metastore
 import ocr
 import table.tablebuilder
 import table.pfactory
+
+# Define logger
+logger = logging.getLogger(__name__)
 
 class InputError(ip_base.BaseError):
     def __init__(self, msg):
@@ -77,10 +81,10 @@ class InvoiceApi:
 
         # Load the invoice from the metadata store and scan it.
         invoice = self._metastore.get(id, models.Invoice)
-        print("Scanning invoice")
+        logger.debug("Scanning invoice")
         scan_tmp_path, ocr_scan = self._scan_invoice(invoice.document)
-        print("OCR_SCAN: " + self._dump_to_json(ocr_scan))
-        print("SCAN_TMP_PATH: " + scan_tmp_path)
+        logger.debug("OCR_SCAN: " + self._dump_to_json(ocr_scan))
+        logger.debug("SCAN_TMP_PATH: " + scan_tmp_path)
         invoice.ocr = ocr_scan
 
         # Store invoice metadata.
@@ -90,17 +94,17 @@ class InvoiceApi:
         with open(scan_tmp_path, "rb") as xml_file:
             xml = xml_file.read()
         tabular_model = table.tablebuilder.build_model(xml)
-        print("TABULAR MODEL: " + self._dump_to_json(tabular_model))
+        logger.debug("TABULAR MODEL: " + self._dump_to_json(tabular_model))
 
         # Find a provider.
         provider = table.pfactory.get_provider(tabular_model)
         if provider is None:
-            print("Can't find a provider!!!")
+            raise InputError("Can't find a provider!!!")
         else:
-            print("PROVIDER: " + provider.name())
+            logger.info("PROVIDER: " + provider.name())
             content = provider.get_content()
-            invoice.content = invoice
-            print("INVOICE CONTENT: " + self._dump_to_json(content))
+            invoice.content = content
+            logger.debug("INVOICE CONTENT: " + self._dump_to_json(content))
             self._metastore.put(invoice, id=invoice.id)
 
         # Remove no matter what.
@@ -135,10 +139,11 @@ class InvoiceApi:
 
     def get_invoice(self, id):
         """List an invoice document"""
-        if id == None:
-            return self._metastore.list(models.Invoice)
-        else:
-            return self._metastore.get(id, models.Invoice)
+        return self._metastore.get(id, models.Invoice)
+
+    def get_all_invoices(self):
+        """List all invoices"""
+        return self._metastore.list(models.Invoice)
 
     def delete_invoice(self, id):
         """Delete an invoice document"""
