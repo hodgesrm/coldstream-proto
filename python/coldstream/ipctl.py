@@ -163,6 +163,25 @@ class CommandInvoiceShow(object):
                                                        indent=2, sort_keys=True)
         print(metadata_as_json)
 
+class CommandInvoiceValidate(object):
+    name = "invoice-validate"
+    help = "Validate an invoice emitting non-zero status if validation fails"
+
+    def __init__(self):
+        self._parser = standard_command_parser(self.name, ["--repo-cfg"])
+        self._parser.add_argument("--id", help="ID of single invoice to validate")
+        self._parser.set_defaults(summary=False)
+
+    def execute(self, command_options):
+        args = self._parser.parse_args(command_options)
+        api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
+        all_match = api.validate_invoice(args.id)
+        if all_match is True:
+            print("All rule checks passed")
+            return 0
+        else:
+            print("One or more rule checks failed")
+            return 1
 
 class CommandInvoiceDelete(object):
     name = "invoice-delete"
@@ -282,6 +301,7 @@ addCommand(CommandInvoiceCreate())
 addCommand(CommandInvoiceProcess())
 addCommand(CommandInvoiceDelete())
 addCommand(CommandInvoiceShow())
+addCommand(CommandInvoiceValidate())
 addCommand(CommandRepoCreate())
 addCommand(CommandRepoDelete())
 addCommand(CommandRepoShow())

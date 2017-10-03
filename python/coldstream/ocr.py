@@ -1,11 +1,9 @@
 # Copyright (c) 2017 Robert Hodges.  All rights reserved. 
 
-"""Public API for invoice processing"""
+"""Public API for OCR processing"""
 
-import json
 import os
 import shutil
-import unittest
 
 import ip_base
 

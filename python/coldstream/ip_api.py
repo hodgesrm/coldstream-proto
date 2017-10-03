@@ -13,6 +13,7 @@ import generated.api.models as models
 import docstore
 import metastore
 import ocr
+import validate
 import table.tablebuilder
 import table.pfactory
 
@@ -144,6 +145,40 @@ class InvoiceApi:
     def get_all_invoices(self):
         """List all invoices"""
         return self._metastore.list(models.Invoice)
+
+    def validate_invoice(self, id):
+        all_match = True
+        invoice = self._metastore.get(id, models.Invoice)
+        if invoice is None:
+            raise "Invoice not found: id={0}".format(id)
+
+        ruleset = validate.invoice_rule_set()
+        for rule in ruleset.get_entity_rules(validate.Rule.INVOICE):
+            match, explanation = rule.validate(invoice.content)
+            all_match &= match
+            logger.debug("Applying rule: name={0} matches={1} explanation={2}".format(
+                rule.name, match, explanation))
+            if match is False:
+                print("Invoice rule failed:")
+                print("  Name: {0}".format(rule.name))
+                print("  Description: {0}".format(rule.description))
+                print("  Explanation: {0}".format(explanation))
+
+        for item in invoice.content.hosts:
+            for rule in ruleset.get_entity_rules(validate.Rule.INVOICE_ITEM):
+                match, explanation = rule.validate(item)
+                all_match &= match
+                logger.debug("Applying rule: name={0} matches={1} explanation={2}".format(
+                    rule.name, match, explanation))
+                if match is False:
+                    print("Invoice rule failed:")
+                    print("  Item ID: {0}".format(item.item_id))
+                    print("  Resource ID: {0}".format(item.resource_id))
+                    print("  Name:        {0}".format(rule.name))
+                    print("  Description: {0}".format(rule.description))
+                    print("  Explanation: {0}".format(explanation))
+
+        return all_match
 
     def delete_invoice(self, id):
         """Delete an invoice document"""
