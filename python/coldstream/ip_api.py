@@ -2,6 +2,7 @@
 
 """Public API for invoice processing"""
 
+from enum import Enum
 import json
 import logging
 import os
@@ -14,6 +15,7 @@ import docstore
 import metastore
 import ocr
 import validate
+import convert
 import table.tablebuilder
 import table.pfactory
 
@@ -24,6 +26,15 @@ class InputError(ip_base.BaseError):
     def __init__(self, msg):
         super().__init__(msg)
 
+class Time_Range(Enum):
+    """Time range handling for conversions"""
+    AS_GIVEN = "AS_GIVEN"
+    BY_DAY = "BY_DAY"
+
+class Format(Enum):
+    """Conversion output format"""
+    CSV = "CSV"
+    HTML = "HTML"
 
 class InvoiceApi:
     """Implements invoice operations"""
@@ -179,6 +190,25 @@ class InvoiceApi:
                     print("  Explanation: {0}".format(explanation))
 
         return all_match
+
+    def convert_invoice(self, id, format=Format.CSV, time_range=Time_Range.AS_GIVEN):
+        all_match = True
+        invoice = self._metastore.get(id, models.Invoice)
+        if invoice is None:
+            raise "Invoice not found: id={0}".format(id)
+
+        if format == Format.CSV:
+            output_generator = convert.csv_output_generator
+        else:
+            raise InputError("Invalid conversion output format: {0}".format(format))
+
+        if time_range == Time_Range.AS_GIVEN:
+            data_generator = convert.invoice_items_generator
+        elif time_range == Time_Range.BY_DAY:
+            data_generator = convert.invoice_items_daily_generator
+
+        for output_line in output_generator(invoice.content, data_generator):
+            print(output_line)
 
     def delete_invoice(self, id):
         """Delete an invoice document"""

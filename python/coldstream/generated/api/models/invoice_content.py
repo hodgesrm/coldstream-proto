@@ -56,7 +56,7 @@ class InvoiceContent(object):
 
     def __init__(self, id=None, identifier=None, effective_date=None, vendor=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, hosts=None):
         """
-        InvoiceContent - a model defined in Swagger
+        InvoiceContent - a model defind in Swagger
         """
 
         self._id = None

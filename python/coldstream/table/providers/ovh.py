@@ -10,6 +10,8 @@ from decimal import Decimal
 from generated.api.models.invoice_content import InvoiceContent
 from generated.api.models.host_invoice_item import HostInvoiceItem
 
+import data
+
 # Define logger
 logger = logging.getLogger(__name__)
 
@@ -80,12 +82,12 @@ class OvhProcessor:
                                 must_post = False
                                 if (current_item.resource_id is not None and
                                              self._get_resource_id(row) is not None):
-                                    logger.debug("FOUND RID AGAIN")
+                                    logger.debug("FOUND RESOURCE_ID AGAIN, MUST POST")
                                     must_post = True
 
-                                if (current_item.total_amount is not None and
-                                              self._get_amount_and_currency(row.cells[3].joined_text()) is not None):
-                                    logger.debug("FOUND TA AGAIN")
+                                row_total_amount, ignored = self._get_amount_and_currency(row.cells[3].joined_text())
+                                if current_item.total_amount is not None and row_total_amount is not None:
+                                    logger.debug("FOUND TOTAL AMOUNT AGAIN, MUST POST: " + row_total_amount)
                                     must_post = True
 
                                 if must_post:
@@ -121,6 +123,13 @@ class OvhProcessor:
                 else:
                     raise Exception("Unrecognized table: "
                                     + table.header_row.joined_text(join_by="|"))
+
+        # Clean resource_id values. These should be valid host names.
+        sample_resource_ids = []
+        for item in content.hosts:
+            sample_resource_ids.append(item.resource_id)
+        for item in content.hosts:
+            item.resource_id = data.clean_host_name(item.resource_id, sample_resource_ids)
 
         # Cross check content.
         total = Decimal('0.0')
@@ -193,7 +202,7 @@ class OvhProcessor:
         if ovh_date is None:
             return None
         else:
-            return datetime.strptime(ovh_date, '%B %d, %Y').strftime('%m-%d-%Y')
+            return datetime.strptime(ovh_date, '%B %d, %Y').strftime('%Y-%m-%d')
 
     def _item_complete(self, invoice_item):
         logger.debug("ITEM: " + invoice_item.to_str())

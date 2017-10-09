@@ -191,7 +191,6 @@ class Region:
                 self.left <= other.left and
                 self.right >= other.right)
 
-
 class Table:
     """Defines a table consisting of 0 or more rows"""
 

@@ -16,6 +16,7 @@ import ip_base
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
 
+
 #############################################################################
 # Command classes
 #############################################################################
@@ -163,9 +164,10 @@ class CommandInvoiceShow(object):
                                                        indent=2, sort_keys=True)
         print(metadata_as_json)
 
+
 class CommandInvoiceValidate(object):
     name = "invoice-validate"
-    help = "Validate an invoice emitting non-zero status if validation fails"
+    help = "Apply validation rules to invoice to look for problems"
 
     def __init__(self):
         self._parser = standard_command_parser(self.name, ["--repo-cfg"])
@@ -182,6 +184,28 @@ class CommandInvoiceValidate(object):
         else:
             print("One or more rule checks failed")
             return 1
+
+
+class CommandInvoiceExport(object):
+    name = "invoice-export"
+    help = "Transform invoice into other forms like CSV or SQL INSERTs"
+
+    def __init__(self):
+        self._parser = standard_command_parser(self.name, ["--repo-cfg"])
+        self._parser.add_argument("--id", help="ID of invoice to transform")
+        self._parser.add_argument("--format", help="CSV | HTML", default="CSV")
+        self._parser.add_argument("--daily", dest='daily', action='store_true', help="Export a line for each day")
+        self._parser.set_defaults(daily=False)
+
+    def execute(self, command_options):
+        args = self._parser.parse_args(command_options)
+        api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
+        if args.daily:
+            range = ip_api.Time_Range.BY_DAY
+        else:
+            range = ip_api.Time_Range.AS_GIVEN
+        api.convert_invoice(args.id, format=ip_api.Format[args.format], time_range=range)
+
 
 class CommandInvoiceDelete(object):
     name = "invoice-delete"
@@ -262,6 +286,7 @@ def dump_swagger_object_to_json(obj, indent=None, sort_keys=None):
     converter_fn = lambda unserializable_obj: unserializable_obj.to_dict()
     return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
 
+
 def init_logging(log_level, log_file=None):
     """Validates log level and starts logging"""
     if log_level == "CRITICAL":
@@ -302,6 +327,7 @@ addCommand(CommandInvoiceProcess())
 addCommand(CommandInvoiceDelete())
 addCommand(CommandInvoiceShow())
 addCommand(CommandInvoiceValidate())
+addCommand(CommandInvoiceExport())
 addCommand(CommandRepoCreate())
 addCommand(CommandRepoDelete())
 addCommand(CommandRepoShow())
@@ -312,11 +338,11 @@ parser = argparse.ArgumentParser(
     description=generate_command_help(commands),
     epilog="For more information try -h on specific commands")
 parser.add_argument("--log-level",
-                        help="CRITICAL/ERROR/WARNING/INFO/DEBUG (default: %(default)s)",
-                        default=os.getenv("LOG_LEVEL", "INFO"))
+                    help="CRITICAL/ERROR/WARNING/INFO/DEBUG (default: %(default)s)",
+                    default=os.getenv("LOG_LEVEL", "INFO"))
 parser.add_argument("--log-file",
-                        help="Name of log file (default: %(default)s)",
-                        default=os.getenv("LOG_FILE", None))
+                    help="Name of log file (default: %(default)s)",
+                    default=os.getenv("LOG_FILE", None))
 parser.add_argument("command", default=None)
 parser.add_argument("command_options", nargs=argparse.REMAINDER)
 
