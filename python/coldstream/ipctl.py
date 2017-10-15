@@ -104,8 +104,10 @@ class CommandInvoiceCreate(object):
     def execute(self, command_options):
         args = self._parser.parse_args(command_options)
         api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
-        id = api.load_invoice(args.invoice, args.name)
-        print("Invoice created: {0}".format(id))
+        envelope = api.load_invoice(args.invoice, args.name)
+        metadata_as_json = dump_swagger_object_to_json(envelope,
+                                                       indent=2, sort_keys=True)
+        print(metadata_as_json)
 
 
 class CommandInvoiceProcess(object):
@@ -137,27 +139,39 @@ class CommandInvoiceShow(object):
         args = self._parser.parse_args(command_options)
         api = ip_api.InvoiceApi(ip_base.Repo(args.repo_cfg))
         if args.id:
-            invoice = api.get_invoice(args.id)
+            envelope = api.get_invoice(args.id)
             if args.summary is True:
-                self._print_invoice_summary(invoice)
+                self._print_invoice_summary(envelope)
             else:
-                self._print_invoice_json(invoice)
+                self._print_invoice_json(envelope)
         else:
-            invoice_list = api.get_all_invoices()
+            envelope_list = api.get_all_invoices()
             if args.summary == True:
-                for invoice in invoice_list:
-                    self._print_invoice_summary(invoice)
+                for envelope in envelope_list:
+                    self._print_invoice_summary(envelope)
             else:
-                self._print_invoice_json(invoice_list)
+                self._print_invoice_json(envelope_list)
 
-    def _print_invoice_summary(self, invoice):
-        invoice_content = invoice.content
-        print("INVOICE: id={0}".format(invoice.id))
-        print("  identifer={0}".format(invoice_content.identifier))
-        print("  vendor={0}".format(invoice_content.vendor))
-        print("  effective_date={0}".format(invoice_content.effective_date))
-        print("  total_amount={0}".format(invoice_content.total_amount))
-        print("  currency={0}".format(invoice_content.currency))
+    def _print_invoice_summary(self, envelope):
+        print("INVOICE: id={0}".format(envelope.id))
+        print("  state={0}".format(envelope.state))
+        print("  description={0}".format(envelope.description))
+        if envelope.source is not None:
+            print("  document.name={0}".format(envelope.source.name))
+        else:
+            print("  document.name={0}".format(None))
+        if envelope.content is not None:
+            print("  content.identifer={0}".format(envelope.content.identifier))
+            print("  content.vendor={0}".format(envelope.content.vendor))
+            print("  content.effective_date={0}".format(envelope.content.effective_date))
+            print("  content.total_amount={0}".format(envelope.content.total_amount))
+            print("  content.currency={0}".format(envelope.content.currency))
+        else:
+            print("  content.identifer={0}".format(None))
+            print("  content.vendor={0}".format(None))
+            print("  content.effective_date={0}".format(None))
+            print("  content.total_amount={0}".format(None))
+            print("  content.currency={0}".format(None))
 
     def _print_invoice_json(self, invoice_data):
         metadata_as_json = dump_swagger_object_to_json(invoice_data,

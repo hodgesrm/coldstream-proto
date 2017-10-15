@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -31,123 +31,241 @@ class Invoice(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'id': 'str',
-        'document': 'Document',
-        'ocr': 'OcrScan',
-        'content': 'InvoiceContent'
+        'identifier': 'str',
+        'effective_date': 'datetime',
+        'vendor': 'str',
+        'subtotal_amount': 'float',
+        'tax': 'float',
+        'total_amount': 'float',
+        'currency': 'str',
+        'items': 'List[InvoiceItem]'
     }
 
     attribute_map = {
-        'id': 'id',
-        'document': 'document',
-        'ocr': 'ocr',
-        'content': 'content'
+        'identifier': 'identifier',
+        'effective_date': 'effectiveDate',
+        'vendor': 'vendor',
+        'subtotal_amount': 'subtotalAmount',
+        'tax': 'tax',
+        'total_amount': 'totalAmount',
+        'currency': 'currency',
+        'items': 'items'
     }
 
-    def __init__(self, id=None, document=None, ocr=None, content=None):
+    def __init__(self, identifier=None, effective_date=None, vendor=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, items=None):
         """
         Invoice - a model defined in Swagger
         """
 
-        self._id = None
-        self._document = None
-        self._ocr = None
-        self._content = None
+        self._identifier = None
+        self._effective_date = None
+        self._vendor = None
+        self._subtotal_amount = None
+        self._tax = None
+        self._total_amount = None
+        self._currency = None
+        self._items = None
 
-        if id is not None:
-          self.id = id
-        if document is not None:
-          self.document = document
-        if ocr is not None:
-          self.ocr = ocr
-        if content is not None:
-          self.content = content
+        if identifier is not None:
+          self.identifier = identifier
+        if effective_date is not None:
+          self.effective_date = effective_date
+        if vendor is not None:
+          self.vendor = vendor
+        if subtotal_amount is not None:
+          self.subtotal_amount = subtotal_amount
+        if tax is not None:
+          self.tax = tax
+        if total_amount is not None:
+          self.total_amount = total_amount
+        if currency is not None:
+          self.currency = currency
+        if items is not None:
+          self.items = items
 
     @property
-    def id(self):
+    def identifier(self):
         """
-        Gets the id of this Invoice.
-        Invoice ID
+        Gets the identifier of this Invoice.
+        Invoice identifier
 
-        :return: The id of this Invoice.
+        :return: The identifier of this Invoice.
         :rtype: str
         """
-        return self._id
+        return self._identifier
 
-    @id.setter
-    def id(self, id):
+    @identifier.setter
+    def identifier(self, identifier):
         """
-        Sets the id of this Invoice.
-        Invoice ID
+        Sets the identifier of this Invoice.
+        Invoice identifier
 
-        :param id: The id of this Invoice.
+        :param identifier: The identifier of this Invoice.
         :type: str
         """
 
-        self._id = id
+        self._identifier = identifier
 
     @property
-    def document(self):
+    def effective_date(self):
         """
-        Gets the document of this Invoice.
+        Gets the effective_date of this Invoice.
+        Invoice effective date
 
-        :return: The document of this Invoice.
-        :rtype: Document
+        :return: The effective_date of this Invoice.
+        :rtype: datetime
         """
-        return self._document
+        return self._effective_date
 
-    @document.setter
-    def document(self, document):
+    @effective_date.setter
+    def effective_date(self, effective_date):
         """
-        Sets the document of this Invoice.
+        Sets the effective_date of this Invoice.
+        Invoice effective date
 
-        :param document: The document of this Invoice.
-        :type: Document
+        :param effective_date: The effective_date of this Invoice.
+        :type: datetime
         """
 
-        self._document = document
+        self._effective_date = effective_date
 
     @property
-    def ocr(self):
+    def vendor(self):
         """
-        Gets the ocr of this Invoice.
+        Gets the vendor of this Invoice.
+        Vendor name
 
-        :return: The ocr of this Invoice.
-        :rtype: OcrScan
+        :return: The vendor of this Invoice.
+        :rtype: str
         """
-        return self._ocr
+        return self._vendor
 
-    @ocr.setter
-    def ocr(self, ocr):
+    @vendor.setter
+    def vendor(self, vendor):
         """
-        Sets the ocr of this Invoice.
+        Sets the vendor of this Invoice.
+        Vendor name
 
-        :param ocr: The ocr of this Invoice.
-        :type: OcrScan
+        :param vendor: The vendor of this Invoice.
+        :type: str
         """
 
-        self._ocr = ocr
+        self._vendor = vendor
 
     @property
-    def content(self):
+    def subtotal_amount(self):
         """
-        Gets the content of this Invoice.
+        Gets the subtotal_amount of this Invoice.
+        Invoice subtotal amount
 
-        :return: The content of this Invoice.
-        :rtype: InvoiceContent
+        :return: The subtotal_amount of this Invoice.
+        :rtype: float
         """
-        return self._content
+        return self._subtotal_amount
 
-    @content.setter
-    def content(self, content):
+    @subtotal_amount.setter
+    def subtotal_amount(self, subtotal_amount):
         """
-        Sets the content of this Invoice.
+        Sets the subtotal_amount of this Invoice.
+        Invoice subtotal amount
 
-        :param content: The content of this Invoice.
-        :type: InvoiceContent
+        :param subtotal_amount: The subtotal_amount of this Invoice.
+        :type: float
         """
 
-        self._content = content
+        self._subtotal_amount = subtotal_amount
+
+    @property
+    def tax(self):
+        """
+        Gets the tax of this Invoice.
+        Invoice tax amount
+
+        :return: The tax of this Invoice.
+        :rtype: float
+        """
+        return self._tax
+
+    @tax.setter
+    def tax(self, tax):
+        """
+        Sets the tax of this Invoice.
+        Invoice tax amount
+
+        :param tax: The tax of this Invoice.
+        :type: float
+        """
+
+        self._tax = tax
+
+    @property
+    def total_amount(self):
+        """
+        Gets the total_amount of this Invoice.
+        Invoice total (subtotal + tax)
+
+        :return: The total_amount of this Invoice.
+        :rtype: float
+        """
+        return self._total_amount
+
+    @total_amount.setter
+    def total_amount(self, total_amount):
+        """
+        Sets the total_amount of this Invoice.
+        Invoice total (subtotal + tax)
+
+        :param total_amount: The total_amount of this Invoice.
+        :type: float
+        """
+
+        self._total_amount = total_amount
+
+    @property
+    def currency(self):
+        """
+        Gets the currency of this Invoice.
+        Currency type
+
+        :return: The currency of this Invoice.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """
+        Sets the currency of this Invoice.
+        Currency type
+
+        :param currency: The currency of this Invoice.
+        :type: str
+        """
+
+        self._currency = currency
+
+    @property
+    def items(self):
+        """
+        Gets the items of this Invoice.
+        Invoice items
+
+        :return: The items of this Invoice.
+        :rtype: List[InvoiceItem]
+        """
+        return self._items
+
+    @items.setter
+    def items(self, items):
+        """
+        Sets the items of this Invoice.
+        Invoice items
+
+        :param items: The items of this Invoice.
+        :type: List[InvoiceItem]
+        """
+
+        self._items = items
 
     def to_dict(self):
         """

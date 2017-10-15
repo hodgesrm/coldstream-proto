@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -34,17 +34,19 @@ class Document(object):
         'id': 'str',
         'name': 'str',
         'locator': 'str',
-        'thumbprint': 'str'
+        'thumbprint': 'str',
+        'creation_date': 'str'
     }
 
     attribute_map = {
         'id': 'id',
         'name': 'name',
         'locator': 'locator',
-        'thumbprint': 'thumbprint'
+        'thumbprint': 'thumbprint',
+        'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, name=None, locator=None, thumbprint=None):
+    def __init__(self, id=None, name=None, locator=None, thumbprint=None, creation_date=None):
         """
         Document - a model defined in Swagger
         """
@@ -53,6 +55,7 @@ class Document(object):
         self._name = None
         self._locator = None
         self._thumbprint = None
+        self._creation_date = None
 
         if id is not None:
           self.id = id
@@ -62,6 +65,8 @@ class Document(object):
           self.locator = locator
         if thumbprint is not None:
           self.thumbprint = thumbprint
+        if creation_date is not None:
+          self.creation_date = creation_date
 
     @property
     def id(self):
@@ -136,7 +141,7 @@ class Document(object):
     def thumbprint(self):
         """
         Gets the thumbprint of this Document.
-        SHA-256 thumbprint of documentation content
+        SHA-256 thumbprint of object content
 
         :return: The thumbprint of this Document.
         :rtype: str
@@ -147,13 +152,36 @@ class Document(object):
     def thumbprint(self, thumbprint):
         """
         Sets the thumbprint of this Document.
-        SHA-256 thumbprint of documentation content
+        SHA-256 thumbprint of object content
 
         :param thumbprint: The thumbprint of this Document.
         :type: str
         """
 
         self._thumbprint = thumbprint
+
+    @property
+    def creation_date(self):
+        """
+        Gets the creation_date of this Document.
+        Date invoice record was created
+
+        :return: The creation_date of this Document.
+        :rtype: str
+        """
+        return self._creation_date
+
+    @creation_date.setter
+    def creation_date(self, creation_date):
+        """
+        Sets the creation_date of this Document.
+        Date invoice record was created
+
+        :param creation_date: The creation_date of this Document.
+        :type: str
+        """
+
+        self._creation_date = creation_date
 
     def to_dict(self):
         """

@@ -1,57 +1,231 @@
 swagger: '2.0'
 info:
-  description: 'Coldstream model for invoice processing. '
+  description: Goldfin Invoice Analysis
   version: 1.0.0
-  title: Coldstream Prototype
+  title: Goldfin Invoice Processing API
   termsOfService: 'http://swagger.io/terms/'
   contact:
     email: rhodges@skylineresearch.comm
-host: api.coldstream.io
+host: api.goldfin.io
 basePath: /api/v1
 tags:
-  - name: core
-    description: Core processing model
-  - name: server
-    description: Server API
+  - name: invoice
+    description: Invoice Processing Model
 schemes:
-  - http
+  - https
+securityDefinitions:
+  UserSecurity:
+    type: basic
+security:
+  - UserSecurity: []
 paths:
-  /server/version:
-    get:
+  /invoice:
+    post:
       tags:
-        - server
-      summary: Return server version.
-      description: Return server version information.
-      operationId: serverVersion
+        - invoice
+      summary: Create a new invoice
+      description: Upload a new invoice and kick off processing
+      operationId: invoiceCreate
+      consumes:
+        - multipart/form-data
       produces:
         - application/json
+      parameters:
+        - name: description
+          in: formData
+          description: A optional description of the invoice
+          type: string
+        - name: file
+          in: formData
+          description: Invoice file
+          required: true
+          type: file
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/InvoiceEnvelope'
+        '400':
+          description: Invoice creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - invoice
+      summary: List invoices
+      description: Return a list of all invoices
+      operationId: invoiceShowAll
+      produces:
+        - application/json
+        - application/xml
+        - text/xml
+      parameters:
+        - name: summary
+          in: query
+          description: >-
+            If true return complete invoice content, otherwise just the Invoice
+            fields
+          required: false
+          default: true
+          type: boolean
       responses:
         '200':
-          description: Successful operation
+          description: Successful query
           schema:
-            $ref: '#/definitions/VersionInfo'
+            type: array
+            items:
+              $ref: '#/definitions/InvoiceEnvelope'
+  '/invoice/{id}':
+    get:
+      tags:
+        - invoice
+      summary: Show a single invoice
+      description: Return all information relative to a single invoice
+      operationId: invoiceShow
+      produces:
+        - application/json
+        - application/xml
+        - text/xml
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/InvoiceEnvelope'
+        '404':
+          description: Not Found
+    put:
+      tags:
+        - invoice
+      summary: Update an invoice
+      description: Update invoice description and tags. Changes to other fields are ignored
+      operationId: invoiceUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Invoice descriptor
+          schema:
+            $ref: '#/definitions/InvoiceEnvelopeParameters'
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - invoice
+      summary: Delete an invoice
+      description: Delete a single
+      operationId: invoiceDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/invoice/{id}/process':
+    post:
+      tags:
+        - invoice
+      summary: Start invoice processing
+      description: >-
+        Run background OCR and interpretation on invoice.  The invoice state
+        will be set to CREATED before this call returns.
+      operationId: invoiceProcess
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Accepted
+        '404':
+          description: Not Found
+  '/invoice/{id}/validate':
+    post:
+      tags:
+        - invoice
+      summary: Start invoice validations
+      description: Run invoice validations
+      operationId: invoiceValidate
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Accepted
+        '404':
+          description: Not Found
 definitions:
-  VersionInfo:
-    type: object
-    properties:
-      version:
-        type: string
-        description: Server version
-  Invoice:
-    description: Complete description of an invoice
-    type: object
+  InvoiceEnvelope:
+    description: Root object for invoice content.
     properties:
       id:
         type: string
-        description: Invoice ID
-      document:
+        format: uuid
+        description: Unique invoice id
+      description:
+        type: string
+        description: A user-provided description of the invoice
+      tags:
+        type: string
+        description: A user-provided list of name-value pairs that describe the invoice
+      state:
+        description: >-
+          The current processing state of the invoice.  The invoice field is
+          available once the invoice is interpreted.
+        enum:
+          - CREATED
+          - SCANNED
+          - INTERPRETED
+      source:
         $ref: '#/definitions/Document'
       ocr:
         $ref: '#/definitions/OcrScan'
       content:
-        $ref: '#/definitions/InvoiceContent'
+        $ref: '#/definitions/Invoice'
+      creationDate:
+        type: string
+        description: Date invoice record was created
+  InvoiceEnvelopeParameters:
+    description: User settable invoice parameters
+    properties:
+      description:
+        type: string
+        description: A user-provided description of the invoice
+      tags:
+        type: string
+        description: A user-provided list of name-value pairs that describe the invoice
   Document:
-    description: 'A document, for example a PDF invoice'
+    description: 'A document, for example a PDF file'
     type: object
     properties:
       id:
@@ -66,7 +240,10 @@ definitions:
         description: URL of the source
       thumbprint:
         type: string
-        description: SHA-256 thumbprint of documentation content
+        description: SHA-256 thumbprint of object content
+      creationDate:
+        type: string
+        description: Date invoice record was created
   OcrScan:
     description: OCR scan of a document
     type: object
@@ -74,17 +251,16 @@ definitions:
       id:
         type: string
         description: Scan ID
-      docId:
+      thumbprint:
         type: string
-        format: uuid
-        description: ID of source document
+        description: SHA-256 thumbprint of source document
       locator:
         type: string
         format: url
         description: URL of the scan document
-      thumbprint:
+      creationDate:
         type: string
-        description: SHA-256 thumbprint of scan content
+        description: Date scan record was created
   DocumentRegion:
     description: >-
       Location within a document page expressed in page number and pixel region
@@ -111,13 +287,9 @@ definitions:
         type: integer
         format: int32
         description: Bottom pixel coordinate
-  InvoiceContent:
-    description: Root of invoice content model
+  Invoice:
+    description: Invoice content obtained from documentation interpretation
     properties:
-      id:
-        type: string
-        format: uuid
-        description: Unique invoice id
       identifier:
         type: string
         description: Invoice identifier
@@ -140,11 +312,11 @@ definitions:
       currency:
         type: string
         description: Currency type
-      hosts:
+      items:
         type: array
-        description: Invoice items related to managed hosts
+        description: Invoice items
         items:
-          $ref: '#/definitions/HostInvoiceItem'
+          $ref: '#/definitions/InvoiceItem'
   InvoiceItem:
     description: Common fields for all invoice line items
     type: object
@@ -175,16 +347,15 @@ definitions:
         type: string
         format: timestamp
         description: End of the time range
-      invoiceRegion:
+      region:
         $ref: '#/definitions/DocumentRegion'
-  HostInvoiceItem:
-    allOf:
-      - $ref: '#/definitions/InvoiceItem'
-      - type: object
-        description: Invoice entry for a managed host
-        properties:
-          host:
-            $ref: '#/definitions/Host'
+      inventoryId:
+        type: string
+        description: Id of an inventory description
+      inventoryType:
+        type: string
+        enum:
+          - HOST
   Host:
     description: >-
       A host configuration including CPU, RAM, OS, storage devices, and network
@@ -222,6 +393,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/PowerSupply'
+      startDate:
+        type: string
+        format: timestamp
+        description: Begining of the time range
+      endDate:
+        type: string
+        format: timestamp
+        description: End of the time range
   CPU:
     description: CPU description
     properties:
@@ -348,5 +527,5 @@ definitions:
       message:
         type: string
 externalDocs:
-  description: Find out more about Swagger
-  url: 'http://swagger.io'
+  description: Find out more about Goldfin.io
+  url: 'https://goldfin.io'

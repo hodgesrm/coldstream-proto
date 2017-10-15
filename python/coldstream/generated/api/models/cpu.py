@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm

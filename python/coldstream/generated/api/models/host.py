@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -34,12 +34,14 @@ class Host(object):
         'id': 'str',
         'identifier': 'str',
         'name': 'str',
-        'cpu': 'list[CPU]',
-        'memory': 'list[Memory]',
+        'cpu': 'List[CPU]',
+        'memory': 'List[Memory]',
         'os': 'OperatingSystem',
-        'storage': 'list[StorageDevice]',
-        'network': 'list[NetworkConnection]',
-        'power': 'list[PowerSupply]'
+        'storage': 'List[StorageDevice]',
+        'network': 'List[NetworkConnection]',
+        'power': 'List[PowerSupply]',
+        'start_date': 'str',
+        'end_date': 'str'
     }
 
     attribute_map = {
@@ -51,10 +53,12 @@ class Host(object):
         'os': 'os',
         'storage': 'storage',
         'network': 'network',
-        'power': 'power'
+        'power': 'power',
+        'start_date': 'startDate',
+        'end_date': 'endDate'
     }
 
-    def __init__(self, id=None, identifier=None, name=None, cpu=None, memory=None, os=None, storage=None, network=None, power=None):
+    def __init__(self, id=None, identifier=None, name=None, cpu=None, memory=None, os=None, storage=None, network=None, power=None, start_date=None, end_date=None):
         """
         Host - a model defined in Swagger
         """
@@ -68,6 +72,8 @@ class Host(object):
         self._storage = None
         self._network = None
         self._power = None
+        self._start_date = None
+        self._end_date = None
 
         if id is not None:
           self.id = id
@@ -87,6 +93,10 @@ class Host(object):
           self.network = network
         if power is not None:
           self.power = power
+        if start_date is not None:
+          self.start_date = start_date
+        if end_date is not None:
+          self.end_date = end_date
 
     @property
     def id(self):
@@ -163,7 +173,7 @@ class Host(object):
         Gets the cpu of this Host.
 
         :return: The cpu of this Host.
-        :rtype: list[CPU]
+        :rtype: List[CPU]
         """
         return self._cpu
 
@@ -173,7 +183,7 @@ class Host(object):
         Sets the cpu of this Host.
 
         :param cpu: The cpu of this Host.
-        :type: list[CPU]
+        :type: List[CPU]
         """
 
         self._cpu = cpu
@@ -184,7 +194,7 @@ class Host(object):
         Gets the memory of this Host.
 
         :return: The memory of this Host.
-        :rtype: list[Memory]
+        :rtype: List[Memory]
         """
         return self._memory
 
@@ -194,7 +204,7 @@ class Host(object):
         Sets the memory of this Host.
 
         :param memory: The memory of this Host.
-        :type: list[Memory]
+        :type: List[Memory]
         """
 
         self._memory = memory
@@ -226,7 +236,7 @@ class Host(object):
         Gets the storage of this Host.
 
         :return: The storage of this Host.
-        :rtype: list[StorageDevice]
+        :rtype: List[StorageDevice]
         """
         return self._storage
 
@@ -236,7 +246,7 @@ class Host(object):
         Sets the storage of this Host.
 
         :param storage: The storage of this Host.
-        :type: list[StorageDevice]
+        :type: List[StorageDevice]
         """
 
         self._storage = storage
@@ -247,7 +257,7 @@ class Host(object):
         Gets the network of this Host.
 
         :return: The network of this Host.
-        :rtype: list[NetworkConnection]
+        :rtype: List[NetworkConnection]
         """
         return self._network
 
@@ -257,7 +267,7 @@ class Host(object):
         Sets the network of this Host.
 
         :param network: The network of this Host.
-        :type: list[NetworkConnection]
+        :type: List[NetworkConnection]
         """
 
         self._network = network
@@ -268,7 +278,7 @@ class Host(object):
         Gets the power of this Host.
 
         :return: The power of this Host.
-        :rtype: list[PowerSupply]
+        :rtype: List[PowerSupply]
         """
         return self._power
 
@@ -278,10 +288,56 @@ class Host(object):
         Sets the power of this Host.
 
         :param power: The power of this Host.
-        :type: list[PowerSupply]
+        :type: List[PowerSupply]
         """
 
         self._power = power
+
+    @property
+    def start_date(self):
+        """
+        Gets the start_date of this Host.
+        Begining of the time range
+
+        :return: The start_date of this Host.
+        :rtype: str
+        """
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, start_date):
+        """
+        Sets the start_date of this Host.
+        Begining of the time range
+
+        :param start_date: The start_date of this Host.
+        :type: str
+        """
+
+        self._start_date = start_date
+
+    @property
+    def end_date(self):
+        """
+        Gets the end_date of this Host.
+        End of the time range
+
+        :return: The end_date of this Host.
+        :rtype: str
+        """
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date):
+        """
+        Sets the end_date of this Host.
+        End of the time range
+
+        :param end_date: The end_date of this Host.
+        :type: str
+        """
+
+        self._end_date = end_date
 
     def to_dict(self):
         """

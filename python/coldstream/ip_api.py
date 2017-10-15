@@ -22,19 +22,23 @@ import table.pfactory
 # Define logger
 logger = logging.getLogger(__name__)
 
+
 class InputError(ip_base.BaseError):
     def __init__(self, msg):
         super().__init__(msg)
+
 
 class Time_Range(Enum):
     """Time range handling for conversions"""
     AS_GIVEN = "AS_GIVEN"
     BY_DAY = "BY_DAY"
 
+
 class Format(Enum):
     """Conversion output format"""
     CSV = "CSV"
     HTML = "HTML"
+
 
 class InvoiceApi:
     """Implements invoice operations"""
@@ -47,25 +51,28 @@ class InvoiceApi:
         self._metastore = metastore.MetadataStore(self._repo)
         self._ocr = ocr.Ocr(self._repo)
 
-    def load_invoice(self, source_path, name=None):
+    def load_invoice(self, source_path, description=None, tags=None):
         """Accept a new invoice document into the document store and return
-        the invoice UUID.
+        an invoice envelope.
         """
 
         # Start by creating an invoice instance to store information about
         # this particular invoice.
-        invoice = models.Invoice(id=str(uuid.uuid4()))
+        envelope = models.InvoiceEnvelope(id=str(uuid.uuid4()))
+        envelope.description = description
+        envelope.tags = tags
+        envelope.state = "CREATED"
 
         # Add the document to the store.
-        document = self._store_invoice(source_path, name)
-        invoice.document = document
+        document = self._store_invoice(source_path)
+        envelope.source = document
 
         # Store in metadata store and return.
-        id = self._metastore.put(invoice, id=invoice.id)
-        return id
+        id = self._metastore.put(envelope, id=envelope.id)
+        return envelope
 
-    def _store_invoice(self, source_path, name):
-        """Stores an invoice and returns a descriptor instance"""
+    def _store_invoice(self, source_path):
+        """Stores an invoice source file and returns a document instance"""
         # Validate arguments. 
         if source_path == None or not os.path.exists(source_path):
             raise InputError(
@@ -74,33 +81,30 @@ class InvoiceApi:
         # Generate document metadata and serialize to JSON.
         metadata = {}
         metadata['source_path'] = source_path
-        if name == None:
-            metadata['name'] = os.path.basename(source_path)
-        else:
-            metadata['name'] = name
+        metadata['name'] = os.path.basename(source_path)
 
         # Write the file and associated metadata.
         id, sha256 = self._docstore.put(source_path, metadata)
 
         # Create a document descriptor and return. 
-        descriptor = models.Document(id=id, name=metadata['name'],
-                                     locator=source_path, thumbprint=sha256)
-        return descriptor
+        document = models.Document(id=id, name=metadata['name'],
+                                   locator=source_path, thumbprint=sha256)
+        return document
 
     def process_invoice(self, id):
         """Scan and derive semantic model for an invoice.
         """
 
         # Load the invoice from the metadata store and scan it.
-        invoice = self._metastore.get(id, models.Invoice)
+        envelope = self._metastore.get(id, models.InvoiceEnvelope)
         logger.debug("Scanning invoice")
-        scan_tmp_path, ocr_scan = self._scan_invoice(invoice.document)
+        scan_tmp_path, ocr_scan = self._scan_invoice(envelope.source)
         logger.debug("OCR_SCAN: " + self._dump_to_json(ocr_scan))
         logger.debug("SCAN_TMP_PATH: " + scan_tmp_path)
-        invoice.ocr = ocr_scan
+        envelope.ocr = ocr_scan
 
         # Store invoice metadata.
-        self._metastore.put(invoice, id=invoice.id)
+        self._metastore.put(envelope, id=envelope.id)
 
         # Compute tabular model.
         with open(scan_tmp_path, "rb") as xml_file:
@@ -115,9 +119,10 @@ class InvoiceApi:
         else:
             logger.info("PROVIDER: " + provider.name())
             content = provider.get_content()
-            invoice.content = content
+            envelope.content = content
+            envelope.state = "INTERPRETED"
             logger.debug("INVOICE CONTENT: " + self._dump_to_json(content))
-            self._metastore.put(invoice, id=invoice.id)
+            self._metastore.put(envelope, id=envelope.id)
 
         # Remove no matter what.
         os.remove(scan_tmp_path)
@@ -138,8 +143,7 @@ class InvoiceApi:
         id, sha256 = self._docstore.put(tmp_path, metadata)
 
         # Create a document descriptor and return. 
-        descriptor = models.OcrScan(id=id, doc_id=document.id,
-                                    locator=id, thumbprint=sha256)
+        descriptor = models.OcrScan(id=id, locator=id, thumbprint=sha256)
         return tmp_path, descriptor
 
     def _dump_to_json(self, obj, indent=2, sort_keys=True):
@@ -151,15 +155,15 @@ class InvoiceApi:
 
     def get_invoice(self, id):
         """List an invoice document"""
-        return self._metastore.get(id, models.Invoice)
+        return self._metastore.get(id, models.InvoiceEnvelope)
 
     def get_all_invoices(self):
         """List all invoices"""
-        return self._metastore.list(models.Invoice)
+        return self._metastore.list(models.InvoiceEnvelope)
 
     def validate_invoice(self, id):
         all_match = True
-        invoice = self._metastore.get(id, models.Invoice)
+        invoice = self._metastore.get(id, models.InvoiceEnvelope)
         if invoice is None:
             raise "Invoice not found: id={0}".format(id)
 
@@ -175,7 +179,7 @@ class InvoiceApi:
                 print("  Description: {0}".format(rule.description))
                 print("  Explanation: {0}".format(explanation))
 
-        for item in invoice.content.hosts:
+        for item in invoice.content.items:
             for rule in ruleset.get_entity_rules(validate.Rule.INVOICE_ITEM):
                 match, explanation = rule.validate(item)
                 all_match &= match
@@ -193,9 +197,9 @@ class InvoiceApi:
 
     def convert_invoice(self, id, format=Format.CSV, time_range=Time_Range.AS_GIVEN):
         all_match = True
-        invoice = self._metastore.get(id, models.Invoice)
+        invoice = self._metastore.get(id, models.InvoiceEnvelope)
         if invoice is None:
-            raise "Invoice not found: id={0}".format(id)
+            raise "Invoice envelope not found: id={0}".format(id)
 
         if format == Format.CSV:
             output_generator = convert.csv_output_generator
@@ -214,10 +218,10 @@ class InvoiceApi:
         """Delete an invoice document"""
         if id == None:
             raise InputError("Invoice id is missing")
-        invoice = self.get_invoice(id)
+        envelope = self.get_invoice(id)
         # Clear storage if it exists.
-        if (invoice.document):
-            self._docstore.delete(invoice.document.id)
-        if (invoice.ocr):
-            self._docstore.delete(invoice.ocr.id)
-        self._metastore.delete(id, models.Invoice)
+        if envelope.source is not None:
+            self._docstore.delete(envelope.source.id)
+        if envelope.ocr is not None:
+            self._docstore.delete(envelope.ocr.id)
+        self._metastore.delete(id, models.InvoiceEnvelope)

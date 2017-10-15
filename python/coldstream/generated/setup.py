@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -14,7 +14,7 @@
 import sys
 from setuptools import setup, find_packages
 
-NAME = "api"
+NAME = ""
 VERSION = "1.0.0"
 # To install the library, run the following
 #
@@ -28,14 +28,14 @@ REQUIRES = ["urllib3 >= 1.15", "six >= 1.10", "certifi", "python-dateutil"]
 setup(
     name=NAME,
     version=VERSION,
-    description="Coldstream Prototype",
+    description="Goldfin Invoice Processing API",
     author_email="rhodges@skylineresearch.comm",
     url="",
-    keywords=["Swagger", "Coldstream Prototype"],
+    keywords=["Swagger", "Goldfin Invoice Processing API"],
     install_requires=REQUIRES,
     packages=find_packages(),
     include_package_data=True,
     long_description="""\
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
     """
 )

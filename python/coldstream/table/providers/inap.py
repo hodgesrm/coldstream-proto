@@ -5,8 +5,8 @@ import re
 import logging
 import uuid
 from decimal import Decimal
-from generated.api.models.invoice_content import InvoiceContent
-from generated.api.models.host_invoice_item import HostInvoiceItem
+from generated.api.models.invoice import Invoice
+from generated.api.models.invoice_item import InvoiceItem
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -32,18 +32,18 @@ class InapProcessor:
         return "Internap"
 
     def get_content(self):
-        """Analyzes the invoice tabular model and returns semantic content"""
+        """Analyzes the invoice tabular model and returns adds semantic content"""
 
         # Extract invoice header information available from text blocks.
         # For OVH the sub-total is in the same table as the invoice item rows.
-        id = str(uuid.uuid4())
-        content = InvoiceContent(id=id, vendor="Internap Corporation")
+        invoice = Invoice()
+        invoice.vendor="Internap Corporation"
 
-        content.identifier = self._find_first_group_1(r'.*Invoice\s*Number:\s*(\S*)\s*')
-        logger.debug(content.identifier)
+        invoice.identifier = self._find_first_group_1(r'.*Invoice\s*Number:\s*(\S*)\s*')
+        logger.debug(invoice.identifier)
 
-        content.effective_date = self._find_first_group_1(r'.* Invoice Date:\s*([0-9]+\-[0-9]+\-[0-9]+)\s*$')
-        logger.debug(content.effective_date)
+        invoice.effective_date = self._find_first_group_1(r'.* Invoice Date:\s*([0-9]+\-[0-9]+\-[0-9]+)\s*$')
+        logger.debug(invoice.effective_date)
 
         # Find the invoice total.  This is tricky because it's the 5th line
         # of text in the block that is to the right of the block with
@@ -63,11 +63,11 @@ class InapProcessor:
             value_blocks = self._tabular_model.select_blocks(value_predicate)
             if len(value_blocks) > 0:
                 logger.debug(value_blocks[0].joined_text())
-                content.total_amount, content.currency = self._get_amount_and_currency(value_blocks[0].text[4])
-                content.tax, ignored = self._get_amount_and_currency(value_blocks[0].text[3])
+                invoice.total_amount, invoice.currency = self._get_amount_and_currency(value_blocks[0].text[4])
+                invoice.tax, ignored = self._get_amount_and_currency(value_blocks[0].text[3])
 
         # Set invoice items to an empty list.
-        content.hosts = []
+        invoice.items = []
 
         # Iterate across all tables that have 'ID#' in the header row.
         # Iterate across the invoice rows.  Some items span more than one PDF table row
@@ -85,7 +85,7 @@ class InapProcessor:
                             continue
 
                         if current_item is None:
-                            current_item = HostInvoiceItem()
+                            current_item = InvoiceItem()
 
                         # Try to fill in missing values.
                         if current_item.item_id is None:
@@ -106,7 +106,7 @@ class InapProcessor:
 
                         # If we have everything post to the invoice and clear current item.
                         logger.debug("POST!!!")
-                        content.hosts.append(current_item)
+                        invoice.items.append(current_item)
                         current_item = None
 
                 else:
@@ -115,12 +115,11 @@ class InapProcessor:
 
         # Cross check and return content.
         total = Decimal('0.0')
-        for item in content.hosts:
+        for item in invoice.items:
             total += Decimal(item.total_amount)
 
-        logger.info("TOTAL: {0}  CHECKED_TOTAL: {1}".format(content.total_amount, total))
-
-        return content
+        logger.info("TOTAL: {0}  CHECKED_TOTAL: {1}".format(invoice.total_amount, total))
+        return invoice
 
     def _find_first_group_1(self, regex):
         """Find group(1) of block text captured by regex"""

@@ -23,7 +23,7 @@ elif [ "$OPT" = "config-help" ]; then
 elif [ "$OPT" = "generate" ]; then
   shift
   mkdir -p $CS_HOME/python/generated
-  args="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i $CS_HOME/swagger/coldstream-proto.yaml -l python -o $CS_CODEGEN_DIR -DpackageName=api $@"
+  args="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i $CS_HOME/swagger/coldstream-proto.yaml -l python-flask -o $CS_CODEGEN_DIR -DpackageName=api -Dservice $@"
 else
   echo "Usage: ${SCRIPT} { generate | clean | help } [ options ]"
   exit 1
@@ -39,3 +39,4 @@ fi
 # Set standard values and execute. 
 export JAVA_OPTS="${JAVA_OPTS} -XX:MaxPermSize=256M -Xmx1024M -DloggerPath=conf/log4j.properties"
 java $JAVA_OPTS -jar $executable $args
+touch $CS_CODEGEN_DIR/api/models/__init__.py

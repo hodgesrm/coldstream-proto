@@ -1,8 +1,11 @@
-# Copyright (c) 2017 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2017 Robert Hodges.  All rights reserved.
 
 """Rules for validating invoices"""
 
 from decimal import Decimal
+
+import data
+import generated.api.models as models
 
 
 class Rule:
@@ -46,29 +49,29 @@ class RuleSet:
 
 
 # Invoice rules go here.
-def invoice_total_check(invoice_content):
+def invoice_total_check(invoice: models.Invoice):
     """Ensure invoice total matches sum of invoice item totals"""
     item_total = Decimal('0.0')
-    for item in invoice_content.hosts:
+    for item in invoice.items:
         item_total += Decimal(item.total_amount)
 
-    matches = (Decimal(invoice_content.total_amount) == item_total)
+    matches = (Decimal(invoice.total_amount) == item_total)
     explanation = "Invoice total: {0}  Invoice item total: {1}".format(
-        invoice_content.total_amount, item_total)
+        invoice.total_amount, item_total)
     return matches, explanation
 
 
-def invoice_vendor_check(invoice_content):
+def invoice_vendor_check(invoice: models.Invoice):
     """Ensure invoice vendor is set"""
-    vendor = invoice_content.vendor
+    vendor = invoice.vendor
     matches = (vendor is not None)
     explanation = "Vendor name: {0}".format(vendor)
     return matches, explanation
 
 
 # Invoice item rules go here.
-def invoice_item_total_check(invoice_item):
-    """Ensure invoice total is unit_price * units"""
+def invoice_item_total_check(invoice_item: models.InvoiceItem):
+    """Ensure invoice item total is unit_price * units"""
     if invoice_item.total_amount is None or invoice_item.units is None or invoice_item.unit_amount is None:
         return False, "Invoice item total={0}, units={1}, unit_amount={2}".format(
             invoice_item.total_amount, invoice_item.units, invoice_item.unit_amount
@@ -79,6 +82,16 @@ def invoice_item_total_check(invoice_item):
         explanation = "Invoice item total: {0}  Computed total: {1}".format(
             invoice_item.total_amount, computed_total)
         return matches, explanation
+
+
+def invoice_item_resource_id_check(invoice_item: models.InvoiceItem):
+    """Ensure resource total is a valid host name"""
+    if invoice_item.resource_id is None:
+        return False, "Invoice resource ID is not set"
+    elif data.is_valid_host(invoice_item.resource_id) is False:
+        return False, "Invoice resource ID is not a valid host name: {0}".format(invoice_item.resource_id)
+    else:
+        return True, "Invoice resource ID is a valid host name: {0}".format(invoice_item.resource_id)
 
 
 def invoice_rule_set():
@@ -92,4 +105,7 @@ def invoice_rule_set():
     ruleset.add_entity_rule(ValidationRule("Invoice Item Total Check",
                                            "Invoice item total equals unit_amount X units",
                                            Rule.INVOICE_ITEM, invoice_item_total_check))
+    ruleset.add_entity_rule(ValidationRule("Invoice Item Resource Name Check",
+                                           "Resource ID is a valid host name or IP address",
+                                           Rule.INVOICE_ITEM, invoice_item_resource_id_check))
     return ruleset

@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -39,7 +39,9 @@ class InvoiceItem(object):
         'currency': 'str',
         'start_date': 'str',
         'end_date': 'str',
-        'invoice_region': 'DocumentRegion'
+        'region': 'DocumentRegion',
+        'inventory_id': 'str',
+        'inventory_type': 'str'
     }
 
     attribute_map = {
@@ -51,10 +53,12 @@ class InvoiceItem(object):
         'currency': 'currency',
         'start_date': 'startDate',
         'end_date': 'endDate',
-        'invoice_region': 'invoiceRegion'
+        'region': 'region',
+        'inventory_id': 'inventoryId',
+        'inventory_type': 'inventoryType'
     }
 
-    def __init__(self, item_id=None, resource_id=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, invoice_region=None):
+    def __init__(self, item_id=None, resource_id=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, region=None, inventory_id=None, inventory_type=None):
         """
         InvoiceItem - a model defined in Swagger
         """
@@ -67,7 +71,9 @@ class InvoiceItem(object):
         self._currency = None
         self._start_date = None
         self._end_date = None
-        self._invoice_region = None
+        self._region = None
+        self._inventory_id = None
+        self._inventory_type = None
 
         if item_id is not None:
           self.item_id = item_id
@@ -85,8 +91,12 @@ class InvoiceItem(object):
           self.start_date = start_date
         if end_date is not None:
           self.end_date = end_date
-        if invoice_region is not None:
-          self.invoice_region = invoice_region
+        if region is not None:
+          self.region = region
+        if inventory_id is not None:
+          self.inventory_id = inventory_id
+        if inventory_type is not None:
+          self.inventory_type = inventory_type
 
     @property
     def item_id(self):
@@ -273,25 +283,75 @@ class InvoiceItem(object):
         self._end_date = end_date
 
     @property
-    def invoice_region(self):
+    def region(self):
         """
-        Gets the invoice_region of this InvoiceItem.
+        Gets the region of this InvoiceItem.
 
-        :return: The invoice_region of this InvoiceItem.
+        :return: The region of this InvoiceItem.
         :rtype: DocumentRegion
         """
-        return self._invoice_region
+        return self._region
 
-    @invoice_region.setter
-    def invoice_region(self, invoice_region):
+    @region.setter
+    def region(self, region):
         """
-        Sets the invoice_region of this InvoiceItem.
+        Sets the region of this InvoiceItem.
 
-        :param invoice_region: The invoice_region of this InvoiceItem.
+        :param region: The region of this InvoiceItem.
         :type: DocumentRegion
         """
 
-        self._invoice_region = invoice_region
+        self._region = region
+
+    @property
+    def inventory_id(self):
+        """
+        Gets the inventory_id of this InvoiceItem.
+        Id of an inventory description
+
+        :return: The inventory_id of this InvoiceItem.
+        :rtype: str
+        """
+        return self._inventory_id
+
+    @inventory_id.setter
+    def inventory_id(self, inventory_id):
+        """
+        Sets the inventory_id of this InvoiceItem.
+        Id of an inventory description
+
+        :param inventory_id: The inventory_id of this InvoiceItem.
+        :type: str
+        """
+
+        self._inventory_id = inventory_id
+
+    @property
+    def inventory_type(self):
+        """
+        Gets the inventory_type of this InvoiceItem.
+
+        :return: The inventory_type of this InvoiceItem.
+        :rtype: str
+        """
+        return self._inventory_type
+
+    @inventory_type.setter
+    def inventory_type(self, inventory_type):
+        """
+        Sets the inventory_type of this InvoiceItem.
+
+        :param inventory_type: The inventory_type of this InvoiceItem.
+        :type: str
+        """
+        allowed_values = ["HOST"]
+        if inventory_type not in allowed_values:
+            raise ValueError(
+                "Invalid value for `inventory_type` ({0}), must be one of {1}"
+                .format(inventory_type, allowed_values)
+            )
+
+        self._inventory_type = inventory_type
 
     def to_dict(self):
         """

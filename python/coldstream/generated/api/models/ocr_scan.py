@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -32,36 +32,36 @@ class OcrScan(object):
     """
     swagger_types = {
         'id': 'str',
-        'doc_id': 'str',
+        'thumbprint': 'str',
         'locator': 'str',
-        'thumbprint': 'str'
+        'creation_date': 'str'
     }
 
     attribute_map = {
         'id': 'id',
-        'doc_id': 'docId',
+        'thumbprint': 'thumbprint',
         'locator': 'locator',
-        'thumbprint': 'thumbprint'
+        'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, doc_id=None, locator=None, thumbprint=None):
+    def __init__(self, id=None, thumbprint=None, locator=None, creation_date=None):
         """
         OcrScan - a model defined in Swagger
         """
 
         self._id = None
-        self._doc_id = None
-        self._locator = None
         self._thumbprint = None
+        self._locator = None
+        self._creation_date = None
 
         if id is not None:
           self.id = id
-        if doc_id is not None:
-          self.doc_id = doc_id
-        if locator is not None:
-          self.locator = locator
         if thumbprint is not None:
           self.thumbprint = thumbprint
+        if locator is not None:
+          self.locator = locator
+        if creation_date is not None:
+          self.creation_date = creation_date
 
     @property
     def id(self):
@@ -87,27 +87,27 @@ class OcrScan(object):
         self._id = id
 
     @property
-    def doc_id(self):
+    def thumbprint(self):
         """
-        Gets the doc_id of this OcrScan.
-        ID of source document
+        Gets the thumbprint of this OcrScan.
+        SHA-256 thumbprint of source document
 
-        :return: The doc_id of this OcrScan.
+        :return: The thumbprint of this OcrScan.
         :rtype: str
         """
-        return self._doc_id
+        return self._thumbprint
 
-    @doc_id.setter
-    def doc_id(self, doc_id):
+    @thumbprint.setter
+    def thumbprint(self, thumbprint):
         """
-        Sets the doc_id of this OcrScan.
-        ID of source document
+        Sets the thumbprint of this OcrScan.
+        SHA-256 thumbprint of source document
 
-        :param doc_id: The doc_id of this OcrScan.
+        :param thumbprint: The thumbprint of this OcrScan.
         :type: str
         """
 
-        self._doc_id = doc_id
+        self._thumbprint = thumbprint
 
     @property
     def locator(self):
@@ -133,27 +133,27 @@ class OcrScan(object):
         self._locator = locator
 
     @property
-    def thumbprint(self):
+    def creation_date(self):
         """
-        Gets the thumbprint of this OcrScan.
-        SHA-256 thumbprint of scan content
+        Gets the creation_date of this OcrScan.
+        Date scan record was created
 
-        :return: The thumbprint of this OcrScan.
+        :return: The creation_date of this OcrScan.
         :rtype: str
         """
-        return self._thumbprint
+        return self._creation_date
 
-    @thumbprint.setter
-    def thumbprint(self, thumbprint):
+    @creation_date.setter
+    def creation_date(self, creation_date):
         """
-        Sets the thumbprint of this OcrScan.
-        SHA-256 thumbprint of scan content
+        Sets the creation_date of this OcrScan.
+        Date scan record was created
 
-        :param thumbprint: The thumbprint of this OcrScan.
+        :param creation_date: The creation_date of this OcrScan.
         :type: str
         """
 
-        self._thumbprint = thumbprint
+        self._creation_date = creation_date
 
     def to_dict(self):
         """

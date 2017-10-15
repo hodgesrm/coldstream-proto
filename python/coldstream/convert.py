@@ -1,25 +1,26 @@
 # Copyright (c) 2017 Robert Hodges.  All rights reserved. 
 
-"""Rules for converting invoices to differnet representations"""
+"""Rules for converting invoices to different representations"""
 
 from decimal import Decimal
 from datetime import datetime, timedelta
 import generated.api.models as models
 
+
 # Generators to iterate across invoices in interesting ways.
-def invoice_items_generator(invoice_content: models.InvoiceContent):
+def invoice_items_generator(invoice: models.Invoice):
     """Emits invoice item rows with enclosing invoice information"""
     # Emit a header row with names. 
     yield _header()
 
-    for item in invoice_content.hosts:
+    for item in invoice.items:
         item_row = [
-            invoice_content.identifier,
-            invoice_content.effective_date,
-            invoice_content.vendor,
-            invoice_content.subtotal_amount,
-            invoice_content.tax,
-            invoice_content.total_amount,
+            invoice.identifier,
+            invoice.effective_date,
+            invoice.vendor,
+            invoice.subtotal_amount,
+            invoice.tax,
+            invoice.total_amount,
             item.item_id,
             item.resource_id,
             item.unit_amount,
@@ -32,13 +33,13 @@ def invoice_items_generator(invoice_content: models.InvoiceContent):
         yield item_row
 
 
-def invoice_items_daily_generator(invoice_content: models.InvoiceContent):
+def invoice_items_daily_generator(invoice: models.Invoice):
     """Emits invoice item rows split into daily increments to enable
     cost accounting down to level of individual days"""
     # Emit a header row with names.
     yield _header()
 
-    for item in invoice_content.hosts:
+    for item in invoice.items:
         start_date = datetime.strptime(item.start_date, '%Y-%m-%d')
         end_date = datetime.strptime(item.end_date, '%Y-%m-%d')
         interval = end_date - start_date
@@ -50,12 +51,12 @@ def invoice_items_daily_generator(invoice_content: models.InvoiceContent):
             today_start = start_date + timedelta(days=day)
             today_end = today_start + one_day
             item_row = [
-                invoice_content.identifier,
-                invoice_content.effective_date,
-                invoice_content.vendor,
-                invoice_content.subtotal_amount,
-                invoice_content.tax,
-                invoice_content.total_amount,
+                invoice.identifier,
+                invoice.effective_date,
+                invoice.vendor,
+                invoice.subtotal_amount,
+                invoice.tax,
+                invoice.total_amount,
                 item.item_id,
                 item.resource_id,
                 _decimal_value(item.unit_amount) / days,
@@ -95,9 +96,9 @@ def _decimal_value(number):
         return 0.0
 
 
-def csv_output_generator(invoice_content: models.InvoiceContent, generator):
+def csv_output_generator(invoice: models.Invoice, generator):
     """Return a sequence of CSV lines"""
-    for items in generator(invoice_content):
+    for items in generator(invoice):
         row = []
         for item in items:
             if item is None:

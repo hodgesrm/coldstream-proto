@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Coldstream Prototype
+    Goldfin Invoice Processing API
 
-    Coldstream model for invoice processing. 
+    Goldfin Invoice Analysis
 
     OpenAPI spec version: 1.0.0
     Contact: rhodges@skylineresearch.comm
@@ -20,7 +20,8 @@ from .document import Document
 from .document_region import DocumentRegion
 from .host import Host
 from .invoice import Invoice
-from .invoice_content import InvoiceContent
+from .invoice_envelope import InvoiceEnvelope
+from .invoice_envelope_parameters import InvoiceEnvelopeParameters
 from .invoice_item import InvoiceItem
 from .memory import Memory
 from .network_connection import NetworkConnection
@@ -29,5 +30,3 @@ from .operating_system import OperatingSystem
 from .power_supply import PowerSupply
 from .storage_device import StorageDevice
 from .tag import Tag
-from .version_info import VersionInfo
-from .host_invoice_item import HostInvoiceItem

@@ -7,8 +7,8 @@ import logging
 import re
 import uuid
 from decimal import Decimal
-from generated.api.models.invoice_content import InvoiceContent
-from generated.api.models.host_invoice_item import HostInvoiceItem
+from generated.api.models.invoice import Invoice
+from generated.api.models.invoice_item import InvoiceItem
 
 import data
 
@@ -40,23 +40,23 @@ class OvhProcessor:
 
         # Extract invoice header information available from text blocks.
         # For OVH the sub-total is in the same table as the invoice item rows.
-        id = str(uuid.uuid4())
-        content = InvoiceContent(id=id, vendor="OVH.com")
-        content.identifier = self._find_first_group_1(r'^Invoice:\s*(\S.*\S)\s*$')
-        logger.debug(content.identifier)
+        invoice = Invoice()
+        invoice.vendor = "OVH.com"
+        invoice.identifier = self._find_first_group_1(r'^Invoice:\s*(\S.*\S)\s*$')
+        logger.debug(invoice.identifier)
         ovh_date = self._find_first_group_1(r'^Date:\s*(\S.*\S)\s*$')
-        content.effective_date = self._get_normalized_date(ovh_date)
-        logger.debug(content.effective_date)
-        content.tax = 0.0
-        logger.debug(content.tax)
+        invoice.effective_date = self._get_normalized_date(ovh_date)
+        logger.debug(invoice.effective_date)
+        invoice.tax = 0.0
+        logger.debug(invoice.tax)
         total = self._find_named_block_value(r'^TOTAL')
         if total is not None:
             total_amount, total_currency = self._get_amount_and_currency(total)
-            content.total_amount = total_amount
-            content.currency = total_currency
-        logger.debug(content.total_amount)
-        logger.debug(content.currency)
-        content.hosts = []
+            invoice.total_amount = total_amount
+            invoice.currency = total_currency
+        logger.debug(invoice.total_amount)
+        logger.debug(invoice.currency)
+        invoice.items = []
 
         # Iterate across the invoice rows.  Some items span more than one PDF table row
         # so we have a 'current_item' that allows work on items to span extra PDF
@@ -70,13 +70,13 @@ class OvhProcessor:
                             # Great, found the sub total row.
                             amount, ignore = self._get_amount_and_currency(
                                 row.cells[2].joined_text())
-                            content.subtotal_amount = amount
+                            invoice.subtotal_amount = amount
                             break;
                         else:
                             # This is a detail row, which may be spread across multiple PDF
                             # table rows.
                             if current_item is None:
-                                current_item = HostInvoiceItem()
+                                current_item = InvoiceItem()
                             else:
                                 # Make sure we aren't spanning extra rows due to bad data.
                                 must_post = False
@@ -91,8 +91,8 @@ class OvhProcessor:
                                     must_post = True
 
                                 if must_post:
-                                    content.hosts.append(current_item)
-                                    current_item = HostInvoiceItem()
+                                    invoice.items.append(current_item)
+                                    current_item = InvoiceItem()
 
                             # Try to fill in missing values.
                             if current_item.resource_id is None:
@@ -117,7 +117,7 @@ class OvhProcessor:
                             # If we have everything post to the invoice and clear current item.
                             if self._item_complete(current_item):
                                 logger.debug("POST!!!")
-                                content.hosts.append(current_item)
+                                invoice.items.append(current_item)
                                 current_item = None
 
                 else:
@@ -126,19 +126,19 @@ class OvhProcessor:
 
         # Clean resource_id values. These should be valid host names.
         sample_resource_ids = []
-        for item in content.hosts:
+        for item in invoice.items:
             sample_resource_ids.append(item.resource_id)
-        for item in content.hosts:
+        for item in invoice.items:
             item.resource_id = data.clean_host_name(item.resource_id, sample_resource_ids)
 
         # Cross check content.
         total = Decimal('0.0')
-        for item in content.hosts:
+        for item in invoice.items:
             total += Decimal(item.total_amount)
 
-        logger.info("TOTAL: {0}  CHECKED_TOTAL: {1}".format(content.total_amount, total))
+        logger.info("TOTAL: {0}  CHECKED_TOTAL: {1}".format(invoice.total_amount, total))
 
-        return content
+        return invoice
 
     def _find_named_block_value(self, select_value):
         """Find the value to the right of a named block"""

@@ -1,0 +1,538 @@
+---
+swagger: "2.0"
+info:
+  description: "Goldfin Invoice Analysis"
+  version: "1.0.0"
+  title: "Goldfin Invoice Processing API"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "rhodges@skylineresearch.comm"
+host: "api.goldfin.io"
+basePath: "/api/v1"
+tags:
+- name: "invoice"
+  description: "Invoice Processing Model"
+schemes:
+- "https"
+security:
+- UserSecurity: []
+paths:
+  /invoice:
+    get:
+      tags:
+      - "invoice"
+      summary: "List invoices"
+      description: "Return a list of all invoices"
+      operationId: "invoice_show_all"
+      produces:
+      - "application/json"
+      - "application/xml"
+      - "text/xml"
+      parameters:
+      - name: "summary"
+        in: "query"
+        description: "If true return complete invoice content, otherwise just the\
+          \ Invoice fields"
+        required: false
+        type: "boolean"
+        default: true
+      responses:
+        200:
+          description: "Successful query"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/InvoiceEnvelope"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+    post:
+      tags:
+      - "invoice"
+      summary: "Create a new invoice"
+      description: "Upload a new invoice and kick off processing"
+      operationId: "invoice_create"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "description"
+        in: "formData"
+        description: "A optional description of the invoice"
+        required: false
+        type: "string"
+      - name: "file"
+        in: "formData"
+        description: "Invoice file"
+        required: true
+        type: "file"
+      responses:
+        201:
+          description: "Created"
+          schema:
+            $ref: "#/definitions/InvoiceEnvelope"
+        400:
+          description: "Invoice creation failed"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+  /invoice/{id}:
+    get:
+      tags:
+      - "invoice"
+      summary: "Show a single invoice"
+      description: "Return all information relative to a single invoice"
+      operationId: "invoice_show"
+      produces:
+      - "application/json"
+      - "application/xml"
+      - "text/xml"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Invoice ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/InvoiceEnvelope"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+    put:
+      tags:
+      - "invoice"
+      summary: "Update an invoice"
+      description: "Update invoice description and tags. Changes to other fields are\
+        \ ignored"
+      operationId: "invoice_update"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Invoice ID"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Invoice descriptor"
+        required: false
+        schema:
+          $ref: "#/definitions/InvoiceEnvelopeParameters"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+    delete:
+      tags:
+      - "invoice"
+      summary: "Delete an invoice"
+      description: "Delete a single"
+      operationId: "invoice_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Invoice ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+  /invoice/{id}/process:
+    post:
+      tags:
+      - "invoice"
+      summary: "Start invoice processing"
+      description: "Run background OCR and interpretation on invoice.  The invoice\
+        \ state will be set to CREATED before this call returns."
+      operationId: "invoice_process"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Invoice ID"
+        required: true
+        type: "string"
+      responses:
+        202:
+          description: "Accepted"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+  /invoice/{id}/validate:
+    post:
+      tags:
+      - "invoice"
+      summary: "Start invoice validations"
+      description: "Run invoice validations"
+      operationId: "invoice_validate"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Invoice ID"
+        required: true
+        type: "string"
+      responses:
+        202:
+          description: "Accepted"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.invoice_controller"
+securityDefinitions:
+  UserSecurity:
+    type: "basic"
+definitions:
+  InvoiceEnvelope:
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        description: "Unique invoice id"
+      description:
+        type: "string"
+        description: "A user-provided description of the invoice"
+      tags:
+        type: "string"
+        description: "A user-provided list of name-value pairs that describe the invoice"
+      state:
+        type: "string"
+        description: "The current processing state of the invoice.  The invoice field\
+          \ is available once the invoice is interpreted."
+        enum:
+        - "CREATED"
+        - "SCANNED"
+        - "INTERPRETED"
+      source:
+        $ref: "#/definitions/Document"
+      ocr:
+        $ref: "#/definitions/OcrScan"
+      content:
+        $ref: "#/definitions/Invoice"
+      creationDate:
+        type: "string"
+        description: "Date invoice record was created"
+    description: "Root object for invoice content."
+  InvoiceEnvelopeParameters:
+    properties:
+      description:
+        type: "string"
+        description: "A user-provided description of the invoice"
+      tags:
+        type: "string"
+        description: "A user-provided list of name-value pairs that describe the invoice"
+    description: "User settable invoice parameters"
+  Document:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Document ID"
+      name:
+        type: "string"
+        description: "Name of the document"
+      locator:
+        type: "string"
+        format: "url"
+        description: "URL of the source"
+      thumbprint:
+        type: "string"
+        description: "SHA-256 thumbprint of object content"
+      creationDate:
+        type: "string"
+        description: "Date invoice record was created"
+    description: "A document, for example a PDF file"
+  OcrScan:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Scan ID"
+      thumbprint:
+        type: "string"
+        description: "SHA-256 thumbprint of source document"
+      locator:
+        type: "string"
+        format: "url"
+        description: "URL of the scan document"
+      creationDate:
+        type: "string"
+        description: "Date scan record was created"
+    description: "OCR scan of a document"
+  DocumentRegion:
+    type: "object"
+    properties:
+      page:
+        type: "integer"
+        format: "int32"
+        description: "Page number"
+      left:
+        type: "integer"
+        format: "int32"
+        description: "Left pixel coordinate"
+      top:
+        type: "integer"
+        format: "int32"
+        description: "Top pixel coordinate"
+      right:
+        type: "integer"
+        format: "int32"
+        description: "Right pixel coordinate"
+      bottom:
+        type: "integer"
+        format: "int32"
+        description: "Bottom pixel coordinate"
+    description: "Location within a document page expressed in page number and pixel\
+      \ region coordinates on the page"
+  Invoice:
+    properties:
+      identifier:
+        type: "string"
+        description: "Invoice identifier"
+      effectiveDate:
+        type: "string"
+        format: "date-time"
+        description: "Invoice effective date"
+      vendor:
+        type: "string"
+        description: "Vendor name"
+      subtotalAmount:
+        type: "number"
+        description: "Invoice subtotal amount"
+      tax:
+        type: "number"
+        description: "Invoice tax amount"
+      totalAmount:
+        type: "number"
+        description: "Invoice total (subtotal + tax)"
+      currency:
+        type: "string"
+        description: "Currency type"
+      items:
+        type: "array"
+        description: "Invoice items"
+        items:
+          $ref: "#/definitions/InvoiceItem"
+    description: "Invoice content obtained from documentation interpretation"
+  InvoiceItem:
+    type: "object"
+    properties:
+      itemId:
+        type: "string"
+        description: "Invoice item ID if specified"
+      resourceId:
+        type: "string"
+        description: "Inventory resource ID"
+      unitAmount:
+        type: "number"
+        description: "Cost per unit"
+      units:
+        type: "integer"
+        description: "Number of units"
+      totalAmount:
+        type: "number"
+        description: "Total cost for all units"
+      currency:
+        type: "string"
+        description: "Item currency"
+      startDate:
+        type: "string"
+        format: "timestamp"
+        description: "Begining of the time range"
+      endDate:
+        type: "string"
+        format: "timestamp"
+        description: "End of the time range"
+      region:
+        $ref: "#/definitions/DocumentRegion"
+      inventoryId:
+        type: "string"
+        description: "Id of an inventory description"
+      inventoryType:
+        type: "string"
+        enum:
+        - "HOST"
+    description: "Common fields for all invoice line items"
+  Host:
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        description: "Unique host descriptor ID"
+      identifier:
+        type: "string"
+        description: "Host identification key"
+      name:
+        type: "string"
+        description: "The host name"
+      cpu:
+        type: "array"
+        items:
+          $ref: "#/definitions/CPU"
+      memory:
+        type: "array"
+        items:
+          $ref: "#/definitions/Memory"
+      os:
+        $ref: "#/definitions/OperatingSystem"
+      storage:
+        type: "array"
+        items:
+          $ref: "#/definitions/StorageDevice"
+      network:
+        type: "array"
+        items:
+          $ref: "#/definitions/NetworkConnection"
+      power:
+        type: "array"
+        items:
+          $ref: "#/definitions/PowerSupply"
+      startDate:
+        type: "string"
+        format: "timestamp"
+        description: "Begining of the time range"
+      endDate:
+        type: "string"
+        format: "timestamp"
+        description: "End of the time range"
+    description: "A host configuration including CPU, RAM, OS, storage devices, and\
+      \ network connections"
+  CPU:
+    properties:
+      model:
+        type: "string"
+        description: "CPU model name"
+      manufacturer:
+        type: "string"
+        description: "CPU manufacturer"
+      cores:
+        type: "integer"
+        format: "int32"
+        description: "Number of cores"
+    description: "CPU description"
+  Memory:
+    properties:
+      capacity:
+        type: "integer"
+        format: "int64"
+        description: "Memory capacity in bytes"
+    description: "Memory allocation description"
+  OperatingSystem:
+    properties:
+      name:
+        type: "string"
+        description: "OS major version e.g., Linux"
+      distribution:
+        type: "string"
+        description: "Distribution, e.g, Debian or Ubuntu"
+      majorVersion:
+        type: "string"
+        description: "OS major version e.g., 'Waxing Wombat' or 10"
+      minorVersion:
+        type: "string"
+        description: "OS minor version e.g., '0'"
+    description: "Operating system information"
+  StorageDevice:
+    properties:
+      name:
+        type: "string"
+        description: "Device name"
+      capacity:
+        type: "integer"
+        format: "int64"
+        description: "Capacity in bytes"
+      storageType:
+        type: "string"
+        description: "Storage type"
+        enum:
+        - "SSD"
+        - "HD"
+      model:
+        type: "string"
+        description: "Device model name"
+      manufacturer:
+        type: "string"
+        description: "Device manufacturer"
+      interfaceType:
+        type: "string"
+        description: "Storage interface type"
+        enum:
+        - "SATA-2"
+        - "SATA-3"
+        - "OTHER"
+      raidType:
+        type: "string"
+        description: "RAID type"
+        enum:
+        - "NONE"
+        - "RAID1"
+        - "RAID5"
+        - "RAID10"
+        - "OTHER"
+    description: "A storage device such as SSD or HD"
+  NetworkConnection:
+    properties:
+      name:
+        type: "string"
+        description: "Network connection name"
+      speed:
+        type: "integer"
+        format: "int64"
+        description: "Speed in bytes per second"
+      model:
+        type: "string"
+        description: "Device model name"
+      manufacturer:
+        type: "string"
+        description: "Device manufacturer"
+      mac:
+        type: "string"
+        description: "MAC address"
+      ipv4Address:
+        type: "string"
+        description: "IPv4 address"
+    description: "A network connection"
+  PowerSupply:
+    properties:
+      watts:
+        type: "integer"
+        format: "int32"
+        description: "Available power"
+      model:
+        type: "string"
+        description: "Device model name"
+      manufacturer:
+        type: "string"
+        description: "Device manufacturer"
+    description: "A power supply"
+  Tag:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Goldfin.io"
+  url: "https://goldfin.io"
