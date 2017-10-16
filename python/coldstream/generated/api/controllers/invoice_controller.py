@@ -10,7 +10,7 @@ from ..util import deserialize_date, deserialize_datetime
 
 def invoice_create(file, description=None):
     """
-    Create a new invoice
+    Create a new invoice for logged in tenant
     Upload a new invoice and kick off processing
     :param file: Invoice file
     :type file: werkzeug.datastructures.FileStorage

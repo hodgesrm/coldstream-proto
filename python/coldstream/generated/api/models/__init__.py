@@ -30,3 +30,8 @@ from .operating_system import OperatingSystem
 from .power_supply import PowerSupply
 from .storage_device import StorageDevice
 from .tag import Tag
+from .tenant import Tenant
+from .tenant_parameters import TenantParameters
+from .tenant_registration_parameters import TenantRegistrationParameters
+from .user import User
+from .user_parameters import UserParameters

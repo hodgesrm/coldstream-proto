@@ -12,11 +12,264 @@ basePath: "/api/v1"
 tags:
 - name: "invoice"
   description: "Invoice Processing Model"
+- name: "tenant"
+  description: "Tenant and user management"
 schemes:
 - "https"
 security:
 - UserSecurity: []
 paths:
+  /tenant:
+    get:
+      tags:
+      - "tenant"
+      summary: "List tenants"
+      description: "Return a list of all tenants"
+      operationId: "tenant_showall"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Successful query"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+    post:
+      tags:
+      - "tenant"
+      summary: "Create a new tenant"
+      description: "Upload a new tenant registration request.  The tenant will be\
+        \ in a pending state until at least one user is enabled."
+      operationId: "tenant_create"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Tenant registration request parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/TenantRegistrationParameters"
+      responses:
+        201:
+          description: "Created"
+          schema:
+            $ref: "#/definitions/Tenant"
+        400:
+          description: "Tenant creation failed"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+  /tenant/{id}:
+    get:
+      tags:
+      - "tenant"
+      summary: "Show a single tenant"
+      description: "Return all information relative to a single tenant"
+      operationId: "tenant_show"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Tenant ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/Tenant"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+    put:
+      tags:
+      - "tenant"
+      summary: "Update a tenant"
+      description: "Update invoice description and tags. Changes to other fields are\
+        \ ignored"
+      operationId: "tenant_update"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Tenant ID"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Tenant parameters"
+        required: false
+        schema:
+          $ref: "#/definitions/TenantParameters"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+    delete:
+      tags:
+      - "tenant"
+      summary: "Delete a tenant"
+      description: "Delete a single tenant"
+      operationId: "tenant_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Tenant ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+  /tenant/{tenantId}/user:
+    get:
+      tags:
+      - "tenant"
+      summary: "List users"
+      description: "Return a list of all users for the tenant"
+      operationId: "user_showall"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "tenantId"
+        in: "path"
+        description: "Tenant Id"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful query"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+    post:
+      tags:
+      - "tenant"
+      summary: "Create a new user for a tenant"
+      description: "Upload a new user registration request."
+      operationId: "user_create"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "tenantId"
+        in: "path"
+        description: "Tenant Id"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "User registration request parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/UserParameters"
+      responses:
+        201:
+          description: "Created"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "User creation failed"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+  /tenant/{tenantId}/user/{id}:
+    get:
+      tags:
+      - "tenant"
+      summary: "Show a single user"
+      description: "Return all information relative to a single user"
+      operationId: "user_show"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "tenantId"
+        in: "path"
+        description: "Tenant Id"
+        required: true
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "User ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/Tenant"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+    put:
+      tags:
+      - "tenant"
+      summary: "Update a user"
+      description: "Update user description"
+      operationId: "user_update"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "tenantId"
+        in: "path"
+        description: "Tenant Id"
+        required: true
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "User ID"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "User parameters"
+        required: false
+        schema:
+          $ref: "#/definitions/UserParameters"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
+    delete:
+      tags:
+      - "tenant"
+      summary: "Delete a user"
+      description: "Delete a user"
+      operationId: "user_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "tenantId"
+        in: "path"
+        description: "Tenant Id"
+        required: true
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "User ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.tenant_controller"
   /invoice:
     get:
       tags:
@@ -47,7 +300,7 @@ paths:
     post:
       tags:
       - "invoice"
-      summary: "Create a new invoice"
+      summary: "Create a new invoice for logged in tenant"
       description: "Upload a new invoice and kick off processing"
       operationId: "invoice_create"
       consumes:
@@ -194,6 +447,79 @@ securityDefinitions:
   UserSecurity:
     type: "basic"
 definitions:
+  Tenant:
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        description: "Unique tenant id"
+      name:
+        type: "string"
+        description: "Unique tenant name"
+      state:
+        type: "string"
+        description: "The current processing state of the invoice.  The invoice field\
+          \ is available once the invoice is interpreted."
+        enum:
+        - "PENDING"
+        - "ENABLED"
+        - "DISABLED"
+      creationDate:
+        type: "string"
+        description: "Date invoice record was created"
+    description: "Tenant description"
+  TenantParameters:
+    properties:
+      name:
+        type: "string"
+        description: "Unique tenant name"
+    description: "Parameters to change on a tenant"
+  TenantRegistrationParameters:
+    properties:
+      name:
+        type: "string"
+        description: "Unique tenant name"
+      user:
+        $ref: "#/definitions/UserParameters"
+    description: "Parameters for registering a new tenant including an initial tenant\
+      \ user"
+  User:
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        description: "Unique user id"
+      tenantId:
+        type: "string"
+        format: "uuid"
+        description: "Tenant ID"
+      username:
+        type: "string"
+        description: "Unique user name"
+      password:
+        type: "string"
+        description: "Password for user"
+      state:
+        type: "string"
+        description: "The current processing state of the user.  Users are initially\
+          \ pending until confirmed"
+        enum:
+        - "PENDING"
+        - "ENABLED"
+        - "DISABLED"
+      creationDate:
+        type: "string"
+        description: "Date user record was created"
+    description: "User description"
+  UserParameters:
+    properties:
+      username:
+        type: "string"
+        description: "Unique user name"
+      password:
+        type: "string"
+        description: "Password for user"
+    description: "Parameters for creating or updating a user account"
   InvoiceEnvelope:
     properties:
       id:

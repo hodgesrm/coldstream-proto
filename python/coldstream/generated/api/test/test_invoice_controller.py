@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 
 from api.models.api_response import ApiResponse
-from api.models.invoice import Invoice
+from api.models.invoice_envelope import InvoiceEnvelope
+from api.models.invoice_envelope_parameters import InvoiceEnvelopeParameters
 from . import BaseTestCase
 from six import BytesIO
 from flask import json
@@ -16,10 +17,9 @@ class TestInvoiceController(BaseTestCase):
         """
         Test case for invoice_create
 
-        Create a new invoice
+        Create a new invoice for logged in tenant
         """
-        data = dict(name='name_example',
-                    description='description_example',
+        data = dict(description='description_example',
                     file=(BytesIO(b'some file data'), 'file.txt'))
         response = self.client.open('/api/v1/invoice',
                                     method='POST',
@@ -75,11 +75,21 @@ class TestInvoiceController(BaseTestCase):
 
         Update an invoice
         """
-        body = Invoice()
+        body = InvoiceEnvelopeParameters()
         response = self.client.open('/api/v1/invoice/{id}'.format(id='id_example'),
                                     method='PUT',
                                     data=json.dumps(body),
                                     content_type='application/json')
+        self.assert200(response, "Response body is : " + response.data.decode('utf-8'))
+
+    def test_invoice_validate(self):
+        """
+        Test case for invoice_validate
+
+        Start invoice validations
+        """
+        response = self.client.open('/api/v1/invoice/{id}/validate'.format(id='id_example'),
+                                    method='POST')
         self.assert200(response, "Response body is : " + response.data.decode('utf-8'))
 
 
