@@ -1,0 +1,282 @@
+#!/bin/bash
+# Goldfin API Server
+# Copyright (C) 2017 All rights reserved
+
+##############################################################################
+# ENVIRONMENT SETUP
+##############################################################################
+
+API_MAIN=io.goldfin.invoice.restapi.jetty.App
+
+# Find our home. 
+GBIN=`dirname $0`
+GHOME=`cd $GBIN/..; pwd`
+
+# Identify the server PID file. 
+if [ -z "$API_SERVER_PID" ]; then 
+  API_SERVER_PID=$GHOME/var/api-server.pid
+fi
+
+# Add jars from all directories to class path.
+for jar in $GHOME/lib/*.jar; do 
+  if [ -z "$CP" ]; then
+    CP=$jar
+  else
+    CP=$CP:$jar
+  fi
+done
+
+# Add configuration directory to class path. 
+CP=$CP:$GHOME/conf
+
+# Find Java.
+if [ -z "$JAVA_HOME" ]; then
+  JAVA=`which java`
+else
+  JAVA=$JAVA_HOME/bin/java
+fi
+if [ ! -x "$JAVA" ]; then
+  echo "Cannot find java command.  Please set the JAVA_HOME environment"
+  echo "variable or add java to the execution path."
+  exit 1
+fi
+
+# Set the port for JVM remote debugging.
+if [ ! -z "$API_SERVER_DEBUG_PORT" ]; then
+  JVM_OPTIONS="${JVM_OPTIONS} $API_SERVER_DEBUG_PORT"
+fi
+
+# Set options for debugging.
+if [ ! -z "$API_SERVER_DEBUG_OPTS" ]; then
+  JVM_OPTIONS="${JVM_OPTIONS} $API_SERVER_DEBUG_OPTS"
+fi
+
+# Set the platform charset if available.
+if [ ! -z "$API_SERVER_FILE_ENCODING" ]; then
+  JVM_OPTIONS="${JVM_OPTIONS} $API_SERVER_FILE_ENCODING"
+fi
+
+# Set log directory. 
+if [ -z "$API_SERVER_LOG_DIR" ]; then 
+  API_SERVER_LOG_DIR=$GHOME/log
+fi
+mkdir -p $API_SERVER_LOG_DIR
+if [ ! -d "$API_SERVER_LOG_DIR" ]; then
+  echo "Cannot find log directory: $API_SERVER_LOG_DIR"
+  exit 1
+fi
+JVM_OPTIONS="${JVM_OPTIONS} -Dapi.server.log.dir=$API_SERVER_LOG_DIR" 
+
+# Set debug port and enable if debug option is enabled.  These are added if
+# server is started with debug option. 
+if [ -z "$API_SERVER_JVMDEBUG_PORT" ]; then
+  API_SERVER_JVMDEBUG_PORT=64002
+fi
+if [ -z "$API_SERVER_JVMDEBUG_OPTS" ]; then
+  API_SERVER_JVMDEBUG_OPTS="-enableassertions -Xdebug -Xnoagent -Djava.compiler=none -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$API_SERVER_JVMDEBUG_PORT"
+fi
+
+##############################################################################
+# UTILITY FUNCTIONS
+##############################################################################
+
+# Command to read current PID if any. 
+getPid() {
+  if [ -e "$API_SERVER_PID" ]; then
+    echo `cat $API_SERVER_PID`
+  else
+    echo ""
+  fi
+}
+
+# Command to remove PID file. 
+rmPidFile() {
+  if [ -e "$API_SERVER_PID" ]; then
+    rm $API_SERVER_PID
+  fi
+}
+
+# Command to kill a process. 
+killPid() {
+  kill $1
+}
+
+# See if the process corresponding to a PID is alive and print status. 
+isPidAlive() {
+  ps -f $1 > /dev/null
+  if [ $? = "0" ]; then
+    echo 'alive'
+  else
+    echo 'dead'
+  fi
+}
+
+##############################################################################
+# OPERATIONS
+##############################################################################
+
+# Start the api server. 
+apiStart() {
+  # Parse arguments. 
+  cmd="$1"
+  shift
+  while [[ ${#} -gt 0 ]] 
+  do
+    if [ "$1" = "debug" ]; then
+      JVM_OPTIONS="$API_SERVER_JVMDEBUG_OPTS $JVM_OPTIONS"
+    else
+      echo "Unrecognized option: $1"
+      exit 1
+    fi
+    shift
+  done
+
+  # See if there is already a api server running.  If there's just a PID
+  # file remove it. 
+  pid=`getPid`
+  if [ "$pid" != "" ]; then
+    if [ `isPidAlive $pid` = "alive" ]; then
+      echo "Replicator is already started"
+      exit 1
+    else
+      rmPidFile
+    fi
+  fi
+  
+  # Ensure we have a directory for the pid file. 
+  pid_dir=`dirname $API_SERVER_PID`
+  mkdir -p $pid_dir
+  # Start according to whether we are in console or background mode. 
+  if [ "$cmd" = "background" ]; then
+    echo "Starting API Server Service..."
+    # Start the api server using nohup to protect against SIGHUP on shell exit.
+    nohup $JAVA -cp $CP -Dlog4j.rootAppender=file -Dapi.server.home.dir=$GHOME -Dapi.server.log.dir=$API_SERVER_LOG_DIR $JVM_OPTIONS ${API_MAIN} $offline > $GHOME/log/api server-nohup.out 2>&1 &
+    status="$?"
+    pid="$!"
+    if [ $status = "0" ]; then
+      echo $pid > $API_SERVER_PID
+      echo -n "Waiting for API Server Service."
+      for i in 1 2 3 4 5 6 7 8 9 10; do
+        if [ `isPidAlive $pid` = "alive" ]; then
+          echo
+          echo "running: PID:$pid"
+          return
+        else
+          echo -n "."
+          sleep 1
+        fi
+      done
+    else
+      echo "Replicator failed to start"
+      exit $status
+    fi
+  else 
+    # Start the api server in foreground.
+    $JAVA -cp $CP -Dlog4j.rootAppender=stdout -Dapi.server.home.dir=$GHOME -Dapi.server.log.dir=$API_SERVER_LOG_DIR $JVM_OPTIONS ${API_MAIN} $offline
+  fi
+}
+
+# Stop the api server. 
+apiStop() {
+  # See if the api server is running and if so stop it. 
+  echo "Stopping API Server Service..."
+  pid=`getPid`
+  if [ "$pid" != "" ]; then
+    if [ `isPidAlive $pid` = "alive" ]; then
+      killPid $pid
+      echo "Waiting for API Server Service to exit..."
+      for i in 1 2 3 4 5 6 7 8 9 10; do
+        if [ `isPidAlive $pid` = "alive" ]; then
+          sleep 1
+        else
+          echo "Stopped API Server Service."
+          rmPidFile
+          return
+        fi
+      done
+      echo "Could not stop api server!"
+      exit 1;
+    else
+      echo "API Server Service was not running."
+      rmPidFile
+    fi
+  else
+    echo "API Server Service is not running."
+  fi
+}
+
+# Check api server process status. 
+apiStatus() {
+  # See if the api server is running and if so stop it. 
+  pid=`getPid`
+  if [ "$pid" = "" ]; then
+    echo "API Server Service is not running."
+    exit 1
+  else
+    if [ `isPidAlive $pid` = "alive" ]; then
+      echo "API Server Service is running: PID: $pid, Java:STARTED"
+    else
+      echo "API Server Service is not running."
+      exit 1
+    fi
+  fi
+}
+
+# Dump api server threads. 
+apiDump() {
+  # See if the api server is running and if so send kill -QUIT signal.
+  pid=`getPid`
+  if [ "$pid" = "" ]; then
+    echo "API server is not running or in console mode."
+    exit 1
+  else
+    if [ `isPidAlive $pid` = "alive" ]; then
+      kill -QUIT $pid
+    else
+      echo "API server is not running."
+      exit 1
+    fi
+  fi
+}
+
+# Show api server commands. 
+apiUsage() {
+  echo "Usage: api-server command [ options ]"
+  echo "Commands:"
+  echo "  start   Start in the background as a daemon process"
+  echo "  console Start in the current tty with output to console"
+  echo "  stop    Stop if running as a daemon or in another console"
+  echo "  restart Stop if running and then start"
+  echo "  status  Query the current status"
+  echo "  dump    Request a Java thread dump if running"
+  echo "Options:"
+  echo "  debug   Start with Java debugging on port $API_SERVER_JVMDEBUG_PORT"
+  echo "  offline Start in offline state"
+}
+
+##############################################################################
+# COMMAND PROCESSING 
+##############################################################################
+
+# Process the command. 
+cmd=$1; shift
+if [ "$cmd" = "start" ]; then
+  apiStart background $*
+elif [ "$cmd" = "console" ]; then
+  apiStart console $*
+elif [ "$cmd" = "stop" ]; then
+  apiStop
+elif [ "$cmd" = "restart" ]; then
+  apiStop
+  apiStart background $*
+elif [ "$cmd" = "status" ]; then
+  apiStatus
+elif [ "$cmd" = "dump" ]; then
+  apiDump
+elif [ "$cmd" = "help" ]; then
+  apiUsage
+  exit 0
+else
+  apiUsage
+  exit 1
+fi
