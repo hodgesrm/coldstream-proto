@@ -58,7 +58,7 @@ public class ExportApi  {
     
     @Produces({ "text/plain", "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Export invoice data", notes = "Export selected invoice data to useful formats", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "export", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),

@@ -61,7 +61,7 @@ public class InvoiceApi  {
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a new invoice for logged in tenant", notes = "Upload a new invoice and kick off processing", response = InvoiceEnvelope.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = InvoiceEnvelope.class),
@@ -80,7 +80,7 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an invoice", notes = "Delete a single", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -96,7 +96,7 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Start invoice processing", notes = "Run background OCR and interpretation on invoice.  The invoice state will be set to CREATED before this call returns.", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
@@ -112,7 +112,7 @@ public class InvoiceApi  {
     
     @Produces({ "application/json", "application/xml", "text/xml" })
     @io.swagger.annotations.ApiOperation(value = "Show a single invoice", notes = "Return all information relative to a single invoice", response = InvoiceEnvelope.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = InvoiceEnvelope.class),
@@ -128,7 +128,7 @@ public class InvoiceApi  {
     
     @Produces({ "application/json", "application/xml", "text/xml" })
     @io.swagger.annotations.ApiOperation(value = "List invoices", notes = "Return a list of all invoices", response = InvoiceEnvelope.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = InvoiceEnvelope.class, responseContainer = "List") })
@@ -142,7 +142,7 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an invoice", notes = "Update invoice description and tags. Changes to other fields are ignored", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -159,7 +159,7 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Start invoice validations", notes = "Run invoice validations", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),

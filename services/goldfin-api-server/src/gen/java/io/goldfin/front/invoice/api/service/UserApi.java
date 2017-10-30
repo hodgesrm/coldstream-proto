@@ -61,7 +61,7 @@ public class UserApi  {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a new user for a tenant", notes = "Upload a new user registration request.", response = User.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = User.class),
@@ -77,7 +77,7 @@ public class UserApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a user", notes = "Delete a user", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -93,7 +93,7 @@ public class UserApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Show a single user", notes = "Return all information relative to a single user", response = Tenant.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Tenant.class),
@@ -109,7 +109,7 @@ public class UserApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List users", notes = "Return a list of all users visible to current user", response = User.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = User.class, responseContainer = "List") })
@@ -122,7 +122,7 @@ public class UserApi  {
     @Consumes({ "application/json" })
     
     @io.swagger.annotations.ApiOperation(value = "Update a user", notes = "Update user description", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),

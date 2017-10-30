@@ -16,19 +16,49 @@ tags:
 schemes:
   - https
 securityDefinitions:
-  UserSecurity:
-    type: basic
+  APIKeyHeader:
+    type: apiKey
+    in: header
+    name: vnd-io-goldfin-auth
 security:
-  - UserSecurity: []
+  - APIKeyHeader: []
 paths:
+  /login:
+    post:
+      tags:
+        - security
+      summary: Login to system
+      security: []
+      description: Obtain API key using login credentials
+      operationId: loginByCredentials
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Login credentials
+          required: true
+          schema:
+            $ref: '#/definitions/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          headers:
+            vnd-io-goldfin-auth:
+              type: string
+              description: >-
+                API key, should be submitted on future requests to show
+                authorization
+        '400':
+          description: Tenant creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
   /tenant:
     post:
       tags:
         - tenant
       summary: Create a new tenant
-      description: >-
-        Upload a new tenant registration request.  The tenant will be in a
-        pending state until at least one user is enabled.
+      description: Upload a new tenant registration request.
       operationId: tenantCreate
       consumes:
         - application/json
@@ -129,7 +159,7 @@ paths:
           description: Successful
         '404':
           description: Not Found
-  '/tenant/{tenantId}/user':
+  /user:
     post:
       tags:
         - tenant
@@ -141,11 +171,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: tenantId
-          in: path
-          description: Tenant Id
-          required: true
-          type: string
         - in: body
           name: body
           description: User registration request parameters
@@ -165,16 +190,10 @@ paths:
       tags:
         - tenant
       summary: List users
-      description: Return a list of all users for the tenant
+      description: Return a list of all users visible to current user
       operationId: userShowall
       produces:
         - application/json
-      parameters:
-        - name: tenantId
-          in: path
-          description: Tenant Id
-          required: true
-          type: string
       responses:
         '200':
           description: Successful query
@@ -182,7 +201,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/User'
-  '/tenant/{tenantId}/user/{id}':
+  '/user/{id}':
     get:
       tags:
         - tenant
@@ -192,11 +211,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: tenantId
-          in: path
-          description: Tenant Id
-          required: true
-          type: string
         - name: id
           in: path
           description: User ID
@@ -218,11 +232,6 @@ paths:
       consumes:
         - application/json
       parameters:
-        - name: tenantId
-          in: path
-          description: Tenant Id
-          required: true
-          type: string
         - name: id
           in: path
           description: User ID
@@ -247,11 +256,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: tenantId
-          in: path
-          description: Tenant Id
-          required: true
-          type: string
         - name: id
           in: path
           description: User ID
@@ -427,7 +431,140 @@ paths:
           description: Accepted
         '404':
           description: Not Found
+  /host:
+    post:
+      tags:
+        - inventory
+      summary: Create a new host inventory entry
+      description: Upload a host inventory entry
+      operationId: inventoryHostCreate
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: The host definition
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Host'
+        '400':
+          description: Host creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - inventory
+      summary: List host entries
+      description: Return a list of all host inventory records
+      operationId: inventoryHostShowAll
+      produces:
+        - application/json
+      parameters:
+        - name: summary
+          in: query
+          description: >-
+            If true return complete invoice content, otherwise just the Invoice
+            fields
+          required: false
+          default: true
+          type: boolean
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Host'
+  '/host/{id}':
+    get:
+      tags:
+        - inventory
+      summary: Show a single host inventory record
+      description: Return all information relative to a single host
+      operationId: invoiceHostShow
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Host ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Host'
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - inventory
+      summary: Delete a host inventory record
+      description: Delete a host inventory record
+      operationId: inventoryHostDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Host ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  /export/invoice:
+    get:
+      tags:
+        - export
+      summary: Export invoice data
+      description: Export selected invoice data to useful formats
+      operationId: exportInvoice
+      produces:
+        - text/plain
+        - application/octet-stream
+      parameters:
+        - name: outputFormat
+          in: query
+          description: Output format to generate.  CSV is the only currently allowed value.
+          type: string
+        - name: timeSlice
+          in: query
+          description: >-
+            Optional field to explode values out by a time unit.  Allowed values
+            are DAY, HOUR, MINUTE
+          type: string
+        - name: filterSpec
+          in: query
+          description: Predicate list to select invoices.
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ApiResponse'
 definitions:
+  LoginRequest:
+    description: Login credentials
+    properties:
+      user:
+        type: string
+        description: User name
+      password:
+        type: string
+        description: User password
   Tenant:
     description: Tenant description
     properties:

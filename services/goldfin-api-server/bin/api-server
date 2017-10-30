@@ -8,26 +8,24 @@
 
 API_MAIN=io.goldfin.invoice.restapi.jetty.App
 
-# Find our home. 
+# Find our home and cd to it. 
 GBIN=`dirname $0`
 GHOME=`cd $GBIN/..; pwd`
+cd $GHOME
 
 # Identify the server PID file. 
 if [ -z "$API_SERVER_PID" ]; then 
   API_SERVER_PID=$GHOME/var/api-server.pid
 fi
 
-# Add jars from all directories to class path.
-for jar in $GHOME/lib/*.jar; do 
-  if [ -z "$CP" ]; then
-    CP=$jar
-  else
-    CP=$CP:$jar
-  fi
+# Add jars from all directories to class path, which starts with 
+# conf directory.
+CP=conf
+for jar in lib/*.jar; do 
+  CP=$CP:$jar
 done
 
 # Add configuration directory to class path. 
-CP=$CP:$GHOME/conf
 
 # Find Java.
 if [ -z "$JAVA_HOME" ]; then

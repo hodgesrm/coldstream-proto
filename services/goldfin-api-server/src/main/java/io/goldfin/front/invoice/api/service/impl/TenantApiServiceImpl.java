@@ -1,23 +1,15 @@
 package io.goldfin.front.invoice.api.service.impl;
 
-import io.goldfin.front.invoice.api.service.*;
-import io.goldfin.front.invoice.api.model.*;
-
-import io.goldfin.front.invoice.api.model.ModelApiResponse;
-import io.goldfin.front.invoice.api.model.Tenant;
-import io.goldfin.front.invoice.api.model.TenantParameters;
-import io.goldfin.front.invoice.api.model.TenantRegistrationParameters;
-
-import java.util.List;
-import io.goldfin.front.invoice.api.service.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import java.security.Principal;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.validation.constraints.*;
+
+import io.goldfin.front.invoice.api.model.TenantParameters;
+import io.goldfin.front.invoice.api.model.TenantRegistrationParameters;
+import io.goldfin.front.invoice.api.service.ApiResponseMessage;
+import io.goldfin.front.invoice.api.service.NotFoundException;
+import io.goldfin.front.invoice.api.service.TenantApiService;
 
 public class TenantApiServiceImpl extends TenantApiService {
     @Override

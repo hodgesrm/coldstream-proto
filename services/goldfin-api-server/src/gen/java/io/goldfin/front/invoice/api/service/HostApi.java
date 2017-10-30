@@ -59,7 +59,7 @@ public class HostApi  {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a new host inventory entry", notes = "Upload a host inventory entry", response = Host.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Host.class),
@@ -75,7 +75,7 @@ public class HostApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a host inventory record", notes = "Delete a host inventory record", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -91,7 +91,7 @@ public class HostApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List host entries", notes = "Return a list of all host inventory records", response = Host.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Host.class, responseContainer = "List") })
@@ -105,7 +105,7 @@ public class HostApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Show a single host inventory record", notes = "Return all information relative to a single host", response = Host.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "UserSecurity")
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Host.class),
