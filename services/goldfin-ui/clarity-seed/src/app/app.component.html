@@ -1,0 +1,26 @@
+<clr-main-container>
+  <clr-header>
+    <div class="branding">
+      <a href="#" class="nav-link">
+        <span class="title">Goldfin</span>
+      </a>
+    </div>
+      <div *ngIf="router.url == '/login'" class="header-nav" [clr-nav-level]="1">
+          <a class="nav-link" href="#" [routerLink]="['/login']" routerLinkActive="active"><span class="nav-text">Login</span></a>
+      </div>
+      <div *ngIf="router.url != '/login'" class="header-nav" [clr-nav-level]="1">
+          <a class="nav-link" href="#" [routerLink]="['/home']" routerLinkActive="active"><span class="nav-text">Home</span></a>
+          <a class="nav-link" href="#" [routerLink]="['/invoices']" routerLinkActive="active"><span class="nav-text">Invoices</span></a>
+          <a class="nav-link" href="#" [routerLink]="['/inventory']" routerLinkActive="active"><span class="nav-text">Inventory</span></a>
+          <a class="nav-link" href="#" [routerLink]="['/vendors']" routerLinkActive="active"><span class="nav-text">Vendors</span></a>
+          <a class="nav-link" href="#" [routerLink]="['/about']" routerLinkActive="active"><span class="nav-text">About</span></a>
+      </div>
+    <div class="header-actions">
+    </div>
+  </clr-header>
+  <div class="content-container">
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</clr-main-container>

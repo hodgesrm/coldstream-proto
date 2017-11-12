@@ -1,0 +1,31 @@
+<!--
+  ~ Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+  -->
+<div class="login-wrapper">
+    <form class="login">
+        <label class="title">
+            <h3 class="welcome">Welcome to</h3>
+              {{title}}
+            <h5 class="hint">Login or register a new account</h5>
+        </label>
+        <div class="login-group">
+            <input [(ngModel)]="user.name" class="username" [ngModelOptions]="{standalone: true}" type="text" placeholder="Username">
+            <input [(ngModel)]="user.password" class="password" [ngModelOptions]="{standalone: true}" type="password" placeholder="Password">
+            <div class="checkbox">
+                <input type="checkbox" id="rememberme">
+                <label for="rememberme">
+                    Remember me
+                </label>
+            </div>
+            <div *ngIf="error_message">
+              <div class="error active">
+                    {{error_message}}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="login()">
+              NEXT
+            </button>
+            <a href="javascript://" class="signup">Register a new account</a>
+        </div>
+    </form>
+</div>
