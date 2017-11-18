@@ -13,52 +13,92 @@ export class Invoice {
   currency: string;
 }
 
-const MOCK_INVOICES: Invoice[] = [
-  {
-    identifier: 'INV-14066-486955',
-    effective_date: '2017-04-25',
-    vendor: 'Internap Corporation',
-    subtotal_amount: 16932.40,
-    tax: 0.00,
-    total_amount: 16932.40,
-    currency: 'USD'
-  },
-  {
-    identifier: 'INV-14066-486956',
-    effective_date: '2017-05-26',
-    vendor: 'Internap Corporation',
-    subtotal_amount: 16351.90,
-    tax: 0.00,
-    total_amount: 16351.90,
-    currency: 'USD'
-  },
-  {
-    identifier: 'WE666184',
-    effective_date: '2017-04-30',
-    vendor: 'OVH.com',
-    subtotal_amount: 409.36,
-    tax: 0.00,
-    total_amount: 409.36,
-    currency: 'USD'
-  },
-  {
-    identifier: 'WE666187',
-    effective_date: '2017-05-31',
-    vendor: 'OVH.com',
-    subtotal_amount: 423.01,
-    tax: 0.00,
-    total_amount: 423.01,
-    currency: 'USD'
-  },
-];
-
 @Injectable()
 export class InvoiceService {
+  // In-memory invoices and invoice aggregates. 
+  invoices: Invoice[] = null;
+
+  fetchInvoices(): Invoice[] {
+    if (this.invoices === null) {
+      console.log("Initializing invoices");
+      this.invoices = this._fetchInvoices();
+      console.log("Initialized invoices: length=" + this.invoices.length);
+    }
+    return this.invoices;
+  }
+
+  // Generate invoices. 
+  _fetchInvoices(): Invoice[] {
+    // Generates invoices locally for now. 
+    console.log("Fetching invoices");
+    let invoiceGenerator = function(identifierPrefix, amount, vendor) {
+      // Generate invoices with up to 20% variation in amount. 
+      var invoices: Invoice[] = [];
+      var i;
+      for (i = 1; i <= 12; i++) {
+        var invoice = new Invoice();
+        invoice.identifier = identifierPrefix + (i * 1000 / 100); 
+        invoice.effective_date = new Date(2017, i, 25).toISOString().substring(0,10);
+        invoice.vendor = vendor;
+        invoice.subtotal_amount = _roundCurrency(amount * (9 + (2 * Math.random())) / 10);
+        invoice.tax = 0.00;
+        invoice.total_amount = invoice.subtotal_amount;
+        invoice.currency = 'USD';
+        invoices.push(invoice);
+        console.log("Added invoice: identifier=" + invoice.identifier + 
+          " invoices size=" + invoices.length);
+      }
+      return invoices;
+    }
+
+    // Generate on a per vendor basis.  
+    var vendorParams = [
+      {prefix: "WE666", amount: 423.01, vendor: "OVH.com"}, 
+      {prefix: "INV-14066-486", amount: 16932.40, vendor: "Internap Corporation"}
+    ];
+ 
+    var allInvoices: Invoice[] = [];
+    for (let params of vendorParams) {
+      for (let vendorInvoices of invoiceGenerator(params.prefix, 
+          params.amount, params.vendor)) {
+        allInvoices = allInvoices.concat(vendorInvoices);
+        console.log("Total invoices size=" + allInvoices.length);
+      }
+    }
+    return allInvoices;
+  }
+
+  getInvoiceVendors(): string[]  {
+    let vendors = {};
+    for (let invoice of this.fetchInvoices()) {
+      vendors[invoice.vendor] = "x";
+    }
+    return Object.keys(vendors);
+  }
+
   getInvoices(): Promise<Invoice[]> {
-    return Promise.resolve(MOCK_INVOICES);
+    return Promise.resolve(this.fetchInvoices());
+  }
+
+  // Get Invoices from last 30 days. 
+  getRecentInvoices(): Invoice[] {
+    let recentInvoices: Invoice[] = [];
+    var now = Date.now(); 
+    for (var i = 0; i < this.invoices.length; i++) {
+      let effectiveDate = new Date(this.invoices[i].effective_date).valueOf();
+      let diffInDays = (now - effectiveDate) / 1000 / 3600 / 24;
+      if (diffInDays > 0 && diffInDays <= 30) {
+        recentInvoices.push(this.invoices[i]);
+      }
+    }
+    return recentInvoices;
   }
 
   getInvoice(identifier: string): Invoice {
-    return MOCK_INVOICES.find(invoice => invoice.identifier === identifier);
+    return this.fetchInvoices().find(invoice => invoice.identifier === identifier);
   } 
+}
+
+function _roundCurrency(amount: number): number {
+  return (Math.round(amount * 100)) / 100;
 }

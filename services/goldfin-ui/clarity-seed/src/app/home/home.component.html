@@ -1,18 +1,59 @@
 <!--
   ~ Copyright (c) 2017 Goldfin.io. All Rights Reserved.
   -->
-<p>This is a Clarity seed application. This is the default page that loads for the application.</p>
+<script src="node_modules/chart.js/src/chart.js"></script>
 
-<clr-dropdown>
-    <button clrDropdownTrigger class="btn">
-        Dropdown
-        <clr-icon shape="caret down"></clr-icon>
-    </button>
-    <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
-        <a clrDropdownItem href="javascript://">Action 1</a>
-        <a clrDropdownItem href="javascript://">Action 2</a>
-        <div class="dropdown-divider"></div>
-        <a clrDropdownItem href="javascript://">Link 1</a>
-        <a clrDropdownItem href="javascript://">Link 2</a>
-    </clr-dropdown-menu>
-</clr-dropdown>
+<table class="table">
+<tr>
+<td>
+<span><h5>Year-to-Date IT Spend</h5></span>
+<div>
+  <div style="display: block">
+    <canvas baseChart
+            [datasets]="vendorSpendData"
+            [labels]="vendorSpendLabels"
+            [options]="vendorSpendOptions"
+            [legend]="vendorSpendLegend"
+            [chartType]="vendorSpendType"
+            (chartHover)="chartHovered($event)"
+            (chartClick)="chartClicked($event)"></canvas>
+  </div>
+</div>
+</td>
+<td>
+<span><h5>Inventory Amounts by Vendor</h5></span>
+<div style="display: block">
+  <canvas baseChart
+              [data]="doughnutChartData"
+              [labels]="doughnutChartLabels"
+              [chartType]="doughnutChartType"
+              (chartHover)="chartHoveredDonut($event)"
+              (chartClick)="chartClickedDonut($event)"></canvas>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+  <span><h5>Invoices from Past 30 Days</h5></span>
+  <clr-datagrid [(clrDgSelected)]="selected">
+    <clr-dg-column [clrDgField]="'identifier'">Identifier</clr-dg-column>
+    <clr-dg-column [clrDgField]="'effective_date'">Effective Date</clr-dg-column>
+    <clr-dg-column [clrDgField]="'vendor'">Vendor</clr-dg-column>
+    <clr-dg-column [clrDgField]="'subtotal_amount'">Subtotal</clr-dg-column>
+    <clr-dg-column [clrDgField]="'tax'">Tax</clr-dg-column>
+    <clr-dg-column [clrDgField]="'total_amount'">Total</clr-dg-column>
+    <clr-dg-column [clrDgField]="'currency'">Currency</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let invoice of recentInvoices" [clrDgItem]="invoice">
+        <clr-dg-cell>{{invoice.identifier}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.effective_date}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.vendor}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.subtotal_amount}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.tax}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.total_amount}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.currency}}</clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+</td>
+</tr>
+</table>

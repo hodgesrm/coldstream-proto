@@ -32,6 +32,7 @@ export class InvoicesComponent implements OnInit {
 
   getInvoices(): void {
     this.invoiceService.getInvoices().then(invoices => this.invoices = invoices);
+    console.log("Total invoices: " + this.invoices.length);
   }
 
   onImport(): void {

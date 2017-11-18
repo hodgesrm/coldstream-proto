@@ -13,6 +13,8 @@ import { InventoryComponent } from "./inventory/inventory.component";
 import { VendorsComponent } from "./vendors/vendors.component";
 import { AboutComponent } from "./about/about.component";
 
+import { ChartsModule } from 'ng2-charts';
+
 import { AuthService } from "./services/auth.service";
 import { InvoiceService } from "./services/invoice.service";
 
@@ -32,6 +34,7 @@ import { InvoiceService } from "./services/invoice.service";
         FormsModule,
         HttpModule,
         ClarityModule,
+        ChartsModule,
         ROUTING
     ],
     providers: [
