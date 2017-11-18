@@ -1,0 +1,96 @@
+<!--
+  ~ Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+  -->
+<clr-datagrid [(clrDgSelected)]="selected">
+    <clr-dg-action-bar>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="create_open = true">Create Vendor</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="import_open = true">Import Vendor Data</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="edit_open = true">Edit Vendor</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="onExport()">Export Vendor Data</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="delete_open = true" >Delete Vendor(s)</button>
+        </div>
+    </clr-dg-action-bar>
+
+    <clr-dg-column [clrDgField]="'identifier'">Identifier</clr-dg-column>
+    <clr-dg-column [clrDgField]="'name'">Name</clr-dg-column>
+    <clr-dg-column [clrDgField]="'state'">State</clr-dg-column>
+    <clr-dg-column [clrDgField]="'creation_date'">Creation Date</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let vendor of vendors" [clrDgItem]="vendor">
+        <clr-dg-cell>{{vendor.identifier}}</clr-dg-cell>
+        <clr-dg-cell>{{vendor.name}}</clr-dg-cell>
+        <clr-dg-cell>{{vendor.state}}</clr-dg-cell>
+        <clr-dg-cell>{{vendor.creationDate}}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{vendors.length}} vendors</clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="create_open">
+  <h3 class="modal-title">Create New Vendor</h3>
+  <div class="modal-body">
+    <form class="compact">
+      <section class="form-block">
+        <label>Vendor Data</label>
+        <div class="form-group">
+            <label for="aForm_1">Identifier</label>
+            <input type="text" id="aForm_1" placeholder="Enter accounting key" size="45">
+        </div>
+        <div class="form-group">
+            <label for="aForm_2">Display Name</label>
+            <input type="text" id="aForm_2" placeholder="Enter vendor display name" size="35">
+        </div>
+        <div class="form-group">
+            <label for="aForm_3">Provider</label>
+            <div class="select">
+                <select id="aForm_3">
+                    <option>OVH</option>
+                    <option>Internap Incorporated</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="aForm_3">Inventory Management</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="toggle_fetch" checked>
+                <label for="toggle_fetch">Automatically fetch from provider</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="create_open = false">Cancel</button>
+          <button type="submit" class="btn btn-primary" (click)="create_open = false">Create</button>
+        </div>
+      </section>
+    </form>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="import_open">
+  <h3 class="modal-title">Import Vendor Data</h3>
+  <div class="modal-body">
+    <p>Select vendor data file(s)</p>
+    <input type="file" (change)="onImportFiles($event)" placeholder="Select files" accept=".pdf" multiple>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="import_open = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="import_open = false">Upload</button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="delete_open">
+  <h3 class="modal-title">Confirm Vendor Deletion</h3>
+  <div class="modal-body">
+    <p>Are you sure you want to delete the selected vendor(s)? You can only delete vendors that do not have invoices or inventory.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="delete_open = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="delete_open = false">Ok</button>
+  </div>
+</clr-modal>

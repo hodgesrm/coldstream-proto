@@ -17,6 +17,7 @@ import { ChartsModule } from 'ng2-charts';
 
 import { AuthService } from "./services/auth.service";
 import { InvoiceService } from "./services/invoice.service";
+import { VendorService } from "./services/vendor.service";
 
 @NgModule({
     declarations: [
@@ -39,7 +40,8 @@ import { InvoiceService } from "./services/invoice.service";
     ],
     providers: [
       AuthService,
-      InvoiceService
+      InvoiceService,
+      VendorService
     ],
     bootstrap: [AppComponent]
 })

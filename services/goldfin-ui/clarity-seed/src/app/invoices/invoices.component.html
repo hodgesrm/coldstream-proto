@@ -4,11 +4,11 @@
 <clr-datagrid [(clrDgSelected)]="selected">
     <clr-dg-action-bar>
         <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-secondary" (click)="onExport()">Export Data</button>
-            <button type="button" class="btn btn-sm btn-secondary" (click)="delete_open = true" >Delete</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="import_open = true">Import New Invoices</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="onExport()">Export Invoice Data</button>
         </div>
         <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-secondary" (click)="import_open = true">Import New Invoices</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="delete_open = true" >Delete Invoice(s)</button>
         </div>
     </clr-dg-action-bar>
 
