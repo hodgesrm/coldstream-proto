@@ -14,7 +14,7 @@ from ..util import deserialize_date, deserialize_datetime
 def tenant_create(body):
     """
     Create a new tenant
-    Upload a new tenant registration request.  The tenant will be in a pending state until at least one user is enabled.
+    Upload a new tenant registration request.
     :param body: Tenant registration request parameters
     :type body: dict | bytes
 
@@ -75,12 +75,10 @@ def tenant_update(id, body=None):
     return 'do some magic!'
 
 
-def user_create(tenantId, body):
+def user_create(body):
     """
     Create a new user for a tenant
     Upload a new user registration request.
-    :param tenantId: Tenant Id
-    :type tenantId: str
     :param body: User registration request parameters
     :type body: dict | bytes
 
@@ -91,12 +89,10 @@ def user_create(tenantId, body):
     return 'do some magic!'
 
 
-def user_delete(tenantId, id):
+def user_delete(id):
     """
     Delete a user
     Delete a user
-    :param tenantId: Tenant Id
-    :type tenantId: str
     :param id: User ID
     :type id: str
 
@@ -105,12 +101,10 @@ def user_delete(tenantId, id):
     return 'do some magic!'
 
 
-def user_show(tenantId, id):
+def user_show(id):
     """
     Show a single user
     Return all information relative to a single user
-    :param tenantId: Tenant Id
-    :type tenantId: str
     :param id: User ID
     :type id: str
 
@@ -119,24 +113,20 @@ def user_show(tenantId, id):
     return 'do some magic!'
 
 
-def user_showall(tenantId):
+def user_showall():
     """
     List users
-    Return a list of all users for the tenant
-    :param tenantId: Tenant Id
-    :type tenantId: str
+    Return a list of all users visible to current user
 
     :rtype: List[User]
     """
     return 'do some magic!'
 
 
-def user_update(tenantId, id, body=None):
+def user_update(id, body=None):
     """
     Update a user
     Update user description
-    :param tenantId: Tenant Id
-    :type tenantId: str
     :param id: User ID
     :type id: str
     :param body: User parameters

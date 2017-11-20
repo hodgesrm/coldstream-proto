@@ -1,0 +1,70 @@
+<!--
+  ~ Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+  -->
+<clr-datagrid [(clrDgSelected)]="selected">
+    <clr-dg-action-bar>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="analyze_open = true">Analyze Costs</button>
+        </div>
+    </clr-dg-action-bar>
+
+    <clr-dg-column [clrDgField]="'identifier'">Identifer</clr-dg-column>
+    <clr-dg-column [clrDgField]="'vendor'">Vendor</clr-dg-column>
+    <clr-dg-column [clrDgField]="'name'">Name</clr-dg-column>
+    <clr-dg-column [clrDgField]="'type'">Type</clr-dg-column>
+    <clr-dg-column [clrDgField]="'region'">Region</clr-dg-column>
+    <clr-dg-column [clrDgField]="'datacenter'">Datacenter</clr-dg-column>
+    <clr-dg-column [clrDgField]="'os'">OS</clr-dg-column>
+    <clr-dg-column [clrDgField]="'start_date'">Start Date</clr-dg-column>
+    <clr-dg-column [clrDgField]="'duration'">Duration</clr-dg-column>
+    <clr-dg-column [clrDgField]="'cost'">Cost</clr-dg-column>
+    <clr-dg-column [clrDgField]="'hourly_cost'">Hourly Cost</clr-dg-column>
+    <clr-dg-column [clrDgField]="'daily_cost'">Daily Cost</clr-dg-column>
+    <clr-dg-column [clrDgField]="'weekly_cost'">Weekly Cost</clr-dg-column>
+    <clr-dg-column [clrDgField]="'monthly_cost'">Monthly Cost</clr-dg-column>
+    <clr-dg-column [clrDgField]="'currency'">Currency</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let host of hosts" [clrDgItem]="host">
+        <clr-dg-cell>{{host.identifier}}</clr-dg-cell>
+        <clr-dg-cell>{{host.vendor}}</clr-dg-cell>
+        <clr-dg-cell>{{host.name}}</clr-dg-cell>
+        <clr-dg-cell>{{host.type}}</clr-dg-cell>
+        <clr-dg-cell>{{host.region}}</clr-dg-cell>
+        <clr-dg-cell>{{host.datacenter}}</clr-dg-cell>
+        <clr-dg-cell>{{host.os}}</clr-dg-cell>
+        <clr-dg-cell>{{host.start_date}}</clr-dg-cell>
+        <clr-dg-cell>{{host.duration}}</clr-dg-cell>
+        <clr-dg-cell>{{host.cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host.hourly_cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host.daily_cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host.weekly_cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host.monthly_cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host.currency}}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{hosts.length}} hosts</clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="delete_open">
+  <h3 class="modal-title">Confirm Invoice Deletion</h3>
+  <div class="modal-body">
+    <p>Are you sure you want to delete the selected invoices? You will not be able to access them afterwards.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="delete_open = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="delete_open = false">Ok</button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="import_open">
+  <h3 class="modal-title">Invoice Import</h3>
+  <div class="modal-body">
+    <p>Select one or more PDF files to upload</p>
+    <input type="file" (change)="onImportFiles($event)" placeholder="Select files" accept=".pdf" multiple>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="import_open = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="import_open = false">Upload</button>
+  </div>
+</clr-modal>
+

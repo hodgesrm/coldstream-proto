@@ -17,8 +17,38 @@ tags:
 schemes:
 - "https"
 security:
-- UserSecurity: []
+- APIKeyHeader: []
 paths:
+  /login:
+    post:
+      tags:
+      - "security"
+      summary: "Login to system"
+      description: "Obtain API key using login credentials"
+      operationId: "login_by_credentials"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Login credentials"
+        required: true
+        schema:
+          $ref: "#/definitions/LoginRequest"
+      responses:
+        200:
+          description: "OK"
+          headers:
+            vnd-io-goldfin-auth:
+              type: "string"
+              description: "API key, should be submitted on future requests to show\
+                \ authorization"
+        400:
+          description: "Tenant creation failed"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      security: []
+      x-swagger-router-controller: "api.controllers.security_controller"
   /tenant:
     get:
       tags:
@@ -37,8 +67,7 @@ paths:
       tags:
       - "tenant"
       summary: "Create a new tenant"
-      description: "Upload a new tenant registration request.  The tenant will be\
-        \ in a pending state until at least one user is enabled."
+      description: "Upload a new tenant registration request."
       operationId: "tenant_create"
       consumes:
       - "application/json"
@@ -131,21 +160,16 @@ paths:
         404:
           description: "Not Found"
       x-swagger-router-controller: "api.controllers.tenant_controller"
-  /tenant/{tenantId}/user:
+  /user:
     get:
       tags:
       - "tenant"
       summary: "List users"
-      description: "Return a list of all users for the tenant"
+      description: "Return a list of all users visible to current user"
       operationId: "user_showall"
       produces:
       - "application/json"
-      parameters:
-      - name: "tenantId"
-        in: "path"
-        description: "Tenant Id"
-        required: true
-        type: "string"
+      parameters: []
       responses:
         200:
           description: "Successful query"
@@ -165,11 +189,6 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "tenantId"
-        in: "path"
-        description: "Tenant Id"
-        required: true
-        type: "string"
       - in: "body"
         name: "body"
         description: "User registration request parameters"
@@ -186,7 +205,7 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
       x-swagger-router-controller: "api.controllers.tenant_controller"
-  /tenant/{tenantId}/user/{id}:
+  /user/{id}:
     get:
       tags:
       - "tenant"
@@ -196,11 +215,6 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "tenantId"
-        in: "path"
-        description: "Tenant Id"
-        required: true
-        type: "string"
       - name: "id"
         in: "path"
         description: "User ID"
@@ -223,11 +237,6 @@ paths:
       consumes:
       - "application/json"
       parameters:
-      - name: "tenantId"
-        in: "path"
-        description: "Tenant Id"
-        required: true
-        type: "string"
       - name: "id"
         in: "path"
         description: "User ID"
@@ -254,11 +263,6 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "tenantId"
-        in: "path"
-        description: "Tenant Id"
-        required: true
-        type: "string"
       - name: "id"
         in: "path"
         description: "User ID"
@@ -270,6 +274,120 @@ paths:
         404:
           description: "Not Found"
       x-swagger-router-controller: "api.controllers.tenant_controller"
+  /vendor:
+    get:
+      tags:
+      - "vendor"
+      summary: "List vendors"
+      description: "Return a list of all vendors"
+      operationId: "vendor_showall"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Successful query"
+      x-swagger-router-controller: "api.controllers.vendor_controller"
+    post:
+      tags:
+      - "vendor"
+      summary: "Create a new vendor"
+      description: "Upload a new vendor definition.  Vendors are also created automatically\
+        \ if a vendor invoice is processed."
+      operationId: "vendor_create"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Vendor registration request parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/VendorParameters"
+      responses:
+        201:
+          description: "Created"
+          schema:
+            $ref: "#/definitions/Vendor"
+        400:
+          description: "Vendor creation failed"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "api.controllers.vendor_controller"
+  /vendor/{id}:
+    get:
+      tags:
+      - "vendor"
+      summary: "Show a single vendor"
+      description: "Return all information relative to a single vendor"
+      operationId: "vendor_show"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Vendor ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/Vendor"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.vendor_controller"
+    put:
+      tags:
+      - "vendor"
+      summary: "Update a vendor"
+      description: "Update vendor description."
+      operationId: "vendor_update"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Vendor ID"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Vendor parameters"
+        required: false
+        schema:
+          $ref: "#/definitions/VendorParameters"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.vendor_controller"
+    delete:
+      tags:
+      - "vendor"
+      summary: "Delete a vendor"
+      description: "Delete a single vendor.  This can only be done if the vendor is\
+        \ not attached to invoices or existing inventory."
+      operationId: "vendor_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "vendor ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+        400:
+          description: "Invalid Request"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.vendor_controller"
   /invoice:
     get:
       tags:
@@ -443,10 +561,152 @@ paths:
         404:
           description: "Not Found"
       x-swagger-router-controller: "api.controllers.invoice_controller"
+  /host:
+    get:
+      tags:
+      - "inventory"
+      summary: "List host entries"
+      description: "Return a list of all host inventory records"
+      operationId: "inventory_host_show_all"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "summary"
+        in: "query"
+        description: "If true return complete invoice content, otherwise just the\
+          \ Invoice fields"
+        required: false
+        type: "boolean"
+        default: true
+      responses:
+        200:
+          description: "Successful query"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Host"
+      x-swagger-router-controller: "api.controllers.inventory_controller"
+    post:
+      tags:
+      - "inventory"
+      summary: "Create a new host inventory entry"
+      description: "Upload a host inventory entry"
+      operationId: "inventory_host_create"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "The host definition"
+        required: true
+        schema:
+          $ref: "#/definitions/Host"
+      responses:
+        201:
+          description: "Created"
+          schema:
+            $ref: "#/definitions/Host"
+        400:
+          description: "Host creation failed"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "api.controllers.inventory_controller"
+  /host/{id}:
+    get:
+      tags:
+      - "inventory"
+      summary: "Show a single host inventory record"
+      description: "Return all information relative to a single host"
+      operationId: "invoice_host_show"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Host ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/Host"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.inventory_controller"
+    delete:
+      tags:
+      - "inventory"
+      summary: "Delete a host inventory record"
+      description: "Delete a host inventory record"
+      operationId: "inventory_host_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Host ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+        404:
+          description: "Not Found"
+      x-swagger-router-controller: "api.controllers.inventory_controller"
+  /export/invoice:
+    get:
+      tags:
+      - "export"
+      summary: "Export invoice data"
+      description: "Export selected invoice data to useful formats"
+      operationId: "export_invoice"
+      produces:
+      - "text/plain"
+      - "application/octet-stream"
+      parameters:
+      - name: "outputFormat"
+        in: "query"
+        description: "Output format to generate.  CSV is the only currently allowed\
+          \ value."
+        required: false
+        type: "string"
+      - name: "timeSlice"
+        in: "query"
+        description: "Optional field to explode values out by a time unit.  Allowed\
+          \ values are DAY, HOUR, MINUTE"
+        required: false
+        type: "string"
+      - name: "filterSpec"
+        in: "query"
+        description: "Predicate list to select invoices."
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "Successful"
+        400:
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "api.controllers.export_controller"
 securityDefinitions:
-  UserSecurity:
-    type: "basic"
+  APIKeyHeader:
+    type: "apiKey"
+    name: "vnd-io-goldfin-auth"
+    in: "header"
 definitions:
+  LoginRequest:
+    properties:
+      user:
+        type: "string"
+        description: "User name"
+      password:
+        type: "string"
+        description: "User password"
+    description: "Login credentials"
   Tenant:
     properties:
       id:
@@ -559,6 +819,45 @@ definitions:
         type: "string"
         description: "A user-provided list of name-value pairs that describe the invoice"
     description: "User settable invoice parameters"
+  Vendor:
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        description: "Unique vendor id"
+      identifier:
+        type: "string"
+        description: "Key used to describe vendor for accounting purposes"
+      name:
+        type: "string"
+        description: "Vendor display name"
+      state:
+        type: "string"
+        description: "Current state of the vendor.  Active vendors have current inventory\
+          \ and invoices."
+        enum:
+        - "ACTIVE"
+        - "INACTIVE"
+      creationDate:
+        type: "string"
+        description: "Date record was created"
+    description: "Vendor description"
+  VendorParameters:
+    properties:
+      identifier:
+        type: "string"
+        description: "Key used to describe vendor for accounting purposes"
+      name:
+        type: "string"
+        description: "Vendor name"
+      state:
+        type: "string"
+        description: "Current state of the vendor.  Active vendors have current inventory\
+          \ and invoices."
+        enum:
+        - "ACTIVE"
+        - "INACTIVE"
+    description: "Parameters used for vendor creation or update requests"
   Document:
     type: "object"
     properties:
@@ -698,10 +997,27 @@ definitions:
         description: "Unique host descriptor ID"
       identifier:
         type: "string"
-        description: "Host identification key"
+        description: "Inventory identification key"
+      vendor:
+        type: "string"
+        description: "Vendor identification key"
       name:
         type: "string"
         description: "The host name"
+      type:
+        type: "string"
+        description: "Host type"
+        enum:
+        - "DEDICATED"
+        - "CLOUD"
+      region:
+        type: "string"
+        description: "The region where this host runs, e.g., a country or a public\
+          \ cloud region"
+      datacenter:
+        type: "string"
+        description: "The datacenter where this host runs, e.g., a physical datacenter\
+          \ or a public cloud availability zone"
       cpu:
         type: "array"
         items:
@@ -727,11 +1043,29 @@ definitions:
       startDate:
         type: "string"
         format: "timestamp"
-        description: "Begining of the time range"
-      endDate:
-        type: "string"
+        description: "Begining of the accounting time range for this entry"
+      duration:
+        type: "number"
         format: "timestamp"
-        description: "End of the time range"
+        description: "Length of the accounting time range in seconds"
+      cost:
+        type: "number"
+        description: "Cost for this inventory item over the time range"
+      hourlyCost:
+        type: "number"
+        description: "Normalized hourly cost of this entity"
+      dailyCost:
+        type: "number"
+        description: "Cost of this entity normalized to days"
+      weeklyCost:
+        type: "number"
+        description: "Cost of this entity normalized to weeks"
+      monthlyCost:
+        type: "number"
+        description: "Cost of this entity normalized to months"
+      currency:
+        type: "string"
+        description: "Currency used for cost data"
     description: "A host configuration including CPU, RAM, OS, storage devices, and\
       \ network connections"
   CPU:

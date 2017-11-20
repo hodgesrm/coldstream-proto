@@ -8,6 +8,6 @@ import { Component } from '@angular/core';
     templateUrl: './about.component.html'
 })
 export class AboutComponent {
-    open: Boolean = false;
+    about_open: Boolean = false;
     what: String = 'some routing';
 }

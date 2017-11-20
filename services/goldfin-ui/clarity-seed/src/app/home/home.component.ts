@@ -88,17 +88,24 @@ export class HomeComponent implements OnInit {
     console.log(e);
   }
  
-  // Total spend doughnut chart. 
-  public doughnutChartLabels:string[] = ['Amazon', 'OVH.com', 'Internap Incorporated'];
-  public doughnutChartData:number[] = [350, 450, 100];
-  public doughnutChartType:string = 'doughnut';
+  // IT Spend comparison radar chart. 
+  public costBenchmarkChartOptions:any = {
+    scaleShowVerticalLines: false,
+    responsive: true
+  };
+  public costBenchmarkChartLabels:string[] = ['Amazon', 'OVH.com', 'Internap Incorporated'];
+  public costBenchmarkChartData:any[] = [
+    {data: [101901, 236521, 7567], label: 'Your Costs'}, 
+    {data: [120965, 197554, 6023], label: 'Benchmark vs. Similar Inventory'}
+  ];
+  public costBenchmarkChartType:string = 'bar';
  
   // events
-  public chartClickedDonut(e:any):void {
+  public chartClickedCostBenchmark(e:any):void {
     console.log(e);
   }
  
-  public chartHoveredDonut(e:any):void {
+  public chartHoveredCostBenchmark(e:any):void {
     console.log(e);
   }
 }

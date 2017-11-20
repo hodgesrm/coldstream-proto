@@ -1,0 +1,29 @@
+<!--
+  ~ Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+  -->
+<clr-tabs>
+    <clr-tab>
+        <button clrTabLink id="hosts">Hosts</button>
+        <clr-tab-content id="content1" *clrIfActive>
+           <my-app-hosts>Loading...</my-app-hosts>
+        </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+        <button clrTabLink id="hosts">Private Clouds</button>
+        <clr-tab-content id="content1" *clrIfActive>
+        This screen will show private cloud resources.
+        </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+        <button clrTabLink>Object Storage</button>
+        <clr-tab-content *clrIfActive="true">
+        This screen will show cloud object storage resources. 
+        </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+        <button clrTabLink>Data Services</button>
+        <clr-tab-content *clrIfActive="true">
+        This screen will show RDBMS resources. 
+        </clr-tab-content>
+    </clr-tab>
+</clr-tabs>

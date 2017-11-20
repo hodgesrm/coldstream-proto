@@ -6,7 +6,7 @@
 <table class="table">
 <tr>
 <td>
-<span><h5>Year-to-Date IT Spend</h5></span>
+<span><h5>Year-to-Date IT Costs</h5></span>
 <div>
   <div style="display: block">
     <canvas baseChart
@@ -21,14 +21,15 @@
 </div>
 </td>
 <td>
-<span><h5>Inventory Amounts by Vendor</h5></span>
+<span><h5>IT Spend vs. Industry Average for Similar Inventory</h5></span>
 <div style="display: block">
   <canvas baseChart
-              [data]="doughnutChartData"
-              [labels]="doughnutChartLabels"
-              [chartType]="doughnutChartType"
-              (chartHover)="chartHoveredDonut($event)"
-              (chartClick)="chartClickedDonut($event)"></canvas>
+            [datasets]="costBenchmarkChartData"
+            [labels]="costBenchmarkChartLabels"
+            [options]="costBenchmarkOptions"
+            [chartType]="costBenchmarkChartType"
+            (chartHover)="chartHoveredCostBenchmark($event)"
+            (chartClick)="chartClickedCostBenchmark($event)"></canvas>
 </div>
 </td>
 </tr>

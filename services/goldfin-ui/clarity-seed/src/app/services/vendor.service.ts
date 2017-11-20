@@ -11,15 +11,20 @@ export class Vendor {
 }
 
 const VENDORS: Vendor[] = [ 
-  { identifier: "OVH.com", 
-    name: "OVH", 
+  { identifier: "AWS", 
+    name: "Amazon Web Services", 
     state: "ACTIVE", 
-    creationDate: "2016-12-01"
+    creationDate: "2016-1-15"
   },
   { identifier: "Internap Corporation", 
     name: "Internap", 
     state: "ACTIVE", 
     creationDate: "2017-01-25"
+  },
+  { identifier: "OVH.com", 
+    name: "OVH", 
+    state: "ACTIVE", 
+    creationDate: "2016-12-01"
   }
 ];
 

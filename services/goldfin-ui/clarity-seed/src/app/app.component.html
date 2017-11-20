@@ -1,10 +1,10 @@
 <clr-main-container>
   <clr-header>
-    <div class="branding">
-      <a href="#" class="nav-link">
-        <span class="title">Goldfin</span>
-      </a>
-    </div>
+      <div class="branding">
+        <a href="#" class="nav-link">
+          <span class="title">Goldfin.io</span>
+        </a>
+      </div>
       <div *ngIf="router.url == '/login'" class="header-nav" [clr-nav-level]="1">
           <a class="nav-link" href="#" [routerLink]="['/login']" routerLinkActive="active"><span class="nav-text">Login</span></a>
       </div>
@@ -13,14 +13,46 @@
           <a class="nav-link" href="#" [routerLink]="['/invoices']" routerLinkActive="active"><span class="nav-text">Invoices</span></a>
           <a class="nav-link" href="#" [routerLink]="['/inventory']" routerLinkActive="active"><span class="nav-text">Inventory</span></a>
           <a class="nav-link" href="#" [routerLink]="['/vendors']" routerLinkActive="active"><span class="nav-text">Vendors</span></a>
-          <a class="nav-link" href="#" [routerLink]="['/about']" routerLinkActive="active"><span class="nav-text">About</span></a>
       </div>
-    <div class="header-actions">
-    </div>
+      <div *ngIf="router.url != '/login'" class="header-actions">
+        <clr-dropdown>
+            <button class="nav-icon" clrDropdownTrigger>
+                <clr-icon shape="cog"></clr-icon>
+                <clr-icon shape="caret down"></clr-icon>
+            </button>
+            <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+              <button type="button" class="dropdown-item" (click)="about_open = true">About</button>
+              <button type="button" class="dropdown-item" (click)="logout_open = true">Logout</button>
+            </clr-dropdown-menu>
+        </clr-dropdown>
+      </div>
+
   </clr-header>
   <div class="content-container">
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>
   </div>
+
+  <clr-modal [(clrModalOpen)]="about_open">
+    <h3 class="modal-title">Goldfin.io Intelligent Invoice Management</h3>
+    <div class="modal-body">
+      <p>Version 0.0.1, Copyright &copy; 2017, All Rights Reserved</p>
+    </div>
+    <div class="modal-body">
+      Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="about_open = false">OK</button>
+    </div>
+  </clr-modal>
+  <clr-modal [(clrModalOpen)]="logout_open">
+    <div class="modal-body">
+      <p>Are you sure you want to logout?</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="logout_open = false">Cancel</button>
+      <button type="button" class="btn btn-outline" (click)="logout()">Logout</button>
+    </div>
+  </clr-modal>
 </clr-main-container>

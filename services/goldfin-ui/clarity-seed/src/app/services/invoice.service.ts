@@ -35,7 +35,7 @@ export class InvoiceService {
       // Generate invoices with up to 20% variation in amount. 
       var invoices: Invoice[] = [];
       var i;
-      for (i = 1; i <= 12; i++) {
+      for (i = 0; i < 12; i++) {
         var invoice = new Invoice();
         invoice.identifier = identifierPrefix + (i * 1000 / 100); 
         invoice.effective_date = new Date(2017, i, 25).toISOString().substring(0,10);
@@ -54,7 +54,8 @@ export class InvoiceService {
     // Generate on a per vendor basis.  
     var vendorParams = [
       {prefix: "WE666", amount: 423.01, vendor: "OVH.com"}, 
-      {prefix: "INV-14066-486", amount: 16932.40, vendor: "Internap Corporation"}
+      {prefix: "INV-14066-486", amount: 16932.40, vendor: "Internap Corporation"},
+      {prefix: "AWS-2017-", amount: 8500.00, vendor: "AWS"}
     ];
  
     var allInvoices: Invoice[] = [];

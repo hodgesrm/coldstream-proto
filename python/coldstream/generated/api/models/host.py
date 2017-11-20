@@ -33,7 +33,11 @@ class Host(object):
     swagger_types = {
         'id': 'str',
         'identifier': 'str',
+        'vendor': 'str',
         'name': 'str',
+        'type': 'str',
+        'region': 'str',
+        'datacenter': 'str',
         'cpu': 'List[CPU]',
         'memory': 'List[Memory]',
         'os': 'OperatingSystem',
@@ -41,13 +45,23 @@ class Host(object):
         'network': 'List[NetworkConnection]',
         'power': 'List[PowerSupply]',
         'start_date': 'str',
-        'end_date': 'str'
+        'duration': 'float',
+        'cost': 'float',
+        'hourly_cost': 'float',
+        'daily_cost': 'float',
+        'weekly_cost': 'float',
+        'monthly_cost': 'float',
+        'currency': 'str'
     }
 
     attribute_map = {
         'id': 'id',
         'identifier': 'identifier',
+        'vendor': 'vendor',
         'name': 'name',
+        'type': 'type',
+        'region': 'region',
+        'datacenter': 'datacenter',
         'cpu': 'cpu',
         'memory': 'memory',
         'os': 'os',
@@ -55,17 +69,27 @@ class Host(object):
         'network': 'network',
         'power': 'power',
         'start_date': 'startDate',
-        'end_date': 'endDate'
+        'duration': 'duration',
+        'cost': 'cost',
+        'hourly_cost': 'hourlyCost',
+        'daily_cost': 'dailyCost',
+        'weekly_cost': 'weeklyCost',
+        'monthly_cost': 'monthlyCost',
+        'currency': 'currency'
     }
 
-    def __init__(self, id=None, identifier=None, name=None, cpu=None, memory=None, os=None, storage=None, network=None, power=None, start_date=None, end_date=None):
+    def __init__(self, id=None, identifier=None, vendor=None, name=None, type=None, region=None, datacenter=None, cpu=None, memory=None, os=None, storage=None, network=None, power=None, start_date=None, duration=None, cost=None, hourly_cost=None, daily_cost=None, weekly_cost=None, monthly_cost=None, currency=None):
         """
         Host - a model defined in Swagger
         """
 
         self._id = None
         self._identifier = None
+        self._vendor = None
         self._name = None
+        self._type = None
+        self._region = None
+        self._datacenter = None
         self._cpu = None
         self._memory = None
         self._os = None
@@ -73,14 +97,28 @@ class Host(object):
         self._network = None
         self._power = None
         self._start_date = None
-        self._end_date = None
+        self._duration = None
+        self._cost = None
+        self._hourly_cost = None
+        self._daily_cost = None
+        self._weekly_cost = None
+        self._monthly_cost = None
+        self._currency = None
 
         if id is not None:
           self.id = id
         if identifier is not None:
           self.identifier = identifier
+        if vendor is not None:
+          self.vendor = vendor
         if name is not None:
           self.name = name
+        if type is not None:
+          self.type = type
+        if region is not None:
+          self.region = region
+        if datacenter is not None:
+          self.datacenter = datacenter
         if cpu is not None:
           self.cpu = cpu
         if memory is not None:
@@ -95,8 +133,20 @@ class Host(object):
           self.power = power
         if start_date is not None:
           self.start_date = start_date
-        if end_date is not None:
-          self.end_date = end_date
+        if duration is not None:
+          self.duration = duration
+        if cost is not None:
+          self.cost = cost
+        if hourly_cost is not None:
+          self.hourly_cost = hourly_cost
+        if daily_cost is not None:
+          self.daily_cost = daily_cost
+        if weekly_cost is not None:
+          self.weekly_cost = weekly_cost
+        if monthly_cost is not None:
+          self.monthly_cost = monthly_cost
+        if currency is not None:
+          self.currency = currency
 
     @property
     def id(self):
@@ -125,7 +175,7 @@ class Host(object):
     def identifier(self):
         """
         Gets the identifier of this Host.
-        Host identification key
+        Inventory identification key
 
         :return: The identifier of this Host.
         :rtype: str
@@ -136,13 +186,36 @@ class Host(object):
     def identifier(self, identifier):
         """
         Sets the identifier of this Host.
-        Host identification key
+        Inventory identification key
 
         :param identifier: The identifier of this Host.
         :type: str
         """
 
         self._identifier = identifier
+
+    @property
+    def vendor(self):
+        """
+        Gets the vendor of this Host.
+        Vendor identification key
+
+        :return: The vendor of this Host.
+        :rtype: str
+        """
+        return self._vendor
+
+    @vendor.setter
+    def vendor(self, vendor):
+        """
+        Sets the vendor of this Host.
+        Vendor identification key
+
+        :param vendor: The vendor of this Host.
+        :type: str
+        """
+
+        self._vendor = vendor
 
     @property
     def name(self):
@@ -166,6 +239,81 @@ class Host(object):
         """
 
         self._name = name
+
+    @property
+    def type(self):
+        """
+        Gets the type of this Host.
+        Host type
+
+        :return: The type of this Host.
+        :rtype: str
+        """
+        return self._type
+
+    @type.setter
+    def type(self, type):
+        """
+        Sets the type of this Host.
+        Host type
+
+        :param type: The type of this Host.
+        :type: str
+        """
+        allowed_values = ["DEDICATED", "CLOUD"]
+        if type not in allowed_values:
+            raise ValueError(
+                "Invalid value for `type` ({0}), must be one of {1}"
+                .format(type, allowed_values)
+            )
+
+        self._type = type
+
+    @property
+    def region(self):
+        """
+        Gets the region of this Host.
+        The region where this host runs, e.g., a country or a public cloud region
+
+        :return: The region of this Host.
+        :rtype: str
+        """
+        return self._region
+
+    @region.setter
+    def region(self, region):
+        """
+        Sets the region of this Host.
+        The region where this host runs, e.g., a country or a public cloud region
+
+        :param region: The region of this Host.
+        :type: str
+        """
+
+        self._region = region
+
+    @property
+    def datacenter(self):
+        """
+        Gets the datacenter of this Host.
+        The datacenter where this host runs, e.g., a physical datacenter or a public cloud availability zone
+
+        :return: The datacenter of this Host.
+        :rtype: str
+        """
+        return self._datacenter
+
+    @datacenter.setter
+    def datacenter(self, datacenter):
+        """
+        Sets the datacenter of this Host.
+        The datacenter where this host runs, e.g., a physical datacenter or a public cloud availability zone
+
+        :param datacenter: The datacenter of this Host.
+        :type: str
+        """
+
+        self._datacenter = datacenter
 
     @property
     def cpu(self):
@@ -297,7 +445,7 @@ class Host(object):
     def start_date(self):
         """
         Gets the start_date of this Host.
-        Begining of the time range
+        Begining of the accounting time range for this entry
 
         :return: The start_date of this Host.
         :rtype: str
@@ -308,7 +456,7 @@ class Host(object):
     def start_date(self, start_date):
         """
         Sets the start_date of this Host.
-        Begining of the time range
+        Begining of the accounting time range for this entry
 
         :param start_date: The start_date of this Host.
         :type: str
@@ -317,27 +465,165 @@ class Host(object):
         self._start_date = start_date
 
     @property
-    def end_date(self):
+    def duration(self):
         """
-        Gets the end_date of this Host.
-        End of the time range
+        Gets the duration of this Host.
+        Length of the accounting time range in seconds
 
-        :return: The end_date of this Host.
+        :return: The duration of this Host.
+        :rtype: float
+        """
+        return self._duration
+
+    @duration.setter
+    def duration(self, duration):
+        """
+        Sets the duration of this Host.
+        Length of the accounting time range in seconds
+
+        :param duration: The duration of this Host.
+        :type: float
+        """
+
+        self._duration = duration
+
+    @property
+    def cost(self):
+        """
+        Gets the cost of this Host.
+        Cost for this inventory item over the time range
+
+        :return: The cost of this Host.
+        :rtype: float
+        """
+        return self._cost
+
+    @cost.setter
+    def cost(self, cost):
+        """
+        Sets the cost of this Host.
+        Cost for this inventory item over the time range
+
+        :param cost: The cost of this Host.
+        :type: float
+        """
+
+        self._cost = cost
+
+    @property
+    def hourly_cost(self):
+        """
+        Gets the hourly_cost of this Host.
+        Normalized hourly cost of this entity
+
+        :return: The hourly_cost of this Host.
+        :rtype: float
+        """
+        return self._hourly_cost
+
+    @hourly_cost.setter
+    def hourly_cost(self, hourly_cost):
+        """
+        Sets the hourly_cost of this Host.
+        Normalized hourly cost of this entity
+
+        :param hourly_cost: The hourly_cost of this Host.
+        :type: float
+        """
+
+        self._hourly_cost = hourly_cost
+
+    @property
+    def daily_cost(self):
+        """
+        Gets the daily_cost of this Host.
+        Cost of this entity normalized to days
+
+        :return: The daily_cost of this Host.
+        :rtype: float
+        """
+        return self._daily_cost
+
+    @daily_cost.setter
+    def daily_cost(self, daily_cost):
+        """
+        Sets the daily_cost of this Host.
+        Cost of this entity normalized to days
+
+        :param daily_cost: The daily_cost of this Host.
+        :type: float
+        """
+
+        self._daily_cost = daily_cost
+
+    @property
+    def weekly_cost(self):
+        """
+        Gets the weekly_cost of this Host.
+        Cost of this entity normalized to weeks
+
+        :return: The weekly_cost of this Host.
+        :rtype: float
+        """
+        return self._weekly_cost
+
+    @weekly_cost.setter
+    def weekly_cost(self, weekly_cost):
+        """
+        Sets the weekly_cost of this Host.
+        Cost of this entity normalized to weeks
+
+        :param weekly_cost: The weekly_cost of this Host.
+        :type: float
+        """
+
+        self._weekly_cost = weekly_cost
+
+    @property
+    def monthly_cost(self):
+        """
+        Gets the monthly_cost of this Host.
+        Cost of this entity normalized to months
+
+        :return: The monthly_cost of this Host.
+        :rtype: float
+        """
+        return self._monthly_cost
+
+    @monthly_cost.setter
+    def monthly_cost(self, monthly_cost):
+        """
+        Sets the monthly_cost of this Host.
+        Cost of this entity normalized to months
+
+        :param monthly_cost: The monthly_cost of this Host.
+        :type: float
+        """
+
+        self._monthly_cost = monthly_cost
+
+    @property
+    def currency(self):
+        """
+        Gets the currency of this Host.
+        Currency used for cost data
+
+        :return: The currency of this Host.
         :rtype: str
         """
-        return self._end_date
+        return self._currency
 
-    @end_date.setter
-    def end_date(self, end_date):
+    @currency.setter
+    def currency(self, currency):
         """
-        Sets the end_date of this Host.
-        End of the time range
+        Sets the currency of this Host.
+        Currency used for cost data
 
-        :param end_date: The end_date of this Host.
+        :param currency: The currency of this Host.
         :type: str
         """
 
-        self._end_date = end_date
+        self._currency = currency
 
     def to_dict(self):
         """

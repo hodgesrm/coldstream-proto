@@ -10,6 +10,7 @@ import { HomeComponent } from "./home/home.component";
 import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
 import { InventoryComponent } from "./inventory/inventory.component";
+import { HostsComponent } from "./inventory/hosts.component";
 import { VendorsComponent } from "./vendors/vendors.component";
 import { AboutComponent } from "./about/about.component";
 
@@ -17,6 +18,7 @@ import { ChartsModule } from 'ng2-charts';
 
 import { AuthService } from "./services/auth.service";
 import { InvoiceService } from "./services/invoice.service";
+import { HostService } from "./services/host.service";
 import { VendorService } from "./services/vendor.service";
 
 @NgModule({
@@ -26,6 +28,7 @@ import { VendorService } from "./services/vendor.service";
         HomeComponent,
         InvoicesComponent,
         InventoryComponent,
+        HostsComponent,
         VendorsComponent,
         AboutComponent
     ],
@@ -41,6 +44,7 @@ import { VendorService } from "./services/vendor.service";
     providers: [
       AuthService,
       InvoiceService,
+      HostService,
       VendorService
     ],
     bootstrap: [AppComponent]

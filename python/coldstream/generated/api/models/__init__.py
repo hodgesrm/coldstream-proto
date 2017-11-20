@@ -23,6 +23,7 @@ from .invoice import Invoice
 from .invoice_envelope import InvoiceEnvelope
 from .invoice_envelope_parameters import InvoiceEnvelopeParameters
 from .invoice_item import InvoiceItem
+from .login_request import LoginRequest
 from .memory import Memory
 from .network_connection import NetworkConnection
 from .ocr_scan import OcrScan
@@ -35,3 +36,5 @@ from .tenant_parameters import TenantParameters
 from .tenant_registration_parameters import TenantRegistrationParameters
 from .user import User
 from .user_parameters import UserParameters
+from .vendor import Vendor
+from .vendor_parameters import VendorParameters
