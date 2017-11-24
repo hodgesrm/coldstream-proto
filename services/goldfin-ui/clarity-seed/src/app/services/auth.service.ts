@@ -11,7 +11,7 @@ class Session {
 }
 
 const MOCK_USERS: User[] = [
-  { name: 'rhodges', password: 'secret' }
+  { name: 'rhodges@skylineresearch.com', password: 'secret' }
 ];
 
 @Injectable()

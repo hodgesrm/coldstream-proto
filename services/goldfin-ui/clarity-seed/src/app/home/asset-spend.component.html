@@ -1,0 +1,21 @@
+<!--
+~ Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+-->
+<span><h5>IT Asset Costs over last 30 Days</h5></span>
+<clr-datagrid [(clrDgSelected)]="selected">
+  <clr-dg-column [clrDgField]="'vendor'">Vendor</clr-dg-column>
+  <clr-dg-column [clrDgField]="'dedicated_hosts'">Dedicated Hosts</clr-dg-column>
+  <clr-dg-column [clrDgField]="'cloud_hosts'">Cloud Hosts</clr-dg-column>
+  <clr-dg-column [clrDgField]="'private_clouds'">Private Clouds</clr-dg-column>
+  <clr-dg-column [clrDgField]="'cloud_storage'">Cloud Storage</clr-dg-column>
+  <clr-dg-column [clrDgField]="'total'">Total</clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let inv_cost of inventoryCosts" [clrDgItem]="inv_cost">
+      <clr-dg-cell>{{inv_cost.vendor}}</clr-dg-cell>
+      <clr-dg-cell>{{inv_cost.dedicated_hosts}}</clr-dg-cell>
+      <clr-dg-cell>{{inv_cost.cloud_hosts}}</clr-dg-cell>
+      <clr-dg-cell>{{inv_cost.private_clouds}}</clr-dg-cell>
+      <clr-dg-cell>{{inv_cost.cloud_storage}}</clr-dg-cell>
+      <clr-dg-cell>{{inv_cost.total}}</clr-dg-cell>
+  </clr-dg-row>
+</clr-datagrid>

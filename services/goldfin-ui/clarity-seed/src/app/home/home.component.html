@@ -21,16 +21,7 @@
 </div>
 </td>
 <td>
-<span><h5>IT Spend vs. Industry Average for Similar Inventory</h5></span>
-<div style="display: block">
-  <canvas baseChart
-            [datasets]="costBenchmarkChartData"
-            [labels]="costBenchmarkChartLabels"
-            [options]="costBenchmarkOptions"
-            [chartType]="costBenchmarkChartType"
-            (chartHover)="chartHoveredCostBenchmark($event)"
-            (chartClick)="chartClickedCostBenchmark($event)"></canvas>
-</div>
+  <industry-baseline>...Loading...</industry-baseline>
 </td>
 </tr>
 <tr>
@@ -55,6 +46,9 @@
         <clr-dg-cell>{{invoice.currency}}</clr-dg-cell>
     </clr-dg-row>
   </clr-datagrid>
+</td>
+<td>
+  <asset-spend>...Loading...</asset-spend>
 </td>
 </tr>
 </table>

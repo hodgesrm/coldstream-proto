@@ -69,7 +69,7 @@ export class HostService {
         host.hourly_cost = _roundCurrency(host.cost * 3600 / host.duration);
         host.daily_cost = _roundCurrency(host.cost * 3600 * 24 / host.duration);
         host.weekly_cost = _roundCurrency(host.cost * 3600 * 24 * 7/ host.duration);
-        host.monthly_cost = _roundCurrency(host.cost * 3600 * 24 * 7 * 30 / host.duration);
+        host.monthly_cost = _roundCurrency(host.cost * 3600 * 24 * 30 / host.duration);
         host.currency = "USD"
         host.currency = 'USD';
 

@@ -7,6 +7,8 @@ import { ClarityModule } from 'clarity-angular';
 import { AppComponent } from './app.component';
 import { ROUTING } from "./app.routing";
 import { HomeComponent } from "./home/home.component";
+import { AssetSpendComponent } from "./home/asset-spend.component";
+import { IndustryBaselineComponent } from "./home/industry-baseline.component";
 import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
 import { InventoryComponent } from "./inventory/inventory.component";
@@ -26,6 +28,8 @@ import { VendorService } from "./services/vendor.service";
         AppComponent,
         LoginComponent,
         HomeComponent,
+        AssetSpendComponent,
+        IndustryBaselineComponent,
         InvoicesComponent,
         InventoryComponent,
         HostsComponent,
