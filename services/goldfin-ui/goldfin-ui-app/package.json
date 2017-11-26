@@ -1,7 +1,7 @@
 {
-  "name": "clarity-seed",
-  "version": "0.10.0",
-  "description": "Angular-CLI starter for a Clarity project",
+  "name": "goldfin-ui-app",
+  "version": "0.0.1",
+  "description": "Angular-CLI applications for Goldfin UI based on Clarity",
   "angular-cli": {},
   "scripts": {
     "start": "ng serve",
