@@ -13,3 +13,11 @@ How to login:
 
 curl -d '{"user":"x", "password":"y"}' -H "Content-Type: application/json" \
 -X POST http://localhost:8080/api/v1/login -v
+
+How to init the system.  
+
+1.) Create an init.params file or use conf/sample.init.params. 
+
+2.) Run systemctl init as shown below: 
+
+   systemctl init --init-params=$PWD/conf/sample.init.params

@@ -7,7 +7,7 @@ import io.goldfin.front.invoice.api.service.factories.LoginApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
-import io.goldfin.front.invoice.api.model.LoginRequest;
+import io.goldfin.front.invoice.api.model.LoginCredentials;
 import io.goldfin.front.invoice.api.model.ModelApiResponse;
 
 import java.util.List;
@@ -63,7 +63,7 @@ public class LoginApi  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Tenant creation failed", response = void.class) })
-    public Response loginByCredentials(@ApiParam(value = "Login credentials" ,required=true) LoginRequest body
+    public Response loginByCredentials(@ApiParam(value = "Login credentials" ,required=true) LoginCredentials body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.loginByCredentials(body,securityContext);

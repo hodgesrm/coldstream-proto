@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  description: Goldfin Invoice Analysis
+  description: Goldfin Invoice Analysis API
   version: 1.0.0
   title: Goldfin Invoice Processing API
   termsOfService: 'http://swagger.io/terms/'
@@ -39,7 +39,7 @@ paths:
           description: Login credentials
           required: true
           schema:
-            $ref: '#/definitions/LoginRequest'
+            $ref: '#/definitions/LoginCredentials'
       responses:
         '200':
           description: OK
@@ -67,10 +67,10 @@ paths:
       parameters:
         - in: body
           name: body
-          description: Tenant registration request parameters
+          description: Tenant creation parameters
           required: true
           schema:
-            $ref: '#/definitions/TenantRegistrationParameters'
+            $ref: '#/definitions/TenantParameters'
       responses:
         '201':
           description: Created
@@ -668,7 +668,7 @@ paths:
           schema:
             $ref: '#/definitions/ApiResponse'
 definitions:
-  LoginRequest:
+  LoginCredentials:
     description: Login credentials
     properties:
       user:
@@ -688,9 +688,7 @@ definitions:
         type: string
         description: Unique tenant name
       state:
-        description: >-
-          The current processing state of the invoice.  The invoice field is
-          available once the invoice is interpreted.
+        description: 'The current processing state of the tenant. '
         enum:
           - PENDING
           - ENABLED
@@ -699,19 +697,14 @@ definitions:
         type: string
         description: Date invoice record was created
   TenantParameters:
-    description: Parameters to change on a tenant
+    description: Parameters for creating or updating a tenant
     properties:
       name:
         type: string
         description: Unique tenant name
-  TenantRegistrationParameters:
-    description: Parameters for registering a new tenant including an initial tenant user
-    properties:
-      name:
+      description:
         type: string
-        description: Unique tenant name
-      user:
-        $ref: '#/definitions/UserParameters'
+        description: Optional information about the tenant
   User:
     description: User description
     properties:
@@ -729,26 +722,28 @@ definitions:
       password:
         type: string
         description: Password for user
-      state:
-        description: >-
-          The current processing state of the user.  Users are initially pending
-          until confirmed
-        enum:
-          - PENDING
-          - ENABLED
-          - DISABLED
+      roles:
+        type: string
+        description: Comma-separated list of user roles
       creationDate:
         type: string
         description: Date user record was created
   UserParameters:
     description: Parameters for creating or updating a user account
     properties:
+      tenantId:
+        type: string
+        format: uuid
+        description: 'Tenant ID, cannot be changed after creation'
       username:
         type: string
         description: Unique user name
       password:
         type: string
         description: Password for user
+      roles:
+        type: string
+        description: Comma-separated list of user roles
   InvoiceEnvelope:
     description: Root object for invoice content.
     properties:

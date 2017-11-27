@@ -1,6 +1,6 @@
 /*
  * Goldfin Invoice Processing API
- * Goldfin Invoice Analysis
+ * Goldfin Invoice Analysis API
  *
  * OpenAPI spec version: 1.0.0
  * Contact: rhodges@skylineresearch.comm
@@ -35,7 +35,7 @@ public class Tenant   {
   private String name = null;
 
   /**
-   * The current processing state of the invoice.  The invoice field is available once the invoice is interpreted.
+   * The current processing state of the tenant. 
    */
   public enum StateEnum {
     PENDING("PENDING"),
@@ -117,11 +117,11 @@ public class Tenant   {
   }
 
   /**
-   * The current processing state of the invoice.  The invoice field is available once the invoice is interpreted.
+   * The current processing state of the tenant. 
    * @return state
    **/
   @JsonProperty("state")
-  @ApiModelProperty(value = "The current processing state of the invoice.  The invoice field is available once the invoice is interpreted.")
+  @ApiModelProperty(value = "The current processing state of the tenant. ")
   public StateEnum getState() {
     return state;
   }

@@ -12,6 +12,7 @@
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>api-server</include>
+        <include>systemctl</include>
       </includes>
     </fileSet>
     <fileSet>
@@ -33,6 +34,13 @@
       <outputDirectory>lib</outputDirectory>
       <includes>
         <include>*</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/sql/init</directory>
+      <outputDirectory>sql/init</outputDirectory>
+      <includes>
+        <include>*.sql</include>
       </includes>
     </fileSet>
   </fileSets>

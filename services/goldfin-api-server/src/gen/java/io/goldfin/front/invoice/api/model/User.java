@@ -1,6 +1,6 @@
 /*
  * Goldfin Invoice Processing API
- * Goldfin Invoice Analysis
+ * Goldfin Invoice Analysis API
  *
  * OpenAPI spec version: 1.0.0
  * Contact: rhodges@skylineresearch.comm
@@ -16,7 +16,6 @@ package io.goldfin.front.invoice.api.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.UUID;
@@ -40,41 +39,8 @@ public class User   {
   @JsonProperty("password")
   private String password = null;
 
-  /**
-   * The current processing state of the user.  Users are initially pending until confirmed
-   */
-  public enum StateEnum {
-    PENDING("PENDING"),
-    
-    ENABLED("ENABLED"),
-    
-    DISABLED("DISABLED");
-
-    private String value;
-
-    StateEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static StateEnum fromValue(String text) {
-      for (StateEnum b : StateEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-
-  @JsonProperty("state")
-  private StateEnum state = null;
+  @JsonProperty("roles")
+  private String roles = null;
 
   @JsonProperty("creationDate")
   private String creationDate = null;
@@ -155,23 +121,23 @@ public class User   {
     this.password = password;
   }
 
-  public User state(StateEnum state) {
-    this.state = state;
+  public User roles(String roles) {
+    this.roles = roles;
     return this;
   }
 
   /**
-   * The current processing state of the user.  Users are initially pending until confirmed
-   * @return state
+   * Comma-separated list of user roles
+   * @return roles
    **/
-  @JsonProperty("state")
-  @ApiModelProperty(value = "The current processing state of the user.  Users are initially pending until confirmed")
-  public StateEnum getState() {
-    return state;
+  @JsonProperty("roles")
+  @ApiModelProperty(value = "Comma-separated list of user roles")
+  public String getRoles() {
+    return roles;
   }
 
-  public void setState(StateEnum state) {
-    this.state = state;
+  public void setRoles(String roles) {
+    this.roles = roles;
   }
 
   public User creationDate(String creationDate) {
@@ -207,13 +173,13 @@ public class User   {
         Objects.equals(this.tenantId, user.tenantId) &&
         Objects.equals(this.username, user.username) &&
         Objects.equals(this.password, user.password) &&
-        Objects.equals(this.state, user.state) &&
+        Objects.equals(this.roles, user.roles) &&
         Objects.equals(this.creationDate, user.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, username, password, state, creationDate);
+    return Objects.hash(id, tenantId, username, password, roles, creationDate);
   }
 
 
@@ -226,7 +192,7 @@ public class User   {
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
-    sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();

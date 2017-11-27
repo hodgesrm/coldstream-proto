@@ -23,8 +23,6 @@ elif [ "$OPT" = "config-help" ]; then
   args="config-help $@"
 elif [ "$OPT" = "generate" ]; then
   shift
-  mkdir -p $API_HOME/python/generated
-  #args="generate -t $CODEGEN_HOME/modules/swagger-codegen/src/main/resources/python -i $API_HOME/swagger/coldstream-proto.yaml -l python-flask -o $API_CODEGEN_DIR -DpackageName=api -Dservice $@"
   args="$@ generate -t $CODEGEN_HOME/modules/swagger-codegen/src/main/resources/JavaJaxRS -i $SWAGGER_HOME/coldstream-proto.yaml -l jaxrs -o $API_HOME -DhideGenerationTimestamp=true,serverPort=8080 --model-package=io.goldfin.front.invoice.api.model --api-package=io.goldfin.front.invoice.api.service --invoker-package=io.goldfin.front.invoice.api.invoker"
 else
   echo "Usage: ${SCRIPT} { generate | clean | help } [ options ]"

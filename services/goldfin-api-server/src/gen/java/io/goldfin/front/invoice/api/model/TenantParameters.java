@@ -1,6 +1,6 @@
 /*
  * Goldfin Invoice Processing API
- * Goldfin Invoice Analysis
+ * Goldfin Invoice Analysis API
  *
  * OpenAPI spec version: 1.0.0
  * Contact: rhodges@skylineresearch.comm
@@ -21,13 +21,16 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Parameters to change on a tenant
+ * Parameters for creating or updating a tenant
  */
-@ApiModel(description = "Parameters to change on a tenant")
+@ApiModel(description = "Parameters for creating or updating a tenant")
 
 public class TenantParameters   {
   @JsonProperty("name")
   private String name = null;
+
+  @JsonProperty("description")
+  private String description = null;
 
   public TenantParameters name(String name) {
     this.name = name;
@@ -48,6 +51,25 @@ public class TenantParameters   {
     this.name = name;
   }
 
+  public TenantParameters description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  /**
+   * Optional information about the tenant
+   * @return description
+   **/
+  @JsonProperty("description")
+  @ApiModelProperty(value = "Optional information about the tenant")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -58,12 +80,13 @@ public class TenantParameters   {
       return false;
     }
     TenantParameters tenantParameters = (TenantParameters) o;
-    return Objects.equals(this.name, tenantParameters.name);
+    return Objects.equals(this.name, tenantParameters.name) &&
+        Objects.equals(this.description, tenantParameters.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(name, description);
   }
 
 
@@ -73,6 +96,7 @@ public class TenantParameters   {
     sb.append("class TenantParameters {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("}");
     return sb.toString();
   }

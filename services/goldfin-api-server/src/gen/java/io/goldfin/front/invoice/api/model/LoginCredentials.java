@@ -1,6 +1,6 @@
 /*
  * Goldfin Invoice Processing API
- * Goldfin Invoice Analysis
+ * Goldfin Invoice Analysis API
  *
  * OpenAPI spec version: 1.0.0
  * Contact: rhodges@skylineresearch.comm
@@ -16,59 +16,58 @@ package io.goldfin.front.invoice.api.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import io.goldfin.front.invoice.api.model.UserParameters;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Parameters for registering a new tenant including an initial tenant user
+ * Login credentials
  */
-@ApiModel(description = "Parameters for registering a new tenant including an initial tenant user")
+@ApiModel(description = "Login credentials")
 
-public class TenantRegistrationParameters   {
-  @JsonProperty("name")
-  private String name = null;
-
+public class LoginCredentials   {
   @JsonProperty("user")
-  private UserParameters user = null;
+  private String user = null;
 
-  public TenantRegistrationParameters name(String name) {
-    this.name = name;
-    return this;
-  }
+  @JsonProperty("password")
+  private String password = null;
 
-  /**
-   * Unique tenant name
-   * @return name
-   **/
-  @JsonProperty("name")
-  @ApiModelProperty(value = "Unique tenant name")
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public TenantRegistrationParameters user(UserParameters user) {
+  public LoginCredentials user(String user) {
     this.user = user;
     return this;
   }
 
   /**
-   * Get user
+   * User name
    * @return user
    **/
   @JsonProperty("user")
-  @ApiModelProperty(value = "")
-  public UserParameters getUser() {
+  @ApiModelProperty(value = "User name")
+  public String getUser() {
     return user;
   }
 
-  public void setUser(UserParameters user) {
+  public void setUser(String user) {
     this.user = user;
+  }
+
+  public LoginCredentials password(String password) {
+    this.password = password;
+    return this;
+  }
+
+  /**
+   * User password
+   * @return password
+   **/
+  @JsonProperty("password")
+  @ApiModelProperty(value = "User password")
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 
 
@@ -80,24 +79,24 @@ public class TenantRegistrationParameters   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TenantRegistrationParameters tenantRegistrationParameters = (TenantRegistrationParameters) o;
-    return Objects.equals(this.name, tenantRegistrationParameters.name) &&
-        Objects.equals(this.user, tenantRegistrationParameters.user);
+    LoginCredentials loginCredentials = (LoginCredentials) o;
+    return Objects.equals(this.user, loginCredentials.user) &&
+        Objects.equals(this.password, loginCredentials.password);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, user);
+    return Objects.hash(user, password);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TenantRegistrationParameters {\n");
+    sb.append("class LoginCredentials {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    user: ").append(toIndentedString(user)).append("\n");
+    sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("}");
     return sb.toString();
   }

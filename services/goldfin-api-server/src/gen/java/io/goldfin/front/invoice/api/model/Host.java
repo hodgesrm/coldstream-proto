@@ -1,6 +1,6 @@
 /*
  * Goldfin Invoice Processing API
- * Goldfin Invoice Analysis
+ * Goldfin Invoice Analysis API
  *
  * OpenAPI spec version: 1.0.0
  * Contact: rhodges@skylineresearch.comm
@@ -16,6 +16,7 @@ package io.goldfin.front.invoice.api.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.goldfin.front.invoice.api.model.CPU;
 import io.goldfin.front.invoice.api.model.Memory;
 import io.goldfin.front.invoice.api.model.NetworkConnection;
@@ -24,6 +25,7 @@ import io.goldfin.front.invoice.api.model.PowerSupply;
 import io.goldfin.front.invoice.api.model.StorageDevice;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,8 +43,51 @@ public class Host   {
   @JsonProperty("identifier")
   private String identifier = null;
 
+  @JsonProperty("vendor")
+  private String vendor = null;
+
   @JsonProperty("name")
   private String name = null;
+
+  /**
+   * Host type
+   */
+  public enum TypeEnum {
+    DEDICATED("DEDICATED"),
+    
+    CLOUD("CLOUD");
+
+    private String value;
+
+    TypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static TypeEnum fromValue(String text) {
+      for (TypeEnum b : TypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("type")
+  private TypeEnum type = null;
+
+  @JsonProperty("region")
+  private String region = null;
+
+  @JsonProperty("datacenter")
+  private String datacenter = null;
 
   @JsonProperty("cpu")
   private List<CPU> cpu = null;
@@ -65,8 +110,26 @@ public class Host   {
   @JsonProperty("startDate")
   private String startDate = null;
 
-  @JsonProperty("endDate")
-  private String endDate = null;
+  @JsonProperty("duration")
+  private BigDecimal duration = null;
+
+  @JsonProperty("cost")
+  private BigDecimal cost = null;
+
+  @JsonProperty("hourlyCost")
+  private BigDecimal hourlyCost = null;
+
+  @JsonProperty("dailyCost")
+  private BigDecimal dailyCost = null;
+
+  @JsonProperty("weeklyCost")
+  private BigDecimal weeklyCost = null;
+
+  @JsonProperty("monthlyCost")
+  private BigDecimal monthlyCost = null;
+
+  @JsonProperty("currency")
+  private String currency = null;
 
   public Host id(UUID id) {
     this.id = id;
@@ -93,17 +156,36 @@ public class Host   {
   }
 
   /**
-   * Host identification key
+   * Inventory identification key
    * @return identifier
    **/
   @JsonProperty("identifier")
-  @ApiModelProperty(value = "Host identification key")
+  @ApiModelProperty(value = "Inventory identification key")
   public String getIdentifier() {
     return identifier;
   }
 
   public void setIdentifier(String identifier) {
     this.identifier = identifier;
+  }
+
+  public Host vendor(String vendor) {
+    this.vendor = vendor;
+    return this;
+  }
+
+  /**
+   * Vendor identification key
+   * @return vendor
+   **/
+  @JsonProperty("vendor")
+  @ApiModelProperty(value = "Vendor identification key")
+  public String getVendor() {
+    return vendor;
+  }
+
+  public void setVendor(String vendor) {
+    this.vendor = vendor;
   }
 
   public Host name(String name) {
@@ -123,6 +205,63 @@ public class Host   {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Host type(TypeEnum type) {
+    this.type = type;
+    return this;
+  }
+
+  /**
+   * Host type
+   * @return type
+   **/
+  @JsonProperty("type")
+  @ApiModelProperty(value = "Host type")
+  public TypeEnum getType() {
+    return type;
+  }
+
+  public void setType(TypeEnum type) {
+    this.type = type;
+  }
+
+  public Host region(String region) {
+    this.region = region;
+    return this;
+  }
+
+  /**
+   * The region where this host runs, e.g., a country or a public cloud region
+   * @return region
+   **/
+  @JsonProperty("region")
+  @ApiModelProperty(value = "The region where this host runs, e.g., a country or a public cloud region")
+  public String getRegion() {
+    return region;
+  }
+
+  public void setRegion(String region) {
+    this.region = region;
+  }
+
+  public Host datacenter(String datacenter) {
+    this.datacenter = datacenter;
+    return this;
+  }
+
+  /**
+   * The datacenter where this host runs, e.g., a physical datacenter or a public cloud availability zone
+   * @return datacenter
+   **/
+  @JsonProperty("datacenter")
+  @ApiModelProperty(value = "The datacenter where this host runs, e.g., a physical datacenter or a public cloud availability zone")
+  public String getDatacenter() {
+    return datacenter;
+  }
+
+  public void setDatacenter(String datacenter) {
+    this.datacenter = datacenter;
   }
 
   public Host cpu(List<CPU> cpu) {
@@ -285,11 +424,11 @@ public class Host   {
   }
 
   /**
-   * Begining of the time range
+   * Begining of the accounting time range for this entry
    * @return startDate
    **/
   @JsonProperty("startDate")
-  @ApiModelProperty(value = "Begining of the time range")
+  @ApiModelProperty(value = "Begining of the accounting time range for this entry")
   public String getStartDate() {
     return startDate;
   }
@@ -298,23 +437,137 @@ public class Host   {
     this.startDate = startDate;
   }
 
-  public Host endDate(String endDate) {
-    this.endDate = endDate;
+  public Host duration(BigDecimal duration) {
+    this.duration = duration;
     return this;
   }
 
   /**
-   * End of the time range
-   * @return endDate
+   * Length of the accounting time range in seconds
+   * @return duration
    **/
-  @JsonProperty("endDate")
-  @ApiModelProperty(value = "End of the time range")
-  public String getEndDate() {
-    return endDate;
+  @JsonProperty("duration")
+  @ApiModelProperty(value = "Length of the accounting time range in seconds")
+  public BigDecimal getDuration() {
+    return duration;
   }
 
-  public void setEndDate(String endDate) {
-    this.endDate = endDate;
+  public void setDuration(BigDecimal duration) {
+    this.duration = duration;
+  }
+
+  public Host cost(BigDecimal cost) {
+    this.cost = cost;
+    return this;
+  }
+
+  /**
+   * Cost for this inventory item over the time range
+   * @return cost
+   **/
+  @JsonProperty("cost")
+  @ApiModelProperty(value = "Cost for this inventory item over the time range")
+  public BigDecimal getCost() {
+    return cost;
+  }
+
+  public void setCost(BigDecimal cost) {
+    this.cost = cost;
+  }
+
+  public Host hourlyCost(BigDecimal hourlyCost) {
+    this.hourlyCost = hourlyCost;
+    return this;
+  }
+
+  /**
+   * Normalized hourly cost of this entity
+   * @return hourlyCost
+   **/
+  @JsonProperty("hourlyCost")
+  @ApiModelProperty(value = "Normalized hourly cost of this entity")
+  public BigDecimal getHourlyCost() {
+    return hourlyCost;
+  }
+
+  public void setHourlyCost(BigDecimal hourlyCost) {
+    this.hourlyCost = hourlyCost;
+  }
+
+  public Host dailyCost(BigDecimal dailyCost) {
+    this.dailyCost = dailyCost;
+    return this;
+  }
+
+  /**
+   * Cost of this entity normalized to days
+   * @return dailyCost
+   **/
+  @JsonProperty("dailyCost")
+  @ApiModelProperty(value = "Cost of this entity normalized to days")
+  public BigDecimal getDailyCost() {
+    return dailyCost;
+  }
+
+  public void setDailyCost(BigDecimal dailyCost) {
+    this.dailyCost = dailyCost;
+  }
+
+  public Host weeklyCost(BigDecimal weeklyCost) {
+    this.weeklyCost = weeklyCost;
+    return this;
+  }
+
+  /**
+   * Cost of this entity normalized to weeks
+   * @return weeklyCost
+   **/
+  @JsonProperty("weeklyCost")
+  @ApiModelProperty(value = "Cost of this entity normalized to weeks")
+  public BigDecimal getWeeklyCost() {
+    return weeklyCost;
+  }
+
+  public void setWeeklyCost(BigDecimal weeklyCost) {
+    this.weeklyCost = weeklyCost;
+  }
+
+  public Host monthlyCost(BigDecimal monthlyCost) {
+    this.monthlyCost = monthlyCost;
+    return this;
+  }
+
+  /**
+   * Cost of this entity normalized to months
+   * @return monthlyCost
+   **/
+  @JsonProperty("monthlyCost")
+  @ApiModelProperty(value = "Cost of this entity normalized to months")
+  public BigDecimal getMonthlyCost() {
+    return monthlyCost;
+  }
+
+  public void setMonthlyCost(BigDecimal monthlyCost) {
+    this.monthlyCost = monthlyCost;
+  }
+
+  public Host currency(String currency) {
+    this.currency = currency;
+    return this;
+  }
+
+  /**
+   * Currency used for cost data
+   * @return currency
+   **/
+  @JsonProperty("currency")
+  @ApiModelProperty(value = "Currency used for cost data")
+  public String getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(String currency) {
+    this.currency = currency;
   }
 
 
@@ -329,7 +582,11 @@ public class Host   {
     Host host = (Host) o;
     return Objects.equals(this.id, host.id) &&
         Objects.equals(this.identifier, host.identifier) &&
+        Objects.equals(this.vendor, host.vendor) &&
         Objects.equals(this.name, host.name) &&
+        Objects.equals(this.type, host.type) &&
+        Objects.equals(this.region, host.region) &&
+        Objects.equals(this.datacenter, host.datacenter) &&
         Objects.equals(this.cpu, host.cpu) &&
         Objects.equals(this.memory, host.memory) &&
         Objects.equals(this.os, host.os) &&
@@ -337,12 +594,18 @@ public class Host   {
         Objects.equals(this.network, host.network) &&
         Objects.equals(this.power, host.power) &&
         Objects.equals(this.startDate, host.startDate) &&
-        Objects.equals(this.endDate, host.endDate);
+        Objects.equals(this.duration, host.duration) &&
+        Objects.equals(this.cost, host.cost) &&
+        Objects.equals(this.hourlyCost, host.hourlyCost) &&
+        Objects.equals(this.dailyCost, host.dailyCost) &&
+        Objects.equals(this.weeklyCost, host.weeklyCost) &&
+        Objects.equals(this.monthlyCost, host.monthlyCost) &&
+        Objects.equals(this.currency, host.currency);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, identifier, name, cpu, memory, os, storage, network, power, startDate, endDate);
+    return Objects.hash(id, identifier, vendor, name, type, region, datacenter, cpu, memory, os, storage, network, power, startDate, duration, cost, hourlyCost, dailyCost, weeklyCost, monthlyCost, currency);
   }
 
 
@@ -353,7 +616,11 @@ public class Host   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
+    sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    region: ").append(toIndentedString(region)).append("\n");
+    sb.append("    datacenter: ").append(toIndentedString(datacenter)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    memory: ").append(toIndentedString(memory)).append("\n");
     sb.append("    os: ").append(toIndentedString(os)).append("\n");
@@ -361,7 +628,13 @@ public class Host   {
     sb.append("    network: ").append(toIndentedString(network)).append("\n");
     sb.append("    power: ").append(toIndentedString(power)).append("\n");
     sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
-    sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
+    sb.append("    duration: ").append(toIndentedString(duration)).append("\n");
+    sb.append("    cost: ").append(toIndentedString(cost)).append("\n");
+    sb.append("    hourlyCost: ").append(toIndentedString(hourlyCost)).append("\n");
+    sb.append("    dailyCost: ").append(toIndentedString(dailyCost)).append("\n");
+    sb.append("    weeklyCost: ").append(toIndentedString(weeklyCost)).append("\n");
+    sb.append("    monthlyCost: ").append(toIndentedString(monthlyCost)).append("\n");
+    sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("}");
     return sb.toString();
   }

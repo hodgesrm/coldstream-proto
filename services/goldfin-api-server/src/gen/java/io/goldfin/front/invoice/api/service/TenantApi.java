@@ -10,7 +10,6 @@ import io.swagger.jaxrs.*;
 import io.goldfin.front.invoice.api.model.ModelApiResponse;
 import io.goldfin.front.invoice.api.model.Tenant;
 import io.goldfin.front.invoice.api.model.TenantParameters;
-import io.goldfin.front.invoice.api.model.TenantRegistrationParameters;
 
 import java.util.List;
 import io.goldfin.front.invoice.api.service.NotFoundException;
@@ -67,7 +66,7 @@ public class TenantApi  {
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Tenant.class),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Tenant creation failed", response = Tenant.class) })
-    public Response tenantCreate(@ApiParam(value = "Tenant registration request parameters" ,required=true) TenantRegistrationParameters body
+    public Response tenantCreate(@ApiParam(value = "Tenant creation parameters" ,required=true) TenantParameters body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.tenantCreate(body,securityContext);
