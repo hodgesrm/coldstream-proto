@@ -1,0 +1,365 @@
+swagger: '2.0'
+info:
+  description: REST API for Goldfin Service Administration
+  version: 1.0.0
+  title: Goldfin Service Admin API
+  termsOfService: 'http://goldfin.io/terms/'
+  contact:
+    email: info@goldfin.io
+host: admin.goldfin.io
+basePath: /api/v1
+tags:
+  - name: tenant
+    description: Tenant management
+  - name: user
+    description: User management
+schemes:
+  - https
+securityDefinitions:
+  APIKeyHeader:
+    type: apiKey
+    in: header
+    name: vnd-io-goldfin-auth
+security:
+  - APIKeyHeader: []
+paths:
+  /login:
+    post:
+      tags:
+        - security
+      summary: Login to system
+      security: []
+      description: Obtain API key using login credentials
+      operationId: loginByCredentials
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Login credentials
+          required: true
+          schema:
+            $ref: '#/definitions/LoginCredentials'
+      responses:
+        '200':
+          description: OK
+          headers:
+            vnd-io-goldfin-auth:
+              type: string
+              description: >-
+                API key, should be submitted on future requests to show
+                authorization
+        '400':
+          description: Tenant creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+  /tenant:
+    post:
+      tags:
+        - tenant
+      summary: Create a new tenant
+      description: Upload a new tenant registration request.
+      operationId: tenantCreate
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Tenant creation parameters
+          required: true
+          schema:
+            $ref: '#/definitions/TenantParameters'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Tenant'
+        '400':
+          description: Tenant creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - tenant
+      summary: List tenants
+      description: Return a list of all tenants
+      operationId: tenantShowall
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            items:
+              $ref: '#/definitions/Tenant'
+  '/tenant/{id}':
+    get:
+      tags:
+        - tenant
+      summary: Show a single tenant
+      description: Return all information relative to a single tenant
+      operationId: tenantShow
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Tenant'
+        '404':
+          description: Not Found
+    put:
+      tags:
+        - tenant
+      summary: Update a tenant
+      description: Update invoice description and tags. Changes to other fields are ignored
+      operationId: tenantUpdate
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Tenant parameters
+          schema:
+            $ref: '#/definitions/TenantParameters'
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - tenant
+      summary: Delete a tenant
+      description: Delete a single tenant
+      operationId: tenantDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  /user:
+    post:
+      tags:
+        - tenant
+      summary: Create a new user for a tenant
+      description: Upload a new user registration request.
+      operationId: userCreate
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: User registration request parameters
+          required: true
+          schema:
+            $ref: '#/definitions/UserParameters'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: User creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - tenant
+      summary: List users
+      description: Return a list of all users visible to current user
+      operationId: userShowall
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+  '/user/{id}':
+    get:
+      tags:
+        - tenant
+      summary: Show a single user
+      description: Return all information relative to a single user
+      operationId: userShow
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Tenant'
+        '404':
+          description: Not Found
+    put:
+      tags:
+        - tenant
+      summary: Update a user
+      description: Update user description
+      operationId: userUpdate
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: User parameters
+          schema:
+            $ref: '#/definitions/UserParameters'
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - tenant
+      summary: Delete a user
+      description: Delete a user
+      operationId: userDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+definitions:
+  LoginCredentials:
+    description: Login credentials
+    properties:
+      user:
+        type: string
+        description: User name
+      password:
+        type: string
+        description: User password
+  Tenant:
+    description: Tenant description
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique tenant id
+      name:
+        type: string
+        description: Unique tenant name
+      state:
+        description: 'The current processing state of the tenant. '
+        enum:
+          - PENDING
+          - ENABLED
+          - DISABLED
+      creationDate:
+        type: string
+        description: Date invoice record was created
+  TenantParameters:
+    description: Parameters for creating or updating a tenant
+    properties:
+      name:
+        type: string
+        description: Unique tenant name
+      description:
+        type: string
+        description: Optional information about the tenant
+  User:
+    description: User description
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique user id
+      tenantId:
+        type: string
+        format: uuid
+        description: Tenant ID
+      username:
+        type: string
+        description: Unique user name
+      password:
+        type: string
+        description: Password for user
+      roles:
+        type: string
+        description: Comma-separated list of user roles
+      creationDate:
+        type: string
+        description: Date user record was created
+  UserParameters:
+    description: Parameters for creating or updating a user account
+    properties:
+      tenantId:
+        type: string
+        format: uuid
+        description: 'Tenant ID, cannot be changed after creation'
+      username:
+        type: string
+        description: Unique user name
+      password:
+        type: string
+        description: Password for user
+      roles:
+        type: string
+        description: Comma-separated list of user roles
+  Tag:
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
+externalDocs:
+  description: Find out more about Goldfin.io
+  url: 'https://goldfin.io'

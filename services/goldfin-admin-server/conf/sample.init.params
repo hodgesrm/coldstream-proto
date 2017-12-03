@@ -1,0 +1,8 @@
+# Initialization parameters.
+driver: "org.postgresql.Driver"
+url: "jdbc:postgresql://localhost:15432"
+adminUser: "postgres"
+adminPassword: "secret"
+serviceDb: "goldfin"
+serviceUser: "goldfin"
+servicePassword: "Asecret2"

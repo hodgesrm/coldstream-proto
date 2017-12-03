@@ -1,0 +1,280 @@
+#!/bin/bash
+# Goldfin Admin Server
+# Copyright (C) 2017 All rights reserved
+
+##############################################################################
+# ENVIRONMENT SETUP
+##############################################################################
+
+ADMIN_MAIN=io.goldfin.service.restapi.jetty.App
+
+# Find our home and cd to it. 
+GBIN=`dirname $0`
+GHOME=`cd $GBIN/..; pwd`
+cd $GHOME
+
+# Identify the server PID file. 
+if [ -z "$ADMIN_SERVER_PID" ]; then 
+  ADMIN_SERVER_PID=$GHOME/var/admin-server.pid
+fi
+
+# Add jars from all directories to class path, which starts with 
+# conf directory.
+CP=conf
+for jar in lib/*.jar; do 
+  CP=$CP:$jar
+done
+
+# Add configuration directory to class path. 
+
+# Find Java.
+if [ -z "$JAVA_HOME" ]; then
+  JAVA=`which java`
+else
+  JAVA=$JAVA_HOME/bin/java
+fi
+if [ ! -x "$JAVA" ]; then
+  echo "Cannot find java command.  Please set the JAVA_HOME environment"
+  echo "variable or add java to the execution path."
+  exit 1
+fi
+
+# Set the port for JVM remote debugging.
+if [ ! -z "$ADMIN_SERVER_DEBUG_PORT" ]; then
+  JVM_OPTIONS="${JVM_OPTIONS} $ADMIN_SERVER_DEBUG_PORT"
+fi
+
+# Set options for debugging.
+if [ ! -z "$ADMIN_SERVER_DEBUG_OPTS" ]; then
+  JVM_OPTIONS="${JVM_OPTIONS} $ADMIN_SERVER_DEBUG_OPTS"
+fi
+
+# Set the platform charset if available.
+if [ ! -z "$ADMIN_SERVER_FILE_ENCODING" ]; then
+  JVM_OPTIONS="${JVM_OPTIONS} $ADMIN_SERVER_FILE_ENCODING"
+fi
+
+# Set log directory. 
+if [ -z "$ADMIN_SERVER_LOG_DIR" ]; then 
+  ADMIN_SERVER_LOG_DIR=$GHOME/log
+fi
+mkdir -p $ADMIN_SERVER_LOG_DIR
+if [ ! -d "$ADMIN_SERVER_LOG_DIR" ]; then
+  echo "Cannot find log directory: $ADMIN_SERVER_LOG_DIR"
+  exit 1
+fi
+JVM_OPTIONS="${JVM_OPTIONS} -Dadmin.server.log.dir=$ADMIN_SERVER_LOG_DIR" 
+
+# Set debug port and enable if debug option is enabled.  These are added if
+# server is started with debug option. 
+if [ -z "$ADMIN_SERVER_JVMDEBUG_PORT" ]; then
+  ADMIN_SERVER_JVMDEBUG_PORT=64002
+fi
+if [ -z "$ADMIN_SERVER_JVMDEBUG_OPTS" ]; then
+  ADMIN_SERVER_JVMDEBUG_OPTS="-enableassertions -Xdebug -Xnoagent -Djava.compiler=none -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$ADMIN_SERVER_JVMDEBUG_PORT"
+fi
+
+##############################################################################
+# UTILITY FUNCTIONS
+##############################################################################
+
+# Command to read current PID if any. 
+getPid() {
+  if [ -e "$ADMIN_SERVER_PID" ]; then
+    echo `cat $ADMIN_SERVER_PID`
+  else
+    echo ""
+  fi
+}
+
+# Command to remove PID file. 
+rmPidFile() {
+  if [ -e "$ADMIN_SERVER_PID" ]; then
+    rm $ADMIN_SERVER_PID
+  fi
+}
+
+# Command to kill a process. 
+killPid() {
+  kill $1
+}
+
+# See if the process corresponding to a PID is alive and print status. 
+isPidAlive() {
+  ps -f $1 > /dev/null
+  if [ $? = "0" ]; then
+    echo 'alive'
+  else
+    echo 'dead'
+  fi
+}
+
+##############################################################################
+# OPERATIONS
+##############################################################################
+
+# Start the admin server. 
+adminStart() {
+  # Parse arguments. 
+  cmd="$1"
+  shift
+  while [[ ${#} -gt 0 ]] 
+  do
+    if [ "$1" = "debug" ]; then
+      JVM_OPTIONS="$ADMIN_SERVER_JVMDEBUG_OPTS $JVM_OPTIONS"
+    else
+      echo "Unrecognized option: $1"
+      exit 1
+    fi
+    shift
+  done
+
+  # See if there is already a admin server running.  If there's just a PID
+  # file remove it. 
+  pid=`getPid`
+  if [ "$pid" != "" ]; then
+    if [ `isPidAlive $pid` = "alive" ]; then
+      echo "Replicator is already started"
+      exit 1
+    else
+      rmPidFile
+    fi
+  fi
+  
+  # Ensure we have a directory for the pid file. 
+  pid_dir=`dirname $ADMIN_SERVER_PID`
+  mkdir -p $pid_dir
+  # Start according to whether we are in console or background mode. 
+  if [ "$cmd" = "background" ]; then
+    echo "Starting Admin Server Service..."
+    # Start the admin server using nohup to protect against SIGHUP on shell exit.
+    nohup $JAVA -cp $CP -Dlog4j.rootAppender=file -Dadmin.server.home.dir=$GHOME -Dadmin.server.log.dir=$ADMIN_SERVER_LOG_DIR $JVM_OPTIONS ${ADMIN_MAIN} $offline > $GHOME/log/admin server-nohup.out 2>&1 &
+    status="$?"
+    pid="$!"
+    if [ $status = "0" ]; then
+      echo $pid > $ADMIN_SERVER_PID
+      echo -n "Waiting for Admin Server Service."
+      for i in 1 2 3 4 5 6 7 8 9 10; do
+        if [ `isPidAlive $pid` = "alive" ]; then
+          echo
+          echo "running: PID:$pid"
+          return
+        else
+          echo -n "."
+          sleep 1
+        fi
+      done
+    else
+      echo "Replicator failed to start"
+      exit $status
+    fi
+  else 
+    # Start the admin server in foreground.
+    $JAVA -cp $CP -Dlog4j.rootAppender=stdout -Dadmin.server.home.dir=$GHOME -Dadmin.server.log.dir=$ADMIN_SERVER_LOG_DIR $JVM_OPTIONS ${ADMIN_MAIN} $offline
+  fi
+}
+
+# Stop the admin server. 
+adminStop() {
+  # See if the admin server is running and if so stop it. 
+  echo "Stopping Admin Server Service..."
+  pid=`getPid`
+  if [ "$pid" != "" ]; then
+    if [ `isPidAlive $pid` = "alive" ]; then
+      killPid $pid
+      echo "Waiting for Admin Server Service to exit..."
+      for i in 1 2 3 4 5 6 7 8 9 10; do
+        if [ `isPidAlive $pid` = "alive" ]; then
+          sleep 1
+        else
+          echo "Stopped Admin Server Service."
+          rmPidFile
+          return
+        fi
+      done
+      echo "Could not stop admin server!"
+      exit 1;
+    else
+      echo "Admin Server Service was not running."
+      rmPidFile
+    fi
+  else
+    echo "Admin Server Service is not running."
+  fi
+}
+
+# Check admin server process status. 
+adminStatus() {
+  # See if the admin server is running and if so stop it. 
+  pid=`getPid`
+  if [ "$pid" = "" ]; then
+    echo "Admin Server Service is not running."
+    exit 1
+  else
+    if [ `isPidAlive $pid` = "alive" ]; then
+      echo "Admin Server Service is running: PID: $pid, Java:STARTED"
+    else
+      echo "Admin Server Service is not running."
+      exit 1
+    fi
+  fi
+}
+
+# Dump admin server threads. 
+adminDump() {
+  # See if the admin server is running and if so send kill -QUIT signal.
+  pid=`getPid`
+  if [ "$pid" = "" ]; then
+    echo "ADMIN server is not running or in console mode."
+    exit 1
+  else
+    if [ `isPidAlive $pid` = "alive" ]; then
+      kill -QUIT $pid
+    else
+      echo "ADMIN server is not running."
+      exit 1
+    fi
+  fi
+}
+
+# Show admin server commands. 
+adminUsage() {
+  echo "Usage: admin-server command [ options ]"
+  echo "Commands:"
+  echo "  start   Start in the background as a daemon process"
+  echo "  console Start in the current tty with output to console"
+  echo "  stop    Stop if running as a daemon or in another console"
+  echo "  restart Stop if running and then start"
+  echo "  status  Query the current status"
+  echo "  dump    Request a Java thread dump if running"
+  echo "Options:"
+  echo "  debug   Start with Java debugging on port $ADMIN_SERVER_JVMDEBUG_PORT"
+  echo "  offline Start in offline state"
+}
+
+##############################################################################
+# COMMAND PROCESSING 
+##############################################################################
+
+# Process the command. 
+cmd=$1; shift
+if [ "$cmd" = "start" ]; then
+  adminStart background $*
+elif [ "$cmd" = "console" ]; then
+  adminStart console $*
+elif [ "$cmd" = "stop" ]; then
+  adminStop
+elif [ "$cmd" = "restart" ]; then
+  adminStop
+  adminStart background $*
+elif [ "$cmd" = "status" ]; then
+  adminStatus
+elif [ "$cmd" = "dump" ]; then
+  adminDump
+elif [ "$cmd" = "help" ]; then
+  adminUsage
+  exit 0
+else
+  adminUsage
+  exit 1
+fi

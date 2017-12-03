@@ -1,0 +1,5 @@
+# DBMS connection for testing purposes.
+driver: "org.postgresql.Driver"
+url: "jdbc:postgresql://localhost:15432/postgres"
+user: "postgres"
+password: "secret"
