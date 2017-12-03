@@ -41,6 +41,14 @@ public class TaskStatus {
 		return outcome == Outcome.SUCCEEDED;
 	}
 
+	public boolean failed() {
+		return outcome == Outcome.FAILED;
+	}
+
+	public boolean cancelled() {
+		return outcome == Outcome.CANCELLED;
+	}
+
 	/**
 	 * @return the outcome
 	 */

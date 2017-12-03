@@ -3,7 +3,6 @@
  */
 package io.goldfin.invoice.core;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -14,36 +13,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Initializes a new invoice service. Initialization logic runs in a separate
- * thread and reports progress back to client if a progress reporter is
- * available.
+ * Manager for Goldfin service creation and deletion.
  */
-public class SystemInitializer implements ProgressReporter {
-	static final Logger logger = LoggerFactory.getLogger(SystemInitializer.class);
+public class ServiceManager implements ProgressReporter {
+	static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
 	private final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
 	private final List<ProgressReporter> progressReporters = new ArrayList<ProgressReporter>();
 	private final SystemInitParams initParams;
 
-	public SystemInitializer(SystemInitParams initParams) {
+	public ServiceManager(SystemInitParams initParams) {
 		this.initParams = initParams;
 	}
 
-	public SystemInitializer addProgressReporter(ProgressReporter reporter) {
+	public ServiceManager addProgressReporter(ProgressReporter reporter) {
 		this.progressReporters.add(reporter);
 		return this;
 	}
 
 	@Override
-	public void progress(String message, BigDecimal percent) {
+	public void progress(String message, double percent) {
 		for (ProgressReporter reporter: progressReporters) {
 			reporter.progress(message, percent);
 		}
 	}
 
-	public Future<TaskStatus> initialize() {
-		SystemInitializationTask task = new SystemInitializationTask(initParams, this);
+	/** Initialize a new service. */
+	public Future<TaskStatus> create() {
+		ServiceCreateTask task = new ServiceCreateTask(initParams, this);
+		return threadPool.submit(task);
+	}
+	
+	/** Remove an existing service. */
+	public Future<TaskStatus> remove() {
+		ServiceDeleteTask task = new ServiceDeleteTask(initParams, this);
 		return threadPool.submit(task);
 	}
 }

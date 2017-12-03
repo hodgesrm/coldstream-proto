@@ -6,7 +6,7 @@
 # ENVIRONMENT SETUP
 ##############################################################################
 
-MAIN=io.goldfin.invoice.core.SystemCtl
+MAIN=io.goldfin.invoice.core.ServiceCtlLauncher
 
 # Find our home and cd to it. 
 GBIN=`dirname $0`
@@ -32,25 +32,12 @@ if [ ! -x "$JAVA" ]; then
   exit 1
 fi
 
-# Set the platform charset if available.
-if [ ! -z "$API_SERVER_FILE_ENCODING" ]; then
-  JVM_OPTIONS="${JVM_OPTIONS} $API_SERVER_FILE_ENCODING"
-fi
-
-# Set log directory. 
-if [ -z "$API_SERVER_LOG_DIR" ]; then 
-  API_SERVER_LOG_DIR=$GHOME/log
-fi
-mkdir -p $API_SERVER_LOG_DIR
-if [ ! -d "$API_SERVER_LOG_DIR" ]; then
-  echo "Cannot find log directory: $API_SERVER_LOG_DIR"
-  exit 1
-fi
-JVM_OPTIONS="${JVM_OPTIONS} -Dapi.server.log.dir=$API_SERVER_LOG_DIR" 
+# Set logback configuration file location and root appender.  
+JVM_OPTIONS="${JVM_OPTIONS} -Dlogback.configurationFile=$GHOME/conf/logback-servicectl.xml -Dlog4j.rootAppender=file"
 
 ##############################################################################
 # OPERATIONS
 ##############################################################################
 
 # Run the CLI
-$JAVA -cp $CP -Dlog4j.rootAppender=stdout -Dapi.server.home.dir=$GHOME $JVM_OPTIONS ${MAIN} $*
+$JAVA -cp $CP -Dapi.server.home.dir=$GHOME $JVM_OPTIONS ${MAIN} $*

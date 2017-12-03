@@ -12,7 +12,7 @@
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>api-server</include>
-        <include>systemctl</include>
+        <include>servicectl</include>
       </includes>
     </fileSet>
     <fileSet>
