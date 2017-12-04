@@ -7,6 +7,12 @@
 	<name>goldfin-admin-server</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
+		<!-- Shared Goldfin library -->
+		<dependency>
+			<groupId>io.goldfin</groupId>
+			<artifactId>goldfin-shared</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
@@ -153,7 +159,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<repository>goldfin/rest-api</repository>
+					<repository>goldfin/admin-server</repository>
 					<tag>${project.version}</tag>
 					<buildArgs>
 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>

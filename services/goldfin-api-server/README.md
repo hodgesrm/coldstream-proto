@@ -27,3 +27,8 @@ How to clean up the service.
 1.) Using previous init.params file issue the following command: 
 
    servicectl remove --init-params=$PWD/conf/sample.init.params
+
+How to clean up old docker images:
+
+   docker images -q --filter dangling=true |xargs docker rmi
+

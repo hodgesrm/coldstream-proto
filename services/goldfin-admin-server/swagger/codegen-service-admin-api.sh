@@ -23,7 +23,7 @@ elif [ "$OPT" = "config-help" ]; then
   args="config-help $@"
 elif [ "$OPT" = "generate" ]; then
   shift
-  args="$@ generate -t $CODEGEN_HOME/modules/swagger-codegen/src/main/resources/JavaJaxRS -i $SWAGGER_HOME/goldstream-service-admin-api.yaml -l jaxrs -o $API_HOME -DhideGenerationTimestamp=true,serverPort=8080 --model-package=io.goldfin.service.admin.api.model --api-package=io.goldfin.service.admin.api.service --invoker-package=io.goldfin.service.admin.api.invoker"
+  args="$@ generate -t $CODEGEN_HOME/modules/swagger-codegen/src/main/resources/JavaJaxRS -i $SWAGGER_HOME/goldfin-service-admin-api.yaml -l jaxrs -o $API_HOME -DhideGenerationTimestamp=true,serverPort=8080 --model-package=io.goldfin.service.admin.api.model --api-package=io.goldfin.service.admin.api.service --invoker-package=io.goldfin.service.admin.api.invoker"
 else
   echo "Usage: ${SCRIPT} { generate | clean | help } [ options ]"
   exit 1
