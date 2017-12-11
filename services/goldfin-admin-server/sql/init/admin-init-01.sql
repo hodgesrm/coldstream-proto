@@ -14,6 +14,16 @@ CREATE TABLE IF NOT EXISTS tenant (
 )
 ;
 
+// Create the user table. 
+CREATE TABLE IF NOT EXISTS user (
+  id uuid PRIMARY KEY, 
+  tenant_id uuid REFERENCES table(id),
+  username varchar(250) UNIQUE, 
+  password_hash varchar(250),
+  algorithm char(15)
+)
+;
+
 // Grant full privileges on schema contents to service database owner. 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA admin TO {{serviceUser}}
 ;

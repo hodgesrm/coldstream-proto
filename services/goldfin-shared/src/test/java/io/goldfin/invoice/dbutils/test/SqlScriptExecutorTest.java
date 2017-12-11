@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.shared.dbutils.ConnectionParams;
+import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.dbutils.SqlScriptExecutor;
 import io.goldfin.shared.utilities.FileHelper;
 import io.goldfin.shared.utilities.YamlHelper;

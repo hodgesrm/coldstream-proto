@@ -88,12 +88,6 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- DBMS access code -->
-		<!-- https://mvnrepository.com/artifact/org.javalite/activejdbc -->
-		<dependency>
-			<groupId>org.javalite</groupId>
-			<artifactId>activejdbc</artifactId>
-			<version>1.4.13</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>

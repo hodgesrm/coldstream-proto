@@ -266,6 +266,31 @@ paths:
           description: Successful
         '404':
           description: Not Found
+  '/user/{id}/password':
+    put:
+      tags:
+        - tenant
+      summary: Update user password
+      description: Sets a new user password
+      operationId: userUpdatePassword
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Password change parameters
+          schema:
+            $ref: '#/definitions/UserPasswordParameters'
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
 definitions:
   LoginCredentials:
     description: Login credentials
@@ -318,9 +343,6 @@ definitions:
       username:
         type: string
         description: Unique user name
-      password:
-        type: string
-        description: Password for user
       roles:
         type: string
         description: Comma-separated list of user roles
@@ -337,12 +359,18 @@ definitions:
       username:
         type: string
         description: Unique user name
-      password:
-        type: string
-        description: Password for user
       roles:
         type: string
         description: Comma-separated list of user roles
+  UserPasswordParameters:
+    description: Parameters to change a user password
+    properties:
+      oldPassword:
+        type: string
+        description: Existing user password.  Required to change user password.
+      newPassword:
+        type: string
+        description: New user password.
   Tag:
     type: object
     properties:

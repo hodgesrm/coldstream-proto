@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.shared.config.SystemInitParams;
-import io.goldfin.shared.dbutils.ConnectionParams;
-import io.goldfin.shared.dbutils.DbHelper;
+import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.data.DbHelper;
 import io.goldfin.shared.dbutils.SqlScriptExecutor;
 import io.goldfin.shared.tasks.AbstractTaskAdapter;
 import io.goldfin.shared.tasks.ProgressReporter;

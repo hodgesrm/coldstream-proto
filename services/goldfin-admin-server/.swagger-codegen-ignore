@@ -5,6 +5,10 @@
 # The patterns follow closely to .gitignore or .dockerignore.
 
 src/main/java/io/goldfin/service/admin/api/service/impl/LoginApiServiceImpl.java 
+src/main/java/io/goldfin/admin/service/api/service/impl/LoginApiServiceImpl.java 
+# Skip all model classes as they are shared. (Well maybe, this is an idea.)
+#src/gen/java/io/goldfin/shared/admin/api/model/**
+
 # As an example, the C# client generator defines ApiClient.cs.
 # You can make changes and tell Swagger Codgen to ignore just this file by uncommenting the following line:
 #ApiClient.cs

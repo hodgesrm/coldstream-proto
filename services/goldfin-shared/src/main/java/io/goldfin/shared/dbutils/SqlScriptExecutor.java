@@ -4,12 +4,19 @@
 package io.goldfin.shared.dbutils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import org.javalite.activejdbc.DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.data.DataException;
+import io.goldfin.shared.data.Session;
+import io.goldfin.shared.data.SessionBuilder;
+import io.goldfin.shared.data.SimpleJdbcConnectionManager;
+import io.goldfin.shared.data.SqlStatement;
 
 /**
  * Loads SQL script to DBMS via JDBC. Includes ability to parameterize scripts.
@@ -17,12 +24,12 @@ import org.slf4j.LoggerFactory;
 public class SqlScriptExecutor {
 	static final Logger logger = LoggerFactory.getLogger(SqlScriptExecutor.class);
 
-	private final ConnectionParams connectionParams;
 	private final Properties scriptProperties;
+	private final SimpleJdbcConnectionManager connectionManager;
 
 	public SqlScriptExecutor(ConnectionParams connectionParams, Properties scriptProperties) {
-		this.connectionParams = connectionParams;
 		this.scriptProperties = scriptProperties;
+		this.connectionManager = new SimpleJdbcConnectionManager(connectionParams);
 	}
 
 	/**
@@ -34,7 +41,7 @@ public class SqlScriptExecutor {
 	 *             Thrown if load fails.
 	 */
 	public void execute(File script) throws SqlLoadException {
-		DB db = null;
+		Session session = null;
 		SqlBatch current = null;
 
 		try {
@@ -47,24 +54,18 @@ public class SqlScriptExecutor {
 			List<SqlBatch> batches = sqlScript.getBatches();
 
 			// Connect.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Connecting to DBMS: driver=%s, url=%s, user=%s");
-			}
-			db = new DB();
-			db.open(connectionParams.getDriver(), connectionParams.getUrl(), connectionParams.getUser(),
-					connectionParams.getPassword());
+			session = new SessionBuilder().connectionManager(connectionManager).adminType().build();
 
 			// Load batches.
-			// db.openTransaction();
 			for (int batchNumber = 0; batchNumber < batches.size(); batchNumber++) {
 				current = batches.get(batchNumber);
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Executing batch: lineno=%d, sql=%s", current.getLineno(),
 							current.getContent()));
 				}
-				db.exec(current.getContent());
+				new SqlStatement(current.getContent()).run(session);
 			}
-			//db.commitTransaction();
+			session.commit();
 		} catch (Exception e) {
 			String msg;
 			if (current != null) {
@@ -74,20 +75,19 @@ public class SqlScriptExecutor {
 				msg = String.format("Batch load failed: msg=%s", e.getMessage());
 			}
 			logger.error(msg, e);
-			//rollback(db);
+			try {
+				session.rollback();
+			} catch (DataException e2) {
+				logger.warn("Unable to roll back failed transaction", e2);
+			}
 			throw new SqlLoadException(msg, e);
 		} finally {
-			if (db != null) {
-				db.close();
+			if (session != null) {
+				try {
+					session.close();
+				} catch (IOException e) {
+				}
 			}
-		}
-	}
-
-	private void rollback(DB db) {
-		try {
-			db.rollbackTransaction();
-		} catch (Exception e) {
-			logger.error("Unable to roll back transaction", e);
 		}
 	}
 }
