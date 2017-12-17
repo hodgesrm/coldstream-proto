@@ -311,6 +311,9 @@ definitions:
       name:
         type: string
         description: Unique tenant name
+      description:
+        type: string
+        description: Optional information about the tenant
       state:
         description: 'The current processing state of the tenant. '
         enum:
@@ -359,6 +362,9 @@ definitions:
       username:
         type: string
         description: Unique user name
+      initialPassword:
+        type: string
+        description: Initial user password; ignored after creation
       roles:
         type: string
         description: Comma-separated list of user roles

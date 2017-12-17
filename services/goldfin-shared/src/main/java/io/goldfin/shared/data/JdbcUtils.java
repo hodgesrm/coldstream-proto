@@ -3,6 +3,7 @@
  */
 package io.goldfin.shared.data;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,6 +12,17 @@ import java.sql.Statement;
  * Helper routines for JDBC operations.
  */
 public class JdbcUtils {
+	/** Close a SQL connection suppressing exceptions. */
+	public static void closeSoftly(Connection conn) {
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// Ignored.
+			}
+		}
+	}
+
 	/** Close a SQL statement suppressing exceptions. */
 	public static void closeSoftly(Statement stmt) {
 		if (stmt != null) {

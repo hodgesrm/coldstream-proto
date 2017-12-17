@@ -25,7 +25,9 @@ public class ServiceDeleteTask extends AbstractTaskAdapter {
 	static final Logger logger = LoggerFactory.getLogger(ServiceDeleteTask.class);
 
 	private final SystemInitParams initParams;
-
+	
+	private final String ADMIN_SCHEMA = "admin";
+	
 	public ServiceDeleteTask(SystemInitParams initParams, ProgressReporter progressReporter) {
 		super(progressReporter);
 		this.initParams = initParams;
@@ -45,15 +47,15 @@ public class ServiceDeleteTask extends AbstractTaskAdapter {
 
 			// Drop the service schema.
 			ConnectionParams serviceConnection = DbHelper.tenantAdminConnectionParams(initParams);
-			File adminInitScript = new File(FileHelper.homeDir(), "sql/init/admin-remove-01.sql");
-			SqlScriptExecutor adminExecutor = new SqlScriptExecutor(serviceConnection, serviceProps);
+			File adminInitScript = new File(FileHelper.homeDir(), "sql/admin-schema/remove-01.sql");
+			SqlScriptExecutor adminExecutor = new SqlScriptExecutor(serviceConnection, serviceProps, null);
 			adminExecutor.execute(adminInitScript);
 			progressReporter.progress("Removed service schema", 50.0);
 
 			// Drop the service account.
 			ConnectionParams systemConnection = DbHelper.systemConnectionParams(initParams);
-			File serviceInitScript = new File(FileHelper.homeDir(), "sql/init/service-remove-01.sql");
-			SqlScriptExecutor systemExecutor = new SqlScriptExecutor(systemConnection, serviceProps);
+			File serviceInitScript = new File(FileHelper.homeDir(), "sql/service-remove-01.sql");
+			SqlScriptExecutor systemExecutor = new SqlScriptExecutor(systemConnection, serviceProps, ADMIN_SCHEMA);
 			systemExecutor.execute(serviceInitScript);
 			progressReporter.progress("Removed service database and user", 100.0);
 

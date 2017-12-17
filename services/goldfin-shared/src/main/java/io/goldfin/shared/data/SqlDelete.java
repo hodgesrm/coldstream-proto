@@ -6,6 +6,7 @@ package io.goldfin.shared.data;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * Performs a SQL DELETE using a prepared statement.
@@ -21,6 +22,14 @@ public class SqlDelete {
 	public SqlDelete table(String table) {
 		this.table = table;
 		return this;
+	}
+
+	public SqlDelete id(String id) {
+		return where("id = ?", id);
+	}
+
+	public SqlDelete id(UUID id) {
+		return where("id = ?", id);
 	}
 
 	public SqlDelete where(String where, Object... value) {

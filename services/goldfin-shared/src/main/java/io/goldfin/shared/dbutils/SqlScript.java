@@ -41,7 +41,7 @@ public class SqlScript {
 			for (String line : rawLines) {
 				lineno++;
 				// Substitute all variables on the line.
-				if (line.indexOf("{{") > -1) {
+				while (line.indexOf("{{") > -1) {
 					int leftBraces = line.indexOf("{{");
 					int rightBraces = line.indexOf("}}");
 					if (rightBraces > leftBraces) {

@@ -3,8 +3,6 @@
  */
 package io.goldfin.shared.data;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -12,7 +10,7 @@ import java.sql.SQLException;
  * Manages a transactional DBMS session on a single DBMS connection on a single
  * schema.
  */
-public class Session implements Closeable {
+public class Session implements AutoCloseable {
 	private final Connection connection;
 	private final String schema;
 
@@ -56,7 +54,7 @@ public class Session implements Closeable {
 
 	// Resource management.
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		if (connection != null) {
 			try {
 				connection.close();

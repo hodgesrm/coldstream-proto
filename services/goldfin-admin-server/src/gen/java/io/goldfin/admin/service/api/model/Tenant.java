@@ -34,6 +34,9 @@ public class Tenant   {
   @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("description")
+  private String description = null;
+
   /**
    * The current processing state of the tenant. 
    */
@@ -111,6 +114,25 @@ public class Tenant   {
     this.name = name;
   }
 
+  public Tenant description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  /**
+   * Optional information about the tenant
+   * @return description
+   **/
+  @JsonProperty("description")
+  @ApiModelProperty(value = "Optional information about the tenant")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   public Tenant state(StateEnum state) {
     this.state = state;
     return this;
@@ -161,13 +183,14 @@ public class Tenant   {
     Tenant tenant = (Tenant) o;
     return Objects.equals(this.id, tenant.id) &&
         Objects.equals(this.name, tenant.name) &&
+        Objects.equals(this.description, tenant.description) &&
         Objects.equals(this.state, tenant.state) &&
         Objects.equals(this.creationDate, tenant.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, state, creationDate);
+    return Objects.hash(id, name, description, state, creationDate);
   }
 
 
@@ -178,6 +201,7 @@ public class Tenant   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");

@@ -25,6 +25,8 @@ public class ServiceCreateTask extends AbstractTaskAdapter {
 	static final Logger logger = LoggerFactory.getLogger(ServiceCreateTask.class);
 
 	private final SystemInitParams initParams;
+	
+	private final String ADMIN_SCHEMA = "admin";
 
 	public ServiceCreateTask(SystemInitParams initParams, ProgressReporter reporter) {
 		super(reporter);
@@ -42,18 +44,19 @@ public class ServiceCreateTask extends AbstractTaskAdapter {
 			serviceProps.setProperty("serviceUser", initParams.getServiceUser());
 			serviceProps.setProperty("servicePassword", initParams.getServicePassword());
 			serviceProps.setProperty("serviceDb", initParams.getServiceDb());
+			serviceProps.setProperty("adminSchema", ADMIN_SCHEMA);
 
 			// Initialize the service user and database.
 			ConnectionParams systemConnection = DbHelper.systemConnectionParams(initParams);
-			File serviceInitScript = new File(FileHelper.homeDir(), "sql/init/service-init-01.sql");
-			SqlScriptExecutor systemExecutor = new SqlScriptExecutor(systemConnection, serviceProps);
+			File serviceInitScript = new File(FileHelper.homeDir(), "sql/service-init-01.sql");
+			SqlScriptExecutor systemExecutor = new SqlScriptExecutor(systemConnection, serviceProps, null);
 			systemExecutor.execute(serviceInitScript);
 			progressReporter.progress("Installed service user and database", 50.0);
 
 			// Initialize the service schema.
 			ConnectionParams serviceConnection = DbHelper.tenantAdminConnectionParams(initParams);
-			File adminInitScript = new File(FileHelper.homeDir(), "sql/init/admin-init-01.sql");
-			SqlScriptExecutor adminExecutor = new SqlScriptExecutor(serviceConnection, serviceProps);
+			File adminInitScript = new File(FileHelper.homeDir(), "sql/admin-schema-init-01.sql");
+			SqlScriptExecutor adminExecutor = new SqlScriptExecutor(serviceConnection, serviceProps, ADMIN_SCHEMA);
 			adminExecutor.execute(adminInitScript);
 			progressReporter.progress("Set up service schema", 100.0);
 

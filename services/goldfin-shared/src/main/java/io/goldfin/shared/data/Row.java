@@ -3,9 +3,11 @@
  */
 package io.goldfin.shared.data;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Represents data for a single SQL row.
@@ -42,7 +44,15 @@ public class Row {
 		return (String) get(name);
 	}
 
+	public UUID getAsUUID(String name) {
+		return (UUID) get(name);
+	}
+
 	public Integer getAsInt(String name) {
 		return (Integer) get(name);
+	}
+
+	public Timestamp getAsTimestamp(String name) {
+		return (Timestamp) get(name);
 	}
 }

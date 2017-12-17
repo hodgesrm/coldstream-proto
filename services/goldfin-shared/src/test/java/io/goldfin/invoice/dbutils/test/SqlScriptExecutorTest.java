@@ -43,7 +43,7 @@ public class SqlScriptExecutorTest {
 		props.setProperty("schema", "test_schema");
 		
 		// Execute the script. 
-		SqlScriptExecutor executor = new SqlScriptExecutor(testDbParams, props);
+		SqlScriptExecutor executor = new SqlScriptExecutor(testDbParams, props, "test_admin");
 		executor.execute(testFile);
 	}
 }

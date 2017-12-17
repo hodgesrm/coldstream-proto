@@ -4,6 +4,8 @@
 package io.goldfin.shared.data;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,14 +13,10 @@ import java.util.List;
  * Creates a transactional session with participating services.
  */
 public class SessionBuilder {
-	private enum SessionType {
-		ADMIN, TENANT, NO_SCHEMA
-	}
-
 	private SimpleJdbcConnectionManager connectionManager;
-	private List<TransactionalService> services = new ArrayList<TransactionalService>();
-	private SessionType type;
-	private String tenantName;
+	private List<TransactionalService<?>> services = new ArrayList<TransactionalService<?>>();
+	private String schema;
+	private boolean ensure = false;
 
 	public SessionBuilder() {
 	}
@@ -28,23 +26,19 @@ public class SessionBuilder {
 		return this;
 	}
 
-	public SessionBuilder noSchemaType() {
-		this.type = SessionType.NO_SCHEMA;
+	/** Use an existing schema as context for all queries. */
+	public SessionBuilder useSchema(String schema) {
+		this.schema = schema;
 		return this;
 	}
 
-	public SessionBuilder adminType() {
-		this.type = SessionType.ADMIN;
-		return this;
+	/** Ensure the schema exists and use it as context for all queries. */
+	public SessionBuilder ensureSchema(String schema) {
+		this.ensure = true;
+		return useSchema(schema);
 	}
 
-	public SessionBuilder tenantType(String tenantName) {
-		this.type = SessionType.TENANT;
-		this.tenantName = tenantName;
-		return this;
-	}
-
-	public SessionBuilder addService(TransactionalService service) {
+	public SessionBuilder addService(TransactionalService<?> service) {
 		this.services.add(service);
 		return this;
 	}
@@ -53,16 +47,9 @@ public class SessionBuilder {
 	 * Returns a ready-to-use session with services enlisted.
 	 */
 	public Session build() {
-		// Set schema correctly for admin or tenant operations.
-		String schema;
-		if (SessionType.ADMIN.equals(type)) {
-			schema = "admin";
-		} else if (SessionType.TENANT.equals(type)) {
-			schema = "tenant_" + tenantName;
-		} else if (SessionType.NO_SCHEMA.equals(type)) {
-			schema = null;
-		} else {
-			throw new RuntimeException("Unknown transaction type");
+		// If we need to ensure schema exists, do that now.
+		if (ensure) {
+			createSchemaIfRequired();
 		}
 
 		// Open the connection.
@@ -70,12 +57,24 @@ public class SessionBuilder {
 
 		// Create session and enlist services.
 		Session session = new Session(conn, schema);
-		for (TransactionalService service : services) {
+		for (TransactionalService<?> service : services) {
 			service.setSession(session);
 		}
 
 		// Start transaction and return.
 		session.begin();
 		return session;
+	}
+
+	private void createSchemaIfRequired() {
+		Connection conn = connectionManager.open();
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schema);
+		} catch (SQLException e) {
+			throw new DataException("Unable to ensure schema exists: " + schema, e);
+		} finally {
+			JdbcUtils.closeSoftly(conn);
+		}
 	}
 }

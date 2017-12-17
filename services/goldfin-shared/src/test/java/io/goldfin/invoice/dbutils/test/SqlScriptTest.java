@@ -17,34 +17,44 @@ import io.goldfin.shared.dbutils.SqlScript;
 import io.goldfin.shared.utilities.FileHelper;
 
 /**
- * Verifies SQL script handling. 
+ * Verifies SQL script handling.
  */
 public class SqlScriptTest {
 	static final Logger logger = LoggerFactory.getLogger(SqlScriptTest.class);
 
 	/**
 	 * Verify that we can load a SQL script, apply parameter translations, and
-	 * convert to a list of batches.
+	 * convert to a list of batches. This includes single and multiple substitutions
+	 * per line.
 	 */
 	@Test
 	public void testBasicScript() throws Exception {
 		File testDir = FileHelper.resetDirectory(new File("target/testdata/testBasicSqlScript"));
-		File testFile = FileHelper.writeLines(new File(testDir, "script.sql"), "// A comment", "{{a}} 1", ";",
-				"select {{b}}", ";", "select '{{a}}',", "{{b}}, 3", ";");
+		File testFile = FileHelper.writeLines(new File(testDir, "script.sql"),
+				// Batch with a comment.
+				"// A comment", "{{a}} 1", ";",
+				// Batch with single substitution.
+				"select {{b}}", ";",
+				// Batch with multiple substitutions on one line.
+				"select {{b}}, '{{a}}', 2", ";",
+				// Batch with multiple substitutions across lines.
+				"select '{{a}}',", "{{b}}, 3", ";");
 		Properties props = new Properties();
 		props.setProperty("a", "select");
 		props.setProperty("b", "1");
 		List<SqlBatch> batches = new SqlScript(testFile, props).getBatches();
 
 		// Test the batches.
-		Assert.assertEquals(3, batches.size());
+		Assert.assertEquals(4, batches.size());
 		Assert.assertEquals("select 1", batches.get(0).getContent());
 		Assert.assertEquals("select 1", batches.get(1).getContent());
-		Assert.assertEquals("select 'select', 1, 3", batches.get(2).getContent());
+		Assert.assertEquals("select 1, 'select', 2", batches.get(2).getContent());
+		Assert.assertEquals("select 'select', 1, 3", batches.get(3).getContent());
 	}
 
 	/**
-	 * Verify that we can handle a variety of empty batches.
+	 * Verify that empty batches of various types do not generate unexpected
+	 * content.
 	 */
 	@Test
 	public void testEmptyBatches() throws Exception {
@@ -59,7 +69,7 @@ public class SqlScriptTest {
 	}
 
 	/**
-	 * Verify that we can handle a variety of errors.
+	 * Verify that invalid parameter substitutions generate errors.
 	 */
 	@Test
 	public void testScriptErrors() throws Exception {

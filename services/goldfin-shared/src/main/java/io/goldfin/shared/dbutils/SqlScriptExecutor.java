@@ -4,7 +4,6 @@
 package io.goldfin.shared.dbutils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -26,10 +25,18 @@ public class SqlScriptExecutor {
 
 	private final Properties scriptProperties;
 	private final SimpleJdbcConnectionManager connectionManager;
+	private final String schema;
 
-	public SqlScriptExecutor(ConnectionParams connectionParams, Properties scriptProperties) {
+	/**
+	 * Instantiate a new executor for SQL
+	 * @param connectionParams Connection parameters that we can feed to connection pool
+	 * @param scriptProperties Properties to substitute into script
+	 * @param schema DBMS schema to use for script
+	 */
+	public SqlScriptExecutor(ConnectionParams connectionParams, Properties scriptProperties, String schema) {
 		this.scriptProperties = scriptProperties;
 		this.connectionManager = new SimpleJdbcConnectionManager(connectionParams);
+		this.schema = schema;
 	}
 
 	/**
@@ -54,7 +61,7 @@ public class SqlScriptExecutor {
 			List<SqlBatch> batches = sqlScript.getBatches();
 
 			// Connect.
-			session = new SessionBuilder().connectionManager(connectionManager).adminType().build();
+			session = new SessionBuilder().connectionManager(connectionManager).ensureSchema(schema).build();
 
 			// Load batches.
 			for (int batchNumber = 0; batchNumber < batches.size(); batchNumber++) {
@@ -83,10 +90,7 @@ public class SqlScriptExecutor {
 			throw new SqlLoadException(msg, e);
 		} finally {
 			if (session != null) {
-				try {
-					session.close();
-				} catch (IOException e) {
-				}
+				session.close();
 			}
 		}
 	}
