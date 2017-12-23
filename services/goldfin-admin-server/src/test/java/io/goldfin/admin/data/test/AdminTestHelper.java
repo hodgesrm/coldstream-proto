@@ -1,12 +1,15 @@
 /**
  * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.admin.data;
+package io.goldfin.admin.data.test;
 
 import java.io.File;
 import java.util.Properties;
 import java.util.UUID;
 
+import io.goldfin.admin.data.TenantDataService;
+import io.goldfin.admin.data.UserData;
+import io.goldfin.admin.data.UserDataService;
 import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.data.Session;

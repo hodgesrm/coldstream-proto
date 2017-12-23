@@ -1,4 +1,5 @@
 // This script must must be run by the DBMS superuser. 
+//!NON-TRANSACTIONAL
 
 // Create service user. 
 CREATE ROLE {{serviceUser}} 

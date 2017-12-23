@@ -18,10 +18,13 @@ import java.util.Properties;
 public class SqlScript {
 	private static final String COMMENT = "//";
 	private static final String DELIMITER = ";";
+	private static final String DIRECTIVE = "//!";
+	private static final String DIR_NON_TRANSACTIONAL = "NON-TRANSACTIONAL";
 	private final File scriptFile;
 	private final Properties parameters;
 
-	private List<String> parameterizedLines;
+	private List<SqlBatch> batches;
+	private boolean transactional;
 
 	public SqlScript(File scriptFile, Properties parameters) throws SqlLoadException {
 		this.scriptFile = scriptFile;
@@ -29,14 +32,24 @@ public class SqlScript {
 		load();
 	}
 
+	public List<SqlBatch> getBatches() {
+		return batches;
+	}
+
+	public boolean isTransactional() {
+		return transactional;
+	}
+
 	/**
 	 * Read script and substitute parameters.
 	 */
 	private void load() throws SqlLoadException {
 		try {
+			// Read file and perform substitutions.
 			List<String> rawLines = Files.readAllLines(Paths.get(scriptFile.getCanonicalPath()),
 					Charset.defaultCharset());
-			parameterizedLines = new ArrayList<String>(rawLines.size());
+			List<String> parameterizedLines = new ArrayList<String>(rawLines.size());
+			transactional = true;
 			int lineno = 0;
 			for (String line : rawLines) {
 				lineno++;
@@ -56,8 +69,8 @@ public class SqlScript {
 						String value = parameters.getProperty(variable);
 						if (value == null) {
 							throw new SqlLoadException(
-									String.format("Variable not found: variable=%s, lineno=%d, source=%s",
-											variable, lineno, scriptFile.getAbsolutePath()));
+									String.format("Variable not found: variable=%s, lineno=%d, source=%s", variable,
+											lineno, scriptFile.getAbsolutePath()));
 						}
 						line = left + value + right;
 					} else {
@@ -68,6 +81,9 @@ public class SqlScript {
 				// Add line to the parameterize line list.
 				parameterizedLines.add(line);
 			}
+
+			// Split into batches.
+			batches = computeBatches(parameterizedLines);
 		} catch (IOException e) {
 			throw new SqlLoadException("Unable to read SQL script file: " + scriptFile, e);
 		}
@@ -78,17 +94,28 @@ public class SqlScript {
 	 * 
 	 * @throws SqlLoadException
 	 */
-	public List<SqlBatch> getBatches() throws SqlLoadException {
+	private List<SqlBatch> computeBatches(List<String> parameterizedLines) throws SqlLoadException {
 		List<SqlBatch> batches = new ArrayList<SqlBatch>();
 		StringBuffer batchContent = new StringBuffer();
 		int lineno = 0;
 		int startingLineno = -1;
-		for (String line : this.parameterizedLines) {
+		for (String line : parameterizedLines) {
 			lineno++;
 			line = line.trim();
 			// Process cases.
 			if (line.length() == 0) {
 				// Empty line.
+			} else if (line.startsWith(DIRECTIVE)) {
+				// Directive. Find out which one.
+				if (line.length() > DIRECTIVE.length()) {
+					String directive = line.substring(DIRECTIVE.length()).trim();
+					if (DIR_NON_TRANSACTIONAL.equalsIgnoreCase(directive)) {
+						this.transactional = false;
+					} else {
+						throw new SqlLoadException(String.format("Unrecognized directive: line=%d, source=%s", lineno,
+								this.scriptFile.getAbsolutePath()));
+					}
+				}
 			} else if (line.startsWith(COMMENT)) {
 				// Commment.
 			} else if (line.startsWith(DELIMITER) && batchContent.length() == 0) {

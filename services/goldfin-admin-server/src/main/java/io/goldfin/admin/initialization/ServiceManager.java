@@ -3,6 +3,7 @@
  */
 package io.goldfin.admin.initialization;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -38,20 +39,20 @@ public class ServiceManager implements ProgressReporter {
 
 	@Override
 	public void progress(String message, double percent) {
-		for (ProgressReporter reporter: progressReporters) {
+		for (ProgressReporter reporter : progressReporters) {
 			reporter.progress(message, percent);
 		}
 	}
 
 	/** Initialize a new service. */
-	public Future<TaskStatus> create() {
-		ServiceCreateTask task = new ServiceCreateTask(initParams, this);
+	public Future<TaskStatus> create(File connectionParamsFile) {
+		ServiceCreateTask task = new ServiceCreateTask(initParams, connectionParamsFile, this);
 		return threadPool.submit(task);
 	}
-	
+
 	/** Remove an existing service. */
-	public Future<TaskStatus> remove() {
-		ServiceDeleteTask task = new ServiceDeleteTask(initParams, this);
+	public Future<TaskStatus> remove(boolean ignoreErrors) {
+		ServiceDeleteTask task = new ServiceDeleteTask(initParams, ignoreErrors, this);
 		return threadPool.submit(task);
 	}
 }

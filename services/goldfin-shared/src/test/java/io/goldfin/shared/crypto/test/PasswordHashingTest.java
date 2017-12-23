@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
 import io.goldfin.shared.crypto.BcryptHashingAlgorithm;
 
 /**
- * Verify security package functions.
+ * Verify password encryption. 
  */
-public class SecurityTest {
-	static final Logger logger = LoggerFactory.getLogger(SecurityTest.class);
+public class PasswordHashingTest {
+	static final Logger logger = LoggerFactory.getLogger(PasswordHashingTest.class);
 	private String[] passwords = { "123456789", "b0bbybr0wn", "short", "Q#RSTZBQT#$314tq5!!" };
 
 	/**

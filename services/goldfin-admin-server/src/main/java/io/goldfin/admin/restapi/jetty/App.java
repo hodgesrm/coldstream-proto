@@ -3,6 +3,8 @@
  */
 package io.goldfin.admin.restapi.jetty;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,11 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.managers.UserManager;
+import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.utilities.YamlHelper;
 
 public class App {
 	static final Logger logger = LoggerFactory.getLogger(App.class);
@@ -32,12 +39,31 @@ public class App {
 		jettyServer.setHandler(securityHandler);
 		securityHandler.setHandler(servletHandler);
 
+		// Initialize managers.
+		try {
+			setupManagers();
+		} catch (Exception e) {
+			logger.error("Fatal initialization error", e);
+		}
+
+		// Start web server.
 		try {
 			jettyServer.start();
 			jettyServer.join();
 		} finally {
 			jettyServer.destroy();
 		}
+	}
+
+	private static void setupManagers() throws IOException {
+		File dbmsYaml = new File("conf/dbms.yaml");
+		ConnectionParams serviceConnectionParams = YamlHelper.readFromFile(dbmsYaml, ConnectionParams.class);
+		logger.info("Reading DBMS connections: " + dbmsYaml.getAbsolutePath());
+
+		ManagerRegistry registry = ManagerRegistry.getInstance();
+		registry.initialize(serviceConnectionParams);
+		registry.addManager("user", new UserManager());
+		registry.start();
 	}
 
 	private static ConstraintSecurityHandler configureSecurityHandler() {
@@ -54,7 +80,7 @@ public class App {
 
 		// Create mappings for each REST URL with the constraint and add to
 		// the security handler.
-		String[] paths = { "tenant", "user" };
+		String[] paths = { "login", "tenant", "user" };
 		List<ConstraintMapping> mappings = new ArrayList<ConstraintMapping>();
 		for (String path : paths) {
 			ConstraintMapping mapping = new ConstraintMapping();
@@ -81,7 +107,7 @@ public class App {
 
 		// Find packages that have controllers.
 		jerseyServlet.setInitParameter("jersey.config.server.provider.packages",
-				"io.goldfin.service.admin.api.service");
+				"io.goldfin.admin.service.api.service");
 
 		// Register provider for multi-part requests.
 		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", MultiPartFeature.class.getName());

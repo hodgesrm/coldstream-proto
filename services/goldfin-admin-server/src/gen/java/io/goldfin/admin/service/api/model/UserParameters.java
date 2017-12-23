@@ -33,6 +33,9 @@ public class UserParameters   {
   @JsonProperty("username")
   private String username = null;
 
+  @JsonProperty("initialPassword")
+  private String initialPassword = null;
+
   @JsonProperty("roles")
   private String roles = null;
 
@@ -74,6 +77,25 @@ public class UserParameters   {
     this.username = username;
   }
 
+  public UserParameters initialPassword(String initialPassword) {
+    this.initialPassword = initialPassword;
+    return this;
+  }
+
+  /**
+   * Initial user password; ignored after creation
+   * @return initialPassword
+   **/
+  @JsonProperty("initialPassword")
+  @ApiModelProperty(value = "Initial user password; ignored after creation")
+  public String getInitialPassword() {
+    return initialPassword;
+  }
+
+  public void setInitialPassword(String initialPassword) {
+    this.initialPassword = initialPassword;
+  }
+
   public UserParameters roles(String roles) {
     this.roles = roles;
     return this;
@@ -105,12 +127,13 @@ public class UserParameters   {
     UserParameters userParameters = (UserParameters) o;
     return Objects.equals(this.tenantId, userParameters.tenantId) &&
         Objects.equals(this.username, userParameters.username) &&
+        Objects.equals(this.initialPassword, userParameters.initialPassword) &&
         Objects.equals(this.roles, userParameters.roles);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tenantId, username, roles);
+    return Objects.hash(tenantId, username, initialPassword, roles);
   }
 
 
@@ -121,6 +144,7 @@ public class UserParameters   {
     
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
+    sb.append("    initialPassword: ").append(toIndentedString(initialPassword)).append("\n");
     sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -17,6 +17,7 @@ public class SessionBuilder {
 	private List<TransactionalService<?>> services = new ArrayList<TransactionalService<?>>();
 	private String schema;
 	private boolean ensure = false;
+	private boolean transactional = true;
 
 	public SessionBuilder() {
 	}
@@ -43,10 +44,22 @@ public class SessionBuilder {
 		return this;
 	}
 
+	public SessionBuilder addServices(TransactionalService<?>... services) {
+		for (TransactionalService<?> service : services) {
+			this.services.add(service);
+		}
+		return this;
+	}
+
+	public SessionBuilder transactional(boolean transactional) {
+		this.transactional = transactional;
+		return this;
+	}
+
 	/**
 	 * Returns a ready-to-use session with services enlisted.
 	 */
-	public Session build() {
+	public Session build() throws DataException {
 		// If we need to ensure schema exists, do that now.
 		if (ensure) {
 			createSchemaIfRequired();
@@ -61,8 +74,11 @@ public class SessionBuilder {
 			service.setSession(session);
 		}
 
-		// Start transaction and return.
-		session.begin();
+		// Start transaction if this is a transactional script.
+		if (transactional) {
+			session.begin();
+		}
+
 		return session;
 	}
 

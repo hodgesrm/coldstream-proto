@@ -56,6 +56,7 @@ public class ServiceCtl {
 	 */
 	private void createCommand(String[] args) {
 		parser.accepts("init-params", "Initialization parameter file").withRequiredArg().ofType(File.class);
+		parser.accepts("dbms-config", "Generated DBMS connection parameters file").withRequiredArg().ofType(File.class);
 		if (!parseOptions("create", args)) {
 			return;
 		}
@@ -67,13 +68,17 @@ public class ServiceCtl {
 		if (!initParamsFile.canRead()) {
 			error("Unknown file: " + initParamsFile.getAbsolutePath());
 		}
+		File dbmsConfigFile = (File) options.valueOf("dbms-config");
+		if (dbmsConfigFile == null) {
+			error("You must specify a connection parameter file name with --dbms-config");
+		}
 
 		SystemInitParams params;
 		try {
 			params = YamlHelper.readFromFile(initParamsFile, SystemInitParams.class);
 			ServiceManager initializer = new ServiceManager(params);
 			initializer.addProgressReporter(createProgressReporter());
-			Future<TaskStatus> outcome = initializer.create();
+			Future<TaskStatus> outcome = initializer.create(dbmsConfigFile);
 			processOutcome(outcome);
 		} catch (Exception e) {
 			error("Operation failed", e);
@@ -81,12 +86,14 @@ public class ServiceCtl {
 	}
 
 	private void removeCommand(String[] args) {
-		parser.accepts("init-params", "Initialization parameter file").withRequiredArg().ofType(File.class);
+		parser.accepts("init-params", "YAML service parameter file").withRequiredArg().ofType(File.class);
+		parser.accepts("ignore-errors", "Ignore script errors");
 		if (!parseOptions("create", args)) {
 			return;
 		}
 
 		File initParamsFile = (File) options.valueOf("init-params");
+		boolean ignoreErrors = options.has("ignore-errors");
 		if (initParamsFile == null) {
 			error("You must specify a parameter file with --init-params");
 		}
@@ -99,7 +106,7 @@ public class ServiceCtl {
 			params = YamlHelper.readFromFile(initParamsFile, SystemInitParams.class);
 			ServiceManager initializer = new ServiceManager(params);
 			initializer.addProgressReporter(createProgressReporter());
-			Future<TaskStatus> outcome = initializer.remove();
+			Future<TaskStatus> outcome = initializer.remove(ignoreErrors);
 			processOutcome(outcome);
 		} catch (Exception e) {
 			error("Operation failed", e);

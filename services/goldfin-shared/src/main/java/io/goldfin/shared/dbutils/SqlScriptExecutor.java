@@ -29,9 +29,13 @@ public class SqlScriptExecutor {
 
 	/**
 	 * Instantiate a new executor for SQL
-	 * @param connectionParams Connection parameters that we can feed to connection pool
-	 * @param scriptProperties Properties to substitute into script
-	 * @param schema DBMS schema to use for script
+	 * 
+	 * @param connectionParams
+	 *            Connection parameters that we can feed to connection pool
+	 * @param scriptProperties
+	 *            Properties to substitute into script
+	 * @param schema
+	 *            DBMS schema to use for script
 	 */
 	public SqlScriptExecutor(ConnectionParams connectionParams, Properties scriptProperties, String schema) {
 		this.scriptProperties = scriptProperties;
@@ -50,6 +54,7 @@ public class SqlScriptExecutor {
 	public void execute(File script) throws SqlLoadException {
 		Session session = null;
 		SqlBatch current = null;
+		boolean transactional = false;
 
 		try {
 			// Convert the file to batches.
@@ -59,9 +64,16 @@ public class SqlScriptExecutor {
 			}
 			SqlScript sqlScript = new SqlScript(script, scriptProperties);
 			List<SqlBatch> batches = sqlScript.getBatches();
+			transactional = sqlScript.isTransactional();
 
 			// Connect.
-			session = new SessionBuilder().connectionManager(connectionManager).ensureSchema(schema).build();
+			if (schema == null) {
+				session = new SessionBuilder().connectionManager(connectionManager).transactional(transactional)
+						.build();
+			} else {
+				session = new SessionBuilder().connectionManager(connectionManager).transactional(transactional)
+						.ensureSchema(schema).build();
+			}
 
 			// Load batches.
 			for (int batchNumber = 0; batchNumber < batches.size(); batchNumber++) {
@@ -72,7 +84,9 @@ public class SqlScriptExecutor {
 				}
 				new SqlStatement(current.getContent()).run(session);
 			}
-			session.commit();
+			if (transactional) {
+				session.commit();
+			}
 		} catch (Exception e) {
 			String msg;
 			if (current != null) {
@@ -82,10 +96,12 @@ public class SqlScriptExecutor {
 				msg = String.format("Batch load failed: msg=%s", e.getMessage());
 			}
 			logger.error(msg, e);
-			try {
-				session.rollback();
-			} catch (DataException e2) {
-				logger.warn("Unable to roll back failed transaction", e2);
+			if (session != null && transactional) {
+				try {
+					session.rollback();
+				} catch (DataException e2) {
+					logger.warn("Unable to roll back failed transaction", e2);
+				}
 			}
 			throw new SqlLoadException(msg, e);
 		} finally {

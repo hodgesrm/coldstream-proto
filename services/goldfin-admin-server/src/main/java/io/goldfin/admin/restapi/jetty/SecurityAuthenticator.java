@@ -4,11 +4,8 @@
 package io.goldfin.admin.restapi.jetty;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 import javax.security.auth.Subject;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -33,46 +30,30 @@ public class SecurityAuthenticator implements Authenticator {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityAuthenticator.class);
 	public static final String API_KEY_HEADER = "vnd.io.goldfin.session";
 
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-			throws IOException, ServletException {
-		logger.info("Filtering request");
-		Enumeration<String> names = request.getAttributeNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			logger.info(String.format("%s: %s", name, request.getAttribute(name)));
-		}
-		Enumeration<String> parameterNames = request.getParameterNames();
-		while (parameterNames.hasMoreElements()) {
-			String name = names.nextElement();
-			logger.info(String.format("%s", name));
-		}
-
-		HttpServletRequest r = (HttpServletRequest) request;
-		logger.info("Path Info: " + r.getPathInfo());
-		logger.info("Context Path: " + r.getContextPath());
-		logger.info("Servlet path: " + r.getServletPath());
-		logger.info("Header: " + r.getHeader("vnd-io-goldfin-auth"));
-	}
-
+	@Override
 	public String getAuthMethod() {
 		logger.info("Returning auth method: " + this.getClass().getSimpleName());
 		return Constraint.ANY_AUTH;
 	}
 
+	@Override
 	public void prepareRequest(ServletRequest arg0) {
 		logger.info("Preparing request: " + this.getClass().getSimpleName());
 	}
 
+	@Override
 	public boolean secureResponse(ServletRequest arg0, ServletResponse arg1, boolean arg2, User arg3)
 			throws ServerAuthException {
 		logger.info("Checking for secure response: " + this.getClass().getSimpleName());
 		return false;
 	}
 
+	@Override
 	public void setConfiguration(AuthConfiguration arg0) {
 		logger.info("Setting auth configuration: " + this.getClass().getSimpleName());
 	}
 
+	@Override
 	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
 			throws ServerAuthException {
 		logger.info("Validating request: " + this.getClass().getSimpleName());
@@ -93,6 +74,13 @@ public class SecurityAuthenticator implements Authenticator {
 			return Authentication.UNAUTHENTICATED;
 		}
 
+		// If this is a login request we allow it to go through to complete
+		// authentication.
+		if ("/api/v1/login".equals(req.getPathInfo())) {
+			logger.info("Letting login request through...");
+			return Authentication.NOT_CHECKED;
+		}
+
 		// If the apiKey is missing, we aren't authenticated.
 		if (apiKey == null) {
 			try {
@@ -107,15 +95,15 @@ public class SecurityAuthenticator implements Authenticator {
 	}
 
 	/**
-	 * Look up user and create a user identity from the apiKey. 
+	 * Look up user and create a user identity from the apiKey.
 	 */
 	private UserAuthentication userAuthentication(String apiKey) {
-		// Dummy for now. 
+		// Dummy for now.
 		Subject subject = new Subject();
 		AbstractLoginService.UserPrincipal userPrincipal = new AbstractLoginService.UserPrincipal("dummy", null);
 		subject.getPrincipals().add(userPrincipal);
 		subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
-		UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] {"user"});
+		UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });
 		return new UserAuthentication(Constraint.ANY_AUTH, identity);
 	}
 }

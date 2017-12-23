@@ -6,6 +6,7 @@ package io.goldfin.shared.utilities;
 import java.io.File;
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,5 +33,14 @@ public class YamlHelper {
 		ClassLoader classLoader = new YamlHelper().getClass().getClassLoader();
 		File file = new File(classLoader.getResource(path).getFile());
 		return readFromFile(file, outputType);
+	}
+
+	/**
+	 * Serialize from Java object to a Yaml file.
+	 */
+	public static void writeToFile(File file, Object o)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+		mapper.writeValue(file, o);
 	}
 }

@@ -6,7 +6,7 @@
 # ENVIRONMENT SETUP
 ##############################################################################
 
-ADMIN_MAIN=io.goldfin.service.restapi.jetty.App
+ADMIN_MAIN=io.goldfin.admin.restapi.jetty.App
 
 # Find our home and cd to it. 
 GBIN=`dirname $0`

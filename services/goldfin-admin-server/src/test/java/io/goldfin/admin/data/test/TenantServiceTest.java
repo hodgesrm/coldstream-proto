@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.admin.data;
+package io.goldfin.admin.data.test;
 
 import java.util.UUID;
 
@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.TenantDataService;
 import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.shared.data.TransactionalService;
 import io.goldfin.shared.testing.DbConnectionHelper;

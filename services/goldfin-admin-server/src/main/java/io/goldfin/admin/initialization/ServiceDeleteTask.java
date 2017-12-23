@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import io.goldfin.shared.config.SystemInitParams;
 import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.data.DataException;
 import io.goldfin.shared.data.DbHelper;
 import io.goldfin.shared.dbutils.SqlScriptExecutor;
 import io.goldfin.shared.tasks.AbstractTaskAdapter;
@@ -19,18 +20,22 @@ import io.goldfin.shared.tasks.TaskStatus;
 import io.goldfin.shared.utilities.FileHelper;
 
 /**
- * Initializes full service.
+ * Deletes a service.
  */
 public class ServiceDeleteTask extends AbstractTaskAdapter {
 	static final Logger logger = LoggerFactory.getLogger(ServiceDeleteTask.class);
 
 	private final SystemInitParams initParams;
-	
-	private final String ADMIN_SCHEMA = "admin";
-	
-	public ServiceDeleteTask(SystemInitParams initParams, ProgressReporter progressReporter) {
+	private final boolean ignoreErrors;
+
+	public ServiceDeleteTask(SystemInitParams initParams, boolean ignoreErrors, ProgressReporter progressReporter) {
 		super(progressReporter);
 		this.initParams = initParams;
+		this.ignoreErrors = ignoreErrors;
+	}
+
+	public ServiceDeleteTask(SystemInitParams initParams, ProgressReporter progressReporter) {
+		this(initParams, false, progressReporter);
 	}
 
 	/**
@@ -44,24 +49,41 @@ public class ServiceDeleteTask extends AbstractTaskAdapter {
 			serviceProps.setProperty("serviceUser", initParams.getServiceUser());
 			serviceProps.setProperty("servicePassword", initParams.getServicePassword());
 			serviceProps.setProperty("serviceDb", initParams.getServiceDb());
+			serviceProps.setProperty("serviceSchema", initParams.getServiceSchema());
 
 			// Drop the service schema.
-			ConnectionParams serviceConnection = DbHelper.tenantAdminConnectionParams(initParams);
-			File adminInitScript = new File(FileHelper.homeDir(), "sql/admin-schema/remove-01.sql");
-			SqlScriptExecutor adminExecutor = new SqlScriptExecutor(serviceConnection, serviceProps, null);
-			adminExecutor.execute(adminInitScript);
-			progressReporter.progress("Removed service schema", 50.0);
+			try {
+				ConnectionParams serviceConnection = DbHelper.tenantAdminConnectionParams(initParams);
+				File adminInitScript = new File(FileHelper.homeDir(), "sql/admin-schema-remove-01.sql");
+				SqlScriptExecutor adminExecutor = new SqlScriptExecutor(serviceConnection, serviceProps, null);
+				adminExecutor.execute(adminInitScript);
+				progressReporter.progress("Removed service schema", 50.0);
+			} catch (DataException e) {
+				if (ignoreErrors) {
+					logger.info("Service schema removal failed: " + e.getMessage());
+				} else {
+					throw e;
+				}
+			}
 
 			// Drop the service account.
-			ConnectionParams systemConnection = DbHelper.systemConnectionParams(initParams);
-			File serviceInitScript = new File(FileHelper.homeDir(), "sql/service-remove-01.sql");
-			SqlScriptExecutor systemExecutor = new SqlScriptExecutor(systemConnection, serviceProps, ADMIN_SCHEMA);
-			systemExecutor.execute(serviceInitScript);
-			progressReporter.progress("Removed service database and user", 100.0);
+			try {
+				ConnectionParams systemConnection = DbHelper.systemConnectionParams(initParams);
+				File serviceInitScript = new File(FileHelper.homeDir(), "sql/database-remove-01.sql");
+				SqlScriptExecutor systemExecutor = new SqlScriptExecutor(systemConnection, serviceProps, null);
+				systemExecutor.execute(serviceInitScript);
+				progressReporter.progress("Removed service database and user", 100.0);
+			} catch (DataException e) {
+				if (ignoreErrors) {
+					logger.info("Database removal failed: " + e.getMessage());
+				} else {
+					throw e;
+				}
+			}
 
-			return TaskStatus.successfulTask("System initialization succeeded", this.getClass().getSimpleName());
+			return TaskStatus.successfulTask("Service removal succeeded", this.getClass().getSimpleName());
 		} catch (Exception e) {
-			return TaskStatus.failedTask("System initialization failed", this.getClass().getSimpleName(), e);
+			return TaskStatus.failedTask("Service removal failed", this.getClass().getSimpleName(), e);
 		}
 	}
 }

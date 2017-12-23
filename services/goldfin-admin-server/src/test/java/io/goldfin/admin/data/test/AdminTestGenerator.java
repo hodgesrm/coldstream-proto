@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.admin.data;
+package io.goldfin.admin.data.test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

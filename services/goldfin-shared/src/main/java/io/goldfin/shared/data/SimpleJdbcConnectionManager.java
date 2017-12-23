@@ -60,7 +60,7 @@ public class SimpleJdbcConnectionManager {
 				driver = (Driver) driverClass.newInstance();
 				drivers.put(connectionParams.getDriver(), driver);
 			} catch (Exception e) {
-				throw new RuntimeException("Unable to load JDBC driver: " + connectionParams.getDriver(), e);
+				throw new CannotConnectDataException("Unable to load JDBC driver: " + connectionParams.getDriver(), e);
 			}
 		}
 
@@ -72,7 +72,7 @@ public class SimpleJdbcConnectionManager {
 			Connection connection = driver.connect(url, connectionProps);
 			return connection;
 		} catch (SQLException e) {
-			throw new RuntimeException("Unable to connect to DBMS", e);
+			throw new CannotConnectDataException("Unable to connect to DBMS", e);
 		}
 	}
 

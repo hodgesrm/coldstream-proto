@@ -1,0 +1,19 @@
+##############################
+# Initialization parameters. #
+##############################
+
+# DBMS location and existing admin account. 
+driver: "org.postgresql.Driver"
+url: "jdbc:postgresql://localhost:15432"
+adminUser: "postgres"
+adminPassword: "secret"
+
+# Service database name and service user/password.
+serviceDb: "goldfin"
+serviceUser: "goldfin"
+servicePassword: "Asecret2"
+serviceSchema: "admin"
+
+# Service sysadmin user name and password. 
+sysUser: "sysadmin"
+sysPassword: "secret"

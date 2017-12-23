@@ -16,6 +16,7 @@ public class ServiceCtlLauncher {
 			if (e.getCause() != null) {
 				e.getCause().printStackTrace(System.err);
 			}
+			System.exit(1);
 		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 			System.exit(1);
