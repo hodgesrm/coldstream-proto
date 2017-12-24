@@ -10,6 +10,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.jetty.security.AbstractLoginService;
 import org.eclipse.jetty.security.Authenticator;
@@ -22,6 +23,12 @@ import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.util.security.Constraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.goldfin.admin.data.SessionData;
+import io.goldfin.admin.exceptions.NoSessionFoundException;
+import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.managers.UserManager;
+import io.goldfin.admin.service.api.service.ApiResponseMessage;
 
 /**
  * Checks requests to ensure they are authorized.
@@ -90,7 +97,30 @@ public class SecurityAuthenticator implements Authenticator {
 				throw new ServerAuthException(e);
 			}
 		} else {
-			return userAuthentication(apiKey);
+			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
+			try {
+				SessionData sessionData = um.validate(apiKey);
+				Subject subject = new Subject();
+				AbstractLoginService.UserPrincipal userPrincipal = new AbstractLoginService.UserPrincipal(
+						sessionData.getUserId().toString(), null);
+				subject.getPrincipals().add(userPrincipal);
+				subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
+				UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });
+				return new UserAuthentication(Constraint.ANY_AUTH, identity);
+			} catch (NoSessionFoundException e) {
+				logger.warn(String.format("No session available: token=%s, message=%s", apiKey, e.getMessage()));
+				if (logger.isDebugEnabled()) {
+					logger.debug("Extended session failure information", e);
+				}
+				try {
+					res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				} catch (IOException e2) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Unable to send error message", e2);
+					}
+				}
+				return Authentication.SEND_FAILURE;
+			}
 		}
 	}
 

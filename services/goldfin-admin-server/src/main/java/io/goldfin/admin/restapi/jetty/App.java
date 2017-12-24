@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.utilities.YamlHelper;
@@ -129,7 +130,8 @@ public class App {
 
 		ManagerRegistry registry = ManagerRegistry.getInstance();
 		registry.initialize(serviceConnectionParams);
-		registry.addManager("user", new UserManager());
+		registry.addManager(new UserManager());
+		registry.addManager(new TenantManager());
 		registry.start();
 	}
 

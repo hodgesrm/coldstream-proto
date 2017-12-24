@@ -27,7 +27,7 @@ public class LoginApiServiceImpl extends LoginApiService {
 	public Response loginByCredentials(LoginCredentials body, SecurityContext securityContext)
 			throws NotFoundException {
 		try {
-			UserManager um = (UserManager) ManagerRegistry.getInstance().getManager("user");
+			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			String token = um.login(body);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK"))
 					.header(SecurityAuthenticator.API_KEY_HEADER, token).build();

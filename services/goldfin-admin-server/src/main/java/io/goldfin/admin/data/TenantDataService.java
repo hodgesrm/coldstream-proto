@@ -55,6 +55,10 @@ public class TenantDataService implements TransactionalService<Tenant> {
 			update.put("description", params.getDescription());
 			paramsAdded = true;
 		}
+		if (params.getState() != null) {
+			update.put("state", params.getState().toString());
+			paramsAdded = true;
+		}
 		if (!paramsAdded) {
 			return 0;
 		}
@@ -66,7 +70,8 @@ public class TenantDataService implements TransactionalService<Tenant> {
 	}
 
 	public Tenant get(String id) {
-		TabularResultSet result = new SqlSelect().table("tenants").get(COLUMN_NAMES).id(UUID.fromString(id)).run(session);
+		TabularResultSet result = new SqlSelect().table("tenants").get(COLUMN_NAMES).id(UUID.fromString(id))
+				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {

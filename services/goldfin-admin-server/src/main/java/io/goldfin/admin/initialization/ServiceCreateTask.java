@@ -77,7 +77,7 @@ public class ServiceCreateTask extends AbstractTaskAdapter {
 			ManagerRegistry registry = new ManagerRegistry();
 			UserManager userManager = new UserManager();
 			registry.initialize(serviceConnection);
-			registry.addManager("user", userManager);
+			registry.addManager(userManager);
 			registry.start();
 			UserParameters userParams = new UserParameters();
 			userParams.setUsername(initParams.getSysUser());

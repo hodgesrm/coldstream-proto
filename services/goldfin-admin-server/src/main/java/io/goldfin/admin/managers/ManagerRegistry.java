@@ -25,7 +25,7 @@ public class ManagerRegistry implements ManagementContext {
 	private static final ManagerRegistry registry = new ManagerRegistry();
 
 	// Registry state.
-	private Map<String, Manager> managers = new HashMap<String, Manager>();
+	private Map<Class<?>, Manager> managers = new HashMap<Class<?>, Manager>();
 	private ConnectionParams connectionParams;
 	private SimpleJdbcConnectionManager connectionManager;
 
@@ -39,37 +39,36 @@ public class ManagerRegistry implements ManagementContext {
 		this.connectionManager = new SimpleJdbcConnectionManager(this.connectionParams);
 	}
 
-	public void addManager(String name, Manager manager) {
-		managers.put(name, manager);
+	public void addManager(Manager manager) {
+		managers.put(manager.getClass(), manager);
 	}
 
-	public Manager getManager(String name) {
-		return managers.get(name);
+	@SuppressWarnings("unchecked")
+	public <T> T getManager(Class<T> managerClass) {
+		return (T) managers.get(managerClass);
 	}
 
 	public void start() {
 		// Assign management context to each manager.
-		for (String name : managers.keySet()) {
-			Manager manager = managers.get(name);
-			logger.info(
-					String.format("Assigning context: manager=%s, class=%s", name, manager.getClass().getSimpleName()));
+		for (Class<?> managerClass : managers.keySet()) {
+			Manager manager = managers.get(managerClass);
+			logger.info(String.format("Assigning context: manager=%s", managerClass.getSimpleName()));
 			manager.setContext(this);
 		}
 
 		// Prepare managers for operation.
-		for (String name : managers.keySet()) {
-			Manager manager = managers.get(name);
-			logger.info(String.format("Preparing for operation: manager=%s, class=%s", name,
-					manager.getClass().getSimpleName()));
+		for (Class<?> managerClass : managers.keySet()) {
+			Manager manager = managers.get(managerClass);
+			logger.info(String.format("Preparing for operation: manager=%s", managerClass.getSimpleName()));
 			manager.prepare();
 		}
 	}
 
 	public void shutdown() {
 		// Prepare managers for operation.
-		for (String name : managers.keySet()) {
-			Manager manager = managers.get(name);
-			logger.info(String.format("Shutting down: manager=%s, class=%s", name, manager.getClass().getSimpleName()));
+		for (Class<?> managerClass : managers.keySet()) {
+			Manager manager = managers.get(managerClass);
+			logger.info(String.format("Preparing for operation: manager=%s", managerClass.getSimpleName()));
 			manager.release();
 		}
 	}
@@ -106,5 +105,15 @@ public class ManagerRegistry implements ManagementContext {
 		SimpleJdbcConnectionManager cm = getConnectionManager();
 		String schema = getAdminSchema();
 		return new SessionBuilder().connectionManager(cm).useSchema(schema).addServices(svcs).build();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.goldfin.admin.managers.ManagementContext#getConnectionParams()
+	 */
+	@Override
+	public ConnectionParams getConnectionParams() {
+		return this.connectionParams;
 	}
 }
