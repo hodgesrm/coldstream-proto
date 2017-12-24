@@ -1,0 +1,15 @@
+#!/bin/bash
+# Generates a default self-signed certificate in a Java Key Store.
+KEYSTORE=keystore.jks
+KEYPASS=secret
+ANSWERS="An Engineer
+Eng
+Goldfin
+Berkeley
+CA
+US
+yes
+"
+rm $KEYSTORE
+echo "$ANSWERS" | keytool -genkey -keyalg RSA -alias goldfin -keystore $KEYSTORE -validity 365 -keysize 2048 -keypass $KEYPASS -storepass $KEYPASS
+keytool -list -keystore $KEYSTORE -storepass $KEYPASS -v

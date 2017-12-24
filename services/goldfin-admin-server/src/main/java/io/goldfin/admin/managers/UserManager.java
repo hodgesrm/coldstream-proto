@@ -3,7 +3,7 @@
  */
 package io.goldfin.admin.managers;
 
-import java.util.UUID;
+import java.sql.Timestamp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +14,11 @@ import io.goldfin.admin.data.TenantDataService;
 import io.goldfin.admin.data.UserData;
 import io.goldfin.admin.data.UserDataService;
 import io.goldfin.admin.exceptions.InvalidInputException;
+import io.goldfin.admin.exceptions.NoSessionFoundException;
 import io.goldfin.admin.service.api.model.LoginCredentials;
 import io.goldfin.admin.service.api.model.UserParameters;
 import io.goldfin.shared.crypto.BcryptHashingAlgorithm;
+import io.goldfin.shared.crypto.Randomizer;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SessionBuilder;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
@@ -28,6 +30,10 @@ import io.goldfin.shared.data.TransactionalService;
 public class UserManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(UserManager.class);
 	private ManagementContext context;
+	private Randomizer randomizer = new Randomizer();
+
+	/** Session timeout (defaults to 30 minutes) */
+	private static long LOGIN_TIMEOUT_MILLIS = 1800 * 1000;
 
 	@Override
 	public void setContext(ManagementContext context) {
@@ -98,7 +104,7 @@ public class UserManager implements Manager {
 		// Check the password by hashing with bcrypt and comparing against
 		// actual hash.
 		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
-		//String credentialHash = algorithm.generateHash(credentials.getPassword());
+		// String credentialHash = algorithm.generateHash(credentials.getPassword());
 		boolean success = algorithm.validateHash(credentials.getPassword(), user.getPasswordHash());
 		if (!success) {
 			logger.warn(String.format("Login failed due to invalid password: user=%s", credentials.getUser()));
@@ -109,7 +115,7 @@ public class UserManager implements Manager {
 		SessionDataService sessionService = new SessionDataService();
 		SessionData model = new SessionData();
 		model.setUserId(user.getId());
-		model.setToken(UUID.randomUUID().toString());
+		model.setToken(randomizer.base64RandomBytes(20));
 		try (Session session = makeSession(sessionService)) {
 			String id = sessionService.create(model);
 			logger.info(String.format("Successful login: user=%s, tenant=%s, session=%s", user.getUsername(),
@@ -119,9 +125,43 @@ public class UserManager implements Manager {
 		}
 	}
 
+	/**
+	 * Validates an incoming token and if successful returns the session data. This
+	 * updates the session timeout as a side effect.
+	 * 
+	 * @throws NoSessionFoundException Thrown if session does not exist or has timed out
+	 */
+	public SessionData validate(String token) {
+		// Generate a session and return the token.
+		SessionDataService sessionService = new SessionDataService();
+		try (Session session = makeSession(sessionService, false)) {
+			// Check session and ensure it has not expired.
+			SessionData sessionData = sessionService.getByToken(token);
+			if (sessionData == null) {
+				throw new NoSessionFoundException("Invalid session token");
+			}
+			long now = System.currentTimeMillis();
+			long expiration = sessionData.getLastTouched().getTime() + LOGIN_TIMEOUT_MILLIS;
+			if (now > expiration) {
+				logger.warn(String.format("Login timeout: userId=%s", sessionData.getUserId()));
+				throw new NoSessionFoundException("Session timed out");
+			}
+
+			// Update access time and return session data. 
+			sessionData.setLastTouched(new Timestamp(now));
+			sessionService.update(sessionData.getId().toString(), sessionData);
+			return sessionData;
+		}
+	}
+
 	private Session makeSession(TransactionalService<?> ts) {
+		return makeSession(ts, true);
+	}
+
+	private Session makeSession(TransactionalService<?> ts, boolean transactional) {
 		SimpleJdbcConnectionManager cm = context.getConnectionManager();
 		String schema = context.getAdminSchema();
-		return new SessionBuilder().connectionManager(cm).useSchema(schema).addService(ts).build();
+		return new SessionBuilder().connectionManager(cm).useSchema(schema).addService(ts).transactional(transactional)
+				.build();
 	}
 }

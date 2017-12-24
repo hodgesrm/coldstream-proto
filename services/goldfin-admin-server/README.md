@@ -37,7 +37,7 @@ goldfin/rest-api            0.0.1               e9b2532f7d18        8 seconds ag
 Start the docker image using the IMAGE ID tag. 
 
 ```shell
-docker -l debug run -it -p 7080:8080 e9b2532f7d18
+docker -l debug run -it -p 7443:8443 e9b2532f7d18
 ```
 
 ## Clean up Docker Images
@@ -49,6 +49,13 @@ docker images -q --filter dangling=true |xargs docker rmi
 ## REST Service Login
 
 ```shell
-curl -d '{"user":"x", "password":"y"}' -H "Content-Type: application/json" \
--X POST http://localhost:8080/api/v1/login -v
+curl -d '{"user":"sysadmin", "password":"secret"}' \
+-H "Content-Type: application/json" \
+-X POST https://localhost:8443/api/v1/login -v -k
 ```
+
+## Generate New Cert
+
+Run bin/make-cert, and put resulting keystore.jks file in conf directory.
+A default file is already supplied, as are server-config.yaml and
+dbms-config.yaml.

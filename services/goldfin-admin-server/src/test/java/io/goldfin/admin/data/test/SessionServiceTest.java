@@ -3,6 +3,7 @@
  */
 package io.goldfin.admin.data.test;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -58,7 +59,7 @@ public class SessionServiceTest extends TransactionalTest<SessionData> {
 			sd.setId(old.getId());
 			sd.setUserId(old.getUserId());
 			sd.setToken(old.getToken());
-			sd.setLastTouched(old.getLastTouched());
+			sd.setLastTouched(new Timestamp(System.currentTimeMillis()));
 			sd.setCreationDate(old.getCreationDate());
 			return sd;
 		}

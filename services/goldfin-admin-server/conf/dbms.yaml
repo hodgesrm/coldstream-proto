@@ -1,0 +1,6 @@
+---
+driver: "org.postgresql.Driver"
+url: "jdbc:postgresql://localhost:15432/goldfin"
+user: "goldfin"
+password: "Asecret2"
+adminSchema: "admin"

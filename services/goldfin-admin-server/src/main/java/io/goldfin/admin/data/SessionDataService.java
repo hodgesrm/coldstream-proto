@@ -3,7 +3,6 @@
  */
 package io.goldfin.admin.data;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +45,7 @@ public class SessionDataService implements TransactionalService<SessionData> {
 
 	public int update(String id, SessionData model) {
 		SqlUpdate update = new SqlUpdate().table("sessions").id(UUID.fromString(id));
-		update.put("last_touched_date", new Timestamp(System.currentTimeMillis()));
+		update.put("last_touched_date", model.getLastTouched());
 		return update.run(session);
 	}
 
@@ -64,9 +63,9 @@ public class SessionDataService implements TransactionalService<SessionData> {
 		}
 	}
 
-	public SessionData getBySessionname(String sessionname) {
+	public SessionData getByToken(String token) {
 		TabularResultSet result = new SqlSelect().table("sessions").get(COLUMN_NAMES)
-				.where("sessionname = ?", sessionname).run(session);
+				.where("token = ?", token).run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {
