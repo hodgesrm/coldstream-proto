@@ -1,0 +1,43 @@
+#!/bin/bash
+# Goldfin API Server
+# Copyright (C) 2017 All rights reserved
+
+##############################################################################
+# ENVIRONMENT SETUP
+##############################################################################
+
+MAIN=io.goldfin.admin.cli.SvcClientLauncher
+
+# Find our home and cd to it. 
+GBIN=`dirname $0`
+GHOME=`cd $GBIN/..; pwd`
+cd $GHOME
+
+# Add jars from all directories to class path, which starts with 
+# conf directory.
+CP=conf
+for jar in lib/*.jar; do 
+  CP=$CP:$jar
+done
+
+# Find Java.
+if [ -z "$JAVA_HOME" ]; then
+  JAVA=`which java`
+else
+  JAVA=$JAVA_HOME/bin/java
+fi
+if [ ! -x "$JAVA" ]; then
+  echo "Cannot find java command.  Please set the JAVA_HOME environment"
+  echo "variable or add java to the execution path."
+  exit 1
+fi
+
+# Set logback configuration file location and root appender.  
+JVM_OPTIONS="${JVM_OPTIONS} -Dlogback.configurationFile=$GHOME/conf/logback-servicectl.xml -Dlog4j.rootAppender=file"
+
+##############################################################################
+# OPERATIONS
+##############################################################################
+
+# Run the CLI.
+$JAVA -cp $CP -Dapi.server.home.dir=$GHOME $JVM_OPTIONS ${MAIN} $*

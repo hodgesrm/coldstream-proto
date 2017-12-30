@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS tenants (
 // Create the user table. 
 CREATE TABLE IF NOT EXISTS users (
   id uuid PRIMARY KEY, 
-  tenant_id uuid REFERENCES tenants(id),
+  tenant_id uuid REFERENCES tenants(id) ON DELETE CASCADE,
   username varchar(250) UNIQUE, 
   roles varchar(250), 
   password_hash varchar(250),
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
 // Create the sessions table. 
 CREATE TABLE IF NOT EXISTS sessions (
   id uuid PRIMARY KEY, 
-  user_id uuid REFERENCES users(id) NOT NULL,
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   token varchar(250), 
   last_touched_date timestamp DEFAULT current_timestamp, 
   creation_date timestamp DEFAULT current_timestamp

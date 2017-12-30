@@ -10,7 +10,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.jetty.security.AbstractLoginService;
 import org.eclipse.jetty.security.Authenticator;
@@ -28,7 +27,6 @@ import io.goldfin.admin.data.SessionData;
 import io.goldfin.admin.exceptions.NoSessionFoundException;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.UserManager;
-import io.goldfin.admin.service.api.service.ApiResponseMessage;
 
 /**
  * Checks requests to ensure they are authorized.

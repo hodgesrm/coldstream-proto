@@ -1,15 +1,17 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+gfl * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.admin.initialization;
+package io.goldfin.admin.cli;
+
+import io.goldfin.admin.exceptions.CommandError;
 
 /**
  * Launch a service command.
  */
-public class ServiceCtlLauncher {
+public class SvcClientLauncher {
 	public static void main(String[] args) {
 		try {
-			new ServiceCtl().run(args);
+			new SvcClient().run(args);
 			System.exit(0);
 		} catch (CommandError e) {
 			System.err.println("ERROR: " + e.getMessage());

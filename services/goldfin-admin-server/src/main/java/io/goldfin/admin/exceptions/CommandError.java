@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.admin.initialization;
+package io.goldfin.admin.exceptions;
 
 /**
  * Denotes a command error.

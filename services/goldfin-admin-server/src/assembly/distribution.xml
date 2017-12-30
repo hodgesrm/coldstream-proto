@@ -12,7 +12,8 @@
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>admin-server</include>
-        <include>servicectl</include>
+        <include>svc-init</include>
+        <include>svc-client</include>
       </includes>
     </fileSet>
     <fileSet>

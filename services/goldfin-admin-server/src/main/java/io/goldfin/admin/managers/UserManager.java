@@ -4,6 +4,8 @@
 package io.goldfin.admin.managers;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +15,14 @@ import io.goldfin.admin.data.SessionDataService;
 import io.goldfin.admin.data.TenantDataService;
 import io.goldfin.admin.data.UserData;
 import io.goldfin.admin.data.UserDataService;
+import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.exceptions.NoSessionFoundException;
 import io.goldfin.admin.service.api.model.LoginCredentials;
+import io.goldfin.admin.service.api.model.User;
 import io.goldfin.admin.service.api.model.UserParameters;
+import io.goldfin.admin.service.api.model.UserPasswordParameters;
+import io.goldfin.admin.service.api.service.NotFoundException;
 import io.goldfin.shared.crypto.BcryptHashingAlgorithm;
 import io.goldfin.shared.crypto.Randomizer;
 import io.goldfin.shared.data.Session;
@@ -67,18 +73,16 @@ public class UserManager implements Manager {
 			}
 		}
 
-		// Ensure initial password is at least 8 characters.
-		if (userParams.getInitialPassword() == null || userParams.getInitialPassword().length() >= 8) {
-			throw new InvalidInputException("Initial password must be at least 8 characters");
-		}
+		// Check and hash password.
+		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
+		String passwordHash = hashPassword(algorithm, userParams.getInitialPassword());
 
 		// Create the user.
-		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
 		UserDataService userService = new UserDataService();
 		UserData model = new UserData();
 		model.setUsername(userParams.getUsername());
 		model.setTenantId(userParams.getTenantId());
-		model.setPasswordHash(algorithm.generateHash(userParams.getInitialPassword()));
+		model.setPasswordHash(passwordHash);
 		model.setAlgorithm(algorithm.getName());
 		model.setRoles(userParams.getRoles());
 
@@ -87,6 +91,113 @@ public class UserManager implements Manager {
 			session.commit();
 			return id;
 		}
+	}
+
+	public void deleteUser(String id) {
+		UserDataService userService = new UserDataService();
+
+		// See if user exists.
+		UserData userRecord;
+		try (Session session = context.adminSession(userService)) {
+			userRecord = userService.get(id);
+			if (userRecord == null) {
+				throw new EntityNotFoundException("User does not exist");
+			}
+		}
+
+		// Delete the user. This will cascade through to sessions
+		// automatically.
+		logger.info("Deleting user: id=" + id + " username=" + userRecord.getUsername());
+		try (Session session = context.adminSession(userService)) {
+			userService.delete(id);
+			session.commit();
+		}
+	}
+
+	public void updateUser(String id, UserParameters userParams) throws NotFoundException {
+		UserDataService userService = new UserDataService();
+
+		// See if user exists.
+		UserData userRecord;
+		try (Session session = context.adminSession(userService)) {
+			userRecord = userService.get(id);
+			if (userRecord == null) {
+				throw new EntityNotFoundException("User does not exist");
+			}
+		}
+
+		// Apply parameters to the body and update.
+		userRecord.setUsername(userParams.getUsername());
+		userRecord.setRoles(userParams.getRoles());
+		try (Session session = context.adminSession(userService)) {
+			userService.update(id, userRecord);
+			session.commit();
+		}
+	}
+
+	public void updateUserPassword(String id, UserPasswordParameters passwordParams) throws NotFoundException {
+		UserDataService userService = new UserDataService();
+
+		// See if user exists.
+		UserData userRecord;
+		try (Session session = context.adminSession(userService)) {
+			userRecord = userService.get(id);
+			if (userRecord == null) {
+				throw new EntityNotFoundException("User does not exist");
+			}
+		}
+
+		// Validate the old password.
+		boolean success = checkPassword(passwordParams.getOldPassword(), userRecord.getPasswordHash());
+		if (!success) {
+			throw new InvalidInputException("Old password does not match");
+		}
+
+		// Generate new password hash.
+		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
+		String passwordHash = hashPassword(algorithm, passwordParams.getNewPassword());
+
+		// Apply parameters to user record and update.
+		userRecord.setPasswordHash(passwordHash);
+		userRecord.setAlgorithm(algorithm.getName());
+		try (Session session = context.adminSession(userService)) {
+			userService.update(id, userRecord);
+			session.commit();
+		}
+	}
+
+	public User getUser(String id) {
+		UserDataService userService = new UserDataService();
+		try (Session session = context.adminSession(userService)) {
+			UserData userData = userService.get(id);
+			if (userData == null) {
+				throw new EntityNotFoundException("User does not exist");
+			}
+			User user = toUser(userData);
+			return user;
+		}
+	}
+
+	public List<User> getAllUsers() {
+		UserDataService userService = new UserDataService();
+		try (Session session = context.adminSession(userService)) {
+			List<UserData> userData = userService.getAll();
+			List<User> users = new ArrayList<User>(userData.size());
+			for (UserData userDatum : userData) {
+				users.add(toUser(userDatum));
+			}
+			return users;
+		}
+	}
+
+	private User toUser(UserData userData) {
+		User user = new User();
+		user.setId(userData.getId());
+		user.setTenantId(userData.getTenantId());
+		user.setUsername(userData.getUsername());
+		user.setRoles(userData.getRoles());
+		user.setCreationDate(userData.getCreationDate().toString());
+		return user;
 	}
 
 	public String login(LoginCredentials credentials) {
@@ -103,9 +214,7 @@ public class UserManager implements Manager {
 
 		// Check the password by hashing with bcrypt and comparing against
 		// actual hash.
-		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
-		// String credentialHash = algorithm.generateHash(credentials.getPassword());
-		boolean success = algorithm.validateHash(credentials.getPassword(), user.getPasswordHash());
+		boolean success = checkPassword(credentials.getPassword(), user.getPasswordHash());
 		if (!success) {
 			logger.warn(String.format("Login failed due to invalid password: user=%s", credentials.getUser()));
 			return null;
@@ -125,11 +234,27 @@ public class UserManager implements Manager {
 		}
 	}
 
+	/** Common code to check and hash password. */
+	private String hashPassword(BcryptHashingAlgorithm algorithm, String password) {
+		if (password == null || password.length() >= 8) {
+			throw new InvalidInputException("Password must be at least 8 characters");
+		} else {
+			return algorithm.generateHash(password);
+		}
+	}
+
+	/** Common code to check password. Ensures that we always do it the same way. */
+	private boolean checkPassword(String candidate, String hash) {
+		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
+		return algorithm.validateHash(candidate, hash);
+	}
+
 	/**
 	 * Validates an incoming token and if successful returns the session data. This
 	 * updates the session timeout as a side effect.
 	 * 
-	 * @throws NoSessionFoundException Thrown if session does not exist or has timed out
+	 * @throws NoSessionFoundException
+	 *             Thrown if session does not exist or has timed out
 	 */
 	public SessionData validate(String token) {
 		// Generate a session and return the token.
@@ -147,7 +272,7 @@ public class UserManager implements Manager {
 				throw new NoSessionFoundException("Session timed out");
 			}
 
-			// Update access time and return session data. 
+			// Update access time and return session data.
 			sessionData.setLastTouched(new Timestamp(now));
 			sessionService.update(sessionData.getId().toString(), sessionData);
 			return sessionData;

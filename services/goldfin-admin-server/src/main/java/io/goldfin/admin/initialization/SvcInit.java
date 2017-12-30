@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.shared.config.SystemInitParams;
 import io.goldfin.shared.tasks.ProgressReporter;
 import io.goldfin.shared.tasks.TaskStatus;
@@ -19,7 +20,7 @@ import joptsimple.OptionSet;
 /**
  * Command line tool to implement service management operations.
  */
-public class ServiceCtl {
+public class SvcInit {
 	private OptionParser parser = new OptionParser();
 	private OptionSet options;
 

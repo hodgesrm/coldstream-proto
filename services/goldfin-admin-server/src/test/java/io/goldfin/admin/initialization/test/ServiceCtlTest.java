@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.initialization.ServiceCtl;
+import io.goldfin.admin.initialization.SvcInit;
 import io.goldfin.shared.config.SystemInitParams;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.data.DataException;
@@ -47,7 +47,7 @@ public class ServiceCtlTest {
 		YamlHelper.writeToFile(initParamsFile, initParams);
 
 		// Run remove pre-emptively, ignoring errors.
-		ServiceCtl svctl = new ServiceCtl();
+		SvcInit svctl = new SvcInit();
 		String[] removeArgsNoErrors = { "remove", "--init-params", initParamsFile.getAbsolutePath(),
 				"--ignore-errors" };
 		svctl.run(removeArgsNoErrors);
