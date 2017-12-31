@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import io.goldfin.admin.exceptions.CommandError;
-import io.goldfin.admin.http.JsonRestClient;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.restapi.jetty.SecurityAuthenticator;
 import io.goldfin.shared.utilities.YamlHelper;
@@ -28,6 +27,9 @@ public class SvcClient implements CliContext {
 	public SvcClient() {
 		loadCommand(new CmdLogin());
 		loadCommand(new CmdLogout());
+		loadCommand(new CmdTenantCreate());
+		loadCommand(new CmdTenantDelete());
+		loadCommand(new CmdTenantList());
 	}
 
 	private void loadCommand(Command cmd) {
@@ -151,6 +153,24 @@ public class SvcClient implements CliContext {
 					.connect();
 		} catch (IOException e) {
 			throw new CommandError("Unable to read session file: " + sessionFile.getAbsolutePath(), e);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.goldfin.admin.cli.CliContext#getSession()
+	 */
+	@Override
+	public Session getSession() {
+		if (!sessionFile.canRead()) {
+			return null;
+		} else {
+			try {
+				return YamlHelper.readFromFile(sessionFile, Session.class);
+			} catch (IOException e) {
+				throw new CommandError("Unable to read session file: " + sessionFile.getAbsolutePath(), e);
+			}
 		}
 	}
 }

@@ -4,8 +4,9 @@
 # Use this file to prevent files from being overwritten by the generator.
 # The patterns follow closely to .gitignore or .dockerignore.
 
+src/main/java/io/goldfin/admin/service/api/service/impl/SessionApiServiceImpl.java 
 src/main/java/io/goldfin/admin/service/api/service/impl/TenantApiServiceImpl.java
-src/main/java/io/goldfin/admin/service/api/service/impl/LoginApiServiceImpl.java 
+src/main/java/io/goldfin/admin/service/api/service/impl/UserApiServiceImpl.java
 # Skip all model classes as they are shared. (Well maybe, this is an idea.)
 #src/gen/java/io/goldfin/shared/admin/api/model/**
 

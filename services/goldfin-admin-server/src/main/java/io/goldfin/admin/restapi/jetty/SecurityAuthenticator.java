@@ -81,7 +81,7 @@ public class SecurityAuthenticator implements Authenticator {
 
 		// If this is a login request we allow it to go through to complete
 		// authentication.
-		if ("/api/v1/login".equals(req.getPathInfo())) {
+		if ("/api/v1/session".equals(req.getPathInfo())) {
 			logger.info("Letting login request through...");
 			return Authentication.NOT_CHECKED;
 		}

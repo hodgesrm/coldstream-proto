@@ -16,5 +16,7 @@ public interface CliContext {
 
 	public void clearSession();
 	
+	public Session getSession();
+	
 	public MinimalRestClient getRestClient();
 }

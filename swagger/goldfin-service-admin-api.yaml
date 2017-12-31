@@ -23,7 +23,7 @@ securityDefinitions:
 security:
   - APIKeyHeader: []
 paths:
-  /login:
+  /session:
     post:
       tags:
         - security
@@ -47,12 +47,32 @@ paths:
             vnd-io-goldfin-auth:
               type: string
               description: >-
-                API key, should be submitted on future requests to show
+                Session key, should be submitted on future requests to show
                 authorization
         '400':
-          description: Tenant creation failed
+          description: Bad input
           schema:
             $ref: '#/definitions/ApiResponse'
+  '/session/{token}':
+    delete:
+      tags:
+        - security
+      summary: Logout from system
+      description: 'Delete session, which is no longer usable after this call'
+      operationId: logout
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: path
+          description: Session ID token
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
   /tenant:
     post:
       tags:

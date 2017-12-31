@@ -42,7 +42,7 @@ public class TenantManager implements Manager {
 		// Do nothing for now.
 	}
 
-	public String createTenant(TenantParameters tenantParams) {
+	public Tenant createTenant(TenantParameters tenantParams) {
 		TenantDataService tenantService = new TenantDataService();
 
 		// Check data.
@@ -89,7 +89,7 @@ public class TenantManager implements Manager {
 		}
 
 		// All done!
-		return tenantId;
+		return this.getTenant(tenantId);
 	}
 
 	public void deleteTenant(String id) {

@@ -39,6 +39,11 @@ public class RestRequest {
 		return this;
 	}
 
+	public RestRequest DELETE() {
+		method(RestHttpMethod.DELETE);
+		return this;
+	}
+
 	public RestRequest path(String path) {
 		this.path = path;
 		return this;

@@ -1,8 +1,8 @@
 package io.goldfin.admin.service.api.service;
 
 import io.goldfin.admin.service.api.model.*;
-import io.goldfin.admin.service.api.service.LoginApiService;
-import io.goldfin.admin.service.api.service.factories.LoginApiServiceFactory;
+import io.goldfin.admin.service.api.service.SessionApiService;
+import io.goldfin.admin.service.api.service.factories.SessionApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
@@ -25,22 +25,22 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.*;
 import javax.validation.constraints.*;
 
-@Path("/login")
+@Path("/session")
 
 
-@io.swagger.annotations.Api(description = "the login API")
+@io.swagger.annotations.Api(description = "the session API")
 
-public class LoginApi  {
-   private final LoginApiService delegate;
+public class SessionApi  {
+   private final SessionApiService delegate;
 
-   public LoginApi(@Context ServletConfig servletContext) {
-      LoginApiService delegate = null;
+   public SessionApi(@Context ServletConfig servletContext) {
+      SessionApiService delegate = null;
 
       if (servletContext != null) {
-         String implClass = servletContext.getInitParameter("LoginApi.implementation");
+         String implClass = servletContext.getInitParameter("SessionApi.implementation");
          if (implClass != null && !"".equals(implClass.trim())) {
             try {
-               delegate = (LoginApiService) Class.forName(implClass).newInstance();
+               delegate = (SessionApiService) Class.forName(implClass).newInstance();
             } catch (Exception e) {
                throw new RuntimeException(e);
             }
@@ -48,7 +48,7 @@ public class LoginApi  {
       }
 
       if (delegate == null) {
-         delegate = LoginApiServiceFactory.getLoginApi();
+         delegate = SessionApiServiceFactory.getSessionApi();
       }
 
       this.delegate = delegate;
@@ -62,10 +62,26 @@ public class LoginApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Tenant creation failed", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad input", response = void.class) })
     public Response loginByCredentials(@ApiParam(value = "Login credentials" ,required=true) LoginCredentials body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.loginByCredentials(body,securityContext);
+    }
+    @DELETE
+    @Path("/{token}")
+    
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Logout from system", notes = "Delete session, which is no longer usable after this call", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+    }, tags={ "security", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+    public Response logout(@ApiParam(value = "Session ID token",required=true) @PathParam("token") String token
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.logout(token,securityContext);
     }
 }

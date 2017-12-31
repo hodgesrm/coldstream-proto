@@ -227,10 +227,31 @@ public class UserManager implements Manager {
 		model.setToken(randomizer.base64RandomBytes(20));
 		try (Session session = makeSession(sessionService)) {
 			String id = sessionService.create(model);
-			logger.info(String.format("Successful login: user=%s, tenant=%s, session=%s", user.getUsername(),
-					user.getTenantId(), id));
+			logger.info(String.format("Successful login: user=%s, tenant=%s, session=%s, token=%s", user.getUsername(),
+					user.getTenantId(), id, model.getToken()));
 			session.commit();
 			return model.getToken();
+		}
+	}
+
+	public void logout(String token) {
+		SessionDataService sessionService = new SessionDataService();
+		SessionData sessionData = null;
+		// Look up the session using the token.
+		try (Session session = makeSession(sessionService)) {
+			sessionData = sessionService.getByToken(token);
+			if (sessionData == null) {
+				logger.warn(String.format("Logout failed on unknown session: token=%s", token));
+				return;
+			}
+		}
+
+		// Delete the session.
+		try (Session session = makeSession(sessionService)) {
+			sessionService.delete(sessionData.getId().toString());
+			session.commit();
+			logger.info(String.format("Successful logout: userId=%s, sessionId=%s, token=%s", sessionData.getUserId(),
+					sessionData.getId().toString(), token));
 		}
 	}
 

@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
 
-public abstract class LoginApiService {
+public abstract class SessionApiService {
     public abstract Response loginByCredentials(LoginCredentials body,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response logout(String token,SecurityContext securityContext) throws NotFoundException;
 }

@@ -50,11 +50,11 @@ public class CmdLogin implements Command {
 		credentials.setPassword(password);
 
 		// Login and get the header. Unlike other commands we have to instantiate the
-		// client directly since there's no session available.
+		// client directly since there is no session available.
 		MinimalRestClient client = new MinimalRestClient().host(host).port(port).prefix("/api/v1")
 				.verbose(ctx.options().has("verbose")).connect();
 		try {
-			RestRequest request = new RestRequest().POST().path("/login").content(credentials);
+			RestRequest request = new RestRequest().POST().path("/session").content(credentials);
 			RestResponse response = client.execute(request);
 			if (response.isError()) {
 				throw new CommandError(
@@ -69,6 +69,7 @@ public class CmdLogin implements Command {
 			session.setUsername(user);
 			session.setToken(token);
 			ctx.setSession(session);
+			System.out.println("Login succeeded");
 		} catch (RestException e) {
 			throw new CommandError("Rest command failed: " + e.getMessage(), e);
 		} finally {

@@ -8,5 +8,6 @@ package io.goldfin.admin.http;
  */
 public enum RestHttpMethod {
 	GET, 
-	POST
+	POST, 
+	DELETE
 }

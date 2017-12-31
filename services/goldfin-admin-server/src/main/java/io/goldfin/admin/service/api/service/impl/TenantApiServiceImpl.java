@@ -21,8 +21,8 @@ public class TenantApiServiceImpl extends TenantApiService {
 	public Response tenantCreate(TenantParameters body, SecurityContext securityContext) throws NotFoundException {
 		try {
 			TenantManager tm = ManagerRegistry.getInstance().getManager(TenantManager.class);
-			tm.createTenant(body);
-			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
+			Tenant tenant = tm.createTenant(body);
+			return Response.ok().entity(tenant).build();
 		} catch (Exception e) {
 			return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
 					.build();

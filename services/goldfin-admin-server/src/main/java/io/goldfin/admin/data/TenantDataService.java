@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.service.api.model.Tenant;
+import io.goldfin.admin.service.api.model.Tenant.StateEnum;
 import io.goldfin.shared.data.Row;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SqlDelete;
@@ -103,7 +104,7 @@ public class TenantDataService implements TransactionalService<Tenant> {
 		tenant.setId(row.getAsUUID("id"));
 		tenant.setName(row.getAsString("name"));
 		tenant.setDescription(row.getAsString("description"));
-		tenant.setState(Tenant.StateEnum.fromValue(row.getAsString("state")));
+		tenant.setState(StateEnum.fromValue(row.getAsString("state")));
 		tenant.setCreationDate(row.getAsTimestamp("creation_date").toString());
 		return tenant;
 	}

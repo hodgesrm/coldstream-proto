@@ -26,6 +26,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -131,6 +132,9 @@ public class MinimalRestClient {
 				((HttpPost) uriRequest).setEntity(restRequest.getHttpEntity());
 			}
 			break;
+		case DELETE:
+			uriRequest = new HttpDelete(url);
+			break;
 		default:
 			throw new RestRuntimeException("Missing HTTP method");
 		}
@@ -142,6 +146,15 @@ public class MinimalRestClient {
 			println(String.format("%s %s", restRequest.method.toString(), url));
 			for (Header header : uriRequest.getAllHeaders()) {
 				println(String.format("%s: %s", header.getName(), header.getValue()));
+			}
+			if (verbose) {
+				if (restRequest.contentString != null) {
+					println("Content:");
+					println(restRequest.contentString);
+				} else if (restRequest.contentBytes != null) {
+					println("Content:");
+					println("(bytes)");
+				}
 			}
 		}
 
@@ -167,7 +180,7 @@ public class MinimalRestClient {
 
 			// Buffer the entity if we have it.
 			HttpEntity entity = response.getEntity();
-			if (entity != null) {
+			if (entity != null && entity.getContentLength() > 0) {
 				InputStream contentInputStream = entity.getContent();
 				ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
 				int oneByte;
@@ -176,6 +189,13 @@ public class MinimalRestClient {
 				}
 				restResponse.content(byteOutputStream.toByteArray()).contentLength(entity.getContentLength())
 						.contentType(entity.getContentType().getValue());
+				if (verbose) {
+					if ("application/json".equals(restResponse.contentType)) {
+						String contentAsString = new String(restResponse.getContent(), "UTF-8");
+						println("Content:");
+						println(contentAsString);
+					}
+				}
 			}
 			return restResponse;
 		} catch (IOException e) {
@@ -203,7 +223,40 @@ public class MinimalRestClient {
 						responseEntityClass);
 			}
 		} catch (IOException e) {
+			throw new RestRuntimeException("REST POST invocation failed", e);
+		}
+	}
+
+	/**
+	 * Post a JSON message and receive a single JSON message in response.
+	 */
+	public <T> T get(String path, Class<T> responseEntityClass) throws RestException {
+		RestRequest restRequest = new RestRequest().GET().path(path);
+		restRequest.headers.put("ContentType", "application/json");
+		try {
+			RestResponse restResponse = this.execute(restRequest);
+			if (restResponse.code >= 300) {
+				throw new RestException(restResponse.code, restResponse.reason);
+			} else {
+				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
+						responseEntityClass);
+			}
+		} catch (IOException e) {
 			throw new RestRuntimeException("REST POST invocation failed");
+		}
+	}
+
+	/**
+	 * Delete a resource.
+	 */
+	public void delete(String path) throws RestException {
+		RestRequest restRequest = new RestRequest().DELETE().path(path);
+		restRequest.headers.put("ContentType", "application/json");
+		RestResponse restResponse = this.execute(restRequest);
+		if (restResponse.code >= 300) {
+			throw new RestException(restResponse.code, restResponse.reason);
+		} else {
+			return;
 		}
 	}
 
