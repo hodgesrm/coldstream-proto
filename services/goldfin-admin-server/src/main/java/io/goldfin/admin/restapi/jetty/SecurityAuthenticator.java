@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.data.SessionData;
-import io.goldfin.admin.exceptions.NoSessionFoundException;
+import io.goldfin.admin.exceptions.UnauthorizedException;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.UserManager;
 
@@ -61,7 +61,9 @@ public class SecurityAuthenticator implements Authenticator {
 	@Override
 	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
 			throws ServerAuthException {
-		logger.info("Validating request: " + this.getClass().getSimpleName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Validating request: " + this.getClass().getSimpleName());
+		}
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
@@ -71,18 +73,22 @@ public class SecurityAuthenticator implements Authenticator {
 
 		String msg = String.format("Request validation: path=%s, header=%s, mandatory=%s", req.getPathInfo(),
 				req.getHeader(API_KEY_HEADER), mandatory);
-		logger.info(msg);
+		if (logger.isDebugEnabled()) {
+			logger.debug(msg);
+		}
 
 		// In this case we let the call through. Still figuring out how to do this.
-		if (!mandatory) {
+		//if (!mandatory) {
 			// return new DeferredAuthentication(this);
-			return Authentication.UNAUTHENTICATED;
-		}
+		//	return Authentication.UNAUTHENTICATED;
+		//}
 
 		// If this is a login request we allow it to go through to complete
 		// authentication.
 		if ("/api/v1/session".equals(req.getPathInfo())) {
-			logger.info("Letting login request through...");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Letting login request through...");
+			}
 			return Authentication.NOT_CHECKED;
 		}
 
@@ -105,7 +111,7 @@ public class SecurityAuthenticator implements Authenticator {
 				subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
 				UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });
 				return new UserAuthentication(Constraint.ANY_AUTH, identity);
-			} catch (NoSessionFoundException e) {
+			} catch (UnauthorizedException e) {
 				logger.warn(String.format("No session available: token=%s, message=%s", apiKey, e.getMessage()));
 				if (logger.isDebugEnabled()) {
 					logger.debug("Extended session failure information", e);
@@ -120,18 +126,5 @@ public class SecurityAuthenticator implements Authenticator {
 				return Authentication.SEND_FAILURE;
 			}
 		}
-	}
-
-	/**
-	 * Look up user and create a user identity from the apiKey.
-	 */
-	private UserAuthentication userAuthentication(String apiKey) {
-		// Dummy for now.
-		Subject subject = new Subject();
-		AbstractLoginService.UserPrincipal userPrincipal = new AbstractLoginService.UserPrincipal("dummy", null);
-		subject.getPrincipals().add(userPrincipal);
-		subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
-		UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });
-		return new UserAuthentication(Constraint.ANY_AUTH, identity);
 	}
 }

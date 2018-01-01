@@ -6,7 +6,6 @@ package io.goldfin.admin.managers;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
-import io.goldfin.shared.data.TransactionalService;
 
 /**
  * Denotes a context that supplies configuration information to managers.
@@ -25,5 +24,11 @@ public interface ManagementContext {
 	 * Returns an administrative session with zero or more associated transactional
 	 * services.
 	 */
-	public Session adminSession(TransactionalService<?>... svcs);
+	public Session tenantSession(String tenantId);
+
+	/**
+	 * Returns an administrative session with zero or more associated transactional
+	 * services.
+	 */
+	public Session adminSession();
 }

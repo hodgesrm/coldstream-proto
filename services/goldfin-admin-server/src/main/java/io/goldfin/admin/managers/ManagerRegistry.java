@@ -9,11 +9,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SessionBuilder;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
-import io.goldfin.shared.data.TransactionalService;
 
 /**
  * Singleton class that provides access to managers.
@@ -96,15 +96,13 @@ public class ManagerRegistry implements ManagementContext {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * io.goldfin.admin.managers.ManagementContext#adminSession(io.goldfin.shared.
-	 * data.TransactionalService[])
+	 * @see io.goldfin.admin.managers.ManagementContext#adminSession()
 	 */
 	@Override
-	public Session adminSession(TransactionalService<?>... svcs) {
+	public Session adminSession() {
 		SimpleJdbcConnectionManager cm = getConnectionManager();
 		String schema = getAdminSchema();
-		return new SessionBuilder().connectionManager(cm).useSchema(schema).addServices(svcs).build();
+		return new SessionBuilder().connectionManager(cm).useSchema(schema).build();
 	}
 
 	/*
@@ -115,5 +113,24 @@ public class ManagerRegistry implements ManagementContext {
 	@Override
 	public ConnectionParams getConnectionParams() {
 		return this.connectionParams;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * io.goldfin.admin.managers.ManagementContext#tenantSession(java.lang.String)
+	 */
+	@Override
+	public Session tenantSession(String tenantId) {
+		TenantManager tenantManager = getManager(TenantManager.class);
+		Tenant tenant = tenantManager.getTenant(tenantId);
+		if (tenant == null) {
+			throw new RuntimeException(String.format("Tenant ID not found: id=%s", tenantId));
+		} else {
+			SimpleJdbcConnectionManager cm = getConnectionManager();
+			String tenantSchema = "tenant_" + tenant.getName();
+			return new SessionBuilder().connectionManager(cm).useSchema(tenantSchema).build();
+		}
 	}
 }

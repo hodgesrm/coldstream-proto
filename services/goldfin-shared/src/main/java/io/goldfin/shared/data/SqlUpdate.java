@@ -29,6 +29,10 @@ public class SqlUpdate {
 	public SqlUpdate() {
 	}
 
+	public int updatedColumnsSize() {
+		return names.size();
+	}
+	
 	public SqlUpdate table(String table) {
 		this.table = table;
 		return this;

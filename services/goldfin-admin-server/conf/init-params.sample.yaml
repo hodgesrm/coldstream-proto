@@ -16,4 +16,4 @@ serviceSchema: "admin"
 
 # Service sysadmin user name and password. 
 sysUser: "sysadmin"
-sysPassword: "secret"
+sysPassword: "secret12"

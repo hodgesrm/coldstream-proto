@@ -27,6 +27,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
@@ -132,6 +133,7 @@ public class App {
 		registry.initialize(serviceConnectionParams);
 		registry.addManager(new UserManager());
 		registry.addManager(new TenantManager());
+		registry.addManager(new InvoiceManager());
 		registry.start();
 	}
 

@@ -17,7 +17,7 @@ import io.goldfin.admin.data.UserData;
 import io.goldfin.admin.data.UserDataService;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
-import io.goldfin.admin.exceptions.NoSessionFoundException;
+import io.goldfin.admin.exceptions.UnauthorizedException;
 import io.goldfin.admin.service.api.model.LoginCredentials;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.admin.service.api.model.UserParameters;
@@ -56,7 +56,7 @@ public class UserManager implements Manager {
 		// Do nothing for now.
 	}
 
-	public String createUser(UserParameters userParams) {
+	public User createUser(UserParameters userParams) {
 		// Ensure that either the user is an administrator or the user exists.
 		if ("ADMIN".equalsIgnoreCase(userParams.getRoles())) {
 			if (userParams.getTenantId() != null) {
@@ -89,7 +89,7 @@ public class UserManager implements Manager {
 		try (Session session = makeSession(userService)) {
 			String id = userService.create(model);
 			session.commit();
-			return id;
+			return this.getUser(id);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class UserManager implements Manager {
 
 		// See if user exists.
 		UserData userRecord;
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			userRecord = userService.get(id);
 			if (userRecord == null) {
 				throw new EntityNotFoundException("User does not exist");
@@ -108,7 +108,7 @@ public class UserManager implements Manager {
 		// Delete the user. This will cascade through to sessions
 		// automatically.
 		logger.info("Deleting user: id=" + id + " username=" + userRecord.getUsername());
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			userService.delete(id);
 			session.commit();
 		}
@@ -119,7 +119,7 @@ public class UserManager implements Manager {
 
 		// See if user exists.
 		UserData userRecord;
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			userRecord = userService.get(id);
 			if (userRecord == null) {
 				throw new EntityNotFoundException("User does not exist");
@@ -129,7 +129,7 @@ public class UserManager implements Manager {
 		// Apply parameters to the body and update.
 		userRecord.setUsername(userParams.getUsername());
 		userRecord.setRoles(userParams.getRoles());
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			userService.update(id, userRecord);
 			session.commit();
 		}
@@ -140,7 +140,7 @@ public class UserManager implements Manager {
 
 		// See if user exists.
 		UserData userRecord;
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			userRecord = userService.get(id);
 			if (userRecord == null) {
 				throw new EntityNotFoundException("User does not exist");
@@ -160,7 +160,7 @@ public class UserManager implements Manager {
 		// Apply parameters to user record and update.
 		userRecord.setPasswordHash(passwordHash);
 		userRecord.setAlgorithm(algorithm.getName());
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			userService.update(id, userRecord);
 			session.commit();
 		}
@@ -168,7 +168,7 @@ public class UserManager implements Manager {
 
 	public User getUser(String id) {
 		UserDataService userService = new UserDataService();
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			UserData userData = userService.get(id);
 			if (userData == null) {
 				throw new EntityNotFoundException("User does not exist");
@@ -180,7 +180,7 @@ public class UserManager implements Manager {
 
 	public List<User> getAllUsers() {
 		UserDataService userService = new UserDataService();
-		try (Session session = context.adminSession(userService)) {
+		try (Session session = context.adminSession().enlist(userService)) {
 			List<UserData> userData = userService.getAll();
 			List<User> users = new ArrayList<User>(userData.size());
 			for (UserData userDatum : userData) {
@@ -208,7 +208,7 @@ public class UserManager implements Manager {
 			user = userService.getByUsername(credentials.getUser());
 			if (user == null) {
 				logger.warn(String.format("Login failed due to unknown user: user=%s", credentials.getUser()));
-				return null;
+				throw new UnauthorizedException();
 			}
 		}
 
@@ -217,7 +217,7 @@ public class UserManager implements Manager {
 		boolean success = checkPassword(credentials.getPassword(), user.getPasswordHash());
 		if (!success) {
 			logger.warn(String.format("Login failed due to invalid password: user=%s", credentials.getUser()));
-			return null;
+			throw new UnauthorizedException();
 		}
 
 		// Generate a session and return the token.
@@ -257,7 +257,7 @@ public class UserManager implements Manager {
 
 	/** Common code to check and hash password. */
 	private String hashPassword(BcryptHashingAlgorithm algorithm, String password) {
-		if (password == null || password.length() >= 8) {
+		if (password == null || password.length() < 8) {
 			throw new InvalidInputException("Password must be at least 8 characters");
 		} else {
 			return algorithm.generateHash(password);
@@ -274,7 +274,7 @@ public class UserManager implements Manager {
 	 * Validates an incoming token and if successful returns the session data. This
 	 * updates the session timeout as a side effect.
 	 * 
-	 * @throws NoSessionFoundException
+	 * @throws UnauthorizedException
 	 *             Thrown if session does not exist or has timed out
 	 */
 	public SessionData validate(String token) {
@@ -284,13 +284,13 @@ public class UserManager implements Manager {
 			// Check session and ensure it has not expired.
 			SessionData sessionData = sessionService.getByToken(token);
 			if (sessionData == null) {
-				throw new NoSessionFoundException("Invalid session token");
+				throw new UnauthorizedException("Invalid session token");
 			}
 			long now = System.currentTimeMillis();
 			long expiration = sessionData.getLastTouched().getTime() + LOGIN_TIMEOUT_MILLIS;
 			if (now > expiration) {
 				logger.warn(String.format("Login timeout: userId=%s", sessionData.getUserId()));
-				throw new NoSessionFoundException("Session timed out");
+				throw new UnauthorizedException("Session timed out");
 			}
 
 			// Update access time and return session data.

@@ -25,11 +25,15 @@ public class SvcClient implements CliContext {
 	private File sessionFile = new File("svc-client-session.yaml");
 
 	public SvcClient() {
+		loadCommand(new CmdInvoiceList());
 		loadCommand(new CmdLogin());
 		loadCommand(new CmdLogout());
 		loadCommand(new CmdTenantCreate());
 		loadCommand(new CmdTenantDelete());
 		loadCommand(new CmdTenantList());
+		loadCommand(new CmdUserCreate());
+		loadCommand(new CmdUserDelete());
+		loadCommand(new CmdUserList());
 	}
 
 	private void loadCommand(Command cmd) {
@@ -50,7 +54,7 @@ public class SvcClient implements CliContext {
 			return;
 		}
 		Command command = commands.get(commandName);
-		if (commandName == null) {
+		if (command == null) {
 			throw new CommandError(String.format("Unknown command: %s", commandName));
 		}
 

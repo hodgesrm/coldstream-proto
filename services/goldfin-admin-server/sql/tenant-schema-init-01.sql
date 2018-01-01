@@ -9,13 +9,6 @@ CREATE TABLE IF NOT EXISTS invoice_envelopes (
   source json, 
   ocrscan text,
   content json,
-  vendor uuid, 
-  identifier varchar(100), 
-  effective_date timestamp, 
-  subtotal numeric(12,2),
-  tax numeric(12,2),
-  total numeric(12,2), 
-  currency varchar(10),
   creation_date timestamp DEFAULT current_timestamp
 )
 ;

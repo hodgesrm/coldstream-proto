@@ -5,6 +5,10 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.service.api.model.Tenant;
@@ -17,6 +21,9 @@ import io.goldfin.admin.service.api.service.TenantApiService;
  * Perform operations on tenants.
  */
 public class TenantApiServiceImpl extends TenantApiService {
+	static private final Logger logger = LoggerFactory.getLogger(TenantApiServiceImpl.class);
+	ExceptionHelper helper = new ExceptionHelper(logger);
+
 	@Override
 	public Response tenantCreate(TenantParameters body, SecurityContext securityContext) throws NotFoundException {
 		try {
@@ -24,8 +31,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 			Tenant tenant = tm.createTenant(body);
 			return Response.ok().entity(tenant).build();
 		} catch (Exception e) {
-			return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
-					.build();
+			return helper.toApiResponse(e);
 		}
 	}
 
@@ -36,8 +42,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 			tm.deleteTenant(id);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
 		} catch (Exception e) {
-			return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
-					.build();
+			return helper.toApiResponse(e);
 		}
 	}
 
@@ -48,8 +53,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 			Tenant tenant = tm.getTenant(id);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(tenant).build();
 		} catch (Exception e) {
-			return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
-					.build();
+			return helper.toApiResponse(e);
 		}
 	}
 
@@ -60,8 +64,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 			List<Tenant> tenants = tm.getAllTenants();
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(tenants).build();
 		} catch (Exception e) {
-			return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
-					.build();
+			return helper.toApiResponse(e);
 		}
 	}
 

@@ -51,7 +51,7 @@ public class TenantManager implements Manager {
 		}
 
 		// See if tenant exists.
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			if (tenantService.getByName(tenantParams.getName()) != null) {
 				throw new InvalidInputException("Tenant already exists");
 			}
@@ -64,7 +64,7 @@ public class TenantManager implements Manager {
 		model.setDescription(tenantParams.getDescription());
 		model.setState(Tenant.StateEnum.PENDING);
 		String tenantId;
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			tenantId = tenantService.create(model);
 			session.commit();
 		}
@@ -83,7 +83,7 @@ public class TenantManager implements Manager {
 		// Update tenant to be in good standing.
 		logger.info("Enabling tenant: id=" + tenantId);
 		model.setState(Tenant.StateEnum.ENABLED);
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			tenantService.update(tenantId, model);
 			session.commit();
 		}
@@ -97,7 +97,7 @@ public class TenantManager implements Manager {
 
 		// See if tenant exists.
 		Tenant tenant;
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			tenant = tenantService.get(id);
 			if (tenant == null) {
 				throw new EntityNotFoundException("Tenant does not exist");
@@ -107,7 +107,7 @@ public class TenantManager implements Manager {
 		// Disable the tenant since it's going away.
 		logger.info("Disabling tenant: id=" + id + " name=" + tenant.getName());
 		tenant.setState(Tenant.StateEnum.DISABLED);
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			tenantService.update(id, tenant);
 			session.commit();
 		}
@@ -124,7 +124,7 @@ public class TenantManager implements Manager {
 
 		// Delete the tenant.
 		logger.info("Deleting tenant: id=" + id + " name=" + tenant.getName());
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			tenantService.delete(id);
 			session.commit();
 		}
@@ -132,7 +132,7 @@ public class TenantManager implements Manager {
 
 	public Tenant getTenant(String id) {
 		TenantDataService tenantService = new TenantDataService();
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			Tenant tenant = tenantService.get(id);
 			if (tenant == null) {
 				throw new EntityNotFoundException("Tenant does not exist");
@@ -143,7 +143,7 @@ public class TenantManager implements Manager {
 
 	public List<Tenant> getAllTenants() {
 		TenantDataService tenantService = new TenantDataService();
-		try (Session session = context.adminSession(tenantService)) {
+		try (Session session = context.adminSession().enlist(tenantService)) {
 			return tenantService.getAll();
 		}
 	}

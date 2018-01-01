@@ -27,6 +27,14 @@ public class Session implements AutoCloseable {
 		return schema;
 	}
 
+	/** Add a service to the transaction session. */
+	public Session enlist(TransactionalService<?>... svcs) {
+		for (TransactionalService<?> svc : svcs) {
+			svc.setSession(this);
+		}
+		return this;
+	}
+
 	// Transaction management.
 	public void begin() throws DataException {
 		try {
