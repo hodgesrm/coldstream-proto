@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.postgresql.util.PGobject;
+
 /**
  * Represents data for a single SQL row.
  */
@@ -29,7 +31,12 @@ public class Row {
 	}
 
 	public String getAsString(int index) {
-		return (String) get(index);
+		Object o = get(index);
+		if (o instanceof PGobject) {
+			return ((PGobject) o).getValue();
+		} else {
+			return (String) o;
+		}
 	}
 
 	public Integer getAsInt(int index) {
@@ -41,7 +48,12 @@ public class Row {
 	}
 
 	public String getAsString(String name) {
-		return (String) get(name);
+		Object o = get(name);
+		if (o instanceof PGobject) {
+			return ((PGobject) o).getValue();
+		} else {
+			return (String) o;
+		}
 	}
 
 	public UUID getAsUUID(String name) {

@@ -8,9 +8,6 @@ import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
 import joptsimple.OptionParser;
 
-/**
- * Implements login.
- */
 public class CmdUserDelete implements Command {
 	private OptionParser parser = new OptionParser();
 

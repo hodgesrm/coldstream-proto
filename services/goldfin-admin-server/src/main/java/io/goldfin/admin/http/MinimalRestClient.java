@@ -31,6 +31,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
@@ -38,6 +39,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 
 import io.goldfin.shared.utilities.JsonHelper;
+import io.goldfin.shared.utilities.SerializationException;
 
 /**
  * Implements a simple REST client library that exchanges JSON-encoded messages
@@ -73,8 +75,6 @@ public class MinimalRestClient {
 						return true;
 					}
 				});
-		// Set the content type to 'application/json' for all requests.
-		defaultHeader("Content-Type", "application/json");
 	}
 
 	public MinimalRestClient defaultHeader(String name, String value) {
@@ -148,12 +148,25 @@ public class MinimalRestClient {
 				println(String.format("%s: %s", header.getName(), header.getValue()));
 			}
 			if (verbose) {
-				if (restRequest.contentString != null) {
+				if (restRequest.hasHttpEntity()) {
+					HttpEntity httpEntity = restRequest.getHttpEntity();
+					println(String.format("Content Length: %d", httpEntity.getContentLength()));
+					println(String.format("Content Type: %s", httpEntity.getContentType()));
+					println(String.format("Content Encoding: %s", httpEntity.getContentEncoding()));
 					println("Content:");
-					println(restRequest.contentString);
-				} else if (restRequest.contentBytes != null) {
-					println("Content:");
-					println("(bytes)");
+					if (httpEntity instanceof StringEntity) {
+						ByteArrayOutputStream output = new ByteArrayOutputStream();
+						try {
+							((StringEntity) httpEntity).writeTo(output);
+							output.close();
+							String stringContent = new String(output.toByteArray(), "UTF-8");
+							println(stringContent);
+						} catch (IOException e) {
+							println(String.format("(Unable to print content, msg=%s)", e.toString()));
+						}
+					} else {
+						println("(bytes)");
+					}
 				}
 			}
 		}
@@ -210,7 +223,6 @@ public class MinimalRestClient {
 	 */
 	public <T> T post(String path, Object requestEntity, Class<T> responseEntityClass) throws RestException {
 		RestRequest restRequest = new RestRequest().method(RestHttpMethod.POST).path(path);
-		restRequest.headers.put("ContentType", "application/json");
 		try {
 			if (requestEntity != null) {
 				restRequest.content(requestEntity);
@@ -222,7 +234,7 @@ public class MinimalRestClient {
 				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
 						responseEntityClass);
 			}
-		} catch (IOException e) {
+		} catch (SerializationException e) {
 			throw new RestRuntimeException("REST POST invocation failed", e);
 		}
 	}
@@ -241,7 +253,7 @@ public class MinimalRestClient {
 				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
 						responseEntityClass);
 			}
-		} catch (IOException e) {
+		} catch (SerializationException e) {
 			throw new RestRuntimeException("REST POST invocation failed");
 		}
 	}

@@ -5,10 +5,8 @@ package io.goldfin.shared.data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +17,14 @@ import org.slf4j.LoggerFactory;
 public class SqlInsert {
 	static final Logger logger = LoggerFactory.getLogger(SqlInsert.class);
 
+	class InsertValue {
+		String name;
+		Object value;
+		boolean json;
+	};
+
 	private String table;
-	private Map<String, Object> values = new HashMap<String, Object>();
-	private List<String> names = new LinkedList<String>();
+	private List<InsertValue> values = new LinkedList<InsertValue>();
 
 	public SqlInsert() {
 	}
@@ -32,10 +35,15 @@ public class SqlInsert {
 	}
 
 	public SqlInsert put(String name, Object value) {
-		if (values.get(name) == null) {
-			names.add(name);
-		}
-		values.put(name, value);
+		return put(name, value, false);
+	}
+
+	public SqlInsert put(String name, Object value, boolean json) {
+		InsertValue iv = new InsertValue();
+		iv.name = name;
+		iv.value = value;
+		iv.json = json;
+		values.add(iv);
 		return this;
 	}
 
@@ -46,13 +54,18 @@ public class SqlInsert {
 			String format = "INSERT INTO %s (%s) values (%s)";
 			StringBuffer columnList = new StringBuffer();
 			StringBuffer paramList = new StringBuffer();
-			for (int i = 0; i < names.size(); i++) {
+			for (int i = 0; i < values.size(); i++) {
+				InsertValue iv = values.get(i);
 				if (i > 0) {
 					columnList.append(", ");
 					paramList.append(", ");
 				}
-				columnList.append(names.get(i));
-				paramList.append("?");
+				columnList.append(iv.name);
+				if (iv.json) {
+					paramList.append("?::JSON");
+				} else {
+					paramList.append("?");
+				}
 			}
 			String sql = String.format(format, table, columnList, paramList);
 			if (logger.isDebugEnabled()) {
@@ -62,8 +75,8 @@ public class SqlInsert {
 			// Allocate prepared statement and assign parameter values.
 			pstmt = session.getConnection().prepareStatement(sql);
 			int index = 1;
-			for (String name : names) {
-				pstmt.setObject(index++, values.get(name));
+			for (InsertValue iv : values) {
+				pstmt.setObject(index++, iv.value);
 			}
 
 			// Execute and return the result.

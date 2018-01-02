@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.InvoiceEnvelope;
 import io.goldfin.admin.service.api.model.InvoiceEnvelope.StateEnum;
 import io.goldfin.shared.data.Row;
@@ -20,6 +21,7 @@ import io.goldfin.shared.data.SqlSelect;
 import io.goldfin.shared.data.SqlUpdate;
 import io.goldfin.shared.data.TabularResultSet;
 import io.goldfin.shared.data.TransactionalService;
+import io.goldfin.shared.utilities.JsonHelper;
 
 /**
  * Service methods for working with invoice_envelopes.
@@ -42,7 +44,8 @@ public class InvoiceEnvelopeDataService implements TransactionalService<InvoiceE
 		}
 		UUID id = UUID.randomUUID();
 		new SqlInsert().table("invoice_envelopes").put("id", id).put("description", model.getDescription())
-				.put("tags", model.getTags()).put("state", model.getState().toString()).run(session);
+				.put("tags", model.getTags()).put("state", model.getState().toString())
+				.put("source", toJson(model.getSource()), true).run(session);
 		return id.toString();
 	}
 
@@ -99,6 +102,24 @@ public class InvoiceEnvelopeDataService implements TransactionalService<InvoiceE
 		env.setDescription(row.getAsString("description"));
 		env.setTags(row.getAsString("tags"));
 		env.setState(StateEnum.fromValue(row.getAsString("state")));
+		env.setSource(fromJson(row.getAsString("source"), Document.class));
+		env.setCreationDate(row.getAsTimestamp("creation_date").toString());
 		return env;
+	}
+
+	private String toJson(Object o) {
+		if (o == null) {
+			return null;
+		} else {
+			return JsonHelper.writeToString(o);
+		}
+	}
+
+	private <T> T fromJson(String s, Class<T> ref) {
+		if (s == null) {
+			return null;
+		} else {
+			return (T) JsonHelper.readFromString(s, ref);
+		}
 	}
 }

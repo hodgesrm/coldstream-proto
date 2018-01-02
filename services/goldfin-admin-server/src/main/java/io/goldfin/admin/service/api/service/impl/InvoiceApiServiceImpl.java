@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.service.api.model.InvoiceEnvelope;
 import io.goldfin.admin.service.api.model.InvoiceEnvelopeParameters;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
@@ -29,14 +30,25 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	@Override
 	public Response invoiceCreate(InputStream fileInputStream, FormDataContentDisposition fileDetail,
 			String description, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
+			InvoiceEnvelope invoice = im.createInvoiceEnvelope(securityContext.getUserPrincipal(), fileInputStream,
+					fileDetail.getFileName(), description);
+			return Response.ok().entity(invoice).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override
 	public Response invoiceDelete(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
+			im.deleteInvoiceEnvelope(securityContext.getUserPrincipal(), id);
+			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override

@@ -3,8 +3,6 @@
  */
 package io.goldfin.admin.cli;
 
-import java.io.IOException;
-
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
@@ -36,8 +34,6 @@ public class CmdUserList implements Command {
 			User[] users = client.get("/user", new User[0].getClass());
 			String userListing = JsonHelper.writeToString(users);
 			System.out.println(userListing);
-		} catch (IOException e) {
-			throw new CommandError("Unable to print JSON");
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {

@@ -3,13 +3,16 @@
  */
 package io.goldfin.admin.http;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 import io.goldfin.shared.utilities.JsonHelper;
 
@@ -20,9 +23,11 @@ public class RestRequest {
 	RestHttpMethod method;
 	String path;
 	Map<String, String> headers = new HashMap<String, String>();
-	byte[] contentBytes;
-	String contentString;
-	String contentType;
+	HttpEntity httpEntity;
+	MultipartEntityBuilder multipartBuilder;
+
+	public RestRequest() {
+	}
 
 	public RestRequest method(RestHttpMethod method) {
 		this.method = method;
@@ -54,36 +59,67 @@ public class RestRequest {
 		return this;
 	}
 
+	/** Method to set binary content. This must be the only content operation. */
 	public RestRequest content(byte[] content) {
-		this.contentBytes = content;
+		assertNoContent();
+		httpEntity = new ByteArrayEntity(content);
 		return this;
 	}
 
+	/** Method to set object content, which will be serialized to JSON. */
 	public RestRequest content(Object o) {
-		try {
-			this.contentString = JsonHelper.writeToString(o);
-			return contentType("application/json");
-		} catch (IOException e) {
-			throw new RestRuntimeException("Unable to serialize object to JSON: " + o.getClass().getName(), e);
-		}
+		assertNoContent();
+		httpEntity = new StringEntity(JsonHelper.writeToString(o), "UTF-8");
+		header("Content-Type", "application/json");
+		return this;
 	}
 
-	public RestRequest contentType(String contentType) {
-		this.contentType = contentType;
+	/** Method to start a multi-part request. */
+	public RestRequest multipart() {
+		assertNoContent();
+		multipartBuilder = MultipartEntityBuilder.create();
+		multipartBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+		return this;
+	}
+
+	/** Add file to multipart request. */
+	public RestRequest addFile(String name, File file) {
+		assertMultipart();
+		multipartBuilder.addBinaryBody(name, file, ContentType.DEFAULT_BINARY, file.getName());
+		return this;
+	}
+
+	public RestRequest addText(String name, String value) {
+		assertMultipart();
+		multipartBuilder.addTextBody(name, value);
 		return this;
 	}
 
 	public boolean hasHttpEntity() {
-		return contentString != null || contentBytes != null;
+		return httpEntity != null || multipartBuilder != null;
 	}
-	
+
 	public HttpEntity getHttpEntity() {
-		if (contentString != null) {
-			return new StringEntity(contentString, "UTF-8");
-		} else if (contentBytes != null) {
-			return new ByteArrayEntity(contentBytes);
+		if (httpEntity != null) {
+			return httpEntity;
+		} else if (multipartBuilder != null) {
+			httpEntity = multipartBuilder.build();
+			multipartBuilder = null;
+			return httpEntity;
 		} else {
 			return null;
+		}
+	}
+
+	private void assertNoContent() {
+		if (this.httpEntity != null || this.multipartBuilder != null) {
+			throw new UnsupportedOperationException("Content may not be set twice");
+		}
+	}
+
+	private void assertMultipart() {
+		if (this.multipartBuilder == null) {
+			throw new UnsupportedOperationException("No multipart builder found");
 		}
 	}
 }

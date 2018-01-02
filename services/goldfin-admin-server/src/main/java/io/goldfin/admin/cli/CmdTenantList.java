@@ -3,8 +3,6 @@
  */
 package io.goldfin.admin.cli;
 
-import java.io.IOException;
-
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
@@ -12,9 +10,6 @@ import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.shared.utilities.JsonHelper;
 import joptsimple.OptionParser;
 
-/**
- * Implements login.
- */
 public class CmdTenantList implements Command {
 	private OptionParser parser = new OptionParser();
 
@@ -39,8 +34,6 @@ public class CmdTenantList implements Command {
 			Tenant[] tenants = client.get("/tenant", new Tenant[0].getClass());
 			String tenantListing = JsonHelper.writeToString(tenants);
 			System.out.println(tenantListing);
-		} catch (IOException e) {
-			throw new CommandError("Unable to print JSON");
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {

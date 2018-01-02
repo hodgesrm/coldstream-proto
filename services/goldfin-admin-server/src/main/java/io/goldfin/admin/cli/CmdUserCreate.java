@@ -3,7 +3,6 @@
  */
 package io.goldfin.admin.cli;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import io.goldfin.admin.exceptions.CommandError;
@@ -14,9 +13,6 @@ import io.goldfin.admin.service.api.model.UserParameters;
 import io.goldfin.shared.utilities.JsonHelper;
 import joptsimple.OptionParser;
 
-/**
- * Implements login.
- */
 public class CmdUserCreate implements Command {
 	private OptionParser parser = new OptionParser();
 
@@ -58,8 +54,6 @@ public class CmdUserCreate implements Command {
 			User user = client.post("/user", params, User.class);
 			String userListing = JsonHelper.writeToString(user);
 			System.out.println(userListing);
-		} catch (IOException e) {
-			throw new CommandError("Unable to print JSON");
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {
