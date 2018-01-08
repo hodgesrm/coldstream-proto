@@ -1,0 +1,278 @@
+swagger: '2.0'
+info:
+  description: REST API for Goldfin Storage Microservice
+  version: 1.0.0
+  title: Goldfin Storage API
+  contact:
+    email: info@goldfin.io
+host: storage.goldfin.io
+basePath: /api/v1
+tags:
+  - name: storage
+    description: Storage management
+schemes:
+  - https
+securityDefinitions:
+  APIKeyHeader:
+    type: apiKey
+    in: header
+    name: vnd-io-goldfin-jwt
+security:
+  - APIKeyHeader: []
+paths:
+  /tenant-data:
+    post:
+      tags:
+        - storage
+      summary: Create storage folder for tenant
+      description: 'Create storage folder for tenant, failing if the folder exists'
+      operationId: tenantCreate
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: tenant
+          in: body
+          description: tenant information
+          schema:
+            $ref: '#/definitions/TenantInfo'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Tenant creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - storage
+      summary: List tenant storage folder
+      description: Return a list of tenant folders
+      operationId: tenantShowAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TenantInfo'
+  '/tenant-data/{tenantId}':
+    get:
+      tags:
+        - storage
+      summary: Show tenant metadata
+      description: Show tenant metadata
+      operationId: tenantShow
+      produces:
+        - application/json
+      parameters:
+        - name: tenantId
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/TenantInfo'
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - storage
+      summary: Delete a tenant
+      description: Delete a tenant
+      operationId: tenantDelete
+      parameters:
+        - name: tenantId
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/tenant-data/{tenantId}/document':
+    get:
+      tags:
+        - storage
+      summary: List tenant documents
+      description: Show tenant document metadata
+      operationId: tenantDocumentShowall
+      produces:
+        - application/json
+      parameters:
+        - name: tenantId
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Document'
+        '404':
+          description: Not Found
+    post:
+      tags:
+        - storage
+      summary: Create a new document for tenant
+      description: Upload a new document including metadata
+      operationId: tenantDocumentCreate
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: tenantId
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+        - name: name
+          in: formData
+          description: Document file name
+          type: string
+        - name: description
+          in: formData
+          description: Description of the document
+          type: string
+        - name: file
+          in: formData
+          description: Document file
+          required: true
+          type: file
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Document'
+        '400':
+          description: Document creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+  '/tenant-data/{tenantId}/document/{id}':
+    head:
+      tags:
+        - storage
+      summary: Show document metadata
+      description: Return document metadadata
+      operationId: tenantDocumentMetadata
+      produces:
+        - application/json
+      parameters:
+        - name: tenantId
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Document'
+        '404':
+          description: Not Found
+    get:
+      tags:
+        - storage
+      summary: Download document content
+      description: Return binary data
+      operationId: tenantDocumentContent
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: tenantId
+          in: path
+          description: Tenant ID
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            type: file
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - storage
+      summary: Delete a document
+      description: Delete a single document
+      operationId: tenantDocumentDelete
+      parameters:
+        - name: tenantId
+          in: path
+          description: Document ID
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+definitions:
+  TenantInfo:
+    description: Header information for a single tenant
+    type: object
+    properties:
+      tenantId:
+        type: string
+        description: Tenant UUID
+      name:
+        type: string
+        description: Tenant common name
+  Document:
+    description: 'A document, for example a PDF file'
+    type: object
+    properties:
+      id:
+        type: string
+        description: Document ID
+      name:
+        type: string
+        description: Name of the document
+      locator:
+        type: string
+        format: url
+        description: URL of the source
+      thumbprint:
+        type: string
+        description: SHA-256 thumbprint of object content
+      creationDate:
+        type: string
+        description: Date file was created
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
