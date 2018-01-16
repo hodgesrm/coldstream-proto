@@ -7,7 +7,13 @@
 # Do not regen top level files. 
 Dockerfile
 requirements.txt
+test-requirements.txt
 git_push.sh
+setup.py
+tox.ini
+
+# Do not regen controller file(s). 
+goldfin_storage/controllers/storage_controller.py
 
 # As an example, the C# client generator defines ApiClient.cs.
 # You can make changes and tell Swagger Codgen to ignore just this file by uncommenting the following line:

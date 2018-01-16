@@ -1,4 +1,7 @@
 import connexion
+import logging
+import flask
+from goldfin_storage import s3
 from goldfin_storage.models.api_response import ApiResponse
 from goldfin_storage.models.document import Document
 from goldfin_storage.models.tenant_info import TenantInfo
@@ -7,19 +10,28 @@ from typing import List, Dict
 from six import iteritems
 from ..util import deserialize_date, deserialize_datetime
 
+# Our logger.
+logger = logging.getLogger(__name__)
+
 
 def tenant_create(tenant=None):
     """
     Create storage folder for tenant
     Create storage folder for tenant, failing if the folder exists
     :param tenant: tenant information
-    :type tenant: dict | bytes
+    :type tenant: TenantInfo
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        tenant = TenantInfo.from_dict(connexion.request.get_json())
-    return 'do some magic!'
+    # if connexion.request.is_json:
+    #    tenant = TenantInfo.from_dict(connexion.request.get_json())
+    logging.info("Create tenant: {0}".format(str(tenant)))
+    if tenant is None:
+        flask.abort(400, "Missing tenant definition")
+
+    # OK, now we need to create the tenant definition.
+    server = s3.initializeFromEnvironmental()
+    return server.tenant_create(tenant)
 
 
 def tenant_delete(tenantId):
@@ -31,7 +43,8 @@ def tenant_delete(tenantId):
 
     :rtype: None
     """
-    return 'do some magic!'
+    server = s3.initializeFromEnvironmental()
+    server.tenant_delete(tenantId)
 
 
 def tenant_document_content(tenantId, id):
@@ -45,7 +58,8 @@ def tenant_document_content(tenantId, id):
 
     :rtype: file
     """
-    return 'do some magic!'
+    server = s3.initializeFromEnvironmental()
+    return server.tenant_document_content(tenantId, id)
 
 
 def tenant_document_create(tenantId, file, name=None, description=None):
@@ -63,7 +77,8 @@ def tenant_document_create(tenantId, file, name=None, description=None):
 
     :rtype: Document
     """
-    return 'do some magic!'
+    server = s3.initializeFromEnvironmental()
+    return server.tenant_document_create(tenantId, file.stream, name, description, file.content_length, file.content_type)
 
 
 def tenant_document_delete(tenantId, id):
@@ -77,7 +92,7 @@ def tenant_document_delete(tenantId, id):
 
     :rtype: None
     """
-    return 'do some magic!'
+    s3.s3server.tenant_delete_document(tenantId, id)
 
 
 def tenant_document_metadata(tenantId, id):
@@ -115,7 +130,8 @@ def tenant_show(tenantId):
 
     :rtype: TenantInfo
     """
-    return 'do some magic!'
+    server = s3.initializeFromEnvironmental()
+    return server.tenant_show(tenantId)
 
 
 def tenant_show_all():

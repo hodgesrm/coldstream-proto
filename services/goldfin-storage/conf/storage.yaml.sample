@@ -1,0 +1,6 @@
+[aws]
+access_key_id = <ID>
+secret_access_key = <KEY>
+[s3]
+bucket = <NAME>
+location = <AWS Location>
