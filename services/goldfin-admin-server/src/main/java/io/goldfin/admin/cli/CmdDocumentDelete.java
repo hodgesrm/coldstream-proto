@@ -6,22 +6,21 @@ package io.goldfin.admin.cli;
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
-import io.goldfin.admin.service.api.model.Invoice;
-import io.goldfin.shared.utilities.JsonHelper;
 import joptsimple.OptionParser;
 
-public class CmdInvoiceList implements Command {
+public class CmdDocumentDelete implements Command {
 	private OptionParser parser = new OptionParser();
 
-	public CmdInvoiceList() {
+	public CmdDocumentDelete() {
+		parser.accepts("id", "Document ID").withRequiredArg().ofType(String.class);
 	}
 
 	public String getName() {
-		return "invoice-list";
+		return "document-delete";
 	}
 
 	public String getDescription() {
-		return "List invoices";
+		return "Delete a document";
 	}
 
 	public OptionParser getOptParser() {
@@ -29,11 +28,10 @@ public class CmdInvoiceList implements Command {
 	}
 
 	public void exec(CliContext ctx) {
+		String id = (String) CliUtils.requiredOption(ctx.options(), "id");
 		MinimalRestClient client = ctx.getRestClient();
 		try {
-			Invoice[] invoices = client.get("/invoice", new Invoice[0].getClass());
-			String invoiceListing = JsonHelper.writeToString(invoices);
-			System.out.println(invoiceListing);
+			client.delete(String.format("/document/%s", id));
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {

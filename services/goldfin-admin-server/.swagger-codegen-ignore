@@ -3,7 +3,8 @@
 
 # Use this file to prevent files from being overwritten by the generator.
 # The patterns follow closely to .gitignore or .dockerignore.
-src/main/java/io/goldfin/admin/service/api/service/impl/InvoiceApiServiceImpl`.java 
+src/main/java/io/goldfin/admin/service/api/service/impl/DocumentApiServiceImpl.java 
+src/main/java/io/goldfin/admin/service/api/service/impl/InvoiceApiServiceImpl.java 
 src/main/java/io/goldfin/admin/service/api/service/impl/SessionApiServiceImpl.java 
 src/main/java/io/goldfin/admin/service/api/service/impl/TenantApiServiceImpl.java
 src/main/java/io/goldfin/admin/service/api/service/impl/UserApiServiceImpl.java

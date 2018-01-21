@@ -11,19 +11,24 @@ mvn clean install
 Here are the steps to create a new service. 
 
 1. Create an init-params.yaml file from template in conf/init-params.yaml.sample. 
-1. Run servicectl init. 
+2. Run servicectl init. 
 ```shell
-servicectl init --init-params=$PWD/conf/init-params.yaml --dbms-config=dbms-config.yaml
+svc-init --init-params=$PWD/conf/init-params.yaml --dbms-config=dbms-config.yaml
 ```
 The dbms-config.yaml file is required by the running image. 
 
 Here are step(s) to remove a service. 
 
 1. Stop any running images
-1. Using previous init.params file issue the following command: 
+2. Using previous init.params file issue the following command: 
 ```shell
    servicectl remove --init-params=$PWD/conf/init-params.yaml
 ```
+## Create a tenant. 
+svc-client login --host localhost --user=sysadmin --password=secret12
+svc-client tenant-create --name 'skyline' --description "Skyline Research"
+svc-client user-create --initialPassword=secret12 \
+--username=test --tenantId=84cc09b8-5a93-4fd2-9527-4588e46e8b4c
 
 ## Running Docker Images
 

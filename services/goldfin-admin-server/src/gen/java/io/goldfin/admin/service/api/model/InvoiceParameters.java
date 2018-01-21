@@ -25,14 +25,14 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "User settable invoice parameters")
 
-public class InvoiceEnvelopeParameters   {
+public class InvoiceParameters   {
   @JsonProperty("description")
   private String description = null;
 
   @JsonProperty("tags")
   private String tags = null;
 
-  public InvoiceEnvelopeParameters description(String description) {
+  public InvoiceParameters description(String description) {
     this.description = description;
     return this;
   }
@@ -51,7 +51,7 @@ public class InvoiceEnvelopeParameters   {
     this.description = description;
   }
 
-  public InvoiceEnvelopeParameters tags(String tags) {
+  public InvoiceParameters tags(String tags) {
     this.tags = tags;
     return this;
   }
@@ -79,9 +79,9 @@ public class InvoiceEnvelopeParameters   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    InvoiceEnvelopeParameters invoiceEnvelopeParameters = (InvoiceEnvelopeParameters) o;
-    return Objects.equals(this.description, invoiceEnvelopeParameters.description) &&
-        Objects.equals(this.tags, invoiceEnvelopeParameters.tags);
+    InvoiceParameters invoiceParameters = (InvoiceParameters) o;
+    return Objects.equals(this.description, invoiceParameters.description) &&
+        Objects.equals(this.tags, invoiceParameters.tags);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class InvoiceEnvelopeParameters   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class InvoiceEnvelopeParameters {\n");
+    sb.append("class InvoiceParameters {\n");
     
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");

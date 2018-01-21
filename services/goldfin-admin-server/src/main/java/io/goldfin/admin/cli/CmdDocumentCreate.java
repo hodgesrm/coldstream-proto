@@ -11,24 +11,24 @@ import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
 import io.goldfin.admin.http.RestRequest;
 import io.goldfin.admin.http.RestResponse;
-import io.goldfin.admin.service.api.model.InvoiceEnvelope;
+import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.shared.utilities.JsonHelper;
 import joptsimple.OptionParser;
 
-public class CmdInvoiceCreate implements Command {
+public class CmdDocumentCreate implements Command {
 	private OptionParser parser = new OptionParser();
 
-	public CmdInvoiceCreate() {
-		parser.accepts("file", "Invoice PDF file").withRequiredArg().ofType(File.class);
-		parser.accepts("description", "Invoice description").withRequiredArg().ofType(String.class);
+	public CmdDocumentCreate() {
+		parser.accepts("file", "Document file").withRequiredArg().ofType(File.class);
+		parser.accepts("description", "Document description").withRequiredArg().ofType(String.class);
 	}
 
 	public String getName() {
-		return "invoice-create";
+		return "document-create";
 	}
 
 	public String getDescription() {
-		return "Upload an invoice";
+		return "Upload a document";
 	}
 
 	public OptionParser getOptParser() {
@@ -48,7 +48,7 @@ public class CmdInvoiceCreate implements Command {
 		// Create the tenant and load file as form data.
 		MinimalRestClient client = ctx.getRestClient();
 		try {
-			RestRequest request = new RestRequest().POST().path("/invoice").multipart().addFile("file", file);
+			RestRequest request = new RestRequest().POST().path("/document").multipart().addFile("file", file);
 			if (description != null) {
 				request.addText("description", description);
 			}
@@ -56,9 +56,9 @@ public class CmdInvoiceCreate implements Command {
 			if (response.isError()) {
 				throw new RestException(response.getCode(), response.getReason());
 			}
-			InvoiceEnvelope invoiceEnvelope = JsonHelper.readFromStream(new ByteArrayInputStream(response.getContent()),
-					InvoiceEnvelope.class);
-			String envelopeAsString = JsonHelper.writeToString(invoiceEnvelope);
+			Document document = JsonHelper.readFromStream(new ByteArrayInputStream(response.getContent()),
+					Document.class);
+			String envelopeAsString = JsonHelper.writeToString(document);
 			System.out.println(envelopeAsString);
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);

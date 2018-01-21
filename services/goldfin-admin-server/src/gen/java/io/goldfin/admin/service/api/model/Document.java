@@ -16,32 +16,120 @@ package io.goldfin.admin.service.api.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
+import java.util.UUID;
 import javax.validation.constraints.*;
 
 /**
- * A document, for example a PDF file
+ * A document, for example a PDF file containing an invoice
  */
-@ApiModel(description = "A document, for example a PDF file")
+@ApiModel(description = "A document, for example a PDF file containing an invoice")
 
 public class Document   {
   @JsonProperty("id")
-  private String id = null;
+  private UUID id = null;
 
   @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("locator")
-  private String locator = null;
+  @JsonProperty("description")
+  private String description = null;
+
+  @JsonProperty("tags")
+  private String tags = null;
+
+  @JsonProperty("contentType")
+  private String contentType = null;
+
+  @JsonProperty("contentLength")
+  private BigDecimal contentLength = null;
 
   @JsonProperty("thumbprint")
   private String thumbprint = null;
 
+  @JsonProperty("locator")
+  private String locator = null;
+
+  /**
+   * The current processing state of the document.  The document type and content ID are available after scanning
+   */
+  public enum StateEnum {
+    CREATED("CREATED"),
+    
+    SCANNED("SCANNED"),
+    
+    ERROR("ERROR");
+
+    private String value;
+
+    StateEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static StateEnum fromValue(String text) {
+      for (StateEnum b : StateEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("state")
+  private StateEnum state = null;
+
+  /**
+   * Kind of document, e.g., an invoice.
+   */
+  public enum SemanticTypeEnum {
+    INVOICE("INVOICE"),
+    
+    UNKNOWN("UNKNOWN");
+
+    private String value;
+
+    SemanticTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static SemanticTypeEnum fromValue(String text) {
+      for (SemanticTypeEnum b : SemanticTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("semanticType")
+  private SemanticTypeEnum semanticType = null;
+
+  @JsonProperty("semanticId")
+  private UUID semanticId = null;
+
   @JsonProperty("creationDate")
   private String creationDate = null;
 
-  public Document id(String id) {
+  public Document id(UUID id) {
     this.id = id;
     return this;
   }
@@ -52,11 +140,11 @@ public class Document   {
    **/
   @JsonProperty("id")
   @ApiModelProperty(value = "Document ID")
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 
@@ -79,23 +167,80 @@ public class Document   {
     this.name = name;
   }
 
-  public Document locator(String locator) {
-    this.locator = locator;
+  public Document description(String description) {
+    this.description = description;
     return this;
   }
 
   /**
-   * URL of the source
-   * @return locator
+   * Optional description of the document
+   * @return description
    **/
-  @JsonProperty("locator")
-  @ApiModelProperty(value = "URL of the source")
-  public String getLocator() {
-    return locator;
+  @JsonProperty("description")
+  @ApiModelProperty(value = "Optional description of the document")
+  public String getDescription() {
+    return description;
   }
 
-  public void setLocator(String locator) {
-    this.locator = locator;
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Document tags(String tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * A user-provided list of name-value pairs that describe the invoice
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "A user-provided list of name-value pairs that describe the invoice")
+  public String getTags() {
+    return tags;
+  }
+
+  public void setTags(String tags) {
+    this.tags = tags;
+  }
+
+  public Document contentType(String contentType) {
+    this.contentType = contentType;
+    return this;
+  }
+
+  /**
+   * Internet media type (e.g., application/octet-stream)
+   * @return contentType
+   **/
+  @JsonProperty("contentType")
+  @ApiModelProperty(value = "Internet media type (e.g., application/octet-stream)")
+  public String getContentType() {
+    return contentType;
+  }
+
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
+  }
+
+  public Document contentLength(BigDecimal contentLength) {
+    this.contentLength = contentLength;
+    return this;
+  }
+
+  /**
+   * Document length in bytes
+   * @return contentLength
+   **/
+  @JsonProperty("contentLength")
+  @ApiModelProperty(value = "Document length in bytes")
+  public BigDecimal getContentLength() {
+    return contentLength;
+  }
+
+  public void setContentLength(BigDecimal contentLength) {
+    this.contentLength = contentLength;
   }
 
   public Document thumbprint(String thumbprint) {
@@ -104,11 +249,11 @@ public class Document   {
   }
 
   /**
-   * SHA-256 thumbprint of object content
+   * SHA-256 thumbprint of document content
    * @return thumbprint
    **/
   @JsonProperty("thumbprint")
-  @ApiModelProperty(value = "SHA-256 thumbprint of object content")
+  @ApiModelProperty(value = "SHA-256 thumbprint of document content")
   public String getThumbprint() {
     return thumbprint;
   }
@@ -117,17 +262,93 @@ public class Document   {
     this.thumbprint = thumbprint;
   }
 
+  public Document locator(String locator) {
+    this.locator = locator;
+    return this;
+  }
+
+  /**
+   * Storage locator of the document
+   * @return locator
+   **/
+  @JsonProperty("locator")
+  @ApiModelProperty(value = "Storage locator of the document")
+  public String getLocator() {
+    return locator;
+  }
+
+  public void setLocator(String locator) {
+    this.locator = locator;
+  }
+
+  public Document state(StateEnum state) {
+    this.state = state;
+    return this;
+  }
+
+  /**
+   * The current processing state of the document.  The document type and content ID are available after scanning
+   * @return state
+   **/
+  @JsonProperty("state")
+  @ApiModelProperty(value = "The current processing state of the document.  The document type and content ID are available after scanning")
+  public StateEnum getState() {
+    return state;
+  }
+
+  public void setState(StateEnum state) {
+    this.state = state;
+  }
+
+  public Document semanticType(SemanticTypeEnum semanticType) {
+    this.semanticType = semanticType;
+    return this;
+  }
+
+  /**
+   * Kind of document, e.g., an invoice.
+   * @return semanticType
+   **/
+  @JsonProperty("semanticType")
+  @ApiModelProperty(value = "Kind of document, e.g., an invoice.")
+  public SemanticTypeEnum getSemanticType() {
+    return semanticType;
+  }
+
+  public void setSemanticType(SemanticTypeEnum semanticType) {
+    this.semanticType = semanticType;
+  }
+
+  public Document semanticId(UUID semanticId) {
+    this.semanticId = semanticId;
+    return this;
+  }
+
+  /**
+   * ID of the document&#39;s scanned content, e.g. an invoice ID
+   * @return semanticId
+   **/
+  @JsonProperty("semanticId")
+  @ApiModelProperty(value = "ID of the document's scanned content, e.g. an invoice ID")
+  public UUID getSemanticId() {
+    return semanticId;
+  }
+
+  public void setSemanticId(UUID semanticId) {
+    this.semanticId = semanticId;
+  }
+
   public Document creationDate(String creationDate) {
     this.creationDate = creationDate;
     return this;
   }
 
   /**
-   * Date invoice record was created
+   * Date document was uploaded
    * @return creationDate
    **/
   @JsonProperty("creationDate")
-  @ApiModelProperty(value = "Date invoice record was created")
+  @ApiModelProperty(value = "Date document was uploaded")
   public String getCreationDate() {
     return creationDate;
   }
@@ -148,14 +369,21 @@ public class Document   {
     Document document = (Document) o;
     return Objects.equals(this.id, document.id) &&
         Objects.equals(this.name, document.name) &&
-        Objects.equals(this.locator, document.locator) &&
+        Objects.equals(this.description, document.description) &&
+        Objects.equals(this.tags, document.tags) &&
+        Objects.equals(this.contentType, document.contentType) &&
+        Objects.equals(this.contentLength, document.contentLength) &&
         Objects.equals(this.thumbprint, document.thumbprint) &&
+        Objects.equals(this.locator, document.locator) &&
+        Objects.equals(this.state, document.state) &&
+        Objects.equals(this.semanticType, document.semanticType) &&
+        Objects.equals(this.semanticId, document.semanticId) &&
         Objects.equals(this.creationDate, document.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, locator, thumbprint, creationDate);
+    return Objects.hash(id, name, description, tags, contentType, contentLength, thumbprint, locator, state, semanticType, semanticId, creationDate);
   }
 
 
@@ -166,8 +394,15 @@ public class Document   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    locator: ").append(toIndentedString(locator)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    contentType: ").append(toIndentedString(contentType)).append("\n");
+    sb.append("    contentLength: ").append(toIndentedString(contentLength)).append("\n");
     sb.append("    thumbprint: ").append(toIndentedString(thumbprint)).append("\n");
+    sb.append("    locator: ").append(toIndentedString(locator)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    semanticType: ").append(toIndentedString(semanticType)).append("\n");
+    sb.append("    semanticId: ").append(toIndentedString(semanticId)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();

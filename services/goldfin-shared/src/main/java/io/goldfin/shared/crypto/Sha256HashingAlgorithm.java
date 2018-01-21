@@ -20,9 +20,13 @@ public class Sha256HashingAlgorithm {
 
 	public static byte[] generateHash(byte[] value) {
 		MessageDigest digest;
+		digest = getMessageDigest();
+		return digest.digest(value);
+	}
+
+	public static MessageDigest getMessageDigest() {
 		try {
-			digest = MessageDigest.getInstance("SHA-256");
-			return digest.digest(value);
+			return MessageDigest.getInstance("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException("SHA-256 algorithm not found", e);
 		}
@@ -30,6 +34,10 @@ public class Sha256HashingAlgorithm {
 
 	public static String generateHashString(String value) {
 		byte[] bytes = generateHash(value.getBytes(StandardCharsets.UTF_8));
+		return bytesToHexString(bytes);
+	}
+
+	public static String bytesToHexString(byte[] bytes) {
 		String format = "%02x";
 		StringBuffer hexAsString = new StringBuffer();
 		for (byte b : bytes) {

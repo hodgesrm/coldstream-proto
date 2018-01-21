@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.UUID;
 import javax.validation.constraints.*;
 
 /**
@@ -26,6 +27,9 @@ import javax.validation.constraints.*;
 @ApiModel(description = "Location within a document page expressed in page number and pixel region coordinates on the page")
 
 public class DocumentRegion   {
+  @JsonProperty("documentId")
+  private UUID documentId = null;
+
   @JsonProperty("page")
   private Integer page = null;
 
@@ -40,6 +44,25 @@ public class DocumentRegion   {
 
   @JsonProperty("bottom")
   private Integer bottom = null;
+
+  public DocumentRegion documentId(UUID documentId) {
+    this.documentId = documentId;
+    return this;
+  }
+
+  /**
+   * Document ID
+   * @return documentId
+   **/
+  @JsonProperty("documentId")
+  @ApiModelProperty(value = "Document ID")
+  public UUID getDocumentId() {
+    return documentId;
+  }
+
+  public void setDocumentId(UUID documentId) {
+    this.documentId = documentId;
+  }
 
   public DocumentRegion page(Integer page) {
     this.page = page;
@@ -146,7 +169,8 @@ public class DocumentRegion   {
       return false;
     }
     DocumentRegion documentRegion = (DocumentRegion) o;
-    return Objects.equals(this.page, documentRegion.page) &&
+    return Objects.equals(this.documentId, documentRegion.documentId) &&
+        Objects.equals(this.page, documentRegion.page) &&
         Objects.equals(this.left, documentRegion.left) &&
         Objects.equals(this.top, documentRegion.top) &&
         Objects.equals(this.right, documentRegion.right) &&
@@ -155,7 +179,7 @@ public class DocumentRegion   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(page, left, top, right, bottom);
+    return Objects.hash(documentId, page, left, top, right, bottom);
   }
 
 
@@ -164,6 +188,7 @@ public class DocumentRegion   {
     StringBuilder sb = new StringBuilder();
     sb.append("class DocumentRegion {\n");
     
+    sb.append("    documentId: ").append(toIndentedString(documentId)).append("\n");
     sb.append("    page: ").append(toIndentedString(page)).append("\n");
     sb.append("    left: ").append(toIndentedString(left)).append("\n");
     sb.append("    top: ").append(toIndentedString(top)).append("\n");

@@ -428,35 +428,6 @@ paths:
         '404':
           description: Not Found
   /invoice:
-    post:
-      tags:
-        - invoice
-      summary: Create a new invoice for logged in tenant
-      description: Upload a new invoice and kick off processing
-      operationId: invoiceCreate
-      consumes:
-        - multipart/form-data
-      produces:
-        - application/json
-      parameters:
-        - name: description
-          in: formData
-          description: A optional description of the invoice
-          type: string
-        - name: file
-          in: formData
-          description: Invoice file
-          required: true
-          type: file
-      responses:
-        '201':
-          description: Created
-          schema:
-            $ref: '#/definitions/InvoiceEnvelope'
-        '400':
-          description: Invoice creation failed
-          schema:
-            $ref: '#/definitions/ApiResponse'
     get:
       tags:
         - invoice
@@ -465,24 +436,13 @@ paths:
       operationId: invoiceShowAll
       produces:
         - application/json
-        - application/xml
-        - text/xml
-      parameters:
-        - name: summary
-          in: query
-          description: >-
-            If true return complete invoice content, otherwise just the Invoice
-            fields
-          required: false
-          default: true
-          type: boolean
       responses:
         '200':
           description: Successful query
           schema:
             type: array
             items:
-              $ref: '#/definitions/InvoiceEnvelope'
+              $ref: '#/definitions/Invoice'
   '/invoice/{id}':
     get:
       tags:
@@ -492,8 +452,6 @@ paths:
       operationId: invoiceShow
       produces:
         - application/json
-        - application/xml
-        - text/xml
       parameters:
         - name: id
           in: path
@@ -504,7 +462,7 @@ paths:
         '200':
           description: Successful
           schema:
-            $ref: '#/definitions/InvoiceEnvelope'
+            $ref: '#/definitions/Invoice'
         '404':
           description: Not Found
     put:
@@ -523,9 +481,9 @@ paths:
           type: string
         - name: body
           in: body
-          description: Invoice descriptor
+          description: Invoice parameters
           schema:
-            $ref: '#/definitions/InvoiceEnvelopeParameters'
+            $ref: '#/definitions/InvoiceParameters'
       responses:
         '200':
           description: Successful
@@ -535,7 +493,9 @@ paths:
       tags:
         - invoice
       summary: Delete an invoice
-      description: Delete a single
+      description: >-
+        Delete an invoice.  It can be recreated by rescanning the corresponding
+        document
       operationId: invoiceDelete
       produces:
         - application/json
@@ -548,28 +508,6 @@ paths:
       responses:
         '200':
           description: Successful
-        '404':
-          description: Not Found
-  '/invoice/{id}/process':
-    post:
-      tags:
-        - invoice
-      summary: Start invoice processing
-      description: >-
-        Run background OCR and interpretation on invoice.  The invoice state
-        will be set to CREATED before this call returns.
-      operationId: invoiceProcess
-      produces:
-        - application/json
-      parameters:
-        - name: id
-          in: path
-          description: Invoice ID
-          required: true
-          type: string
-      responses:
-        '202':
-          description: Accepted
         '404':
           description: Not Found
   '/invoice/{id}/validate':
@@ -585,6 +523,159 @@ paths:
         - name: id
           in: path
           description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Accepted
+        '404':
+          description: Not Found
+  /document:
+    post:
+      tags:
+        - document
+      summary: Upload document
+      description: Upload a new document for scanning
+      operationId: documentCreate
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: description
+          in: formData
+          description: A optional description of the document
+          type: string
+        - name: file
+          in: formData
+          description: Document file
+          required: true
+          type: file
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Document'
+        '400':
+          description: Invoice creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - document
+      summary: List documents
+      description: Return a list of all documents
+      operationId: documentShowAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Document'
+  '/document/{id}':
+    get:
+      tags:
+        - document
+      summary: Return document content
+      description: Download document content
+      operationId: documentFetchContent
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+    head:
+      tags:
+        - document
+      summary: Return document metadata
+      description: Download document content
+      operationId: documentShow
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Document'
+        '404':
+          description: Not Found
+    put:
+      tags:
+        - document
+      summary: Update document information
+      description: >-
+        Update document description and tags. Changes to other fields are
+        ignored
+      operationId: documentUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Document descriptor
+          schema:
+            $ref: '#/definitions/DocumentParameters'
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - document
+      summary: Delete a invoice
+      description: Delete a single document and associated semantic content
+      operationId: documentDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/document/{id}/scan':
+    post:
+      tags:
+        - invoice
+      summary: Kick off document scanning
+      description: >-
+        Run background scanning on document.  The document state and semantic
+        information will be updated when finished.
+      operationId: documentScan
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
           required: true
           type: string
       responses:
@@ -678,45 +769,6 @@ definitions:
       newPassword:
         type: string
         description: New user password.
-  InvoiceEnvelope:
-    description: Root object for invoice content.
-    properties:
-      id:
-        type: string
-        format: uuid
-        description: Unique invoice id
-      description:
-        type: string
-        description: A user-provided description of the invoice
-      tags:
-        type: string
-        description: A user-provided list of name-value pairs that describe the invoice
-      state:
-        description: >-
-          The current processing state of the invoice.  The invoice field is
-          available once the invoice is interpreted.
-        enum:
-          - CREATED
-          - SCANNED
-          - INTERPRETED
-      source:
-        $ref: '#/definitions/Document'
-      ocr:
-        $ref: '#/definitions/OcrScan'
-      content:
-        $ref: '#/definitions/Invoice'
-      creationDate:
-        type: string
-        description: Date invoice record was created
-  InvoiceEnvelopeParameters:
-    description: User settable invoice parameters
-    properties:
-      description:
-        type: string
-        description: A user-provided description of the invoice
-      tags:
-        type: string
-        description: A user-provided list of name-value pairs that describe the invoice
   Vendor:
     description: Vendor description
     properties:
@@ -757,48 +809,76 @@ definitions:
           - ACTIVE
           - INACTIVE
   Document:
-    description: 'A document, for example a PDF file'
+    description: 'A document, for example a PDF file containing an invoice'
     type: object
     properties:
       id:
         type: string
         description: Document ID
+        format: uuid
       name:
         type: string
         description: Name of the document
+      description:
+        type: string
+        description: Optional description of the document
+      tags:
+        type: string
+        description: A user-provided list of name-value pairs that describe the invoice
+      contentType:
+        type: string
+        description: 'Internet media type (e.g., application/octet-stream)'
+      contentLength:
+        type: number
+        format: int64
+        description: Document length in bytes
+      thumbprint:
+        type: string
+        description: SHA-256 thumbprint of document content
       locator:
         type: string
         format: url
-        description: URL of the source
-      thumbprint:
+        description: Storage locator of the document
+      state:
+        description: >-
+          The current processing state of the document.  The document type and
+          content ID are available after scanning
+        enum:
+          - CREATED
+          - SCANNED
+          - ERROR
+      semanticType:
+        description: 'Kind of document, e.g., an invoice.'
+        enum:
+          - INVOICE
+          - UNKNOWN
+      semanticId:
         type: string
-        description: SHA-256 thumbprint of object content
+        description: 'ID of the document''s scanned content, e.g. an invoice ID'
+        format: uuid
       creationDate:
         type: string
-        description: Date invoice record was created
-  OcrScan:
-    description: OCR scan of a document
+        description: Date document was uploaded
+  DocumentParameters:
+    description: User settable document parameters
     type: object
     properties:
-      id:
+      name:
         type: string
-        description: Scan ID
-      thumbprint:
+        description: Name of the document
+      description:
         type: string
-        description: SHA-256 thumbprint of source document
-      locator:
-        type: string
-        format: url
-        description: URL of the scan document
-      creationDate:
-        type: string
-        description: Date scan record was created
+        description: Optional description of the document
   DocumentRegion:
     description: >-
       Location within a document page expressed in page number and pixel region
       coordinates on the page
     type: object
     properties:
+      documentId:
+        type: string
+        format: uuid
+        description: Document ID
       page:
         type: integer
         format: int32
@@ -820,8 +900,22 @@ definitions:
         format: int32
         description: Bottom pixel coordinate
   Invoice:
-    description: Invoice content obtained from documentation interpretation
+    description: Invoice content obtained from document scanning
     properties:
+      id:
+        type: string
+        format: uuid
+        description: Invoice ID
+      documentId:
+        type: string
+        format: uuid
+        description: Source document ID
+      description:
+        type: string
+        description: A user-provided description of the invoice
+      tags:
+        type: string
+        description: A user-provided list of name-value pairs that describe the invoice
       identifier:
         type: string
         description: Invoice identifier
@@ -849,6 +943,9 @@ definitions:
         description: Invoice items
         items:
           $ref: '#/definitions/InvoiceItem'
+      creationDate:
+        type: string
+        description: Date user record was created
   InvoiceItem:
     description: Common fields for all invoice line items
     type: object
@@ -888,6 +985,15 @@ definitions:
         type: string
         enum:
           - HOST
+  InvoiceParameters:
+    description: User settable invoice parameters
+    properties:
+      description:
+        type: string
+        description: A user-provided description of the invoice
+      tags:
+        type: string
+        description: A user-provided list of name-value pairs that describe the invoice
   Tag:
     type: object
     properties:

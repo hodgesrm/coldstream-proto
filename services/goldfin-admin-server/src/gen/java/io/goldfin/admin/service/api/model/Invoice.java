@@ -23,14 +23,27 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import javax.validation.constraints.*;
 
 /**
- * Invoice content obtained from documentation interpretation
+ * Invoice content obtained from document scanning
  */
-@ApiModel(description = "Invoice content obtained from documentation interpretation")
+@ApiModel(description = "Invoice content obtained from document scanning")
 
 public class Invoice   {
+  @JsonProperty("id")
+  private UUID id = null;
+
+  @JsonProperty("documentId")
+  private UUID documentId = null;
+
+  @JsonProperty("description")
+  private String description = null;
+
+  @JsonProperty("tags")
+  private String tags = null;
+
   @JsonProperty("identifier")
   private String identifier = null;
 
@@ -54,6 +67,85 @@ public class Invoice   {
 
   @JsonProperty("items")
   private List<InvoiceItem> items = null;
+
+  @JsonProperty("creationDate")
+  private String creationDate = null;
+
+  public Invoice id(UUID id) {
+    this.id = id;
+    return this;
+  }
+
+  /**
+   * Invoice ID
+   * @return id
+   **/
+  @JsonProperty("id")
+  @ApiModelProperty(value = "Invoice ID")
+  public UUID getId() {
+    return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public Invoice documentId(UUID documentId) {
+    this.documentId = documentId;
+    return this;
+  }
+
+  /**
+   * Source document ID
+   * @return documentId
+   **/
+  @JsonProperty("documentId")
+  @ApiModelProperty(value = "Source document ID")
+  public UUID getDocumentId() {
+    return documentId;
+  }
+
+  public void setDocumentId(UUID documentId) {
+    this.documentId = documentId;
+  }
+
+  public Invoice description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  /**
+   * A user-provided description of the invoice
+   * @return description
+   **/
+  @JsonProperty("description")
+  @ApiModelProperty(value = "A user-provided description of the invoice")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Invoice tags(String tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * A user-provided list of name-value pairs that describe the invoice
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "A user-provided list of name-value pairs that describe the invoice")
+  public String getTags() {
+    return tags;
+  }
+
+  public void setTags(String tags) {
+    this.tags = tags;
+  }
 
   public Invoice identifier(String identifier) {
     this.identifier = identifier;
@@ -215,6 +307,25 @@ public class Invoice   {
     this.items = items;
   }
 
+  public Invoice creationDate(String creationDate) {
+    this.creationDate = creationDate;
+    return this;
+  }
+
+  /**
+   * Date user record was created
+   * @return creationDate
+   **/
+  @JsonProperty("creationDate")
+  @ApiModelProperty(value = "Date user record was created")
+  public String getCreationDate() {
+    return creationDate;
+  }
+
+  public void setCreationDate(String creationDate) {
+    this.creationDate = creationDate;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -225,19 +336,24 @@ public class Invoice   {
       return false;
     }
     Invoice invoice = (Invoice) o;
-    return Objects.equals(this.identifier, invoice.identifier) &&
+    return Objects.equals(this.id, invoice.id) &&
+        Objects.equals(this.documentId, invoice.documentId) &&
+        Objects.equals(this.description, invoice.description) &&
+        Objects.equals(this.tags, invoice.tags) &&
+        Objects.equals(this.identifier, invoice.identifier) &&
         Objects.equals(this.effectiveDate, invoice.effectiveDate) &&
         Objects.equals(this.vendor, invoice.vendor) &&
         Objects.equals(this.subtotalAmount, invoice.subtotalAmount) &&
         Objects.equals(this.tax, invoice.tax) &&
         Objects.equals(this.totalAmount, invoice.totalAmount) &&
         Objects.equals(this.currency, invoice.currency) &&
-        Objects.equals(this.items, invoice.items);
+        Objects.equals(this.items, invoice.items) &&
+        Objects.equals(this.creationDate, invoice.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(identifier, effectiveDate, vendor, subtotalAmount, tax, totalAmount, currency, items);
+    return Objects.hash(id, documentId, description, tags, identifier, effectiveDate, vendor, subtotalAmount, tax, totalAmount, currency, items, creationDate);
   }
 
 
@@ -246,6 +362,10 @@ public class Invoice   {
     StringBuilder sb = new StringBuilder();
     sb.append("class Invoice {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    documentId: ").append(toIndentedString(documentId)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
     sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");
@@ -254,6 +374,7 @@ public class Invoice   {
     sb.append("    totalAmount: ").append(toIndentedString(totalAmount)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    items: ").append(toIndentedString(items)).append("\n");
+    sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();
   }

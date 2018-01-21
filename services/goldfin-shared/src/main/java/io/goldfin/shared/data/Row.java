@@ -3,6 +3,8 @@
  */
 package io.goldfin.shared.data;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +66,24 @@ public class Row {
 		return (Integer) get(name);
 	}
 
+	public Long getAsLong(String name) {
+		return (Long) get(name);
+	}
+
+	public BigDecimal getAsBigDecimal(String name) {
+		Object o = get(name);
+		if (o instanceof Long) {
+			return BigDecimal.valueOf((Long) o);
+		} else {
+			return (BigDecimal) get(name);
+		}
+	}
+
 	public Timestamp getAsTimestamp(String name) {
 		return (Timestamp) get(name);
+	}
+	
+	public Date getAsDate(String name) {
+		return (Date) get(name);
 	}
 }

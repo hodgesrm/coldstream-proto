@@ -66,6 +66,13 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.1.4</version>
 		</dependency>
+		<!-- Amazon S3 Access -->
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.11.264</version>
+		</dependency>
 		<!-- Unit testing -->
 		<dependency>
 			<groupId>junit</groupId>

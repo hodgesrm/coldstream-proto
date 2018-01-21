@@ -1,21 +1,18 @@
 package io.goldfin.admin.service.api.service.impl;
 
-import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
-import io.goldfin.admin.managers.TenantManager;
-import io.goldfin.admin.service.api.model.InvoiceEnvelope;
-import io.goldfin.admin.service.api.model.InvoiceEnvelopeParameters;
+import io.goldfin.admin.service.api.model.Invoice;
+import io.goldfin.admin.service.api.model.InvoiceParameters;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.InvoiceApiService;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -28,33 +25,14 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	ExceptionHelper helper = new ExceptionHelper(logger);
 
 	@Override
-	public Response invoiceCreate(InputStream fileInputStream, FormDataContentDisposition fileDetail,
-			String description, SecurityContext securityContext) throws NotFoundException {
-		try {
-			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
-			InvoiceEnvelope invoice = im.createInvoiceEnvelope(securityContext.getUserPrincipal(), fileInputStream,
-					fileDetail.getFileName(), description);
-			return Response.ok().entity(invoice).build();
-		} catch (Exception e) {
-			return helper.toApiResponse(e);
-		}
-	}
-
-	@Override
 	public Response invoiceDelete(String id, SecurityContext securityContext) throws NotFoundException {
 		try {
 			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
-			im.deleteInvoiceEnvelope(securityContext.getUserPrincipal(), id);
+			im.deleteInvoice(securityContext.getUserPrincipal(), id);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}
-	}
-
-	@Override
-	public Response invoiceProcess(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
 	}
 
 	@Override
@@ -64,10 +42,10 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	}
 
 	@Override
-	public Response invoiceShowAll(Boolean summary, SecurityContext securityContext) throws NotFoundException {
+	public Response invoiceShowAll(SecurityContext securityContext) throws NotFoundException {
 		try {
 			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
-			List<InvoiceEnvelope> invoices = im.getAllInvoiceEnvelopes(securityContext.getUserPrincipal());
+			List<Invoice> invoices = im.getAllInvoices(securityContext.getUserPrincipal());
 			return Response.ok().entity(invoices).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
@@ -75,7 +53,7 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	}
 
 	@Override
-	public Response invoiceUpdate(String id, InvoiceEnvelopeParameters body, SecurityContext securityContext)
+	public Response invoiceUpdate(String id, InvoiceParameters body, SecurityContext securityContext)
 			throws NotFoundException {
 		// do some magic!
 		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();

@@ -3,6 +3,8 @@
  */
 package io.goldfin.tenant.data.test;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -10,49 +12,53 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.service.api.model.InvoiceEnvelope;
-import io.goldfin.admin.service.api.model.InvoiceEnvelope.StateEnum;
+import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.shared.data.TransactionalService;
 import io.goldfin.shared.testing.DbConnectionHelper;
 import io.goldfin.shared.testing.TransactionalTest;
-import io.goldfin.tenant.data.InvoiceEnvelopeDataService;
+import io.goldfin.tenant.data.InvoiceDataService;
 
 /**
  * Implements a transactional service test on the session service.
  */
-public class InvoiceEnvelopeServiceTest extends TransactionalTest<InvoiceEnvelope> {
-	static final Logger logger = LoggerFactory.getLogger(InvoiceEnvelopeServiceTest.class);
+public class InvoiceServiceTest extends TransactionalTest<Invoice> {
+	static final Logger logger = LoggerFactory.getLogger(InvoiceServiceTest.class);
 
-	private static final String SCHEMA = "test_invoice_envelopes";
+	private static final String SCHEMA = "test_invoices";
 	private static DbConnectionHelper globalConnectionHelper;
 
-	class InvoiceEnvelopeGenerator extends TenantTestGenerator<InvoiceEnvelope> {
+	class InvoiceGenerator extends TenantTestGenerator<Invoice> {
 
-		public InvoiceEnvelopeGenerator(DbConnectionHelper connectionHelper) {
+		public InvoiceGenerator(DbConnectionHelper connectionHelper) {
 			super(connectionHelper);
 		}
 
 		@Override
-		public TransactionalService<InvoiceEnvelope> service() {
-			return new InvoiceEnvelopeDataService();
+		public TransactionalService<Invoice> service() {
+			return new InvoiceDataService();
 		}
 
 		@Override
-		public InvoiceEnvelope generate() {
-			InvoiceEnvelope env = new InvoiceEnvelope();
+		public Invoice generate() {
+			Invoice env = new Invoice();
 			env.setId(UUID.randomUUID());
-			env.setDescription("some desc");
+			env.setDocumentId(UUID.randomUUID());
+			env.setDescription("X");
 			env.setTags("tags");
-			env.setState(StateEnum.CREATED);
+			env.setEffectiveDate(Date.valueOf("2016-12-01"));
+			env.setVendor("X");
+			env.setSubtotalAmount(BigDecimal.valueOf(2000.0));
+			env.setTax(BigDecimal.valueOf(100.0));
+			env.setTotalAmount(BigDecimal.valueOf(210000, 2));
+			env.setCurrency("USD");
 			return env;
 		}
 
 		@Override
-		public InvoiceEnvelope mutate(InvoiceEnvelope old) {
-			InvoiceEnvelope env = new InvoiceEnvelope();
+		public Invoice mutate(Invoice old) {
+			Invoice env = new Invoice();
 			env.setId(old.getId());
 			env.setDescription(old.getDescription());
-			env.setState(old.getState());
 			env.setTags(old.getTags().substring(0, 4) + "_" + index.incrementAndGet());
 			return env;
 		}
@@ -68,6 +74,6 @@ public class InvoiceEnvelopeServiceTest extends TransactionalTest<InvoiceEnvelop
 
 	@Before
 	public void setup() {
-		this.testHelper = new InvoiceEnvelopeGenerator(globalConnectionHelper);
+		this.testHelper = new InvoiceGenerator(globalConnectionHelper);
 	}
 }
