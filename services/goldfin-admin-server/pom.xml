@@ -7,12 +7,6 @@
 	<name>goldfin-admin-server</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
-		<!-- Shared Goldfin library -->
-		<dependency>
-			<groupId>io.goldfin</groupId>
-			<artifactId>goldfin-shared</artifactId>
-			<version>0.0.1</version>
-		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
@@ -114,13 +108,33 @@
 			<artifactId>jopt-simple</artifactId>
 			<version>5.0.4</version>
 		</dependency>
+		<!-- Amazon S3 Access -->
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.11.264</version>
+		</dependency>
+		<!-- Crypto and autho libraries including bcrypt for passwords and JWT 
+			for auth. -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<version>5.0.0.RELEASE</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.0</version>
+		</dependency>
 		<!-- Unit testing -->
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
