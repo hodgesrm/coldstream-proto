@@ -9,7 +9,7 @@ package io.goldfin.admin.http;
 public class RestException extends Exception {
 	private static final long serialVersionUID = 1L;
 
-	public RestException(int status, String reason) {
-		super(String.format("Status=%d Reason=%s", status, reason));
+	public RestException(int status, String reason, String message) {
+		super(String.format("Status=%d Reason=%s Message=%s", status, reason, message));
 	}
 }

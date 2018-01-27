@@ -28,8 +28,8 @@ import io.goldfin.shared.data.TransactionalService;
 public class DocumentDataService implements TransactionalService<Document> {
 	static private final Logger logger = LoggerFactory.getLogger(DocumentDataService.class);
 
-	private static final String[] COLUMN_NAMES = { "id", "name", "description", "tags", "content_type", "content_length",
-			"thumbprint", "locator", "state", "semantic_type", "semantic_id", "creation_date" };
+	private static final String[] COLUMN_NAMES = { "id", "name", "description", "tags", "content_type",
+			"content_length", "thumbprint", "locator", "state", "semantic_type", "semantic_id", "creation_date" };
 	private Session session;
 
 	@Override
@@ -41,7 +41,12 @@ public class DocumentDataService implements TransactionalService<Document> {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding new invoice: " + model.toString());
 		}
-		UUID id = UUID.randomUUID();
+		UUID id;
+		if (model.getId() == null) {
+			id = UUID.randomUUID();
+		} else {
+			id = model.getId();
+		}
 		new SqlInsert().table("documents").put("id", id).put("name", model.getName())
 				.put("description", model.getDescription()).put("tags", model.getTags())
 				.put("content_type", model.getContentType()).put("content_length", model.getContentLength())
@@ -94,9 +99,9 @@ public class DocumentDataService implements TransactionalService<Document> {
 		}
 	}
 
-	public Document getByToken(String token) {
-		TabularResultSet result = new SqlSelect().table("documents").get(COLUMN_NAMES).where("token = ?", token)
-				.run(session);
+	public Document getByThumbprint(String thumbprint) {
+		TabularResultSet result = new SqlSelect().table("documents").get(COLUMN_NAMES)
+				.where("thumbprint = ?", thumbprint).run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {

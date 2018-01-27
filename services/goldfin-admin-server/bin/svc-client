@@ -11,12 +11,11 @@ MAIN=io.goldfin.admin.cli.SvcClientLauncher
 # Find our home and cd to it. 
 GBIN=`dirname $0`
 GHOME=`cd $GBIN/..; pwd`
-cd $GHOME
 
 # Add jars from all directories to class path, which starts with 
 # conf directory.
-CP=conf
-for jar in lib/*.jar; do 
+CP=$GHOME/conf
+for jar in $GHOME/lib/*.jar; do 
   CP=$CP:$jar
 done
 
@@ -40,4 +39,4 @@ JVM_OPTIONS="${JVM_OPTIONS} -Dlogback.configurationFile=$GHOME/conf/logback-serv
 ##############################################################################
 
 # Run the CLI.
-$JAVA -cp $CP -Dapi.server.home.dir=$GHOME $JVM_OPTIONS ${MAIN} $*
+$JAVA -cp $CP -Dapi.server.home.dir=$GHOME $JVM_OPTIONS ${MAIN} "$@"

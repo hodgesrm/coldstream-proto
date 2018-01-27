@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.exceptions.EntityNotFoundException;
+import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
 import io.goldfin.admin.service.api.model.User;
@@ -78,6 +79,15 @@ public class DocumentManager implements Manager {
 		byte[] digestValue = digest.digest();
 		String sha256 = Sha256HashingAlgorithm.bytesToHexString(digestValue);
 
+		// See if the thumbprint already exists.
+		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
+			Document doc = docService.getByThumbprint(sha256);
+			if (doc != null) {
+				throw new InvalidInputException(
+						String.format("Document already exists: id=%s", doc.getId().toString()));
+			}
+		}
+
 		// Now that we have a local file and metadata, upload same to storage.
 		UUID docId = UUID.randomUUID();
 		String locator = null;
@@ -87,7 +97,7 @@ public class DocumentManager implements Manager {
 					sha256, contentLength, contentType);
 		}
 
-		// Store the document descriptor. 
+		// Store the document descriptor.
 		Document document = new Document();
 		document.setId(docId);
 		document.setName(fileName);
@@ -109,22 +119,22 @@ public class DocumentManager implements Manager {
 	}
 
 	public void deleteDocument(Principal principal, String id) {
-		// Find the document to ensure it exists. 
+		// Find the document to ensure it exists.
 		Document document = getDocument(principal, id);
 
-		// Delete the document from storage.  This has to go first so 
-		// we don't lose the document. 
+		// Delete the document from storage. This has to go first so
+		// we don't lose the document.
 		String tenantId = getTenantId(principal);
 		S3Connection connection = new S3Connection();
 		connection.deleteTenantDocument(tenantId, document.getId().toString());
 
-		// Now erase document metadata. 
+		// Now erase document metadata.
 		DocumentDataService docService = new DocumentDataService();
 		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
 			int rows = docService.delete(id);
 			session.commit();
 			if (rows == 0) {
-				// Could happen due to concurrent access. 
+				// Could happen due to concurrent access.
 				throw new EntityNotFoundException("Document does not exist");
 			}
 		}
@@ -132,21 +142,21 @@ public class DocumentManager implements Manager {
 
 	public Document getDocument(Principal principal, String id) {
 		String tenantId = getTenantId(principal);
-		DocumentDataService invoiceDataService = new DocumentDataService();
-		try (Session session = context.tenantSession(tenantId).enlist(invoiceDataService)) {
-			Document invoiceEnvelope = invoiceDataService.get(id);
-			if (invoiceEnvelope == null) {
+		DocumentDataService documentDataService = new DocumentDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(documentDataService)) {
+			Document documentEnvelope = documentDataService.get(id);
+			if (documentEnvelope == null) {
 				throw new EntityNotFoundException("Document does not exist");
 			}
-			return invoiceEnvelope;
+			return documentEnvelope;
 		}
 	}
 
 	public List<Document> getAllDocuments(Principal principal) {
 		String tenantId = getTenantId(principal);
-		DocumentDataService invoiceEnvelopService = new DocumentDataService();
-		try (Session session = context.tenantSession(tenantId).enlist(invoiceEnvelopService)) {
-			return invoiceEnvelopService.getAll();
+		DocumentDataService documentService = new DocumentDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(documentService)) {
+			return documentService.getAll();
 		}
 	}
 

@@ -1,6 +1,7 @@
 package io.goldfin.admin.service.api.service.impl;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -11,9 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.DocumentManager;
+import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.DocumentParameters;
+import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.DocumentApiService;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -30,9 +33,9 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 			String description, SecurityContext securityContext) throws NotFoundException {
 		try {
 			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
-			Document invoice = dm.createDocument(securityContext.getUserPrincipal(), fileInputStream,
+			Document doc = dm.createDocument(securityContext.getUserPrincipal(), fileInputStream,
 					fileDetail.getFileName(), description, "application/octet-stream");
-			return Response.ok().entity(invoice).build();
+			return Response.ok().entity(doc).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}
@@ -69,8 +72,13 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 
 	@Override
 	public Response documentShowAll(SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
+			List<Document> documents = dm.getAllDocuments(securityContext.getUserPrincipal());
+			return Response.ok().entity(documents).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override

@@ -37,7 +37,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.shared.utilities.JsonHelper;
 import io.goldfin.shared.utilities.SerializationException;
 
@@ -46,6 +49,8 @@ import io.goldfin.shared.utilities.SerializationException;
  * using Apache HTTP Client.
  */
 public class MinimalRestClient {
+	static final Logger logger = LoggerFactory.getLogger(MinimalRestClient.class);
+
 	private String host;
 	private int port;
 	private String prefix = "/";
@@ -229,7 +234,7 @@ public class MinimalRestClient {
 			}
 			RestResponse restResponse = this.execute(restRequest);
 			if (restResponse.code >= 300) {
-				throw new RestException(restResponse.code, restResponse.reason);
+				throw generateRestException(restResponse);
 			} else {
 				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
 						responseEntityClass);
@@ -248,7 +253,7 @@ public class MinimalRestClient {
 		try {
 			RestResponse restResponse = this.execute(restRequest);
 			if (restResponse.code >= 300) {
-				throw new RestException(restResponse.code, restResponse.reason);
+				throw generateRestException(restResponse);
 			} else {
 				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
 						responseEntityClass);
@@ -266,12 +271,25 @@ public class MinimalRestClient {
 		restRequest.headers.put("ContentType", "application/json");
 		RestResponse restResponse = this.execute(restRequest);
 		if (restResponse.code >= 300) {
-			throw new RestException(restResponse.code, restResponse.reason);
+			throw generateRestException(restResponse);
 		} else {
 			return;
 		}
 	}
 
+	private RestException generateRestException(RestResponse response) throws RestException {
+		// Try to get the error message. 
+		String message = null;
+		try {
+			ApiResponseMessage apiResponse = JsonHelper.readFromStream(new ByteArrayInputStream(response.getContent()), 
+					ApiResponseMessage.class);
+			message = apiResponse.getMessage();
+		} catch (SerializationException e) {
+			logger.debug("Unable to deserialize error response", e);
+		}
+		throw new RestException(response.code, response.reason, message);
+	}
+	
 	private String makeUrl(String path) {
 		return String.format("https://%s:%d%s%s", host, port, prefix, path);
 	}

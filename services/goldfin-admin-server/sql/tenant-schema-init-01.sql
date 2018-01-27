@@ -9,12 +9,14 @@ CREATE TABLE IF NOT EXISTS documents (
   content_type varchar(100),
   content_length bigint, 
   thumbprint varchar(100), 
-  locator varchar(100),
+  locator varchar(250),
   state varchar(10) CHECK (state IN ('CREATED', 'SCANNED', 'ERROR')),
   semantic_type varchar(10) CHECK (semantic_type IN ('INVOICE', 'UNKNOWN')),
   semantic_id uuid,
   creation_date timestamp DEFAULT current_timestamp
 )
+;
+CREATE INDEX ON documents USING hash(thumbprint)
 ;
 
 // Create the invoice table. 
