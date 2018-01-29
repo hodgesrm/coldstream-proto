@@ -1,10 +1,8 @@
 /**
  * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.shared.storage;
+package io.goldfin.shared.cloud;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.slf4j.Logger;
@@ -20,33 +18,32 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
-import io.goldfin.shared.utilities.YamlHelper;
-
 /**
- * Implementations operations on S3 buckets.
+ * Implements operations on S3.
  */
-public class S3Connection {
-	static final Logger logger = LoggerFactory.getLogger(S3Connection.class);
+public class StorageConnection {
+	static final Logger logger = LoggerFactory.getLogger(StorageConnection.class);
+
+	// Configuration properties.
+	private static final String BUCKET = "bucket";
+	private static final String LOCATION = "location";
+
+	private final AwsConnectionParams connectionParams;
 
 	/**
 	 * Auto-closable wrapper for Amazon S3 client to enable operations to allocate
 	 * and free resources using a try block.
 	 */
-	class StorageConnectionWrapper implements AutoCloseable {
-		S3ConnectionParams connectionParams;
+	class S3ClientWrapper implements AutoCloseable {
+		AwsConnectionParams params;
 		AmazonS3 client;
 
-		StorageConnectionWrapper() {
-			try {
-				connectionParams = YamlHelper.readFromFile(new File("conf/storage.yaml"), S3ConnectionParams.class);
-				BasicAWSCredentials credentials = new BasicAWSCredentials(connectionParams.getAccessKeyId(),
-						connectionParams.getSecretAccessKey());
-				AWSCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
-				client = AmazonS3ClientBuilder.standard().withCredentials(provider)
-						.withRegion(connectionParams.getLocation()).build();
-			} catch (IOException e) {
-				throw new RuntimeException("Unable to connect to S3", e);
-			}
+		S3ClientWrapper() {
+			BasicAWSCredentials credentials = new BasicAWSCredentials(connectionParams.getAccessKeyId(),
+					connectionParams.getSecretAccessKey());
+			AWSCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
+			client = AmazonS3ClientBuilder.standard().withCredentials(provider)
+					.withRegion(connectionParams.getS3().getProperty(LOCATION)).build();
 		}
 
 		public AmazonS3 getConnection() {
@@ -54,13 +51,17 @@ public class S3Connection {
 		}
 
 		public String getBucket() {
-			return connectionParams.getBucket();
+			return connectionParams.getS3().getProperty(BUCKET);
 		}
 
 		@Override
 		public void close() {
 			client.shutdown();
 		}
+	}
+
+	public StorageConnection(AwsConnectionParams connectionParams) {
+		this.connectionParams = connectionParams;
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class S3Connection {
 	 */
 	public String storeTenantDocument(String tenantId, String docId, InputStream input, String fileName,
 			String description, String sha256, long contentLength, String contentType) {
-		try (StorageConnectionWrapper wrapper = new StorageConnectionWrapper()) {
+		try (S3ClientWrapper wrapper = new S3ClientWrapper()) {
 			String key = String.format("tenant/%s/%s", tenantId, docId);
 			ObjectMetadata metadata = new ObjectMetadata();
 			metadata.addUserMetadata("tenantId", tenantId);
@@ -96,7 +97,7 @@ public class S3Connection {
 	 * Delete a tenant file from S3.
 	 */
 	public void deleteTenantDocument(String tenantId, String docId) {
-		try (StorageConnectionWrapper wrapper = new StorageConnectionWrapper()) {
+		try (S3ClientWrapper wrapper = new S3ClientWrapper()) {
 			String key = tenantDocumentKey(tenantId, docId);
 			DeleteObjectRequest request = new DeleteObjectRequest(wrapper.getBucket(), key);
 			logger.info(String.format("Deleting document: tenantId=%s, docId=%s", tenantId, docId));

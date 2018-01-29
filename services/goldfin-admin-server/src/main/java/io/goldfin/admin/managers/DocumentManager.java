@@ -24,9 +24,10 @@ import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
 import io.goldfin.admin.service.api.model.User;
+import io.goldfin.shared.cloud.CloudConnectionFactory;
+import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 import io.goldfin.shared.data.Session;
-import io.goldfin.shared.storage.S3Connection;
 import io.goldfin.tenant.data.DocumentDataService;
 
 /**
@@ -92,7 +93,7 @@ public class DocumentManager implements Manager {
 		UUID docId = UUID.randomUUID();
 		String locator = null;
 		try (InputStream localInput = new FileInputStream(tempFile)) {
-			S3Connection connection = new S3Connection();
+			StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
 			locator = connection.storeTenantDocument(tenantId, docId.toString(), localInput, fileName, description,
 					sha256, contentLength, contentType);
 		}
@@ -125,7 +126,7 @@ public class DocumentManager implements Manager {
 		// Delete the document from storage. This has to go first so
 		// we don't lose the document.
 		String tenantId = getTenantId(principal);
-		S3Connection connection = new S3Connection();
+		StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
 		connection.deleteTenantDocument(tenantId, document.getId().toString());
 
 		// Now erase document metadata.

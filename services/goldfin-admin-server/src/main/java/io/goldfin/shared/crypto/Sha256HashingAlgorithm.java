@@ -3,6 +3,10 @@
  */
 package io.goldfin.shared.crypto;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,12 +22,7 @@ public class Sha256HashingAlgorithm {
 		return NAME;
 	}
 
-	public static byte[] generateHash(byte[] value) {
-		MessageDigest digest;
-		digest = getMessageDigest();
-		return digest.digest(value);
-	}
-
+	/** Return a MessageDigest that implements SHA-256. */
 	public static MessageDigest getMessageDigest() {
 		try {
 			return MessageDigest.getInstance("SHA-256");
@@ -32,11 +31,39 @@ public class Sha256HashingAlgorithm {
 		}
 	}
 
-	public static String generateHashString(String value) {
-		byte[] bytes = generateHash(value.getBytes(StandardCharsets.UTF_8));
-		return bytesToHexString(bytes);
+	/** Compute a hash from a byte array. */
+	public static byte[] generateHash(byte[] value) {
+		MessageDigest digest;
+		digest = getMessageDigest();
+		return digest.digest(value);
 	}
 
+	/** Compute a hash from a stream. */
+	public static byte[] generateHash(InputStream input) {
+		MessageDigest digest = getMessageDigest();
+		try {
+			byte[] buf = new byte[1024];
+			int len;
+			while ((len = input.read(buf)) >= 0) {
+				digest.update(buf, 0, len);
+			}
+			return digest.digest();
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to compute digest on input stream", e);
+		}
+	}
+
+	/** Compute a hash on a file. */
+	public static byte[] generateHash(File file) {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return generateHash(fis);
+		} catch (IOException e) {
+			throw new RuntimeException(String.format("Unable to compute digest on file: %s", file.getAbsolutePath()),
+					e);
+		}
+	}
+
+	/** Convert bytes to hex stream representation. */
 	public static String bytesToHexString(byte[] bytes) {
 		String format = "%02x";
 		StringBuffer hexAsString = new StringBuffer();
@@ -44,5 +71,11 @@ public class Sha256HashingAlgorithm {
 			hexAsString.append(String.format(format, b));
 		}
 		return hexAsString.toString();
+	}
+
+	/** Helper method to compute a hex string hash on a string value. */
+	public static String generateHashString(String value) {
+		byte[] bytes = generateHash(value.getBytes(StandardCharsets.UTF_8));
+		return bytesToHexString(bytes);
 	}
 }
