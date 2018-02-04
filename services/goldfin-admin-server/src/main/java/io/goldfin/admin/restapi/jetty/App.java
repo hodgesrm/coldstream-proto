@@ -32,6 +32,8 @@ import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
+import io.goldfin.shared.cloud.CloudConnectionFactory;
+import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.utilities.YamlHelper;
 
@@ -130,6 +132,12 @@ public class App {
 		ConnectionParams serviceConnectionParams = YamlHelper.readFromFile(dbmsYaml, ConnectionParams.class);
 		logger.info("Reading DBMS connections: " + dbmsYaml.getAbsolutePath());
 
+		// Initialize cloud services.
+		File awsYaml = new File("conf/aws.yaml");
+		CloudConnectionFactory cloudFactory = CloudConnectionFactory.getInstance();
+		cloudFactory.setConnectionParamsFile(awsYaml);
+
+		// Configure managers in registry.
 		ManagerRegistry registry = ManagerRegistry.getInstance();
 		registry.initialize(serviceConnectionParams);
 		registry.addManager(new UserManager());

@@ -39,4 +39,5 @@ fi
 
 # Set standard values and execute. 
 export JAVA_OPTS="${JAVA_OPTS} -XX:MaxPermSize=256M -Xmx1024M -DloggerPath=conf/log4j.properties"
+set -x
 java $JAVA_OPTS -jar $executable $args 

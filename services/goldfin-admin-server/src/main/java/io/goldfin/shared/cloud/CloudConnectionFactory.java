@@ -28,9 +28,13 @@ public class CloudConnectionFactory {
 		if (instance == null) {
 			instance = new CloudConnectionFactory();
 		}
-		return null;
+		return instance;
 	}
 
+	/**
+	 * Must be set once so that the factory knows where to find connectin
+	 * parameters.
+	 */
 	public synchronized void setConnectionParamsFile(File connectionParamsFile) {
 		this.connectionParamsFile = connectionParamsFile;
 	}

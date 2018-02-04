@@ -6,6 +6,15 @@
 mvn clean install
 ```
 
+## Server start (console mode with debug enabled).
+```shell
+# Start postgresql image. 
+docker run -e POSTGRES_PASSWORD=secret -p 15432:5432 -d postgres
+# Start server. 
+cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
+bin/admin-server console debug
+```
+
 ## Service Initialization and Removal 
 
 Here are the steps to create a new service. 
@@ -13,7 +22,9 @@ Here are the steps to create a new service.
 1. Create an init-params.yaml file from template in conf/init-params.yaml.sample. 
 2. Run servicectl init. 
 ```shell
-svc-init --init-params=$PWD/conf/init-params.yaml --dbms-config=dbms-config.yaml
+   # Must run in dist location for relative directory references to work. 
+   cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
+   bin/svc-init create --init-params=conf/init-params.sample.yaml --dbms-config=conf/dbms.yaml
 ```
 The dbms-config.yaml file is required by the running image. 
 
@@ -25,10 +36,22 @@ Here are step(s) to remove a service.
    servicectl remove --init-params=$PWD/conf/init-params.yaml
 ```
 ## Create a tenant. 
-svc-client login --host localhost --user=sysadmin --password=secret12
-svc-client tenant-create --name 'skyline' --description "Skyline Research"
-svc-client user-create --initialPassword=secret12 \
---username=test --tenantId=84cc09b8-5a93-4fd2-9527-4588e46e8b4c
+```shell
+   svc-client login --host localhost --user=sysadmin --password=secret12
+   svc-client tenant-create --name 'skyline' --description "Skyline Research"
+   svc-client tenant-list
+   # Get tenantId. 
+   svc-client user-create --initialPassword=secret12 \
+   --username=test --tenantId=84cc09b8-5a93-4fd2-9527-4588e46e8b4c
+```
+
+### Load invoice for client. 
+```shell
+   svc-client login --host local host --user=test --password=secret12
+   svc-client document-create --description='Test invoice' \
+   --file /home/rhodges/coldstream/invoices/ovh/invoice_WE666184.pdf
+   svc-client document-list
+```
 
 ## Running Docker Images
 
