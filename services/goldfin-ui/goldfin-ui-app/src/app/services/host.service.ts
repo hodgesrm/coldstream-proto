@@ -51,11 +51,16 @@ export class HostService {
           host.identifier = "i-05c83264172013a" + i;
           host.region = "us-west";
           host.datacenter = "us-west-2a";
+        } else if (host.vendor == "OVH.com") {
+          host.type = "DEDICATED";
+          host.identifier = identifierPrefix + i; 
+          host.region = "France"
+          host.datacenter = "Gravelines";
         } else {
           host.type = "DEDICATED";
           host.identifier = identifierPrefix + i; 
-          host.region = "North America"
-          host.datacenter = "BHS-1";
+          host.region = "US"
+          host.datacenter = "Denver";
         }
         host.name = host.identifier;
         host.cost = amount;

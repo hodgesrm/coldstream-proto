@@ -1,0 +1,143 @@
+<!--
+  ~ Copyright (c) 2017-2018 Goldfin.io. All Rights Reserved.
+  -->
+<clr-datagrid [(clrDgSelected)]="selected">
+    <clr-dg-action-bar>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="analyze_open = true">Analyze Cost Trends</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="export_open = true">Export Data</button>
+        </div>
+    </clr-dg-action-bar>
+
+    <clr-dg-column [clrDgField]="'vendor'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Vendor
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'name'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Name
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'type'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Type
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'cpu_type'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        CPU
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'cores'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Cores
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'threads'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Threads
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'sockets'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Sockets
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'ram_gb'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        RAM (GB)
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'hdd_storage_gb'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        HDD (GB)
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'ssd_storage_gb'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        SSD (GB)
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'other_storage_gb'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Other Storage (GB)
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'other_storage_type'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Other Storage Type
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'raid'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        RAID
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'bandwidth_gbps'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Network Bandwidth (Gbps)
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'region'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Region
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'datacenter'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Datacenter
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'setup_cost'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Setup Cost
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'incremental_cost'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Incremental Cost
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'increment_type'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Increment Type
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'currency'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Currency
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'effective_date'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Start Date
+      </ng-container>
+    </clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let host_price of host_prices" [clrDgItem]="host_price">
+        <clr-dg-cell>{{host_price.vendor}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.name}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.type}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.cpu_type}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.cores}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.threads}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.sockets}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.ram_gb}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.hdd_storage_gb}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.ssd_storage_gb}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.other_storage_gb}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.other_storage_type}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.raid}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.bandwidth_gpbs}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.region}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.datacenter}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.setup_cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.incremental_cost}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.increment_type}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.currency}}</clr-dg-cell>
+        <clr-dg-cell>{{host_price.effective_date}}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{host_prices.length}} hosts</clr-dg-footer>
+</clr-datagrid>

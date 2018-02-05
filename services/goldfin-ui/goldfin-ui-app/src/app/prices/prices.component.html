@@ -5,25 +5,25 @@
     <clr-tab>
         <button clrTabLink id="hosts">Hosts</button>
         <clr-tab-content id="content1" *clrIfActive>
-           <my-inventory-hosts>Loading...</my-inventory-hosts>
+           <my-prices-hosts>Loading...</my-prices-hosts>
         </clr-tab-content>
     </clr-tab>
     <clr-tab>
         <button clrTabLink id="private_clouds">Private Clouds</button>
-        <clr-tab-content id="content2" *clrIfActive>
-        Your inventory does not contain any private clouds.
+        <clr-tab-content id="content1" *clrIfActive>
+        This screen will show private cloud prices.
         </clr-tab-content>
     </clr-tab>
     <clr-tab>
-        <button clrTabLink id="kubernetes">Kubernetes</button>
+        <button clrTabLink id="private_clouds">Kubernetes</button>
         <clr-tab-content id="content3" *clrIfActive>
-        Your inventory does not contain any Kubernetest clusters.
+        This screen will show hosted Kubernetes prices.
         </clr-tab-content>
     </clr-tab>
     <clr-tab>
-        <button id="object_storage" clrTabLink>Object Storage</button>
+        <button clrTabLink id="object_storage">Object Storage</button>
         <clr-tab-content id="content4" *clrIfActive>
-        Your inventory does not contain any cloud object storage resources. 
+        This screen will show cloud object storage prices. 
         </clr-tab-content>
     </clr-tab>
 </clr-tabs>

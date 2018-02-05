@@ -7,11 +7,11 @@ import { Router }   from '@angular/router'
 import { HostService, Host }   from '../services/host.service';
 
 @Component({
-    selector: 'my-app-hosts', 
-    templateUrl: './hosts.component.html',
+    selector: 'my-inventory-hosts', 
+    templateUrl: './inventory_hosts.component.html',
     styles: []
 })
-export class HostsComponent implements OnInit {
+export class InventoryHostsComponent implements OnInit {
   // Model controls. 
 
   // Host listing.

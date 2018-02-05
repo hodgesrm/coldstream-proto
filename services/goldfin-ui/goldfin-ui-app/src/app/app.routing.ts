@@ -10,6 +10,7 @@ import { AboutComponent } from './about/about.component';
 import { HomeComponent } from './home/home.component';
 import { InvoicesComponent } from './invoices/invoices.component';
 import { InventoryComponent } from './inventory/inventory.component';
+import { PricesComponent } from './prices/prices.component';
 import { VendorsComponent } from './vendors/vendors.component';
 import { LoginComponent } from './login/login.component';
 
@@ -18,6 +19,7 @@ export const ROUTES: Routes = [
     {path: 'home', component: HomeComponent},
     {path: 'invoices', component: InvoicesComponent},
     {path: 'inventory', component: InventoryComponent},
+    {path: 'prices', component: PricesComponent},
     {path: 'vendors', component: VendorsComponent},
     {path: 'about', component: AboutComponent},
     {path: 'login', component: LoginComponent}

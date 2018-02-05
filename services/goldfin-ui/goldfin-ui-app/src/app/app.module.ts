@@ -12,7 +12,9 @@ import { IndustryBaselineComponent } from "./home/industry-baseline.component";
 import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
 import { InventoryComponent } from "./inventory/inventory.component";
-import { HostsComponent } from "./inventory/hosts.component";
+import { InventoryHostsComponent } from "./inventory/inventory_hosts.component";
+import { PricesComponent } from "./prices/prices.component";
+import { PricesHostsComponent } from "./prices/prices_hosts.component";
 import { VendorsComponent } from "./vendors/vendors.component";
 import { AboutComponent } from "./about/about.component";
 
@@ -22,6 +24,7 @@ import { AuthService } from "./services/auth.service";
 import { InvoiceService } from "./services/invoice.service";
 import { HostService } from "./services/host.service";
 import { VendorService } from "./services/vendor.service";
+import { HostPriceService } from "./services/host_pricing.service";
 
 @NgModule({
     declarations: [
@@ -32,7 +35,9 @@ import { VendorService } from "./services/vendor.service";
         IndustryBaselineComponent,
         InvoicesComponent,
         InventoryComponent,
-        HostsComponent,
+        InventoryHostsComponent,
+        PricesComponent,
+        PricesHostsComponent,
         VendorsComponent,
         AboutComponent
     ],
@@ -49,7 +54,8 @@ import { VendorService } from "./services/vendor.service";
       AuthService,
       InvoiceService,
       HostService,
-      VendorService
+      VendorService, 
+      HostPriceService
     ],
     bootstrap: [AppComponent]
 })

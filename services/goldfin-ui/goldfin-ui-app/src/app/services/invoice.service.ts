@@ -81,18 +81,30 @@ export class InvoiceService {
     return Promise.resolve(this.fetchInvoices());
   }
 
-  // Get Invoices from last 30 days. 
+  // Get Invoices from last N days. 
   getRecentInvoices(): Invoice[] {
     let recentInvoices: Invoice[] = [];
+    var days = 90
     var now = Date.now(); 
     for (var i = 0; i < this.invoices.length; i++) {
       let effectiveDate = new Date(this.invoices[i].effective_date).valueOf();
       let diffInDays = (now - effectiveDate) / 1000 / 3600 / 24;
-      if (diffInDays > 0 && diffInDays <= 30) {
+      if (diffInDays > 0 && diffInDays <= days) {
         recentInvoices.push(this.invoices[i]);
       }
     }
-    return recentInvoices;
+    return recentInvoices.sort(this.compareByDate).reverse();
+  }
+
+  compareByDate(i1, i2) {
+    var effectiveDate1 = new Date(i1.effectiveDate).valueOf();
+    var effectiveDate2 = new Date(i2.effectiveDate).valueOf();
+    if (effectiveDate1 < effectiveDate2)
+        return -1;
+    else if (effectiveDate1 > effectiveDate2)
+        return 1;
+    else
+        return 0;
   }
 
   getInvoice(identifier: string): Invoice {

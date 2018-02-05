@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+ * Copyright (c) 2017-2018 Goldfin.io. All Rights Reserved.
  */
 import { Component } from '@angular/core';
 
