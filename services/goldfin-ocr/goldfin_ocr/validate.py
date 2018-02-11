@@ -5,7 +5,7 @@
 from decimal import Decimal
 
 import data
-import generated.api.models as models
+import .api.models as models
 
 
 class Rule:

@@ -8,10 +8,12 @@ import argparse
 import json
 import logging
 import os
+import yaml
 
-from api.models import Document
-#from api.util import deserialize_model
-from json_xlate import json_dict_to_model, model_to_json_dict
+# This is the top-level script, so relative imports not allowed.
+from goldfin_ocr.api.models import Document
+from goldfin_ocr.json_xlate import json_dict_to_model, model_to_json_dict
+from goldfin_ocr.ocr import OcrProcessor
 
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
@@ -68,9 +70,6 @@ parser.add_argument("--request",
                     help="Process OCR single request",
                     type=str, choices=['scan', 'validate'])
 parser.add_argument("--body", help="OCR Request body")
-parser.add_argument("--aws-cfg",
-                    help="Cloud services configuration file",
-                    default="conf/aws.yaml")
 parser.add_argument("--ocr-cfg",
                     help="OCR configuration file", 
                     default="conf/ocr.yaml")
@@ -79,7 +78,7 @@ parser.add_argument("--log-level",
                     default="INFO")
 parser.add_argument("--log-file",
                     help="Name of log file (default: %(default)s)",
-                    default=os.getenv("LOG_FILE", None))
+                    default=os.getenv("LOG_FILE", "ocr.log"))
 
 # Process options.  This will automatically print help. 
 args = parser.parse_args()
@@ -97,13 +96,22 @@ else:
     with open(args.body, "r") as fp:
         body = json.load(fp)
 
-    print("Request: {0}".format(request))
-    print("Body: {0}".format(body))
-    print("Body: {0}".format(type(body)))
+    # Load the ocr configuration.
+    with open(args.ocr_cfg, "r") as ocr_yaml:
+        ocr_config = yaml.load(ocr_yaml)
 
+    # Normalize the JSON and convert to document.
+    logger.debug("Request: {0}".format(request))
     document = json_dict_to_model(body, Document)
-    print("Document: {0}".format(document))
-    back_to_json = model_to_json_dict(document)
-    print("JSON: {0}".format(back_to_json))
 
-print("Ready do to something")
+    # Invoke OCR scan.
+    ocr_processor = OcrProcessor(ocr_config)
+    invoice = ocr_processor.scan("ignore", document, use_cache=True)
+    if invoice is None:
+        print("No invoice generated!")
+    else:
+        print("Invoice: {0}".format(invoice))
+        back_to_json = model_to_json_dict(invoice)
+        print("JSON: {0}".format(back_to_json))
+
+print("Done!!!")

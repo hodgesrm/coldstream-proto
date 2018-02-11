@@ -4,7 +4,7 @@
 
 from decimal import Decimal
 from datetime import datetime, timedelta
-import generated.api.models as models
+import .api.models as models
 
 
 # Generators to iterate across invoices in interesting ways.

@@ -7,8 +7,8 @@ import logging
 import re
 import uuid
 from decimal import Decimal
-from generated.api.models.invoice import Invoice
-from generated.api.models.invoice_item import InvoiceItem
+from goldfin_ocr.api.models.invoice import Invoice
+from goldfin_ocr.api.models.invoice_item import InvoiceItem
 
 import data
 

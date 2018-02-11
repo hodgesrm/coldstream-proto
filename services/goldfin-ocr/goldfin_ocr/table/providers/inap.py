@@ -5,8 +5,8 @@ import re
 import logging
 import uuid
 from decimal import Decimal
-from generated.api.models.invoice import Invoice
-from generated.api.models.invoice_item import InvoiceItem
+from goldfin_ocr.api.models.invoice import Invoice
+from goldfin_ocr.api.models.invoice_item import InvoiceItem
 
 # Define logger
 logger = logging.getLogger(__name__)
