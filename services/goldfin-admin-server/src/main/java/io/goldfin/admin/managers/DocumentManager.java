@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
-import java.security.MessageDigest;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -60,25 +59,21 @@ public class DocumentManager implements Manager {
 		// Download the document into a temporary file.
 		File tempFile = Files.createTempFile(tenantId, fileName, new FileAttribute<?>[0]).toFile();
 		long contentLength = 0;
-		MessageDigest digest = Sha256HashingAlgorithm.getMessageDigest();
-
 		try (FileOutputStream fos = new FileOutputStream(tempFile)) {
 			byte[] buf = new byte[1024];
 			int len;
 			while ((len = content.read(buf)) >= 0) {
 				fos.write(buf, 0, len);
-				// Keep adding to digest and buffer length.
 				contentLength += len;
-				digest.update(buf);
 			}
 			fos.close();
 		} catch (IOException e) {
 			throw e;
 		}
 
-		// Convert the SHA-256 digest to a string.
-		byte[] digestValue = digest.digest();
-		String sha256 = Sha256HashingAlgorithm.bytesToHexString(digestValue);
+		// Compute the SHA-256 digest on the file.  We could do this 
+		// in the write loop but this function is unit-tested. 
+		String sha256 = Sha256HashingAlgorithm.generateHashString(tempFile);
 
 		// See if the thumbprint already exists.
 		try (Session session = context.tenantSession(tenantId).enlist(docService)) {

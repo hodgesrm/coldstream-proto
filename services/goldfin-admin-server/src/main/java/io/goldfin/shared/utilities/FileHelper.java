@@ -4,6 +4,7 @@
 package io.goldfin.shared.utilities;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -59,7 +60,19 @@ public class FileHelper {
 				fw.write(line);
 				fw.write(lineSeparator);
 			}
+			fw.flush();
 			return f;
 		}
+	}
+
+	/** Write binary data to a file. */
+	public static File writeBytes(File f, byte[] data) throws IOException {
+		try (FileOutputStream out = new FileOutputStream(f)) {
+			for (int i = 0; i < data.length; i++) {
+				out.write(data[i]);
+			}
+			out.flush();
+		}
+		return f;
 	}
 }

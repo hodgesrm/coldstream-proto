@@ -6,7 +6,7 @@ package io.goldfin.shared.cloud;
 import java.util.Properties;
 
 /**
- * JDBC connection parameters.
+ * Cloud connection parameters.
  */
 public class AwsConnectionParams {
 	private String accessKeyId;

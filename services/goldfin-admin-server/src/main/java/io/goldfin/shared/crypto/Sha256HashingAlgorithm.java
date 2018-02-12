@@ -13,7 +13,8 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Implements SHA-256 hashing without salt. This is used for identifying streams
- * of bytes.
+ * of bytes. Note: this class could easily be generalized to a nice wrapper
+ * around MessageDigest. Maybe in a future release...
  */
 public class Sha256HashingAlgorithm {
 	private static String NAME = "sha256";
@@ -31,14 +32,20 @@ public class Sha256HashingAlgorithm {
 		}
 	}
 
-	/** Compute a hash from a byte array. */
+	/** Compute a hash digest from a byte array. */
 	public static byte[] generateHash(byte[] value) {
 		MessageDigest digest;
 		digest = getMessageDigest();
 		return digest.digest(value);
 	}
 
-	/** Compute a hash from a stream. */
+	/** Compute a hash string from a byte array. */
+	public static String generateHashString(byte[] value) {
+		byte[] digest = generateHash(value);
+		return bytesToHexString(digest);
+	}
+
+	/** Compute a hash digest from a stream. */
 	public static byte[] generateHash(InputStream input) {
 		MessageDigest digest = getMessageDigest();
 		try {
@@ -53,7 +60,13 @@ public class Sha256HashingAlgorithm {
 		}
 	}
 
-	/** Compute a hash on a file. */
+	/** Compute a hash string from a byte array. */
+	public static String generateHashString(InputStream input) {
+		byte[] digest = generateHash(input);
+		return bytesToHexString(digest);
+	}
+
+	/** Compute a hash digest on a file. */
 	public static byte[] generateHash(File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			return generateHash(fis);
@@ -61,6 +74,12 @@ public class Sha256HashingAlgorithm {
 			throw new RuntimeException(String.format("Unable to compute digest on file: %s", file.getAbsolutePath()),
 					e);
 		}
+	}
+
+	/** Compute a hash string on a file. */
+	public static String generateHashString(File file) {
+		byte[] digest = generateHash(file);
+		return bytesToHexString(digest);
 	}
 
 	/** Convert bytes to hex stream representation. */
