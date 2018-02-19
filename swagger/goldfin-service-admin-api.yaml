@@ -546,6 +546,11 @@ paths:
           in: formData
           description: A optional description of the document
           type: string
+        - name: scan
+          in: formData
+          description: Flag to control scanning
+          type: boolean
+          default: True
         - name: file
           in: formData
           description: Document file
@@ -971,11 +976,11 @@ definitions:
         description: Item currency
       startDate:
         type: string
-        format: timestamp
+        format: date-time
         description: Begining of the time range
       endDate:
         type: string
-        format: timestamp
+        format: date-time
         description: End of the time range
       region:
         $ref: '#/definitions/DocumentRegion'

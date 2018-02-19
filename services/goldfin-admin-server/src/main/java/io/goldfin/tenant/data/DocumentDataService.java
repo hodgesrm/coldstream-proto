@@ -74,13 +74,13 @@ public class DocumentDataService implements TransactionalService<Document> {
 			update.put("tags", model.getTags());
 		}
 		if (model.getState() != null) {
-			update.put("state", model.getState().toString());
+			update.put("state", stringOrNull(model.getState()));
 		}
 		if (model.getSemanticType() != null) {
-			update.put("semanticType", model.getSemanticType().toString());
+			update.put("semantic_type", stringOrNull(model.getSemanticType()));
 		}
 		if (model.getSemanticId() != null) {
-			update.put("semanticId", model.getSemanticId().toString());
+			update.put("semantic_id", model.getSemanticId());
 		}
 		return update.run(session);
 	}

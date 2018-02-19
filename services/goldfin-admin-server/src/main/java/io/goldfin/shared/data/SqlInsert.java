@@ -5,6 +5,7 @@ package io.goldfin.shared.data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,6 +40,11 @@ public class SqlInsert {
 	}
 
 	public SqlInsert put(String name, Object value, boolean json) {
+		// Fixup--convert java.util.Date to timestamp so PostgreSQL can work with it.
+		if (value != null && value instanceof java.util.Date) {
+			java.util.Date dateValue = (java.util.Date) value;
+			value = new Timestamp(dateValue.getTime());
+		}
 		InsertValue iv = new InsertValue();
 		iv.name = name;
 		iv.value = value;

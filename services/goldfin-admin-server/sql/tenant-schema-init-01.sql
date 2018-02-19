@@ -22,11 +22,11 @@ CREATE INDEX ON documents USING hash(thumbprint)
 // Create the invoice table. 
 CREATE TABLE IF NOT EXISTS invoices (
   id uuid PRIMARY KEY, 
-  document_id uuid,
+  document_id uuid REFERENCES documents(id) ON DELETE CASCADE,
   description varchar(250),
   tags varchar(500),
   identifier varchar(100), 
-  effective_date date, 
+  effective_date timestamp, 
   vendor varchar(100), 
   subtotal_amount numeric(10,2), 
   tax numeric(10,2), 

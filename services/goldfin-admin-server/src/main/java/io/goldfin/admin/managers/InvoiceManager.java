@@ -33,6 +33,12 @@ public class InvoiceManager implements Manager {
 		// Do nothing for now.
 	}
 
+	public void addScannedInvoice(String tenantId, Invoice invoice) {
+		// If there is an existing invoice for this document ID, we need to delete it. 
+
+		// Add the new invoice. 
+	}
+	
 	public void deleteInvoice(Principal principal, String id) {
 		String tenantId = getTenantId(principal);
 		InvoiceDataService invoiceEnvelopeService = new InvoiceDataService();
@@ -44,7 +50,7 @@ public class InvoiceManager implements Manager {
 			}
 		}
 	}
-
+	
 	public Invoice getInvoice(Principal principal, String id) {
 		String tenantId = getTenantId(principal);
 		InvoiceDataService invoiceDataService = new InvoiceDataService();

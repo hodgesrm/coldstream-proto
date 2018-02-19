@@ -55,7 +55,7 @@ public class DocumentManager implements Manager {
 	}
 
 	public Document createDocument(Principal principal, InputStream content, String fileName, String description,
-			String contentType) throws IOException {
+			String contentType, Boolean scan) throws IOException {
 		String tenantId = getTenantId(principal);
 		DocumentDataService docService = new DocumentDataService();
 
@@ -113,6 +113,12 @@ public class DocumentManager implements Manager {
 			logger.info("Document created: id=" + id);
 		}
 
+		// Schedule a scan if desired.
+		if (scan != null && scan.booleanValue()) {
+			logger.info("Scan requested on new document: id=" + document.getId().toString());
+			scanDocument(principal, document.getId().toString());
+		}
+
 		// All done!
 		return this.getDocument(principal, document.getId().toString());
 	}
@@ -122,7 +128,7 @@ public class DocumentManager implements Manager {
 		Document document = getDocument(principal, id);
 		String tenantId = getTenantId(principal);
 
-		// Get the OCR manager and submit the document for scanning. 
+		// Get the OCR manager and submit the document for scanning.
 		OcrManager ocr = ManagerRegistry.getInstance().getManager(OcrManager.class);
 		ocr.scan(tenantId, document);
 

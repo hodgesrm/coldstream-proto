@@ -12,11 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.DocumentManager;
-import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.DocumentParameters;
-import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.DocumentApiService;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -30,11 +28,11 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 
 	@Override
 	public Response documentCreate(InputStream fileInputStream, FormDataContentDisposition fileDetail,
-			String description, SecurityContext securityContext) throws NotFoundException {
+			String description, Boolean scan, SecurityContext securityContext) throws NotFoundException {
 		try {
 			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
 			Document doc = dm.createDocument(securityContext.getUserPrincipal(), fileInputStream,
-					fileDetail.getFileName(), description, "application/octet-stream");
+					fileDetail.getFileName(), description, "application/octet-stream", scan);
 			return Response.ok().entity(doc).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);

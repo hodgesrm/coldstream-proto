@@ -27,6 +27,8 @@ public class CmdDocumentCreate implements Command {
 	public CmdDocumentCreate() {
 		parser.accepts("file", "Document file").withRequiredArg().ofType(File.class);
 		parser.accepts("description", "Document description").withRequiredArg().ofType(String.class);
+		parser.accepts("scan", "If true automatically scan document").withRequiredArg().ofType(Boolean.class)
+				.defaultsTo(true);
 	}
 
 	public String getName() {
@@ -45,6 +47,7 @@ public class CmdDocumentCreate implements Command {
 		// Check options and assign parameters to create tenant.
 		File file = (File) CliUtils.requiredOption(ctx.options(), "file");
 		String description = (String) ctx.options().valueOf("description");
+		Boolean scan = (Boolean) ctx.options().valueOf("scan");
 
 		// Ensure file exists and is readable.
 		if (!file.canRead()) {
@@ -57,6 +60,9 @@ public class CmdDocumentCreate implements Command {
 			RestRequest request = new RestRequest().POST().path("/document").multipart().addFile("file", file);
 			if (description != null) {
 				request.addText("description", description);
+			}
+			if (scan != null) {
+				request.addText("scan", scan.toString());
 			}
 			RestResponse response = client.execute(request);
 			if (response.isError()) {

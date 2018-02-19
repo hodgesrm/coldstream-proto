@@ -42,7 +42,7 @@ public class InvoiceServiceTest extends TransactionalTest<Invoice> {
 		public Invoice generate() {
 			Invoice env = new Invoice();
 			env.setId(UUID.randomUUID());
-			env.setDocumentId(UUID.randomUUID());
+			//env.setDocumentId(UUID.randomUUID());
 			env.setDescription("X");
 			env.setTags("tags");
 			env.setEffectiveDate(Date.valueOf("2016-12-01"));

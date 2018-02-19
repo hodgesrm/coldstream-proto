@@ -3,6 +3,7 @@
  */
 package io.goldfin.tenant.data;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,14 +41,26 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding new invoice: " + model.toString());
 		}
-		UUID id = UUID.randomUUID();
-		new SqlInsert().table("invoices").put("id", id).put("document_id", model.getDocumentId())
+
+		if (model.getId() == null) {
+			model.setId(UUID.randomUUID());
+		}
+		new SqlInsert().table("invoices").put("id", model.getId()).put("document_id", model.getDocumentId())
 				.put("identifier", model.getIdentifier()).put("description", model.getDescription())
-				.put("tags", model.getTags()).put("effective_date", model.getEffectiveDate())
+				.put("tags", model.getTags()).put("effective_date", timestampOrNull(model.getEffectiveDate()))
 				.put("vendor", model.getVendor()).put("subtotal_amount", model.getSubtotalAmount())
 				.put("tax", model.getTax()).put("total_amount", model.getTotalAmount())
 				.put("currency", model.getCurrency()).run(session);
-		return id.toString();
+		return model.getId().toString();
+	}
+
+	// Coerce a string to a timestamp value.
+	private Timestamp timestampOrNull(java.util.Date d) {
+		if (d == null) {
+			return null;
+		} else {
+			return new Timestamp(d.getTime());
+		}
 	}
 
 	public int update(String id, Invoice model) {
@@ -75,9 +88,9 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		}
 	}
 
-	public Invoice getByToken(String token) {
-		TabularResultSet result = new SqlSelect().table("invoices").get(COLUMN_NAMES).where("token = ?", token)
-				.run(session);
+	public Invoice getByDocumentId(String documentId) {
+		TabularResultSet result = new SqlSelect().table("invoices").get(COLUMN_NAMES)
+				.where("document_id = ?", UUID.fromString(documentId)).run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {
@@ -95,18 +108,20 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 	}
 
 	private Invoice toInvoice(Row row) {
-		Invoice env = new Invoice();
-		env.setId(row.getAsUUID("id"));
-		env.setDocumentId(row.getAsUUID("document_id"));
-		env.setDescription(row.getAsString("description"));
-		env.setTags(row.getAsString("tags"));
-		env.setIdentifier(row.getAsString("identifier"));
-		env.setEffectiveDate(row.getAsDate("effective_date"));
-		env.setSubtotalAmount(row.getAsBigDecimal("subtotal_amount"));
-		env.setTax(row.getAsBigDecimal("tax"));
-		env.setTotalAmount(row.getAsBigDecimal("total_amount"));
-		env.setCurrency(row.getAsString("currency"));
-		return env;
+		Invoice inv = new Invoice();
+		inv.setId(row.getAsUUID("id"));
+		inv.setDocumentId(row.getAsUUID("document_id"));
+		inv.setDescription(row.getAsString("description"));
+		inv.setTags(row.getAsString("tags"));
+		inv.setIdentifier(row.getAsString("identifier"));
+		inv.setVendor(row.getAsString("vendor"));
+		inv.setEffectiveDate(row.getAsJavaDate("effective_date"));
+		inv.setSubtotalAmount(row.getAsBigDecimal("subtotal_amount"));
+		inv.setTax(row.getAsBigDecimal("tax"));
+		inv.setTotalAmount(row.getAsBigDecimal("total_amount"));
+		inv.setCurrency(row.getAsString("currency"));
+		inv.setCreationDate(row.getAsTimestamp("creation_date").toString());
+		return inv;
 	}
 
 	private String toJson(Object o) {

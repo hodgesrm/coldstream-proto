@@ -47,7 +47,7 @@ Here are step(s) to remove a service.
 
 ### Load invoice for client. 
 ```shell
-   svc-client login --host local host --user=test --password=secret12
+   svc-client login --host localhost --user=test --password=secret12
    svc-client document-create --description='Test invoice' \
    --file /home/rhodges/coldstream/invoices/ovh/invoice_WE666184.pdf
    svc-client document-list

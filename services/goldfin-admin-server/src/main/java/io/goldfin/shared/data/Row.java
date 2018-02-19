@@ -82,8 +82,24 @@ public class Row {
 	public Timestamp getAsTimestamp(String name) {
 		return (Timestamp) get(name);
 	}
-	
+
 	public Date getAsDate(String name) {
 		return (Date) get(name);
+	}
+
+	public java.util.Date getAsJavaDate(String name) {
+		Object o = get(name);
+		if (o == null) {
+			return null;
+		} else if (o instanceof Timestamp) {
+			return new java.sql.Date(((Timestamp) o).getTime());
+		} else if (o instanceof Date) {
+			return (Date) o;
+		} else if (o instanceof String) {
+			return java.sql.Date.valueOf((String) o);
+		} else {
+			// Not sure what to do here, so we'll just lose data. 
+			return null;
+		}
 	}
 }

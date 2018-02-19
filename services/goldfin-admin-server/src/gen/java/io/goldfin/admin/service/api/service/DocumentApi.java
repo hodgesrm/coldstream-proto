@@ -71,9 +71,10 @@ public class DocumentApi  {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
 ,@ApiParam(value = "A optional description of the document")@FormDataParam("description")  String description
+,@ApiParam(value = "Flag to control scanning", defaultValue="true")@FormDataParam("scan")  Boolean scan
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.documentCreate(fileInputStream, fileDetail,description,securityContext);
+        return delegate.documentCreate(fileInputStream, fileDetail,description,scan,securityContext);
     }
     @DELETE
     @Path("/{id}")

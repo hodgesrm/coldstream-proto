@@ -21,6 +21,7 @@ import io.goldfin.admin.service.api.model.DocumentRegion;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
+import java.util.Date;
 import javax.validation.constraints.*;
 
 /**
@@ -48,10 +49,10 @@ public class InvoiceItem   {
   private String currency = null;
 
   @JsonProperty("startDate")
-  private String startDate = null;
+  private Date startDate = null;
 
   @JsonProperty("endDate")
-  private String endDate = null;
+  private Date endDate = null;
 
   @JsonProperty("region")
   private DocumentRegion region = null;
@@ -205,7 +206,7 @@ public class InvoiceItem   {
     this.currency = currency;
   }
 
-  public InvoiceItem startDate(String startDate) {
+  public InvoiceItem startDate(Date startDate) {
     this.startDate = startDate;
     return this;
   }
@@ -216,15 +217,15 @@ public class InvoiceItem   {
    **/
   @JsonProperty("startDate")
   @ApiModelProperty(value = "Begining of the time range")
-  public String getStartDate() {
+  public Date getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(String startDate) {
+  public void setStartDate(Date startDate) {
     this.startDate = startDate;
   }
 
-  public InvoiceItem endDate(String endDate) {
+  public InvoiceItem endDate(Date endDate) {
     this.endDate = endDate;
     return this;
   }
@@ -235,11 +236,11 @@ public class InvoiceItem   {
    **/
   @JsonProperty("endDate")
   @ApiModelProperty(value = "End of the time range")
-  public String getEndDate() {
+  public Date getEndDate() {
     return endDate;
   }
 
-  public void setEndDate(String endDate) {
+  public void setEndDate(Date endDate) {
     this.endDate = endDate;
   }
 
