@@ -59,6 +59,8 @@ public class Document   {
   public enum StateEnum {
     CREATED("CREATED"),
     
+    SCAN_REQUESTED("SCAN_REQUESTED"),
+    
     SCANNED("SCANNED"),
     
     ERROR("ERROR");

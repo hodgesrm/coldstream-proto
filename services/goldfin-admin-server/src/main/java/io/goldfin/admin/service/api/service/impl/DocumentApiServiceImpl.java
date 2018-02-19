@@ -60,8 +60,13 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 
 	@Override
 	public Response documentScan(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
+			dm.scanDocument(securityContext.getUserPrincipal(), id);
+			return Response.accepted().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override

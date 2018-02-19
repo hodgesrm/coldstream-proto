@@ -113,7 +113,7 @@ public class DocumentApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Kick off document scanning", notes = "Run background scanning on document.  The document state and semantic information will be updated when finished.", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "APIKeyHeader")
-    }, tags={ "invoice", })
+    }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
         

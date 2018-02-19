@@ -1,5 +1,9 @@
 # Copyright (c) 2018 Robert Hodges.  All rights reserved. 
 
+import json
+from six import iteritems
+
+
 def json_dict_to_model(data, klass):
     """
     Deserializes raw JSON data in dict form to model class by translating property names.
@@ -20,6 +24,7 @@ def json_dict_to_model(data, klass):
         translated_data[python_name] = data.get(json_name)
     return klass(**translated_data)
 
+
 def model_to_json_dict(instance):
     """
     Serialize model class to dict with Swagger names.
@@ -30,6 +35,24 @@ def model_to_json_dict(instance):
     """
     # Test to ensure class has swagger attribute names.
     if not instance.attribute_map:
-        raise Exception("Instance is not a model class: {0}".format(type(instance)))
+        raise Exception(
+            "Instance is not a model class: {0}".format(type(instance)))
     else:
         return instance.to_dict()
+
+
+class SwaggerJsonEncoder(json.JSONEncoder):
+    include_nulls = False
+
+    def default(self, o):
+        # Look for o with swagger types and attribute map.
+        if hasattr(o, 'swagger_types'):
+            dikt = {}
+            for attr, _ in iteritems(o.swagger_types):
+                value = getattr(o, attr)
+                if value is None and not self.include_nulls:
+                    continue
+                attr = o.attribute_map[attr]
+                dikt[attr] = value
+            return dikt
+        return json.JSONEncoder.default(self, o)

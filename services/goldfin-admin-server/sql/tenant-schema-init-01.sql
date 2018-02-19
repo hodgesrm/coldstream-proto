@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS documents (
   content_length bigint, 
   thumbprint varchar(100), 
   locator varchar(250),
-  state varchar(10) CHECK (state IN ('CREATED', 'SCANNED', 'ERROR')),
+  state varchar(20) CHECK (state IN ('CREATED', 'SCAN_REQUESTED', 'SCANNED', 'ERROR')),
   semantic_type varchar(10) CHECK (semantic_type IN ('INVOICE', 'UNKNOWN')),
   semantic_id uuid,
   creation_date timestamp DEFAULT current_timestamp
@@ -33,6 +33,26 @@ CREATE TABLE IF NOT EXISTS invoices (
   total_amount numeric(10,2),
   currency char(3),
   creation_date timestamp DEFAULT current_timestamp
+)
+;
+
+// Create the invoice items table. 
+CREATE TABLE IF NOT EXISTS invoice_items (
+  invoice_id uuid REFERENCES invoices(id) ON DELETE CASCADE NOT NULL,
+  item_row_number integer NOT NULL,
+  item_id varchar(250), 
+  resource_id varchar(250), 
+  unit_amount numeric(10,2), 
+  units integer, 
+  total_amount numeric(10,2), 
+  currency char(3),
+  start_date timestamp, 
+  end_date timestamp,
+  region text,
+  inventory_id uuid, 
+  inventory_type varchar(50), 
+  creation_date timestamp DEFAULT current_timestamp,
+  PRIMARY KEY (invoice_id, item_row_number)
 )
 ;
 

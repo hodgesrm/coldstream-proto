@@ -3,7 +3,9 @@
  */
 package io.goldfin.shared.cloud;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -18,10 +20,10 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
 import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
-
-import io.goldfin.shared.utilities.JsonHelper;
 
 /**
  * Implements encapsulated operations on a single SQS queue.
@@ -122,19 +124,22 @@ public class QueueConnection {
 	}
 
 	/**
-	 * Send a JSON message to the queue.
+	 * Send a structured message to the queue.
 	 * 
-	 * @param request
-	 *            Object that will be serialized to JSON
+	 * @param message
+	 *            Message contents
 	 */
-	public void sendJsonMessage(Object o) {
+	public void send(StructuredMessage message) {
 		try (SqsClientWrapper wrapper = new SqsClientWrapper(connectionParams)) {
 			final AmazonSQS sqs = wrapper.getConnection();
 			try {
 				String queueUrl = sqs.getQueueUrl(queue).getQueueUrl();
-				String message = JsonHelper.writeToString(o);
 				SendMessageRequest send_msg_request = new SendMessageRequest().withQueueUrl(queueUrl)
-						.withMessageBody(message).withDelaySeconds(0);
+						.withMessageAttributes(toMessageAttributes(message.getHeaders()))
+						.withMessageBody(message.getContent()).withDelaySeconds(0);
+				if (logger.isDebugEnabled()) {
+					logger.debug(toDebugSendMessageRequest(send_msg_request));
+				}
 				sqs.sendMessage(send_msg_request);
 			} catch (AmazonServiceException e) {
 				this.handleException(String.format("Queue creation failed: name=%s, message=%s", queue, e.getMessage()),
@@ -144,36 +149,37 @@ public class QueueConnection {
 	}
 
 	/**
-	 * Read a JSON message from the queue.
+	 * Read a message from the queue.
 	 * 
 	 * @param objectType
 	 *            Type into which JSON message is deserialized
+	 * @return Structue
 	 */
-	public <T> QueueResponse<T> receiveJsonMessage(Class<T> objectType) {
-		QueueResponse<T> jsonMessage = null;
+	public StructuredMessage receive(boolean deleteOnReceipt) {
+		StructuredMessage message = null;
 		try (SqsClientWrapper wrapper = new SqsClientWrapper(connectionParams)) {
 			final AmazonSQS sqs = wrapper.getConnection();
 			try {
 				String queueUrl = sqs.getQueueUrl(queue).getQueueUrl();
-				List<Message> messages = sqs.receiveMessage(queueUrl).getMessages();
+				ReceiveMessageRequest receiveParams = new ReceiveMessageRequest().withQueueUrl(queueUrl)
+						.withAttributeNames("All").withMessageAttributeNames("All");
+				List<Message> messages = sqs.receiveMessage(receiveParams).getMessages();
 				if (messages.size() > 0) {
 					Message m1 = messages.get(0);
 					if (logger.isDebugEnabled()) {
 						logger.debug(toDebugMessage(m1));
 					}
-					T object = JsonHelper.readFromString(m1.getBody(), objectType);
-					jsonMessage = new QueueResponse<T>(m1.getReceiptHandle(), object);
-				}
-
-				// delete messages from the queue
-				for (Message m : messages) {
-					sqs.deleteMessage(queueUrl, m.getReceiptHandle());
+					message = new StructuredMessage().setHeaders(fromMessageAttributes(m1.getMessageAttributes()))
+							.setContent(m1.getBody()).setReceiptHandle(m1.getReceiptHandle());
+					if (deleteOnReceipt) {
+						sqs.deleteMessage(queueUrl, message.getReceiptHandle());
+					}
 				}
 			} catch (AmazonServiceException e) {
 				handleException(String.format("Message receive failed: name=%s, message=%s", queue, e.getMessage()), e);
 			}
 		}
-		return jsonMessage;
+		return message;
 	}
 
 	/**
@@ -182,16 +188,54 @@ public class QueueConnection {
 	 * @param key
 	 *            Key used for deletion
 	 */
-	public void deleteMessage(String key) {
+	public void deleteMessage(StructuredMessage message) {
 		try (SqsClientWrapper wrapper = new SqsClientWrapper(connectionParams)) {
 			final AmazonSQS sqs = wrapper.getConnection();
 			try {
 				String queueUrl = sqs.getQueueUrl(queue).getQueueUrl();
-				sqs.deleteMessage(queueUrl, key);
+				sqs.deleteMessage(queueUrl, message.getReceiptHandle());
 			} catch (AmazonServiceException e) {
 				handleException(String.format("Queue creation failed: name=%s, message=%s", queue, e.getMessage()), e);
 			}
 		}
+	}
+
+	private Map<String, MessageAttributeValue> toMessageAttributes(Map<String, String> headers) {
+		HashMap<String, MessageAttributeValue> attributes = new HashMap<String, MessageAttributeValue>();
+		for (String key : headers.keySet()) {
+			MessageAttributeValue mav = new MessageAttributeValue();
+			mav.setStringValue(headers.get(key));
+			mav.setDataType("String");
+			attributes.put(key, mav);
+		}
+		return attributes;
+	}
+
+	private Map<String, String> fromMessageAttributes(Map<String, MessageAttributeValue> attributes) {
+		HashMap<String, String> headers = new HashMap<String, String>();
+		for (String key : attributes.keySet()) {
+			MessageAttributeValue mav = attributes.get(key);
+			if ("Number".equals(mav.getDataType())) {
+				headers.put(key, mav.getStringValue());
+			} else if ("String".equals(mav.getDataType())) {
+				headers.put(key, mav.getStringValue());
+			} else {
+				throw new RuntimeException(String.format(
+						"Message attributes must be string or number type: key=%s, type=%s", key, mav.getDataType()));
+			}
+		}
+		return headers;
+	}
+
+	private String toDebugSendMessageRequest(SendMessageRequest smr) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Sending message:");
+		sb.append(String.format("\n  Body: %s", summaryContent(smr.getMessageBody(), 200)));
+		for (Entry<String, MessageAttributeValue> entry : smr.getMessageAttributes().entrySet()) {
+			sb.append(String.format("\n  Attribute: %s, Type: %s, Value: %s", entry.getKey(),
+					entry.getValue().getDataType(), entry.getValue().getStringValue()));
+		}
+		return sb.toString();
 	}
 
 	private String toDebugMessage(Message m) {
@@ -200,11 +244,23 @@ public class QueueConnection {
 		sb.append(String.format("\n  MessageId: %s", m.getMessageId()));
 		sb.append(String.format("\n  ReceiptHandle: %s", m.getReceiptHandle()));
 		sb.append(String.format("\n  MD5OfBody: %s", m.getMD5OfBody()));
-		sb.append(String.format("\n  Body: %s", m.getBody()));
+		sb.append(String.format("\n  Body: %s", summaryContent(m.getBody(), 200)));
 		for (Entry<String, String> entry : m.getAttributes().entrySet()) {
 			sb.append(String.format("\n  Attribute: %s, Value: %s", entry.getKey(), entry.getValue()));
 		}
+		for (Entry<String, MessageAttributeValue> entry : m.getMessageAttributes().entrySet()) {
+			sb.append(String.format("\n  Message Attribute: %s, Type: %s, Value: %s", entry.getKey(),
+					entry.getValue().getDataType(), entry.getValue().getStringValue()));
+		}
 		return sb.toString();
+	}
+
+	private String summaryContent(String s, int len) {
+		if (s.length() <= len) {
+			return s;
+		} else {
+			return s.substring(0, len - 1) + "...";
+		}
 	}
 
 	private void handleException(String message, AmazonServiceException e) {

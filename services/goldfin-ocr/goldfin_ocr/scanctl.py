@@ -8,12 +8,15 @@ import argparse
 import json
 import logging
 import os
+import time
 import yaml
 
 # This is the top-level script, so relative imports not allowed.
-from goldfin_ocr.api.models import Document
-from goldfin_ocr.json_xlate import json_dict_to_model, model_to_json_dict
+from goldfin_ocr.api.encoder import JSONEncoder
+from goldfin_ocr.api.models import Document, ApiResponse
+from goldfin_ocr.json_xlate import json_dict_to_model, model_to_json_dict, SwaggerJsonEncoder
 from goldfin_ocr.ocr import OcrProcessor
+import goldfin_ocr.sqs as sqs
 
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
@@ -56,6 +59,107 @@ def init_logging(log_level, log_file=None):
                                                                log_level))
 
 
+def processFromCommandLine(args, ocr_config):
+    """Process a single request using command line arguments
+
+    :param args: Argparse arguments
+    :param ocr_config: OCR config file contents
+    """
+    request = args.request
+    if args.body is None:
+        raise Exception("Request body is required")
+    with open(args.body, "r") as fp:
+        body = json.load(fp)
+
+    # Normalize the JSON and convert to document.
+    logger.debug("Request: {0}".format(request))
+    document = json_dict_to_model(body, Document)
+
+    # Invoke OCR scan.
+    ocr_processor = OcrProcessor(ocr_config)
+    invoice = ocr_processor.scan("ignore", document, use_cache=True)
+    if invoice is None:
+        print("No invoice generated!")
+    else:
+        print("Invoice: {0}".format(invoice))
+        encoder = SwaggerJsonEncoder()
+        back_to_json = encoder.encode(invoice)
+        #back_to_json = model_to_json_dict(invoice)
+        print("JSON: {0}".format(back_to_json))
+
+
+def processFromQueue(args, ocr_config):
+    """Process requests read from a queue.
+
+    :param args: Argparse arguments
+    :param ocr_config: OCR config file contents
+    """
+    # Get queue connectors.
+    request_queue = get_sqs_connection('ocrRequestQueue', ocr_config)
+    response_queue = get_sqs_connection('ocrResponseQueue', ocr_config)
+    ocr_processor = OcrProcessor(ocr_config)
+
+    # Loop until iteration count is exhausted.
+    count = 0
+    while args.iterations == -1 or count < args.iterations:
+        # Wait for a message.
+        request = None
+        while request is None:
+            request = request_queue.receive()
+            if request is None:
+                time.sleep(1)
+            else:
+                count += 1
+                request_queue.delete(request)
+
+        # Normalize the JSON content and convert to Document type.
+        logger.info("Document OCR request: {0}".format(request))
+        content = json.loads(request.content)
+        document = json_dict_to_model(content, Document)
+
+        # Invoke OCR scan.
+        invoice = ocr_processor.scan(request.tenant_id, document,
+                                     use_cache=True)
+        if invoice is None:
+            # Add error handling here.
+            logger.error("Unable to generate invoice")
+            response_content = ApiResponse(code=500, type="error",
+                                           message="Unable to generate invoice")
+            response_content_class = "ApiResponse"
+
+        else:
+            logger.debug("Invoice: {0}".format(invoice))
+            encoder = SwaggerJsonEncoder()
+            response_content = encoder.encode(invoice)
+            response_content_class = "Invoice"
+
+        # Send response back on response queue.
+        response = sqs.StructuredMessage()
+        response.operation = request.operation
+        response.type = "response"
+        response.xact_tag = request.xact_tag
+        response.tenant_id = request.tenant_id
+        response.content = response_content
+        response.content_class = response_content_class
+        response_queue.send(response)
+
+
+def get_sqs_connection(queue_opt, config):
+    """Allocate connection from configuration file"""
+    access_key_id = config['aws']['accessKeyId']
+    secret_access_key = config['aws']['secretAccessKey']
+    queue = config['sqs'][queue_opt]
+    region = config['sqs']['region']
+
+    queue_conn = sqs.SqsConnection(queue, access_key_id=access_key_id,
+                                   secret_access_key=secret_access_key,
+                                   region=region)
+    if not queue_conn.queueExists():
+        raise Exception("Queue does not exist: {0}".format(queue))
+    else:
+        return queue_conn
+
+
 #############################################################################
 # Command line processor
 #############################################################################
@@ -64,14 +168,17 @@ def init_logging(log_level, log_file=None):
 parser = argparse.ArgumentParser(prog='scanctl.py',
                                  usage="%(prog)s [options]")
 parser.add_argument("--daemon",
-                    help="Process OCR operations from queue", 
+                    help="Process OCR operations from queue",
                     action="store_true", default=False)
-parser.add_argument("--request", 
+parser.add_argument("--iterations",
+                    help="Number of messages to process on queue (-1 = loop forever)",
+                    type=int, default=-1)
+parser.add_argument("--request",
                     help="Process OCR single request",
                     type=str, choices=['scan', 'validate'])
 parser.add_argument("--body", help="OCR Request body")
 parser.add_argument("--ocr-cfg",
-                    help="OCR configuration file", 
+                    help="OCR configuration file",
                     default="conf/ocr.yaml")
 parser.add_argument("--log-level",
                     help="CRITICAL/ERROR/WARNING/INFO/DEBUG (default: %(default)s)",
@@ -86,32 +193,14 @@ args = parser.parse_args()
 # Start logging.
 init_logging(log_level=args.log_level, log_file=args.log_file)
 
-# Process options. 
+# Load the ocr configuration.
+with open(args.ocr_cfg, "r") as ocr_yaml:
+    ocr_config = yaml.load(ocr_yaml)
+
+# Fork processing depending on whether we are a daemon or a command line request.
 if args.daemon is True:
-    raise Exception("Daemon operation is not supported yet")
+    processFromQueue(args, ocr_config)
 else:
-    request = args.request
-    if args.body is None:
-        raise Exception("Request body is required")
-    with open(args.body, "r") as fp:
-        body = json.load(fp)
-
-    # Load the ocr configuration.
-    with open(args.ocr_cfg, "r") as ocr_yaml:
-        ocr_config = yaml.load(ocr_yaml)
-
-    # Normalize the JSON and convert to document.
-    logger.debug("Request: {0}".format(request))
-    document = json_dict_to_model(body, Document)
-
-    # Invoke OCR scan.
-    ocr_processor = OcrProcessor(ocr_config)
-    invoice = ocr_processor.scan("ignore", document, use_cache=True)
-    if invoice is None:
-        print("No invoice generated!")
-    else:
-        print("Invoice: {0}".format(invoice))
-        back_to_json = model_to_json_dict(invoice)
-        print("JSON: {0}".format(back_to_json))
+    processFromCommandLine(args, ocr_config)
 
 print("Done!!!")

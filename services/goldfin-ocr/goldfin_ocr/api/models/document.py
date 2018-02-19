@@ -307,7 +307,7 @@ class Document(object):
         :param state: The state of this Document.
         :type: str
         """
-        allowed_values = ["CREATED", "SCANNED", "ERROR"]
+        allowed_values = ["CREATED", "SCAN_REQUESTED", "SCANNED", "ERROR"]
         if state not in allowed_values:
             raise ValueError(
                 "Invalid value for `state` ({0}), must be one of {1}"

@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
-import io.goldfin.shared.cloud.QueueResponse;
 import io.goldfin.shared.cloud.StorageConnection;
+import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 
 /**
@@ -76,20 +76,29 @@ public class CloudServiceTest {
 
 		// Send a message to the queue.
 		SampleMessage input = new SampleMessage(1, "a string");
-		conn.sendJsonMessage(input);
+		String tenantId = UUID.randomUUID().toString();
+		StructuredMessage request = new StructuredMessage().setOperation("test").setType("request")
+				.setXactTag("test_xact").setTenantId(tenantId).encodeContent(input);
+		conn.send(request);
 
 		// Read the message back.
-		QueueResponse<SampleMessage> response = conn.receiveJsonMessage(SampleMessage.class);
+		StructuredMessage response = conn.receive(false);
 		Assert.assertNotNull("Expect response", response);
-		SampleMessage output = response.getObject();
+		SampleMessage output = response.decodeContent(SampleMessage.class);
 		Assert.assertNotNull("Expect object", output);
 		Assert.assertEquals("Expect same message in return", input, output);
 
+		Assert.assertEquals("Check operation", "test", response.getOperation());
+		Assert.assertEquals("Check type", "request", response.getType());
+		Assert.assertEquals("Check xact tag", "test_xact", response.getXactTag());
+		Assert.assertEquals("Check tenantId", tenantId, response.getTenantId());
+		Assert.assertEquals("Check contentClass", SampleMessage.class.getSimpleName(), response.getContentClass());
+
 		// Delete the message.
-		conn.deleteMessage(response.getKey());
+		conn.deleteMessage(response);
 
 		// Show that further calls do not return a message.
-		QueueResponse<SampleMessage> emptyResponse = conn.receiveJsonMessage(SampleMessage.class);
+		StructuredMessage emptyResponse = conn.receive(false);
 		Assert.assertNull("Do not expect response", emptyResponse);
 
 		// Delete the queue.

@@ -76,7 +76,8 @@ public class ServiceCreateTask extends AbstractTaskAdapter {
 			// Create the sysadmin user.
 			ManagerRegistry registry = new ManagerRegistry();
 			UserManager userManager = new UserManager();
-			registry.initialize(serviceConnection);
+			// Need to extend initialization to cover AWS resource setup. 
+			registry.initialize(serviceConnection, null);
 			registry.addManager(userManager);
 			registry.start();
 			UserParameters userParams = new UserParameters();

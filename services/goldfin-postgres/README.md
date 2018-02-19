@@ -12,4 +12,5 @@ pull and run:
   # Find out the postgres container network IP on docker bridged network.
   docker network inspect bridge
   # Connect to IP using psql.
-  psql -h 172.17.0.2 -Upostgres 
+  psql -hlocalhost -Upostgres -p15432
+

@@ -23,8 +23,11 @@ import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
 import io.goldfin.admin.service.api.model.User;
+import io.goldfin.shared.cloud.AwsConnectionParams;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
+import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StorageConnection;
+import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 import io.goldfin.shared.data.Session;
 import io.goldfin.tenant.data.DocumentDataService;
@@ -71,8 +74,8 @@ public class DocumentManager implements Manager {
 			throw e;
 		}
 
-		// Compute the SHA-256 digest on the file.  We could do this 
-		// in the write loop but this function is unit-tested. 
+		// Compute the SHA-256 digest on the file. We could do this
+		// in the write loop but this function is unit-tested.
 		String sha256 = Sha256HashingAlgorithm.generateHashString(tempFile);
 
 		// See if the thumbprint already exists.
@@ -112,6 +115,30 @@ public class DocumentManager implements Manager {
 
 		// All done!
 		return this.getDocument(principal, document.getId().toString());
+	}
+
+	public void scanDocument(Principal principal, String id) {
+		// Find the document to ensure it exists.
+		Document document = getDocument(principal, id);
+		String tenantId = getTenantId(principal);
+
+		// Get the OCR manager and submit the document for scanning. 
+		OcrManager ocr = ManagerRegistry.getInstance().getManager(OcrManager.class);
+		ocr.scan(tenantId, document);
+
+		// Assuming we're still alive here, update the document state to show a scan has
+		// been requested.
+		DocumentDataService docService = new DocumentDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
+			document.setState(StateEnum.SCAN_REQUESTED);
+			int rows = docService.update(document.getId().toString(), document);
+			session.commit();
+			if (rows == 0) {
+				// Could happen due to concurrent access.
+				throw new EntityNotFoundException(
+						String.format("Document update failed: documentId=%s", document.getId().toString()));
+			}
+		}
 	}
 
 	public void deleteDocument(Principal principal, String id) {

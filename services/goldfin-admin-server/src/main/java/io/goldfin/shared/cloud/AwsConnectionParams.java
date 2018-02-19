@@ -12,7 +12,7 @@ public class AwsConnectionParams {
 	private String accessKeyId;
 	private String secretAccessKey;
 	private Properties s3 = new Properties();
-	private Properties sqs = new Properties();
+	private Properties ocr = new Properties();
 
 	public String getAccessKeyId() {
 		return accessKeyId;
@@ -38,12 +38,12 @@ public class AwsConnectionParams {
 		this.s3 = s3;
 	}
 
-	public Properties getSqs() {
-		return sqs;
+	public Properties getOcr() {
+		return ocr;
 	}
 
-	public void setSqs(Properties sqs) {
-		this.sqs = sqs;
+	public void setOcr(Properties ocr) {
+		this.ocr = ocr;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class AwsConnectionParams {
 		StringBuffer buf = new StringBuffer();
 		buf.append(this.getClass().getSimpleName());
 		buf.append(" s3=").append(s3.toString());
-		buf.append(", sqs=").append(sqs.toString());
+		buf.append(", sqs=").append(ocr.toString());
 		return buf.toString();
 	}
 }

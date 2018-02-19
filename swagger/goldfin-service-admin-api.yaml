@@ -664,7 +664,7 @@ paths:
   '/document/{id}/scan':
     post:
       tags:
-        - invoice
+        - document
       summary: Kick off document scanning
       description: >-
         Run background scanning on document.  The document state and semantic
@@ -845,6 +845,7 @@ definitions:
           content ID are available after scanning
         enum:
           - CREATED
+          - SCAN_REQUESTED
           - SCANNED
           - ERROR
       semanticType:

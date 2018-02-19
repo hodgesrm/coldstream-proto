@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 import io.goldfin.admin.managers.DocumentManager;
 import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.managers.OcrManager;
 import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
-import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.utilities.YamlHelper;
 
@@ -139,11 +139,12 @@ public class App {
 
 		// Configure managers in registry.
 		ManagerRegistry registry = ManagerRegistry.getInstance();
-		registry.initialize(serviceConnectionParams);
+		registry.initialize(serviceConnectionParams, awsYaml);
 		registry.addManager(new UserManager());
 		registry.addManager(new TenantManager());
 		registry.addManager(new InvoiceManager());
 		registry.addManager(new DocumentManager());
+		registry.addManager(new OcrManager());
 		registry.start();
 	}
 

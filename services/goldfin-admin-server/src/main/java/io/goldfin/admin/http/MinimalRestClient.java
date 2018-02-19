@@ -236,8 +236,12 @@ public class MinimalRestClient {
 			if (restResponse.code >= 300) {
 				throw generateRestException(restResponse);
 			} else {
-				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
-						responseEntityClass);
+				if (responseEntityClass == null) {
+					return null;
+				} else {
+					return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
+							responseEntityClass);
+				}
 			}
 		} catch (SerializationException e) {
 			throw new RestRuntimeException("REST POST invocation failed", e);
@@ -278,10 +282,10 @@ public class MinimalRestClient {
 	}
 
 	private RestException generateRestException(RestResponse response) throws RestException {
-		// Try to get the error message. 
+		// Try to get the error message.
 		String message = null;
 		try {
-			ApiResponseMessage apiResponse = JsonHelper.readFromStream(new ByteArrayInputStream(response.getContent()), 
+			ApiResponseMessage apiResponse = JsonHelper.readFromStream(new ByteArrayInputStream(response.getContent()),
 					ApiResponseMessage.class);
 			message = apiResponse.getMessage();
 		} catch (SerializationException e) {
@@ -289,7 +293,7 @@ public class MinimalRestClient {
 		}
 		throw new RestException(response.code, response.reason, message);
 	}
-	
+
 	private String makeUrl(String path) {
 		return String.format("https://%s:%d%s%s", host, port, prefix, path);
 	}
