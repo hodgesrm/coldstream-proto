@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.UUID;
 import javax.validation.constraints.*;
 
 /**
@@ -27,11 +26,8 @@ import javax.validation.constraints.*;
 @ApiModel(description = "Parameters for creating or updating a user account")
 
 public class UserParameters   {
-  @JsonProperty("tenantId")
-  private UUID tenantId = null;
-
-  @JsonProperty("username")
-  private String username = null;
+  @JsonProperty("user")
+  private String user = null;
 
   @JsonProperty("initialPassword")
   private String initialPassword = null;
@@ -39,42 +35,23 @@ public class UserParameters   {
   @JsonProperty("roles")
   private String roles = null;
 
-  public UserParameters tenantId(UUID tenantId) {
-    this.tenantId = tenantId;
+  public UserParameters user(String user) {
+    this.user = user;
     return this;
   }
 
   /**
-   * Tenant ID, cannot be changed after creation
-   * @return tenantId
+   * Unique user name in form &#39;username@tenantname&#39;
+   * @return user
    **/
-  @JsonProperty("tenantId")
-  @ApiModelProperty(value = "Tenant ID, cannot be changed after creation")
-  public UUID getTenantId() {
-    return tenantId;
+  @JsonProperty("user")
+  @ApiModelProperty(value = "Unique user name in form 'username@tenantname'")
+  public String getUser() {
+    return user;
   }
 
-  public void setTenantId(UUID tenantId) {
-    this.tenantId = tenantId;
-  }
-
-  public UserParameters username(String username) {
-    this.username = username;
-    return this;
-  }
-
-  /**
-   * Unique user name
-   * @return username
-   **/
-  @JsonProperty("username")
-  @ApiModelProperty(value = "Unique user name")
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
+  public void setUser(String user) {
+    this.user = user;
   }
 
   public UserParameters initialPassword(String initialPassword) {
@@ -125,15 +102,14 @@ public class UserParameters   {
       return false;
     }
     UserParameters userParameters = (UserParameters) o;
-    return Objects.equals(this.tenantId, userParameters.tenantId) &&
-        Objects.equals(this.username, userParameters.username) &&
+    return Objects.equals(this.user, userParameters.user) &&
         Objects.equals(this.initialPassword, userParameters.initialPassword) &&
         Objects.equals(this.roles, userParameters.roles);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tenantId, username, initialPassword, roles);
+    return Objects.hash(user, initialPassword, roles);
   }
 
 
@@ -142,8 +118,7 @@ public class UserParameters   {
     StringBuilder sb = new StringBuilder();
     sb.append("class UserParameters {\n");
     
-    sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
-    sb.append("    username: ").append(toIndentedString(username)).append("\n");
+    sb.append("    user: ").append(toIndentedString(user)).append("\n");
     sb.append("    initialPassword: ").append(toIndentedString(initialPassword)).append("\n");
     sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
     sb.append("}");

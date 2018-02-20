@@ -439,7 +439,7 @@ paths:
       parameters:
         - name: full
           in: query
-          description: If true, return full invoices with all line items
+          description: 'If true, return full invoices with all line items'
           type: boolean
       responses:
         '200':
@@ -465,7 +465,7 @@ paths:
           type: string
         - name: full
           in: query
-          description: If true, return full invoices with all line items
+          description: 'If true, return full invoices with all line items'
           type: boolean
       responses:
         '200':
@@ -559,7 +559,7 @@ paths:
           in: formData
           description: Flag to control scanning
           type: boolean
-          default: True
+          default: true
         - name: file
           in: formData
           description: Document file
@@ -703,7 +703,7 @@ definitions:
     properties:
       user:
         type: string
-        description: User name
+        description: User name in form 'username@tenantname'
       password:
         type: string
         description: User password
@@ -717,6 +717,9 @@ definitions:
       name:
         type: string
         description: Unique tenant name
+      schema_suffix:
+        type: string
+        description: Tenant schema suffix
       description:
         type: string
         description: Optional information about the tenant
@@ -735,6 +738,9 @@ definitions:
       name:
         type: string
         description: Unique tenant name
+      schema_suffix:
+        type: string
+        description: Tenant schema suffix
       description:
         type: string
         description: Optional information about the tenant
@@ -761,13 +767,9 @@ definitions:
   UserParameters:
     description: Parameters for creating or updating a user account
     properties:
-      tenantId:
+      user:
         type: string
-        format: uuid
-        description: 'Tenant ID, cannot be changed after creation'
-      username:
-        type: string
-        description: Unique user name
+        description: Unique user name in form 'username@tenantname'
       initialPassword:
         type: string
         description: Initial user password; ignored after creation

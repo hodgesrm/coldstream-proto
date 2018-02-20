@@ -16,6 +16,7 @@ public class CmdTenantCreate implements Command {
 
 	public CmdTenantCreate() {
 		parser.accepts("name", "Tenant name").withRequiredArg().ofType(String.class);
+		parser.accepts("schema-suffix", "Tenant SQL schema suffix").withRequiredArg().ofType(String.class);
 		parser.accepts("description", "Tenant description").withRequiredArg().ofType(String.class);
 	}
 
@@ -34,10 +35,12 @@ public class CmdTenantCreate implements Command {
 	public void exec(CliContext ctx) {
 		// Check options and assign parameters to create tenant.
 		String name = (String) CliUtils.requiredOption(ctx.options(), "name");
+		String schemaSuffix = (String) CliUtils.requiredOption(ctx.options(), "schema-suffix");
 		String description = (String) ctx.options().valueOf("description");
 
 		TenantParameters params = new TenantParameters();
 		params.setName(name);
+		params.setSchemaSuffix(schemaSuffix);
 		params.setDescription(description);
 
 		// Create the tenant.

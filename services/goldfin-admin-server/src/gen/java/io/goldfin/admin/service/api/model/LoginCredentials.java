@@ -38,11 +38,11 @@ public class LoginCredentials   {
   }
 
   /**
-   * User name
+   * User name in form &#39;username@tenantname&#39;
    * @return user
    **/
   @JsonProperty("user")
-  @ApiModelProperty(value = "User name")
+  @ApiModelProperty(value = "User name in form 'username@tenantname'")
   public String getUser() {
     return user;
   }

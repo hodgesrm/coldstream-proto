@@ -27,7 +27,8 @@ import io.goldfin.shared.data.TransactionalService;
 public class TenantDataService implements TransactionalService<Tenant> {
 	static private final Logger logger = LoggerFactory.getLogger(TenantDataService.class);
 
-	private static final String[] COLUMN_NAMES = { "id", "name", "description", "state", "creation_date" };
+	private static final String[] COLUMN_NAMES = { "id", "name", "schema_suffix", "description", "state",
+			"creation_date" };
 	private Session session;
 
 	@Override
@@ -35,14 +36,25 @@ public class TenantDataService implements TransactionalService<Tenant> {
 		this.session = session;
 	}
 
-	public String create(Tenant params) {
+	public String create(Tenant model) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Adding new tenant: " + params.toString());
+			logger.debug("Adding new tenant: " + model.toString());
 		}
-		UUID id = UUID.randomUUID();
-		new SqlInsert().table("tenants").put("id", id).put("name", params.getName())
-				.put("description", params.getDescription()).put("state", "PENDING").run(session);
-		return id.toString();
+		if (model.getId() == null) {
+			model.setId(UUID.randomUUID());
+		}
+		new SqlInsert().table("tenants").put("id", model.getId()).put("name", model.getName())
+				.put("schema_suffix", model.getSchemaSuffix()).put("description", model.getDescription())
+				.put("state", stateEnumOrPending(model.getState()).toString()).run(session);
+		return model.getId().toString();
+	}
+
+	private StateEnum stateEnumOrPending(StateEnum state) {
+		if (state == null) {
+			return StateEnum.PENDING;
+		} else {
+			return state;
+		}
 	}
 
 	public int update(String id, Tenant params) {
@@ -50,6 +62,10 @@ public class TenantDataService implements TransactionalService<Tenant> {
 		boolean paramsAdded = false;
 		if (params.getName() != null) {
 			update.put("name", params.getName());
+			paramsAdded = true;
+		}
+		if (params.getSchemaSuffix() != null) {
+			update.put("schema_suffix", params.getSchemaSuffix());
 			paramsAdded = true;
 		}
 		if (params.getDescription() != null) {
@@ -103,6 +119,7 @@ public class TenantDataService implements TransactionalService<Tenant> {
 		Tenant tenant = new Tenant();
 		tenant.setId(row.getAsUUID("id"));
 		tenant.setName(row.getAsString("name"));
+		tenant.setSchemaSuffix(row.getAsString("schema_suffix"));
 		tenant.setDescription(row.getAsString("description"));
 		tenant.setState(StateEnum.fromValue(row.getAsString("state")));
 		tenant.setCreationDate(row.getAsTimestamp("creation_date").toString());

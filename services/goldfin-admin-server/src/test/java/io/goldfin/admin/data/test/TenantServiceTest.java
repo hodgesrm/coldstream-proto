@@ -41,6 +41,7 @@ public class TenantServiceTest extends TransactionalTest<Tenant> {
 			Tenant t = new Tenant();
 			t.setId(UUID.randomUUID());
 			t.setName("tenant_" + index.get());
+			t.setSchemaSuffix(t.getName());
 			t.setDescription("description_" + index.getAndIncrement());
 			return t;
 		}
@@ -52,6 +53,7 @@ public class TenantServiceTest extends TransactionalTest<Tenant> {
 			t2.setName(old.getName().substring(0, 7) + index.get());
 			t2.setDescription(old.getDescription().substring(0, 11) + index.getAndIncrement());
 			t2.setState(old.getState());
+			t2.setSchemaSuffix(old.getSchemaSuffix());
 			t2.setCreationDate(old.getCreationDate());
 			return t2;
 		}

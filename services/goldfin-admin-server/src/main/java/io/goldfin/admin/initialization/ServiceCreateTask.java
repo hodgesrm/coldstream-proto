@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
 import io.goldfin.admin.service.api.model.UserParameters;
 import io.goldfin.shared.config.SystemInitParams;
@@ -73,19 +74,25 @@ public class ServiceCreateTask extends AbstractTaskAdapter {
 					String.format("Write connection parameters file: %s", this.connectionParamsFile.getAbsolutePath()),
 					75.0);
 
-			// Create the sysadmin user.
+			// Create the system tenant and the sysadmin user thereof.
 			ManagerRegistry registry = new ManagerRegistry();
+			TenantManager tenantManager = new TenantManager();
 			UserManager userManager = new UserManager();
 			// Need to extend initialization to cover AWS resource setup. 
 			registry.initialize(serviceConnection, null);
+			registry.addManager(tenantManager);
 			registry.addManager(userManager);
 			registry.start();
+
+			// Create the system tenant. 
+			tenantManager.createSystemTenant();
+			
 			UserParameters userParams = new UserParameters();
-			userParams.setUsername(initParams.getSysUser());
+			userParams.setUser(initParams.getSysUser() + "@system");
 			userParams.setInitialPassword(initParams.getSysPassword());
 			userParams.setRoles("admin");
 			userManager.createUser(userParams);
-			progressReporter.progress(String.format("Set up sysadmin user: username=%s", userParams.getUsername()),
+			progressReporter.progress(String.format("Set up sysadmin user: username=%s", userParams.getUser()),
 					100.0);
 
 			return TaskStatus.successfulTask("System initialization succeeded", this.getClass().getSimpleName());

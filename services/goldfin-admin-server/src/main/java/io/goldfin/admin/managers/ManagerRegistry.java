@@ -86,7 +86,7 @@ public class ManagerRegistry implements ManagementContext {
 	 */
 	@Override
 	public AwsConnectionParams getAwsConnectionParams() {
-		// Load file each time to ensure it's current. 
+		// Load file each time to ensure it's current.
 		try {
 			return YamlHelper.readFromFile(awsYaml, AwsConnectionParams.class);
 		} catch (IOException e) {
@@ -150,7 +150,7 @@ public class ManagerRegistry implements ManagementContext {
 			throw new RuntimeException(String.format("Tenant ID not found: id=%s", tenantId));
 		} else {
 			SimpleJdbcConnectionManager cm = getConnectionManager();
-			String tenantSchema = "tenant_" + tenant.getName();
+			String tenantSchema = "tenant_" + tenant.getSchemaSuffix();
 			return new SessionBuilder().connectionManager(cm).useSchema(tenantSchema).build();
 		}
 	}

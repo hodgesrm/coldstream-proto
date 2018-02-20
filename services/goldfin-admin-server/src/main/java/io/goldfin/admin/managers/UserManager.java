@@ -6,6 +6,8 @@ package io.goldfin.admin.managers;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.exceptions.UnauthorizedException;
 import io.goldfin.admin.service.api.model.LoginCredentials;
+import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.admin.service.api.model.UserParameters;
 import io.goldfin.admin.service.api.model.UserPasswordParameters;
@@ -37,6 +40,8 @@ public class UserManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(UserManager.class);
 	private ManagementContext context;
 	private Randomizer randomizer = new Randomizer();
+
+	private static Pattern userAtTenantPattern = Pattern.compile("([a-zA-z0-9.]+)@([a-zA-z0-9.]+)");
 
 	/** Session timeout (defaults to 30 minutes) */
 	private static long LOGIN_TIMEOUT_MILLIS = 1800 * 1000;
@@ -57,31 +62,34 @@ public class UserManager implements Manager {
 	}
 
 	public User createUser(UserParameters userParams) {
-		// Ensure that either the user is an administrator or the user exists.
-		if ("ADMIN".equalsIgnoreCase(userParams.getRoles())) {
-			if (userParams.getTenantId() != null) {
-				throw new InvalidInputException("Tenant ID must be null for admin user");
-			}
-		} else {
-			TenantDataService tenantService = new TenantDataService();
-			try (Session session = makeSession(tenantService)) {
-				if (userParams.getTenantId() == null) {
-					throw new InvalidInputException("Tenant ID may not be null");
-				} else if (tenantService.get(userParams.getTenantId().toString()) == null) {
-					throw new InvalidInputException("Tenant ID does not exist");
-				}
+		// Get the user name and tenant name.
+		String[] userTenant = this.parseLogin(userParams.getUser());
+		if (userTenant == null) {
+			logger.warn(String.format("Invalid user name format: user=%s", userParams.getUser()));
+			throw new InvalidInputException("User name must be 'user@tenant'");
+		}
+		String userName = userTenant[0];
+		String tenantName = userTenant[1];
+
+		// Find the tenant.
+		Tenant tenant = null;
+		TenantDataService tenantService = new TenantDataService();
+		try (Session session = makeSession(tenantService)) {
+			tenant = tenantService.getByName(tenantName);
+			if (tenant == null) {
+				throw new InvalidInputException(String.format("Unknown tenant: name=%s"));
 			}
 		}
 
-		// Check and hash password.
+		// Hash password.
 		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
 		String passwordHash = hashPassword(algorithm, userParams.getInitialPassword());
 
 		// Create the user.
 		UserDataService userService = new UserDataService();
 		UserData model = new UserData();
-		model.setUsername(userParams.getUsername());
-		model.setTenantId(userParams.getTenantId());
+		model.setUsername(userName);
+		model.setTenantId(tenant.getId());
 		model.setPasswordHash(passwordHash);
 		model.setAlgorithm(algorithm.getName());
 		model.setRoles(userParams.getRoles());
@@ -126,8 +134,9 @@ public class UserManager implements Manager {
 			}
 		}
 
-		// Apply parameters to the body and update.
-		userRecord.setUsername(userParams.getUsername());
+		// Apply parameters to the body and update.  NOTE:  This is incorrect; 
+		// we need to revisit changing user names. 
+		userRecord.setUsername(userParams.getUser());
 		userRecord.setRoles(userParams.getRoles());
 		try (Session session = context.adminSession().enlist(userService)) {
 			userService.update(id, userRecord);
@@ -202,10 +211,27 @@ public class UserManager implements Manager {
 
 	public String login(LoginCredentials credentials) {
 		UserDataService userService = new UserDataService();
+		TenantDataService tenantService = new TenantDataService();
 		UserData user = null;
 		// Look up the user.
-		try (Session session = makeSession(userService)) {
-			user = userService.getByUsername(credentials.getUser());
+		try (Session session = makeSession(userService).enlist(tenantService)) {
+			String[] userTenant = this.parseLogin(credentials.getUser());
+			if (userTenant == null) {
+				logger.warn(
+						String.format("Login failed due to invalid user name format: user=%s", credentials.getUser()));
+				throw new UnauthorizedException();
+			}
+			String userName = userTenant[0];
+			String tenantName = userTenant[1];
+
+			Tenant tenant = tenantService.getByName(tenantName);
+			if (tenant == null) {
+				logger.warn(String.format("Login failed due to unknown tenant name: user=%s, tenantName=%s",
+						credentials.getUser(), tenantName));
+				throw new UnauthorizedException();
+			}
+
+			user = userService.getByUserNameAndTenant(userName, tenant.getId());
 			if (user == null) {
 				logger.warn(String.format("Login failed due to unknown user: user=%s", credentials.getUser()));
 				throw new UnauthorizedException();
@@ -309,5 +335,17 @@ public class UserManager implements Manager {
 		String schema = context.getAdminSchema();
 		return new SessionBuilder().connectionManager(cm).useSchema(schema).addService(ts).transactional(transactional)
 				.build();
+	}
+
+	/** Split up user and tenant names. */
+	private String[] parseLogin(String login) {
+		Matcher loginMatcher = userAtTenantPattern.matcher(login);
+		if (!loginMatcher.matches()) {
+			return null;
+		}
+		String[] userTenant = new String[2];
+		userTenant[0] = loginMatcher.group(1);
+		userTenant[1] = loginMatcher.group(2);
+		return userTenant;
 	}
 }

@@ -48,6 +48,7 @@ public class AdminTestHelper {
 		try (Session session = new SessionBuilder().connectionManager(cm).useSchema(schema).addService(svc).build();) {
 			Tenant t = new Tenant();
 			t.setName(name);
+			t.setSchemaSuffix(name);
 			t.setDescription("Test tenant");
 			String id = svc.create(t);
 			session.commit();

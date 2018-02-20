@@ -33,21 +33,21 @@ Here are step(s) to remove a service.
 1. Stop any running images
 2. Using previous init.params file issue the following command: 
 ```shell
-   servicectl remove --init-params=$PWD/conf/init-params.yaml
+   svc-init remove --init-params=$PWD/conf/sample-init-params.yaml
 ```
 ## Create a tenant. 
 ```shell
-   svc-client login --host localhost --user=sysadmin --password=secret12
-   svc-client tenant-create --name 'skyline' --description "Skyline Research"
+   svc-client login --host localhost --user=sysadmin@system --password=secret12
+   svc-client tenant-create --name 'skylineresearch.com' --description "Skyline Research, Inc." --schema-suffix=skyline
    svc-client tenant-list
    # Get tenantId. 
    svc-client user-create --initialPassword=secret12 \
-   --username=test --tenantId=84cc09b8-5a93-4fd2-9527-4588e46e8b4c
+   --user=test@skylineresearch.com 
 ```
 
 ### Load invoice for client. 
 ```shell
-   svc-client login --host localhost --user=test --password=secret12
+   svc-client login --host localhost --user=test@skylineresearch.com --password=secret12
    svc-client document-create --description='Test invoice' \
    --file /home/rhodges/coldstream/invoices/ovh/invoice_WE666184.pdf
    svc-client document-list

@@ -94,6 +94,16 @@ public class UserDataService implements TransactionalService<UserData> {
 		}
 	}
 
+	public UserData getByUserNameAndTenant(String username, UUID tenantId) {
+		TabularResultSet result = new SqlSelect().table("users").get(COLUMN_NAMES)
+				.where("username = ? AND tenant_id = ?", username, tenantId).run(session);
+		if (result.rowCount() == 0) {
+			return null;
+		} else {
+			return toUserRecord(result.row(1));
+		}
+	}
+
 	public List<UserData> getAll() {
 		TabularResultSet result = new SqlSelect().table("users").get(COLUMN_NAMES).run(session);
 		List<UserData> users = new ArrayList<UserData>(result.rowCount());

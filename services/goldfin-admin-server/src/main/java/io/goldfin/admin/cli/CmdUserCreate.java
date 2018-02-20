@@ -3,8 +3,6 @@
  */
 package io.goldfin.admin.cli;
 
-import java.util.UUID;
-
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
@@ -17,8 +15,7 @@ public class CmdUserCreate implements Command {
 	private OptionParser parser = new OptionParser();
 
 	public CmdUserCreate() {
-		parser.accepts("tenantId", "Tenant ID").withRequiredArg().ofType(String.class);
-		parser.accepts("username", "User name").withRequiredArg().ofType(String.class);
+		parser.accepts("user", "User name in form username@tenantname").withRequiredArg().ofType(String.class);
 		parser.accepts("initialPassword", "Password for user").withRequiredArg().ofType(String.class);
 		parser.accepts("roles", "Comma-separated list of user roles").withRequiredArg().ofType(String.class);
 	}
@@ -37,14 +34,12 @@ public class CmdUserCreate implements Command {
 
 	public void exec(CliContext ctx) {
 		// Check options and assign parameters to create tenant.
-		String tenantId = (String) CliUtils.requiredOption(ctx.options(), "tenantId");
-		String username = (String) CliUtils.requiredOption(ctx.options(), "username");
+		String username = (String) CliUtils.requiredOption(ctx.options(), "user");
 		String initialPassword = (String) CliUtils.requiredOption(ctx.options(), "initialPassword");
 		String roles = (String) ctx.options().valueOf("roles");
 
 		UserParameters params = new UserParameters();
-		params.setTenantId(UUID.fromString(tenantId));
-		params.setUsername(username);
+		params.setUser(username);
 		params.setInitialPassword(initialPassword);
 		params.setRoles(roles);
 

@@ -29,6 +29,9 @@ public class TenantParameters   {
   @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("schema_suffix")
+  private String schemaSuffix = null;
+
   @JsonProperty("description")
   private String description = null;
 
@@ -49,6 +52,25 @@ public class TenantParameters   {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public TenantParameters schemaSuffix(String schemaSuffix) {
+    this.schemaSuffix = schemaSuffix;
+    return this;
+  }
+
+  /**
+   * Tenant schema suffix
+   * @return schemaSuffix
+   **/
+  @JsonProperty("schema_suffix")
+  @ApiModelProperty(value = "Tenant schema suffix")
+  public String getSchemaSuffix() {
+    return schemaSuffix;
+  }
+
+  public void setSchemaSuffix(String schemaSuffix) {
+    this.schemaSuffix = schemaSuffix;
   }
 
   public TenantParameters description(String description) {
@@ -81,12 +103,13 @@ public class TenantParameters   {
     }
     TenantParameters tenantParameters = (TenantParameters) o;
     return Objects.equals(this.name, tenantParameters.name) &&
+        Objects.equals(this.schemaSuffix, tenantParameters.schemaSuffix) &&
         Objects.equals(this.description, tenantParameters.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description);
+    return Objects.hash(name, schemaSuffix, description);
   }
 
 
@@ -96,6 +119,7 @@ public class TenantParameters   {
     sb.append("class TenantParameters {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    schemaSuffix: ").append(toIndentedString(schemaSuffix)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("}");
     return sb.toString();

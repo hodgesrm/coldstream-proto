@@ -34,6 +34,9 @@ public class Tenant   {
   @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("schema_suffix")
+  private String schemaSuffix = null;
+
   @JsonProperty("description")
   private String description = null;
 
@@ -114,6 +117,25 @@ public class Tenant   {
     this.name = name;
   }
 
+  public Tenant schemaSuffix(String schemaSuffix) {
+    this.schemaSuffix = schemaSuffix;
+    return this;
+  }
+
+  /**
+   * Tenant schema suffix
+   * @return schemaSuffix
+   **/
+  @JsonProperty("schema_suffix")
+  @ApiModelProperty(value = "Tenant schema suffix")
+  public String getSchemaSuffix() {
+    return schemaSuffix;
+  }
+
+  public void setSchemaSuffix(String schemaSuffix) {
+    this.schemaSuffix = schemaSuffix;
+  }
+
   public Tenant description(String description) {
     this.description = description;
     return this;
@@ -183,6 +205,7 @@ public class Tenant   {
     Tenant tenant = (Tenant) o;
     return Objects.equals(this.id, tenant.id) &&
         Objects.equals(this.name, tenant.name) &&
+        Objects.equals(this.schemaSuffix, tenant.schemaSuffix) &&
         Objects.equals(this.description, tenant.description) &&
         Objects.equals(this.state, tenant.state) &&
         Objects.equals(this.creationDate, tenant.creationDate);
@@ -190,7 +213,7 @@ public class Tenant   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, state, creationDate);
+    return Objects.hash(id, name, schemaSuffix, description, state, creationDate);
   }
 
 
@@ -201,6 +224,7 @@ public class Tenant   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    schemaSuffix: ").append(toIndentedString(schemaSuffix)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");

@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS tenants (
   id uuid PRIMARY KEY, 
   name varchar(100) UNIQUE, 
+  schema_suffix varchar(50) UNIQUE, 
   description text, 
   state varchar(10) CHECK (state IN ('PENDING', 'ENABLED', 'DISABLED')),
   creation_date timestamp DEFAULT current_timestamp
