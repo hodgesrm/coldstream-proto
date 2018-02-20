@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.initialization.ServiceDeleteTask;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.shared.cloud.AwsConnectionParams;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
@@ -25,6 +24,7 @@ public class OcrManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(OcrManager.class);
 	private ManagementContext context;
 
+	// Names of our queues. 
 	private String ocrRequestQueue;
 	private String ocrResponseQueue;
 
@@ -74,6 +74,11 @@ public class OcrManager implements Manager {
 		// Do nothing for now.
 	}
 
+	/** 
+	 * Submit a document for OCR scanning. 
+	 * @param tenantId Tenant ID
+	 * @param document Document record
+	 */
 	public void scan(String tenantId, Document document) {
 		// Generate a request to scan the document.
 		QueueConnection conn = CloudConnectionFactory.getInstance().getQueueConnection(ocrRequestQueue);

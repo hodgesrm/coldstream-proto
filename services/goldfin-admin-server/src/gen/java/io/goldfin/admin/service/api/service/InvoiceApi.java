@@ -82,9 +82,10 @@ public class InvoiceApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Invoice.class) })
     public Response invoiceShow(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
+,@ApiParam(value = "If true, return full invoices with all line items") @QueryParam("full") Boolean full
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.invoiceShow(id,securityContext);
+        return delegate.invoiceShow(id,full,securityContext);
     }
     @GET
     
@@ -95,9 +96,10 @@ public class InvoiceApi  {
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Invoice.class, responseContainer = "List") })
-    public Response invoiceShowAll(@Context SecurityContext securityContext)
+    public Response invoiceShowAll(@ApiParam(value = "If true, return full invoices with all line items") @QueryParam("full") Boolean full
+,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.invoiceShowAll(securityContext);
+        return delegate.invoiceShowAll(full,securityContext);
     }
     @PUT
     @Path("/{id}")

@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
   start_date timestamp, 
   end_date timestamp,
   region text,
-  inventory_id uuid, 
+  inventory_id varchar(250), 
   inventory_type varchar(50), 
   creation_date timestamp DEFAULT current_timestamp,
   PRIMARY KEY (invoice_id, item_row_number)

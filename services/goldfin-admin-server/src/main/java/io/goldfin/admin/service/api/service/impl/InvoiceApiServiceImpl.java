@@ -36,16 +36,16 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	}
 
 	@Override
-	public Response invoiceShow(String id, SecurityContext securityContext) throws NotFoundException {
+	public Response invoiceShow(String id, Boolean full, SecurityContext securityContext) throws NotFoundException {
 		// do some magic!
 		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
 	}
 
 	@Override
-	public Response invoiceShowAll(SecurityContext securityContext) throws NotFoundException {
+	public Response invoiceShowAll(Boolean full, SecurityContext securityContext) throws NotFoundException {
 		try {
 			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
-			List<Invoice> invoices = im.getAllInvoices(securityContext.getUserPrincipal());
+			List<Invoice> invoices = im.getAllInvoices(securityContext.getUserPrincipal(), full);
 			return Response.ok().entity(invoices).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);

@@ -436,6 +436,11 @@ paths:
       operationId: invoiceShowAll
       produces:
         - application/json
+      parameters:
+        - name: full
+          in: query
+          description: If true, return full invoices with all line items
+          type: boolean
       responses:
         '200':
           description: Successful query
@@ -458,6 +463,10 @@ paths:
           description: Invoice ID
           required: true
           type: string
+        - name: full
+          in: query
+          description: If true, return full invoices with all line items
+          type: boolean
       responses:
         '200':
           description: Successful

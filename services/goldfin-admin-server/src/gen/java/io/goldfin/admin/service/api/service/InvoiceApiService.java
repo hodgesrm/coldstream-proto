@@ -19,8 +19,8 @@ import javax.validation.constraints.*;
 
 public abstract class InvoiceApiService {
     public abstract Response invoiceDelete(String id,SecurityContext securityContext) throws NotFoundException;
-    public abstract Response invoiceShow(String id,SecurityContext securityContext) throws NotFoundException;
-    public abstract Response invoiceShowAll(SecurityContext securityContext) throws NotFoundException;
+    public abstract Response invoiceShow(String id, Boolean full,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response invoiceShowAll( Boolean full,SecurityContext securityContext) throws NotFoundException;
     public abstract Response invoiceUpdate(String id,InvoiceParameters body,SecurityContext securityContext) throws NotFoundException;
     public abstract Response invoiceValidate(String id,SecurityContext securityContext) throws NotFoundException;
 }

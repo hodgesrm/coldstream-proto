@@ -55,19 +55,24 @@ public class InvoiceManager implements Manager {
 		String tenantId = getTenantId(principal);
 		InvoiceDataService invoiceDataService = new InvoiceDataService();
 		try (Session session = context.tenantSession(tenantId).enlist(invoiceDataService)) {
-			Invoice invoiceEnvelope = invoiceDataService.get(id);
-			if (invoiceEnvelope == null) {
+			Invoice invoice = invoiceDataService.getComplete(id);
+			if (invoice == null) {
 				throw new EntityNotFoundException("Invoice does not exist");
 			}
-			return invoiceEnvelope;
+			return invoice;
 		}
 	}
 
-	public List<Invoice> getAllInvoices(Principal principal) {
+	public List<Invoice> getAllInvoices(Principal principal, Boolean full) {
 		String tenantId = getTenantId(principal);
-		InvoiceDataService invoiceEnvelopService = new InvoiceDataService();
-		try (Session session = context.tenantSession(tenantId).enlist(invoiceEnvelopService)) {
-			return invoiceEnvelopService.getAll();
+		InvoiceDataService invoiceService = new InvoiceDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(invoiceService)) {
+			if (full == null || ! full) {
+				return invoiceService.getAll();
+			}
+			else {
+				return invoiceService.getAllComplete();
+			}
 		}
 	}
 

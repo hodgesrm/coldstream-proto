@@ -14,6 +14,8 @@ public class CmdInvoiceList implements Command {
 	private OptionParser parser = new OptionParser();
 
 	public CmdInvoiceList() {
+		parser.accepts("full", "Return invoice items if true, otherwise only header").withRequiredArg()
+				.ofType(Boolean.class);
 	}
 
 	public String getName() {
@@ -29,9 +31,18 @@ public class CmdInvoiceList implements Command {
 	}
 
 	public void exec(CliContext ctx) {
+		Boolean full = (Boolean) ctx.options().valueOf("full");
+
+		String path;
+		if (full == null) {
+			path = "/invoice";
+		} else {
+			path = String.format("/invoice?full=%s", full.toString());
+		}
+
 		MinimalRestClient client = ctx.getRestClient();
 		try {
-			Invoice[] invoices = client.get("/invoice", new Invoice[0].getClass());
+			Invoice[] invoices = client.get(path, new Invoice[0].getClass());
 			String invoiceListing = JsonHelper.writeToString(invoices);
 			System.out.println(invoiceListing);
 		} catch (RestException e) {
