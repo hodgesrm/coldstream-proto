@@ -33,12 +33,13 @@ Here are step(s) to remove a service.
 1. Stop any running images
 2. Using previous init.params file issue the following command: 
 ```shell
-   svc-init remove --init-params=$PWD/conf/sample-init-params.yaml
+   svc-init remove --init-params=$PWD/conf/init-params.sample.yaml
 ```
 ## Create a tenant. 
 ```shell
    svc-client login --host localhost --user=sysadmin@system --password=secret12
-   svc-client tenant-create --name 'skylineresearch.com' --description "Skyline Research, Inc." --schema-suffix=skyline
+   svc-client tenant-create --name 'skylineresearch.com' \
+   --description "Skyline Research, Inc." --schema-suffix=skyline
    svc-client tenant-list
    # Get tenantId. 
    svc-client user-create --initialPassword=secret12 \

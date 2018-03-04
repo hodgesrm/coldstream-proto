@@ -6,20 +6,29 @@ package io.goldfin.admin.restapi.jetty;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+
+import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -52,10 +61,13 @@ public class App {
 		// Create handlers.
 		ServletContextHandler servletHandler = configureServletHandler();
 		ConstraintSecurityHandler securityHandler = configureSecurityHandler();
+		ContextHandler resourceContextHandler = configureResourceHandler();
 
 		// Add security handler to server and chain servlet handler to it.
-		jettyServer.setHandler(securityHandler);
 		securityHandler.setHandler(servletHandler);
+		HandlerList handlers = new HandlerList();
+		handlers.setHandlers(new Handler[] { resourceContextHandler, securityHandler });
+		jettyServer.setHandler(handlers);
 
 		// Initialize managers.
 		try {
@@ -200,6 +212,33 @@ public class App {
 		// Register provider for multi-part requests.
 		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", MultiPartFeature.class.getName());
 
+		// Add CORS filter, and then use the provided FilterHolder to configure it. 
+		// (Original example from StackOverflow:
+		// https://stackoverflow.com/questions/28190198/cross-origin-filter-with-embedded-jetty)
+		FilterHolder cors = servletHandler.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+		cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+		cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD,UPDATE,DELETE");
+		// For now allow all headers on requests. 
+		String allowedHeaders = "*";
+		cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, allowedHeaders);
+		// Allow API key header to be exposed along with content-length.  
+		String exposedResponseHeaders = String.format("Content-Length,%s", SecurityAuthenticator.API_KEY_HEADER);
+		cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, exposedResponseHeaders);
+
 		return servletHandler;
+	}
+
+	/** Create a resource handler to serve up files. */
+	private static ContextHandler configureResourceHandler() {
+		ResourceHandler resourceHandler = new ResourceHandler();
+		resourceHandler.setDirectoriesListed(true);
+		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
+		resourceHandler.setResourceBase("content");
+
+		ContextHandler contextHandler = new ContextHandler();
+		contextHandler.setContextPath("/content");
+		contextHandler.setHandler(resourceHandler);
+		return contextHandler;
 	}
 }

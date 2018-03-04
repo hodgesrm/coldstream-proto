@@ -1,8 +1,10 @@
 #!/bin/bash
-# Generates a default self-signed certificate in a Java Key Store.
+# Generates a default self-signed certificate in a Java Key Store.  The
+# certificate includes a subject alternative name. 
+DNSNAME=api-test.goldfin.io
 KEYSTORE=keystore.jks
 KEYPASS=secret
-ANSWERS="An Engineer
+ANSWERS="goldfin.io
 Eng
 Goldfin
 Berkeley
@@ -11,5 +13,5 @@ US
 yes
 "
 rm $KEYSTORE
-echo "$ANSWERS" | keytool -genkey -keyalg RSA -alias goldfin -keystore $KEYSTORE -validity 365 -keysize 2048 -keypass $KEYPASS -storepass $KEYPASS
+echo "$ANSWERS" | keytool -genkey -keyalg RSA -alias goldfin -keystore $KEYSTORE -validity 365 -keysize 2048 -keypass $KEYPASS -storepass $KEYPASS -ext san=dns:${DNSNAME}
 keytool -list -keystore $KEYSTORE -storepass $KEYPASS -v

@@ -77,17 +77,30 @@ public class SecurityAuthenticator implements Authenticator {
 			logger.debug(msg);
 		}
 
-		// In this case we let the call through. Still figuring out how to do this.
-		//if (!mandatory) {
-			// return new DeferredAuthentication(this);
-		//	return Authentication.UNAUTHENTICATED;
-		//}
-
 		// If this is a login request we allow it to go through to complete
 		// authentication.
 		if ("/api/v1/session".equals(req.getPathInfo())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Letting login request through...");
+			}
+			return Authentication.NOT_CHECKED;
+		}
+		
+		// If this is a CORS options request, we all it to go through so that 
+		// the browser can do a pre-flight check. 
+		if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Letting content request through: " + req.getPathInfo());
+			}
+			return Authentication.NOT_CHECKED;
+		}
+		
+		// If this is a content request we similarly allow it to go through
+		// so we can serve up web content requests (e.g., to our Angular 2
+		// application). 
+		if (req.getPathInfo().startsWith("/content")) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Letting content request through: " + req.getPathInfo());
 			}
 			return Authentication.NOT_CHECKED;
 		}
