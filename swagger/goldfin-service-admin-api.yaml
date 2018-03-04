@@ -23,7 +23,7 @@ securityDefinitions:
   APIKeyHeader:
     type: apiKey
     in: header
-    name: vnd-io-goldfin-auth
+    name: vnd.io.goldfin.session
 security:
   - APIKeyHeader: []
 paths:

@@ -35,14 +35,16 @@ export class LoginComponent implements OnInit {
     } else if (this.user.password == null || this.user.password === "") {
       this.error_message = "Please enter a password";
     } else {
-      let session = this.authService.authorize(this.user.name, this.user.password);
-      if (session == null) {
-        this.error_message = "Invalid user name or password";
-      } else {
-        console.log("Logged in: " + this.user.name);
-        this.error_message = null;
-        this.router.navigate(['/home']);
-      }
+      this.authService.authorize(this.user.name, this.user.password)
+        .subscribe(session => {
+          if (session == null) {
+            this.error_message = "Invalid user name or password";
+          } else {
+            console.log("Logged in: " + this.user.name);
+            this.error_message = null;
+            this.router.navigate(['/home']);
+          }
+        });
     }
   }
 }

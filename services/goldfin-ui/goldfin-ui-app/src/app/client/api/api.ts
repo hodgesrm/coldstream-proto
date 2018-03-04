@@ -1,0 +1,11 @@
+export * from './DocumentApi';
+import { DocumentApi } from './DocumentApi';
+export * from './InvoiceApi';
+import { InvoiceApi } from './InvoiceApi';
+export * from './SecurityApi';
+import { SecurityApi } from './SecurityApi';
+export * from './TenantApi';
+import { TenantApi } from './TenantApi';
+export * from './VendorApi';
+import { VendorApi } from './VendorApi';
+export const APIS = [DocumentApi, InvoiceApi, SecurityApi, TenantApi, VendorApi];

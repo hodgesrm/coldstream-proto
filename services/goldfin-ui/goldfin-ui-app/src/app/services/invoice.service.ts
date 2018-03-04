@@ -2,8 +2,12 @@
  * Copyright (c) 2017 Goldfin.io. All Rights Reserved.
  */
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
-export class Invoice {
+import { InvoiceApi } from '../client/api/InvoiceApi';
+import { Invoice } from '../client/model/Invoice';
+
+export class FakeInvoice {
   identifier: string;
   effective_date: string;
   vendor: string;
@@ -16,9 +20,18 @@ export class Invoice {
 @Injectable()
 export class InvoiceService {
   // In-memory invoices and invoice aggregates. 
-  invoices: Invoice[] = null;
+  invoices: FakeInvoice[] = null;
 
-  fetchInvoices(): Invoice[] {
+  constructor(
+    private invoiceApi: InvoiceApi
+  ) {}
+
+  loadInvoices(): Observable<Array<Invoice>> {
+    return this.invoiceApi.invoiceShowAll(false);
+  }
+
+  // Remaining calls are mocks. 
+  fetchInvoices(): FakeInvoice[] {
     if (this.invoices === null) {
       console.log("Initializing invoices");
       this.invoices = this._fetchInvoices();
@@ -28,15 +41,15 @@ export class InvoiceService {
   }
 
   // Generate invoices. 
-  _fetchInvoices(): Invoice[] {
+  _fetchInvoices(): FakeInvoice[] {
     // Generates invoices locally for now. 
     console.log("Fetching invoices");
     let invoiceGenerator = function(identifierPrefix, amount, vendor) {
       // Generate invoices with up to 20% variation in amount. 
-      var invoices: Invoice[] = [];
+      var invoices: FakeInvoice[] = [];
       var i;
       for (i = 0; i < 12; i++) {
-        var invoice = new Invoice();
+        var invoice = new FakeInvoice();
         invoice.identifier = identifierPrefix + (i * 1000 / 100); 
         invoice.effective_date = new Date(2017, i, 25).toISOString().substring(0,10);
         invoice.vendor = vendor;
@@ -45,8 +58,8 @@ export class InvoiceService {
         invoice.total_amount = invoice.subtotal_amount;
         invoice.currency = 'USD';
         invoices.push(invoice);
-        console.log("Added invoice: identifier=" + invoice.identifier + 
-          " invoices size=" + invoices.length);
+        //console.log("Added invoice: identifier=" + invoice.identifier + 
+        //  " invoices size=" + invoices.length);
       }
       return invoices;
     }
@@ -58,14 +71,14 @@ export class InvoiceService {
       {prefix: "AWS-2017-", amount: 8500.00, vendor: "AWS"}
     ];
  
-    var allInvoices: Invoice[] = [];
+    var allInvoices: FakeInvoice[] = [];
     for (let params of vendorParams) {
       for (let vendorInvoices of invoiceGenerator(params.prefix, 
           params.amount, params.vendor)) {
         allInvoices = allInvoices.concat(vendorInvoices);
-        console.log("Total invoices size=" + allInvoices.length);
       }
     }
+    console.log("Total invoices size=" + allInvoices.length);
     return allInvoices;
   }
 
@@ -77,13 +90,13 @@ export class InvoiceService {
     return Object.keys(vendors);
   }
 
-  getInvoices(): Promise<Invoice[]> {
+  getInvoices(): Promise<FakeInvoice[]> {
     return Promise.resolve(this.fetchInvoices());
   }
 
   // Get Invoices from last N days. 
-  getRecentInvoices(): Invoice[] {
-    let recentInvoices: Invoice[] = [];
+  getRecentInvoices(): FakeInvoice[] {
+    let recentInvoices: FakeInvoice[] = [];
     var days = 90
     var now = Date.now(); 
     for (var i = 0; i < this.invoices.length; i++) {
@@ -107,7 +120,7 @@ export class InvoiceService {
         return 0;
   }
 
-  getInvoice(identifier: string): Invoice {
+  getInvoice(identifier: string): FakeInvoice {
     return this.fetchInvoices().find(invoice => invoice.identifier === identifier);
   } 
 }

@@ -18,13 +18,22 @@ import { PricesHostsComponent } from "./prices/prices_hosts.component";
 import { VendorsComponent } from "./vendors/vendors.component";
 import { AboutComponent } from "./about/about.component";
 
+// Dashboard charting. 
 import { ChartsModule } from 'ng2-charts';
 
+// Services. 
 import { AuthService } from "./services/auth.service";
+import { ConfigurationService } from "./services/config.service";
 import { InvoiceService } from "./services/invoice.service";
+import { HostPriceService } from "./services/host_pricing.service";
 import { HostService } from "./services/host.service";
 import { VendorService } from "./services/vendor.service";
-import { HostPriceService } from "./services/host_pricing.service";
+
+// Generated REST API.
+import { BASE_PATH } from "./client/variables";
+import { Configuration } from "./client/configuration";
+import { SecurityApi } from "./client/api/SecurityApi";
+import { InvoiceApi } from "./client/api/InvoiceApi";
 
 @NgModule({
     declarations: [
@@ -51,11 +60,16 @@ import { HostPriceService } from "./services/host_pricing.service";
         ROUTING
     ],
     providers: [
+      { provide: BASE_PATH, useValue: 'https://localhost:8443/api/v1' },
       AuthService,
+      ConfigurationService,
       InvoiceService,
       HostService,
+      HostPriceService,
       VendorService, 
-      HostPriceService
+      Configuration,
+      SecurityApi,
+      InvoiceApi,
     ],
     bootstrap: [AppComponent]
 })

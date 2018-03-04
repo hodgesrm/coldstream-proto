@@ -1,34 +1,54 @@
 /*
  * Copyright (c) 2017 Goldfin.io. All Rights Reserved.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
+import { Response } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
 
 import { User } from './user';
 
+import { Configuration } from '../client/configuration';
+import { SecurityApi } from '../client/api/SecurityApi';
+import { LoginCredentials } from '../client/model/LoginCredentials';
+
 class Session {
   userName: string;
-  sessionKey: string;
+  apiKey: string;
 }
-
-const MOCK_USERS: User[] = [
-  { name: 'rhodges@skylineresearch.com', password: 'secret' }
-];
 
 @Injectable()
 export class AuthService {
-  authorize(name: string, password: string): Session {
-    let user = MOCK_USERS.find(user => user.name === name);
-    if (user == null) {
-      return null;
-    } else if (user.password === password) {
-      let session: Session = { userName: name, sessionKey: "1" }
-      return session
-    } else {
-      return null;
-    }
-  }
+  // Should store the apiKey here so that components
+  // can easily check if we are logged in. 
 
-  getUser(name: string): User {
-    return MOCK_USERS.find(user => user.name === name);
-  } 
+  constructor(
+    private configuration: Configuration,
+    private securityApi: SecurityApi
+  ) {}
+
+  // Look up user/password on server.
+  authorize(name: string, password: string): Observable<{}> {
+    console.log("Authenticating user: " + name);
+    const loginCredential = {
+      user: name, password: password
+    };
+    var request: Observable<{}>;
+    request = this.securityApi.loginByCredentialsWithHttpInfo(loginCredential)
+      .map((response: Response) => {
+        var apiKey = response.headers.get("vnd.io.goldfin.session");
+        console.log("Status: " + response.status);
+        console.log("Api Key: " + apiKey);
+        var session: Session;
+        if (apiKey == null) {
+          session = null;
+        } else {
+          // Set apiKey in the configuration where it will be used by 
+          // later calls. 
+          this.configuration.apiKey = apiKey;
+          session = { userName: name, apiKey: apiKey };
+        }
+        return session;
+      });
+    return request;
+  }
 }

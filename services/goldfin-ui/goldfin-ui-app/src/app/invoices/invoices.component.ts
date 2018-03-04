@@ -4,8 +4,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router }   from '@angular/router'
 
-import { InvoiceService, Invoice }   from '../services/invoice.service';
+import { InvoiceService }   from '../services/invoice.service';
 
+import { Invoice } from '../client/model/Invoice';
 
 @Component({
     selector: 'invoices', 
@@ -31,8 +32,16 @@ export class InvoicesComponent implements OnInit {
   }
 
   getInvoices(): void {
-    this.invoiceService.getInvoices().then(invoices => this.invoices = invoices);
-    console.log("Total invoices: " + this.invoices.length);
+    this.invoiceService.loadInvoices()
+      .subscribe(newInvoices => {
+        this.invoices = newInvoices; 
+        console.log("Total invoices: " + this.invoices.length);
+      });
+  }
+
+  onRefresh(): void {
+    console.log("onRefresh invoked");
+    this.getInvoices();
   }
 
   onImport(): void {

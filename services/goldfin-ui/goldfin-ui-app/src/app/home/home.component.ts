@@ -3,7 +3,7 @@
  */
 import { Component, OnInit } from "@angular/core";
 
-import { InvoiceService, Invoice }   from '../services/invoice.service';
+import { InvoiceService, FakeInvoice }   from '../services/invoice.service';
 
 
 @Component({
@@ -16,8 +16,8 @@ export class HomeComponent implements OnInit {
   ) {}
 
   // Invoice data. 
-  invoices: Invoice[] = [];
-  recentInvoices: Invoice[] = [];
+  invoices: FakeInvoice[] = [];
+  recentInvoices: FakeInvoice[] = [];
   vendors: string[] = [];
 
   // Bar chart for on-going spend. 
@@ -56,7 +56,7 @@ export class HomeComponent implements OnInit {
     // Read all invoices and get the monthly totals. 
     for (var i = 0; i < this.invoices.length; i++) {
       let invoice = this.invoices[i];
-      console.log(invoice.effective_date);
+      //console.log(invoice.effective_date);
       let effective_date = new Date(invoice.effective_date);
       let month = effective_date.getUTCMonth(); 
       let monthTotal = monthlyTotals[month];

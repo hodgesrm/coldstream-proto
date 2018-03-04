@@ -12,6 +12,12 @@ To build a dev application:
 
 ng build
 
+To build the dev application for a particular code path and serve up using
+running Jetty app server.  
+
+ng build --base-href=/content/dist/
+rsync -avr dist/ ../../goldfin-admin-server/target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1/content/dist
+
 To build and run docker image based on Nginx. 
 
 docker build -t goldfin-ui-app .
