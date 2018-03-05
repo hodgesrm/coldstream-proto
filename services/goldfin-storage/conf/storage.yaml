@@ -1,7 +1,0 @@
-[aws]
-access_key_id = AKIAJ7TJPRS2OBXCM3KA
-secret_access_key = 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
-
-[s3]
-bucket = test1-service-goldfin-io
-location = us-west-1
