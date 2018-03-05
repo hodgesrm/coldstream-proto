@@ -8,6 +8,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AboutComponent } from './about/about.component';
 import { HomeComponent } from './home/home.component';
+import { DocumentsComponent } from './documents/documents.component';
 import { InvoicesComponent } from './invoices/invoices.component';
 import { InventoryComponent } from './inventory/inventory.component';
 import { PricesComponent } from './prices/prices.component';
@@ -17,6 +18,7 @@ import { LoginComponent } from './login/login.component';
 export const ROUTES: Routes = [
     {path: '', redirectTo: '/login', pathMatch: 'full'},
     {path: 'home', component: HomeComponent},
+    {path: 'documents', component: DocumentsComponent},
     {path: 'invoices', component: InvoicesComponent},
     {path: 'inventory', component: InventoryComponent},
     {path: 'prices', component: PricesComponent},

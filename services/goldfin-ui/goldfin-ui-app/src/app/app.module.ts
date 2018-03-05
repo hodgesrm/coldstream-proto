@@ -11,6 +11,7 @@ import { AssetSpendComponent } from "./home/asset-spend.component";
 import { IndustryBaselineComponent } from "./home/industry-baseline.component";
 import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
+import { DocumentsComponent } from "./documents/documents.component";
 import { InventoryComponent } from "./inventory/inventory.component";
 import { InventoryHostsComponent } from "./inventory/inventory_hosts.component";
 import { PricesComponent } from "./prices/prices.component";
@@ -24,6 +25,7 @@ import { ChartsModule } from 'ng2-charts';
 // Services. 
 import { AuthService } from "./services/auth.service";
 import { ConfigurationService } from "./services/config.service";
+import { DocumentService } from "./services/document.service";
 import { InvoiceService } from "./services/invoice.service";
 import { HostPriceService } from "./services/host_pricing.service";
 import { HostService } from "./services/host.service";
@@ -34,6 +36,7 @@ import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
 import { SecurityApi } from "./client/api/SecurityApi";
 import { InvoiceApi } from "./client/api/InvoiceApi";
+import { DocumentApi } from "./client/api/DocumentApi";
 
 @NgModule({
     declarations: [
@@ -42,6 +45,7 @@ import { InvoiceApi } from "./client/api/InvoiceApi";
         HomeComponent,
         AssetSpendComponent,
         IndustryBaselineComponent,
+        DocumentsComponent,
         InvoicesComponent,
         InventoryComponent,
         InventoryHostsComponent,
@@ -63,12 +67,14 @@ import { InvoiceApi } from "./client/api/InvoiceApi";
       { provide: BASE_PATH, useValue: 'https://localhost:8443/api/v1' },
       AuthService,
       ConfigurationService,
+      DocumentService,
       InvoiceService,
       HostService,
       HostPriceService,
       VendorService, 
       Configuration,
       SecurityApi,
+      DocumentApi,
       InvoiceApi,
     ],
     bootstrap: [AppComponent]
