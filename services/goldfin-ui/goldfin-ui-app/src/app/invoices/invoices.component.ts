@@ -5,8 +5,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router }   from '@angular/router'
 
 import { InvoiceService }   from '../services/invoice.service';
-
 import { Invoice } from '../client/model/Invoice';
+
+import { ErrorReporter } from '../utility/error-reporter';
+import { ErrorModalComponent } from '../utility/error-modal.component';
 
 @Component({
     selector: 'invoices', 
@@ -16,7 +18,9 @@ import { Invoice } from '../client/model/Invoice';
 export class InvoicesComponent implements OnInit {
   // Model controls. 
   delete_open: boolean = false;
-  import_open: boolean = false;
+
+  // Error reporter sub-component. 
+  errorReporter: ErrorReporter = new ErrorReporter();
 
   // Invoice listing.
   selected: Invoice[] = [];
@@ -44,22 +48,17 @@ export class InvoicesComponent implements OnInit {
     this.getInvoices();
   }
 
-  onImport(): void {
-    console.log("onImport invoked");
-  }
-
-  onImportFiles(event): void {
-    console.log("onImport invoked");
-    for (let file of event.target.files) {
-      console.log(file); 
-    }
-  }
-
   onExport(): void {
     console.log("onExport invoked " + this.selected);
   }
 
   onDelete(): void {
     console.log("onDelete invoked");
+    if (this.selected == null || this.selected.length == 0) {
+      this.errorReporter.error_message = "Please select one or more items to delete";
+      this.errorReporter.error_open = true;
+    } else {
+      this.delete_open = true;
+    }
   }
 }

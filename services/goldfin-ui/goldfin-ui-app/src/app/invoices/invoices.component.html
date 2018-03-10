@@ -4,13 +4,10 @@
 <clr-datagrid [(clrDgSelected)]="selected">
     <clr-dg-action-bar>
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" (click)="import_open = true">Import</button>
+            <button type="button" class="btn btn-primary" (click)="onExport()">Export Data</button>
         </div>
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" (click)="onExport()">Export</button>
-        </div>
-        <div class="btn-group">
-            <button type="button" class="btn btn-primary" (click)="delete_open = true" >Delete</button>
+            <button type="button" class="btn btn-primary" (click)="onDelete()" >Delete</button>
         </div>
         <div class="btn-group">
             <button class="btn btn-link" (click)="onRefresh()" clrPosition="bottom-right">
@@ -51,15 +48,4 @@
   </div>
 </clr-modal>
 
-<clr-modal [(clrModalOpen)]="import_open">
-  <h3 class="modal-title">Invoice Import</h3>
-  <div class="modal-body">
-    <p>Select one or more PDF files to upload</p>
-    <input type="file" (change)="onImportFiles($event)" placeholder="Select files" accept=".pdf" multiple>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="import_open = false">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="import_open = false">Upload</button>
-  </div>
-</clr-modal>
-
+<error-modal [reporter]="errorReporter"></error-modal>

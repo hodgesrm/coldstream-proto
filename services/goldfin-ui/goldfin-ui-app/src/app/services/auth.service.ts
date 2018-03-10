@@ -26,6 +26,11 @@ export class AuthService {
     private securityApi: SecurityApi
   ) {}
 
+  // Return true if we are authorized.   
+  isAuthorized(): boolean {
+    return (this.configuration.apiKey != null);
+  }
+
   // Look up user/password on server.
   authorize(name: string, password: string): Observable<{}> {
     console.log("Authenticating user: " + name);

@@ -14,17 +14,40 @@ import { InventoryComponent } from './inventory/inventory.component';
 import { PricesComponent } from './prices/prices.component';
 import { VendorsComponent } from './vendors/vendors.component';
 import { LoginComponent } from './login/login.component';
+import { AuthGuardService } from './services/auth.guard.service';
 
 export const ROUTES: Routes = [
     {path: '', redirectTo: '/login', pathMatch: 'full'},
-    {path: 'home', component: HomeComponent},
-    {path: 'documents', component: DocumentsComponent},
-    {path: 'invoices', component: InvoicesComponent},
-    {path: 'inventory', component: InventoryComponent},
-    {path: 'prices', component: PricesComponent},
-    {path: 'vendors', component: VendorsComponent},
-    {path: 'about', component: AboutComponent},
-    {path: 'login', component: LoginComponent}
+    {path: 'login', component: LoginComponent}, 
+    {
+      path: 'home', component: HomeComponent,
+      canActivate: [AuthGuardService]
+    },
+    {
+      path: 'documents', component: DocumentsComponent,
+      canActivate: [AuthGuardService]
+    },
+    {
+      path: 'invoices', component: InvoicesComponent,
+      canActivate: [AuthGuardService]
+    },
+    {
+      path: 'inventory', component: InventoryComponent,
+      canActivate: [AuthGuardService]
+    },
+    {
+      path: 'prices', component: PricesComponent,
+      canActivate: [AuthGuardService]
+    },
+    {
+      path: 'vendors', component: VendorsComponent,
+      canActivate: [AuthGuardService]
+    },
+    {
+      path: 'about', component: AboutComponent,
+      canActivate: [AuthGuardService]
+    },
+    {path: '**', redirectTo: '/login', pathMatch: 'full'},
 ];
 
 export const ROUTING: ModuleWithProviders = RouterModule.forRoot(ROUTES);

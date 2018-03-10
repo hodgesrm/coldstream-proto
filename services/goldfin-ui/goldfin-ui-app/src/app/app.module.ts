@@ -17,12 +17,14 @@ import { InventoryHostsComponent } from "./inventory/inventory_hosts.component";
 import { PricesComponent } from "./prices/prices.component";
 import { PricesHostsComponent } from "./prices/prices_hosts.component";
 import { VendorsComponent } from "./vendors/vendors.component";
+import { ErrorModalComponent } from "./utility/error-modal.component";
 import { AboutComponent } from "./about/about.component";
 
 // Dashboard charting. 
 import { ChartsModule } from 'ng2-charts';
 
 // Services. 
+import { AuthGuardService } from "./services/auth.guard.service";
 import { AuthService } from "./services/auth.service";
 import { ConfigurationService } from "./services/config.service";
 import { DocumentService } from "./services/document.service";
@@ -52,6 +54,7 @@ import { DocumentApi } from "./client/api/DocumentApi";
         PricesComponent,
         PricesHostsComponent,
         VendorsComponent,
+        ErrorModalComponent,
         AboutComponent
     ],
     imports: [
@@ -65,6 +68,7 @@ import { DocumentApi } from "./client/api/DocumentApi";
     ],
     providers: [
       { provide: BASE_PATH, useValue: 'https://localhost:8443/api/v1' },
+      AuthGuardService,
       AuthService,
       ConfigurationService,
       DocumentService,

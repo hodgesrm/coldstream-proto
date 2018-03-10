@@ -1,2 +1,10 @@
 // Copyright (c) 2017 Goldfin.io. All Rights Reserved.
-
+.login-wrapper {
+  background-image: url(/images/jpg/3.jpg);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: right center;
+}
+.login-wrapper .login {
+  min-height: 70vh;
+}

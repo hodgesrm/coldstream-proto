@@ -8,6 +8,9 @@ import { DocumentService }   from '../services/document.service';
 
 import { Document } from '../client/model/Document';
 
+import { ErrorReporter } from '../utility/error-reporter';
+import { ErrorModalComponent } from '../utility/error-modal.component';
+
 @Component({
     selector: 'documents', 
     templateUrl: './documents.component.html', 
@@ -17,6 +20,9 @@ export class DocumentsComponent implements OnInit {
   // Model controls. 
   delete_open: boolean = false;
   import_open: boolean = false;
+
+  // Error reporter sub-component.
+  errorReporter: ErrorReporter = new ErrorReporter();
 
   // Document listing.
   selected: Document[] = [];
@@ -44,7 +50,8 @@ export class DocumentsComponent implements OnInit {
     console.log("onScan invoked");
     var component = this;
     if (this.selected == null || this.selected.length == 0) {
-      console.log("Nothing selected");
+      this.errorReporter.error_message = "Please select one or more documents to scan";
+      this.errorReporter.error_open = true;
     } else {
       this.documentService.scanDocuments(this.selected)
         .then(function() {
@@ -71,5 +78,12 @@ export class DocumentsComponent implements OnInit {
 
   onDelete(): void {
     console.log("onDelete invoked");
+    if (this.selected == null || this.selected.length == 0) {
+      this.errorReporter.error_message = "Please select one or more items to delete";
+      this.errorReporter.error_open = true;
+    } else {
+      this.delete_open = true;
+    }
+ 
   }
 }
