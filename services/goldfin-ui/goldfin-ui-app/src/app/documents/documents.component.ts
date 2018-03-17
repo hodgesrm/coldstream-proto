@@ -19,7 +19,7 @@ import { ErrorModalComponent } from '../utility/error-modal.component';
 export class DocumentsComponent implements OnInit {
   // Model controls. 
   delete_open: boolean = false;
-  import_open: boolean = false;
+  upload_open: boolean = false;
 
   // Error reporter sub-component.
   errorReporter: ErrorReporter = new ErrorReporter();
@@ -32,7 +32,6 @@ export class DocumentsComponent implements OnInit {
     private router: Router,
     private documentService: DocumentService
   ) {}
-
 
   ngOnInit(): void {
     this.getDocuments();
@@ -71,9 +70,15 @@ export class DocumentsComponent implements OnInit {
 
   onImportFiles(event): void {
     console.log("onImport invoked");
+    var files = event.target.files;
     for (let file of event.target.files) {
       console.log(file); 
     }
+  }
+
+  onUpload(): void {
+    console.log("onUpload invoked");
+    this.upload_open = true;
   }
 
   onDelete(): void {
@@ -84,6 +89,5 @@ export class DocumentsComponent implements OnInit {
     } else {
       this.delete_open = true;
     }
- 
   }
 }

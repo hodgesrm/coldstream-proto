@@ -1,0 +1,23 @@
+<!--
+  ~ Copyright (c) 2018 Goldfin.io. All Rights Reserved.
+  -->
+<div *ngIf="reporter">
+  <clr-modal [(clrModalOpen)]="reporter.error_open">
+    <h3 class="modal-title">Error</h3>
+    <div class="modal-body">
+      <div class="alert alert-danger">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+            </div>
+            <span class="alert-text">{{reporter.error_message}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="reporter.error_open = false">OK</button>
+    </div>
+  </clr-modal>
+</div>

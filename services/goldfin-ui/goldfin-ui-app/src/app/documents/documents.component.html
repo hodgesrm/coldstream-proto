@@ -4,7 +4,7 @@
 <clr-datagrid [(clrDgSelected)]="selected">
     <clr-dg-action-bar>
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" (click)="import_open = true">Import</button>
+            <button type="button" class="btn btn-primary" (click)="onUpload()">Upload</button>
         </div>
         <div class="btn-group">
             <button type="button" class="btn btn-primary" (click)="onScan()">Scan</button>
@@ -51,16 +51,6 @@
   </div>
 </clr-modal>
 
-<clr-modal [(clrModalOpen)]="import_open">
-  <h3 class="modal-title">Invoice Import</h3>
-  <div class="modal-body">
-    <p>Select one or more PDF files to upload</p>
-    <input type="file" (change)="onImportFiles($event)" placeholder="Select files" accept=".pdf" multiple>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="import_open = false">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="import_open = false">Upload</button>
-  </div>
-</clr-modal>
+<doc-upload-modal [(show)]="upload_open" ></doc-upload-modal>
 
 <error-modal [reporter]="errorReporter"></error-modal>

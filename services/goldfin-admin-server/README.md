@@ -24,7 +24,8 @@ Here are the steps to create a new service.
 ```shell
    # Must run in dist location for relative directory references to work. 
    cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
-   bin/svc-init create --init-params=conf/init-params.sample.yaml --dbms-config=conf/dbms.yaml
+   bin/svc-init create --init-params=conf/init-params.sample.yaml \
+     --dbms-config=conf/dbms.yaml
 ```
 The dbms-config.yaml file is required by the running image. 
 

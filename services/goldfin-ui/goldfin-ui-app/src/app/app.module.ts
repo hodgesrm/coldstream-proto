@@ -12,6 +12,7 @@ import { IndustryBaselineComponent } from "./home/industry-baseline.component";
 import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
 import { DocumentsComponent } from "./documents/documents.component";
+import { DocUploadModalComponent } from "./documents/doc-upload-modal.component";
 import { InventoryComponent } from "./inventory/inventory.component";
 import { InventoryHostsComponent } from "./inventory/inventory_hosts.component";
 import { PricesComponent } from "./prices/prices.component";
@@ -48,6 +49,7 @@ import { DocumentApi } from "./client/api/DocumentApi";
         AssetSpendComponent,
         IndustryBaselineComponent,
         DocumentsComponent,
+        DocUploadModalComponent,
         InvoicesComponent,
         InventoryComponent,
         InventoryHostsComponent,

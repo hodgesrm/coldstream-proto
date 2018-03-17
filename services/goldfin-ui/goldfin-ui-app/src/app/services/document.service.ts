@@ -13,6 +13,10 @@ export class DocumentService {
     private documentApi: DocumentApi
   ) {}
 
+  createDocument(file: File, description: string): Observable<Document> {
+    return this.documentApi.documentCreate(file, description);
+  }
+
   loadDocuments(): Observable<Array<Document>> {
     return this.documentApi.documentShowAll(false);
   }
