@@ -94,6 +94,18 @@ export class InvoiceService {
     return Promise.resolve(this.fetchInvoices());
   }
 
+
+  deleteInvoices(invoices: Invoice[]): Promise<{}> {
+    var promises = [];
+    for (var i = 0; i < invoices.length; i++) {
+      var invoice = invoices[i];
+      console.log("Delete scheduled: " + invoice.id);
+      var next = this.invoiceApi.invoiceDelete(invoice.id).toPromise();
+      promises.push(next);
+    }
+    return Promise.all(promises)
+  }
+
   // Get Invoices from last N days. 
   getRecentInvoices(): FakeInvoice[] {
     let recentInvoices: FakeInvoice[] = [];

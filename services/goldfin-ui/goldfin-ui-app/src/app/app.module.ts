@@ -39,7 +39,9 @@ import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
 import { SecurityApi } from "./client/api/SecurityApi";
 import { InvoiceApi } from "./client/api/InvoiceApi";
-import { DocumentApi } from "./client/api/DocumentApi";
+
+// Subclassed from generated code. 
+import { DocumentApiExtended } from "./services/DocumentApiExtended";
 
 @NgModule({
     declarations: [
@@ -80,7 +82,7 @@ import { DocumentApi } from "./client/api/DocumentApi";
       VendorService, 
       Configuration,
       SecurityApi,
-      DocumentApi,
+      DocumentApiExtended,
       InvoiceApi,
     ],
     bootstrap: [AppComponent]

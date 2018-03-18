@@ -40,11 +40,11 @@
 <clr-modal [(clrModalOpen)]="delete_open">
   <h3 class="modal-title">Confirm Invoice Deletion</h3>
   <div class="modal-body">
-    <p>Are you sure you want to delete the selected invoices? You will not be able to access them afterwards.</p>
+    <p>Are you sure you want to delete the selected invoices? You will need to re-scan the corresponding documents to see them again.</p>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="delete_open = false">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="delete_open = false">Ok</button>
+    <button type="button" class="btn btn-primary" (click)="onDeleteConfirmed()">Ok</button>
   </div>
 </clr-modal>
 

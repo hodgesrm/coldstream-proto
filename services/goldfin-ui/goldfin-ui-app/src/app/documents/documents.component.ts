@@ -2,8 +2,6 @@
  * Copyright (c) 2018 Goldfin.io.  All rights reserved.
  */
 import { Component, OnInit } from '@angular/core';
-import { Router }   from '@angular/router'
-
 import { DocumentService }   from '../services/document.service';
 
 import { Document } from '../client/model/Document';
@@ -18,8 +16,8 @@ import { ErrorModalComponent } from '../utility/error-modal.component';
 })
 export class DocumentsComponent implements OnInit {
   // Model controls. 
-  delete_open: boolean = false;
   upload_open: boolean = false;
+  delete_open: boolean = false;
 
   // Error reporter sub-component.
   errorReporter: ErrorReporter = new ErrorReporter();
@@ -29,7 +27,6 @@ export class DocumentsComponent implements OnInit {
   documents: Document[] = [];
 
   constructor(
-    private router: Router,
     private documentService: DocumentService
   ) {}
 
@@ -83,11 +80,22 @@ export class DocumentsComponent implements OnInit {
 
   onDelete(): void {
     console.log("onDelete invoked");
+    var component = this;
     if (this.selected == null || this.selected.length == 0) {
       this.errorReporter.error_message = "Please select one or more items to delete";
       this.errorReporter.error_open = true;
     } else {
       this.delete_open = true;
     }
+  }
+
+  onDeleteConfirmed(): void {
+    console.log("onDeleteConfirmed invoked");
+    var component = this;
+    this.documentService.deleteDocuments(this.selected)
+      .then(function() {
+        component.getDocuments();
+      });
+    this.delete_open = false;
   }
 }

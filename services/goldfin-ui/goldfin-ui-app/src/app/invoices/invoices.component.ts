@@ -50,6 +50,13 @@ export class InvoicesComponent implements OnInit {
 
   onExport(): void {
     console.log("onExport invoked " + this.selected);
+    if (this.selected == null || this.selected.length == 0) {
+      this.errorReporter.error_message = "Please select one or more items to export";
+      this.errorReporter.error_open = true;
+    } else {
+      this.errorReporter.error_message = "Export is not implemented yet";
+      this.errorReporter.error_open = true;
+    }
   }
 
   onDelete(): void {
@@ -60,5 +67,15 @@ export class InvoicesComponent implements OnInit {
     } else {
       this.delete_open = true;
     }
+  }
+
+  onDeleteConfirmed(): void {
+    console.log("onDeleteConfirmed invoked");
+    var component = this;
+    this.invoiceService.deleteInvoices(this.selected)
+      .then(function() {
+        component.getInvoices();
+      });
+    this.delete_open = false;
   }
 }
