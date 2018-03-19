@@ -8,6 +8,7 @@ src/main/java/io/goldfin/admin/service/api/service/impl/InvoiceApiServiceImpl.ja
 src/main/java/io/goldfin/admin/service/api/service/impl/SessionApiServiceImpl.java 
 src/main/java/io/goldfin/admin/service/api/service/impl/TenantApiServiceImpl.java
 src/main/java/io/goldfin/admin/service/api/service/impl/UserApiServiceImpl.java
+src/main/java/io/goldfin/admin/service/api/service/impl/VendorApiServiceImpl.java
 # Skip all model classes as they are shared. (Well maybe, this is an idea.)
 #src/gen/java/io/goldfin/shared/admin/api/model/**
 

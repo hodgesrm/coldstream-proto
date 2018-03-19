@@ -12,12 +12,14 @@ import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.Document.SemanticTypeEnum;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
 import io.goldfin.admin.service.api.model.Invoice;
+import io.goldfin.admin.service.api.model.Vendor;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.data.Session;
 import io.goldfin.tenant.data.DocumentDataService;
 import io.goldfin.tenant.data.InvoiceDataService;
+import io.goldfin.tenant.data.VendorDataService;
 import io.swagger.annotations.ApiResponse;
 
 /**
@@ -131,7 +133,9 @@ public class OcrResponseQueueTask implements Runnable {
 		// Start a transaction to upsert the invoice, then update the document.
 		InvoiceDataService invoiceDataService = new InvoiceDataService();
 		DocumentDataService documentDataService = new DocumentDataService();
-		try (Session session = context.tenantSession(tenantId).enlist(invoiceDataService).enlist(documentDataService)) {
+		VendorDataService vendorDataService = new VendorDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(invoiceDataService).enlist(documentDataService)
+				.enlist(vendorDataService)) {
 			// See if we have a document. If not, the transaction must be aborted.
 			Document document = documentDataService.get(documentId);
 			if (document == null) {
@@ -163,6 +167,24 @@ public class OcrResponseQueueTask implements Runnable {
 			document.setSemanticId(UUID.fromString(invoiceId));
 			document.setState(StateEnum.SCANNED);
 			documentDataService.update(documentId, document);
+
+			// See if the vendor exists. If not create one now.
+			if (invoice.getVendor() == null) {
+				logger.warn(
+						String.format("No vendor on invoice, unable to validate vendor record: tenant=%s, invoice=%s",
+								tenantId, invoiceId));
+			} else {
+				Vendor vendor = vendorDataService.getByIdentifier(invoice.getVendor());
+				if (vendor == null) {
+					logger.info(String.format("Adding new vendor for tenant: tenant=%s, invoice=%s, vendor=%s",
+							tenantId, invoiceId, invoice.getVendor()));
+					vendor = new Vendor();
+					vendor.setIdentifier(invoice.getVendor());
+					vendor.setName(invoice.getVendor());
+					vendor.setState(Vendor.StateEnum.ACTIVE);
+					vendorDataService.create(vendor);
+				}
+			}
 
 			// Great, we're done. Commit the whole thing and head for home.
 			session.commit();

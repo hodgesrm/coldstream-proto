@@ -42,6 +42,7 @@ import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.OcrManager;
 import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
+import io.goldfin.admin.managers.VendorManager;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.utilities.YamlHelper;
@@ -156,6 +157,7 @@ public class App {
 		registry.addManager(new TenantManager());
 		registry.addManager(new InvoiceManager());
 		registry.addManager(new DocumentManager());
+		registry.addManager(new VendorManager());
 		registry.addManager(new OcrManager());
 		registry.start();
 	}

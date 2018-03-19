@@ -39,6 +39,7 @@ import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
 import { SecurityApi } from "./client/api/SecurityApi";
 import { InvoiceApi } from "./client/api/InvoiceApi";
+import { VendorApi } from "./client/api/VendorApi";
 
 // Subclassed from generated code. 
 import { DocumentApiExtended } from "./services/DocumentApiExtended";
@@ -84,6 +85,7 @@ import { DocumentApiExtended } from "./services/DocumentApiExtended";
       SecurityApi,
       DocumentApiExtended,
       InvoiceApi,
+      VendorApi,
     ],
     bootstrap: [AppComponent]
 })
