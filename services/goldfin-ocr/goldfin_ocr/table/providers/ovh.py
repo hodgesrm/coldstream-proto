@@ -15,6 +15,7 @@ import data
 # Define logger
 logger = logging.getLogger(__name__)
 
+
 class OvhProcessor:
     """OVH Invoice Processor"""
 
@@ -23,14 +24,16 @@ class OvhProcessor:
 
     @staticmethod
     def conforms(model):
-        """Returns True if we can find OVH identification within the
-           invoice header."""
+        """Returns True if we can find OVH.com identification within the
+           invoice header or www.ovh.com on one or more pages."""
 
         def ovh_predicate(block):
-            return (len(block.select_text(r'OVH\.com')) > 0)
+            return (len(block.select_text(r'OVH\.com')) > 0) or (len(
+                block.select_text(r'.*www\.ovh\.com')) > 0)
 
         ovh_com_blocks = model.select_blocks(ovh_predicate)
-        return len(ovh_com_blocks) == 1
+
+        return len(ovh_com_blocks) >= 1
 
     def name(self):
         return "OVH"
@@ -42,7 +45,8 @@ class OvhProcessor:
         # For OVH the sub-total is in the same table as the invoice item rows.
         invoice = Invoice()
         invoice.vendor = "OVH.com"
-        invoice.identifier = self._find_first_group_1(r'^Invoice:\s*(\S.*\S)\s*$')
+        invoice.identifier = self._find_first_group_1(
+            r'^Invoice:\s*(\S.*\S)\s*$')
         logger.debug(invoice.identifier)
         ovh_date = self._find_first_group_1(r'^Date:\s*(\S.*\S)\s*$')
         invoice.effective_date = self._get_normalized_date(ovh_date)
@@ -81,13 +85,17 @@ class OvhProcessor:
                                 # Make sure we aren't spanning extra rows due to bad data.
                                 must_post = False
                                 if (current_item.resource_id is not None and
-                                             self._get_resource_id(row) is not None):
-                                    logger.debug("FOUND RESOURCE_ID AGAIN, MUST POST")
+                                            self._get_resource_id(
+                                                row) is not None):
+                                    logger.debug(
+                                        "FOUND RESOURCE_ID AGAIN, MUST POST")
                                     must_post = True
 
-                                row_total_amount, ignored = self._get_amount_and_currency(row.cells[3].joined_text())
+                                row_total_amount, ignored = self._get_amount_and_currency(
+                                    row.cells[3].joined_text())
                                 if current_item.total_amount is not None and row_total_amount is not None:
-                                    logger.debug("FOUND TOTAL AMOUNT AGAIN, MUST POST: " + row_total_amount)
+                                    logger.debug(
+                                        "FOUND TOTAL AMOUNT AGAIN, MUST POST: " + row_total_amount)
                                     must_post = True
 
                                 if must_post:
@@ -96,23 +104,29 @@ class OvhProcessor:
 
                             # Try to fill in missing values.
                             if current_item.resource_id is None:
-                                current_item.resource_id = self._get_resource_id(row)
+                                current_item.resource_id = self._get_resource_id(
+                                    row)
                             if current_item.total_amount is None:
                                 current_item.total_amount, current_item.currency = self._get_amount_and_currency(
                                     row.cells[3].joined_text())
                             if current_item.start_date is None:
                                 date_search = re.search(r'From (.*) to (.*)$',
-                                                        row.cells[0].joined_text())
+                                                        row.cells[
+                                                            0].joined_text())
                                 if date_search is not None:
-                                    current_item.start_date = self._get_normalized_date(date_search.group(1))
-                                    current_item.end_date = self._get_normalized_date(date_search.group(2))
+                                    current_item.start_date = self._get_normalized_date(
+                                        date_search.group(1))
+                                    current_item.end_date = self._get_normalized_date(
+                                        date_search.group(2))
                             if current_item.unit_amount is None:
-                                unit_price_search = re.search(r'^([0-9]+) (\$.*)',
-                                                              row.cells[2].joined_text())
+                                unit_price_search = re.search(
+                                    r'^([0-9]+) (\$.*)',
+                                    row.cells[2].joined_text())
                                 if unit_price_search is not None:
                                     current_item.unit_amount, ignore = self._get_amount_and_currency(
                                         unit_price_search.group(2))
-                                    current_item.units = int(unit_price_search.group(1))
+                                    current_item.units = int(
+                                        unit_price_search.group(1))
 
                             # If we have everything post to the invoice and clear current item.
                             if self._item_complete(current_item):
@@ -122,21 +136,25 @@ class OvhProcessor:
 
                 else:
                     raise Exception("Unrecognized table: "
-                                    + table.header_row.joined_text(join_by="|"))
+                                    + table.header_row().joined_text(
+                        join_by="|"))
 
         # Clean resource_id values. These should be valid host names.
         sample_resource_ids = []
         for item in invoice.items:
             sample_resource_ids.append(item.resource_id)
         for item in invoice.items:
-            item.resource_id = data.clean_host_name(item.resource_id, sample_resource_ids)
+            item.resource_id = data.clean_host_name(item.resource_id,
+                                                    sample_resource_ids)
 
         # Cross check content.
         total = Decimal('0.0')
         for item in invoice.items:
             total += Decimal(item.total_amount)
 
-        logger.info("TOTAL: {0}  CHECKED_TOTAL: {1}".format(invoice.total_amount, total))
+        logger.info(
+            "TOTAL: {0}  CHECKED_TOTAL: {1}".format(invoice.total_amount,
+                                                    total))
 
         return invoice
 
@@ -202,7 +220,8 @@ class OvhProcessor:
         if ovh_date is None:
             return None
         else:
-            return datetime.strptime(ovh_date, '%B %d, %Y').strftime('%Y-%m-%d')
+            return datetime.strptime(ovh_date, '%B %d, %Y').strftime(
+                '%Y-%m-%d')
 
     def _item_complete(self, invoice_item):
         logger.debug("ITEM: " + invoice_item.to_str())

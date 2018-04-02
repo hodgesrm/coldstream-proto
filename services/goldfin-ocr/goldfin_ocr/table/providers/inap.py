@@ -11,6 +11,7 @@ from goldfin_ocr.api.models.invoice_item import InvoiceItem
 # Define logger
 logger = logging.getLogger(__name__)
 
+
 class InapProcessor:
     """INAP Invoice Processor"""
 
@@ -37,34 +38,50 @@ class InapProcessor:
         # Extract invoice header information available from text blocks.
         # For OVH the sub-total is in the same table as the invoice item rows.
         invoice = Invoice()
-        invoice.vendor="Internap Corporation"
+        invoice.vendor = "Internap Corporation"
 
-        invoice.identifier = self._find_first_group_1(r'.*Invoice\s*Number:\s*(\S*)\s*')
+        invoice.identifier = self._find_first_group_1(
+            r'.*Invoice\s*Number:\s*(\S*)\s*')
         logger.debug(invoice.identifier)
 
-        invoice.effective_date = self._find_first_group_1(r'.* Invoice Date:\s*([0-9]+\-[0-9]+\-[0-9]+)\s*$')
+        invoice.effective_date = self._find_first_group_1(
+            r'.* Invoice Date:\s*([0-9]+\-[0-9]+\-[0-9]+)\s*$')
         logger.debug(invoice.effective_date)
 
         # Find the invoice total.  This is tricky because it's the 5th line
         # of text in the block that is to the right of the block with
-        # 'Invoice Total $' in it.
+        # 'Invoice Total $' in it. ... OR ... it could be in the same block.
         def predicate(block):
             return len(block.select_text(r'.*Invoice Total \$')) > 0
 
         blocks = self._tabular_model.select_blocks(predicate)
         if len(blocks) > 0:
-            predicate_region = blocks[0].region
+            # See if it's in this block.
+            matching_text = blocks[0].select_text(r'.*Invoice Total\s*\$')
+            if len(matching_text) > 0:
+                invoice.total_amount, invoice.currency = self._get_amount_and_currency(matching_text[0])
+            matching_text = blocks[0].select_text(r'.*Taxes\s*\$')
+            if len(matching_text) > 0:
+                invoice.tax, ignored = self._get_amount_and_currency(matching_text[0])
 
-            def value_predicate(block):
-                return (block.region.overlaps_vertically(predicate_region) and
-                        block.region.is_to_right_of(predicate_region) and
-                        block != blocks[0])
+            if invoice.total_amount is None:
+                # If we don't find it, look at the block to the right.
+                predicate_region = blocks[0].region
 
-            value_blocks = self._tabular_model.select_blocks(value_predicate)
-            if len(value_blocks) > 0:
-                logger.debug(value_blocks[0].joined_text())
-                invoice.total_amount, invoice.currency = self._get_amount_and_currency(value_blocks[0].text[4])
-                invoice.tax, ignored = self._get_amount_and_currency(value_blocks[0].text[3])
+                def value_predicate(block):
+                    return (block.region.overlaps_vertically(predicate_region) and
+                            block.region.is_to_right_of(predicate_region) and
+                            block != blocks[0])
+
+                value_blocks = self._tabular_model.select_blocks(value_predicate)
+                if len(value_blocks) > 0:
+                    logger.debug(value_blocks[0].joined_text())
+                    invoice.total_amount, invoice.currency = self._get_amount_and_currency(
+                        value_blocks[0].text[4])
+                    invoice.tax, ignored = self._get_amount_and_currency(
+                        value_blocks[0].text[3])
+                    invoice.subtotal_amount, ignored = self._get_amount_and_currency(
+                        value_blocks[0].text[2])
 
         # Set invoice items to an empty list.
         invoice.items = []
@@ -74,13 +91,31 @@ class InapProcessor:
         # so we have a 'current_item' that allows work on items to span extra PDF
         # table rows.
         for page in self._tabular_model.pages:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("Processing page: {0}".format(page.number))
             for table in page.tables:
-                if table.header_row().cells[0].matches_text("ID#"):
+                if table.header_row().cell_count() > 1 and \
+                        table.header_row().cells[0].matches_text("ID#") and \
+                        table.header_row().cells[1].matches_text(
+                            "Service Items"):
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug(
+                            "Processing table: "
+                            + table.header_row().joined_text(join_by="|"))
                     current_item = None
+                    row_number = 0;
                     for row in table.detail_rows():
-                        #print ("ROW: " + row.joined_text("|"))
                         # This is a detail row, which may be spread across multiple PDF
                         # table rows.
+                        row_number += 1
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug("ROW[{0}]: {1}".format(row_number,
+                                                                row.joined_text(
+                                                                    "|")))
+
+                        # If the first column does not have a number, it's a
+                        # continuation line from a previous page.  For now we
+                        # ignore it.
                         if row.cells[0].joined_text() == '':
                             continue
 
@@ -91,7 +126,8 @@ class InapProcessor:
                         if current_item.item_id is None:
                             current_item.item_id = row.cells[0].joined_text()
                         if current_item.resource_id is None:
-                            current_item.resource_id = self._get_resource_id(row.cells[1].joined_text())
+                            current_item.resource_id = self._get_resource_id(
+                                row.cells[1].joined_text())
                         if current_item.start_date is None:
                             current_item.start_date, current_item._end_date = self._get_date_range(
                                 row.cells[2].joined_text())
@@ -110,15 +146,18 @@ class InapProcessor:
                         current_item = None
 
                 else:
-                    logger.debug("Ignored table: " 
-                            + table.header_row().joined_text(join_by="|"))
+                    logger.debug("Ignored table: "
+                                 + table.header_row().joined_text(join_by="|"))
 
         # Cross check and return content.
         total = Decimal('0.0')
         for item in invoice.items:
-            total += Decimal(item.total_amount)
+            if item.total_amount is not None:
+                total += Decimal(item.total_amount)
 
-        logger.info("TOTAL: {0}  CHECKED_TOTAL: {1}".format(invoice.total_amount, total))
+        logger.info(
+            "TOTAL: {0}  CHECKED_TOTAL: {1}".format(invoice.total_amount,
+                                                    total))
         return invoice
 
     def _find_first_group_1(self, regex):
@@ -152,8 +191,9 @@ class InapProcessor:
             return text
 
     def _get_date_range(self, text):
-        date_search = re.search(r'^([0-9]+\-[0-9]+\-[0-9]+).\s*([0-9]+\-[0-9]+\-[0-9]+)$',
-                                text)
+        date_search = re.search(
+            r'^([0-9]+\-[0-9]+\-[0-9]+).\s*([0-9]+\-[0-9]+\-[0-9]+)$',
+            text)
         if date_search is not None:
             return date_search.group(1), date_search.group(2)
         else:
@@ -161,7 +201,7 @@ class InapProcessor:
 
     def _get_amount_and_currency(self, text):
         """Return amount and currency, removing commas from printed numbers"""
-        match_usd = re.search(r'^\$\s*([0-9,]*\.[0-9]*)\s*', text)
+        match_usd = re.search(r'^.*\$\s*([0-9,]*\.[0-9]*)\s*', text)
         if match_usd:
             return match_usd.group(1).replace(',', ''), "USD"
 

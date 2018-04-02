@@ -13,6 +13,7 @@ import io.goldfin.admin.service.api.model.Document.SemanticTypeEnum;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
 import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.admin.service.api.model.Vendor;
+import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
@@ -20,7 +21,6 @@ import io.goldfin.shared.data.Session;
 import io.goldfin.tenant.data.DocumentDataService;
 import io.goldfin.tenant.data.InvoiceDataService;
 import io.goldfin.tenant.data.VendorDataService;
-import io.swagger.annotations.ApiResponse;
 
 /**
  * Executes an endless loop to look for and process OCR responses.
@@ -97,8 +97,11 @@ public class OcrResponseQueueTask implements Runnable {
 			if ("Invoice".equals(response.getContentClass())) {
 				processInvoiceContent(response);
 			} else if ("ApiResponse".equals(response.getContentClass())) {
-				ApiResponse apiResponse = response.decodeContent(ApiResponse.class);
-				logger.info("Got an API response back: " + apiResponse.toString());
+				ApiResponseMessage apiResponse = response.decodeContent(ApiResponseMessage.class);
+				logger.error("Got an API response back: " + apiResponse.toString());
+				if ("error".equalsIgnoreCase(apiResponse.getType())) {
+					processScanError(response);
+				}
 			} else {
 				logger.error(String.format("Unexpected content class: class=%s, content=%s", response.getContentClass(),
 						response.getContent()));
@@ -129,6 +132,9 @@ public class OcrResponseQueueTask implements Runnable {
 		// Decode the invoice and fill in document ID.
 		Invoice invoice = invoiceResponse.decodeContent(Invoice.class);
 		invoice.setDocumentId(UUID.fromString(documentId));
+		if (logger.isDebugEnabled()) {
+			logger.debug(invoice.toString());
+		}
 
 		// Start a transaction to upsert the invoice, then update the document.
 		InvoiceDataService invoiceDataService = new InvoiceDataService();
@@ -191,6 +197,52 @@ public class OcrResponseQueueTask implements Runnable {
 			logger.info(
 					String.format("Successfully stored new scanned invoice: tenantId=%s, invoiceId=%s, documentId=%s",
 							tenantId, invoiceId, documentId));
+		}
+	}
+
+	/**
+	 * Handle a document scan error
+	 */
+	private void processScanError(StructuredMessage scanResponse) {
+		// Fetch header information and validate information.
+		logger.info(String.format("Processing invoice response: %s", scanResponse.toString()));
+		String type = scanResponse.getType();
+		String operation = scanResponse.getOperation();
+		String tenantId = scanResponse.getTenantId();
+		String documentId = scanResponse.getXactTag();
+		if (!"scan".equals(operation)) {
+			logger.error("ABORT: Expected a scan operation");
+			return;
+		}
+		if (!"response".equals(type)) {
+			logger.error("ABORT: Expected a scan response");
+			return;
+		}
+
+		// Decode the response message.
+		ApiResponseMessage apiResponse = scanResponse.decodeContent(ApiResponseMessage.class);
+
+		// Start a transaction to update the document with ERROR state.
+		DocumentDataService documentDataService = new DocumentDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(documentDataService)) {
+			// See if we have a document. If not, the transaction must be aborted.
+			Document document = documentDataService.get(documentId);
+			if (document == null) {
+				logger.error(String.format(
+						"Document ID does not exist, discarding error response: tenantId=%s, documentId=%s", tenantId,
+						documentId));
+				session.rollback();
+				return;
+			}
+
+			// Update the document.
+			document.setState(StateEnum.ERROR);
+			documentDataService.update(documentId, document);
+
+			// Commit.
+			session.commit();
+			logger.info(String.format("Logged document scan error: tenantId=%s, documentId=%s, message=%s", tenantId,
+					documentId, apiResponse.getMessage()));
 		}
 	}
 }

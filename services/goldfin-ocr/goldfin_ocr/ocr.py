@@ -28,7 +28,7 @@ class OcrProcessor:
         """
         self._ocr_config = ocr_config
 
-    def scan(self, tenant_id, doc, use_cache=True):
+    def scan(self, tenant_id, doc, use_cache=True, dump_model=False):
         """Scan a file returning a document containing the scan result
 
         :param tenant_id: Tenant to whom doc belongs
@@ -37,6 +37,8 @@ class OcrProcessor:
         :type doc: Document
         :param use_cache: If true cached results are OK for use
         :type use_cache: bool
+        :param dump_model: If true dump model to file
+        :type dump_model: bool
         :returns Invoice object or None
         """
         logger.info("Processing scan on document: tenant_id={0}, document={1}"
@@ -45,12 +47,14 @@ class OcrProcessor:
         # Check for a cached result.  If not found, download from S3.
         cached_ocr_file = self._fetch_from_cache(doc, use_cache)
         if cached_ocr_file is None:
-            logger.info("Running document OCR: ref={0}".format(doc.locator))
+            logger.info("Fetching document for OCR: ref={0}".format(doc.locator))
             scan_input = self._fetch_from_s3(doc.locator, doc.thumbprint)
+            logger.info("Submitting document to OCR: scan_input={0}".format(scan_input))
             scan_result_path = self._run_ocr(scan_input)
             if use_cache:
                 # Caching the result avoids rerunning OCR on the same file.
-                self._load_to_cache(scan_result_path, doc.thumbprint, doc.locator)
+                self._load_to_cache(scan_result_path, doc.thumbprint,
+                                    doc.locator)
         else:
             logger.info("Using cached OCR scan: ref={0}".format(doc.locator))
             scan_result_path = cached_ocr_file.name
@@ -61,20 +65,31 @@ class OcrProcessor:
         with open(scan_result_path, "rb") as xml_file:
             xml = xml_file.read()
         tabular_model = build_model(xml)
-        logger.debug("TABULAR MODEL: " + self._dump_to_json(tabular_model))
+        # Dump tabular model for debugging purposes.
+        if dump_model:
+            tabular_model_path = scan_result_path + "-tabular-model.json"
+            logger.info(
+                "Path location of tabular model: {0}".format(
+                    tabular_model_path))
+            with open(tabular_model_path, "w") as tabular_model_file:
+                tabular_model_file.write(self._dump_to_json(tabular_model))
 
         # Find a provider and translate to Invoice model.
         provider = get_provider(tabular_model)
         if provider is None:
-            raise Exception("Can't find a provider!!!")
+            print(
+                "Can't find a provider!!!, tabular model={0}".format(
+                    tabular_model_path))
+            raise Exception("Unable to find provider for document")
+
         else:
             logger.info("PROVIDER: " + provider.name())
             invoice = provider.get_content()
             logger.debug("INVOICE CONTENT: " + self._dump_to_json(invoice))
             return invoice
 
-        # Remove no matter what.
-        #os.remove(scan_tmp_path)
+            # Remove no matter what.
+            # os.remove(scan_tmp_path)
 
     def _fetch_from_cache(self, doc, use_cache):
         """Try to fetch a cached OCR scan for the document. 
@@ -112,12 +127,15 @@ class OcrProcessor:
 
         # Delete existing copy, if any.
         if s3.exists(cache_key):
-            logger.info("Clearing OCR cache result: key={0}, locator={1}".format(cache_key, locator))
+            logger.info(
+                "Clearing OCR cache result: key={0}, locator={1}".format(
+                    cache_key, locator))
             s3.delete(cache_key)
 
         metadata = {"locator": locator}
-        logger.info("Uploading OCR cache result: key={0}, locator={1}, local_path={2}".format(
-            cache_key, locator, path))
+        logger.info(
+            "Uploading OCR result to cache: key={0}, locator={1}, local_path={2}".format(
+                cache_key, locator, path))
         s3.create_from_file(cache_key, path, metadata)
 
     def _fetch_from_s3(self, locator, thumbprint):
@@ -144,11 +162,12 @@ class OcrProcessor:
         if sha256_sum == thumbprint:
             logger.info(
                 "Fetched document thumbprint matches expected value: temp_file={0}, thumbprint={1}"
-                .format(temp_doc_file.name, thumbprint))
+                    .format(temp_doc_file.name, thumbprint))
         else:
             raise Exception(
                 "Fetched document thumbprint does not match value: ref={0}, temp_file={1}, expected={2}, actual={3}"
-                .format(locator, temp_doc_file.name, thumbprint, sha256_sum))
+                    .format(locator, temp_doc_file.name, thumbprint,
+                            sha256_sum))
 
         # Adjust file pointer and return.
         temp_doc_file.seek(0)
@@ -156,12 +175,13 @@ class OcrProcessor:
 
     def _run_ocr(self, file):
         """Dispatches file-like object to OCR, returns XML file path if successful"""
-        ocr_engine = CloudOCR(application_id=self._ocr_config['abbyy']['appid'],
-                                   password=self._ocr_config['abbyy']['pwd'])
+        ocr_engine = CloudOCR(
+            application_id=self._ocr_config['abbyy']['appid'],
+            password=self._ocr_config['abbyy']['pwd'])
         scan_file = {file.name: file}
         result = ocr_engine.process_and_download(scan_file,
-                                                      exportFormat='xml',
-                                                      language='English')
+                                                 exportFormat='xml',
+                                                 language='English')
 
         logger.info("Output result: {0}".format(result))
         logger.info("Output bytes: {0}".format(result.get("xml")))

@@ -12,10 +12,11 @@ import time
 import yaml
 
 # This is the top-level script, so relative imports not allowed.
-from goldfin_ocr.api.encoder import JSONEncoder
 from goldfin_ocr.api.models import Document, ApiResponse
-from goldfin_ocr.json_xlate import json_dict_to_model, model_to_json_dict, SwaggerJsonEncoder
+from goldfin_ocr.json_xlate import json_dict_to_model, model_to_json_dict, \
+    SwaggerJsonEncoder
 from goldfin_ocr.ocr import OcrProcessor
+import goldfin_ocr.util as util
 import goldfin_ocr.sqs as sqs
 
 # Standard logging initialization.
@@ -77,14 +78,16 @@ def processFromCommandLine(args, ocr_config):
 
     # Invoke OCR scan.
     ocr_processor = OcrProcessor(ocr_config)
-    invoice = ocr_processor.scan("ignore", document, use_cache=True)
+    invoice = ocr_processor.scan("ignore", document,
+                                 use_cache=(not args.no_cache),
+                                 dump_model=args.dump_model)
     if invoice is None:
         print("No invoice generated!")
     else:
         print("Invoice: {0}".format(invoice))
         encoder = SwaggerJsonEncoder()
         back_to_json = encoder.encode(invoice)
-        #back_to_json = model_to_json_dict(invoice)
+        # back_to_json = model_to_json_dict(invoice)
         print("JSON: {0}".format(back_to_json))
 
 
@@ -118,20 +121,34 @@ def processFromQueue(args, ocr_config):
         document = json_dict_to_model(content, Document)
 
         # Invoke OCR scan.
-        invoice = ocr_processor.scan(request.tenant_id, document,
-                                     use_cache=True)
-        if invoice is None:
-            # Add error handling here.
-            logger.error("Unable to generate invoice")
-            response_content = ApiResponse(code=500, type="error",
-                                           message="Unable to generate invoice")
-            response_content_class = "ApiResponse"
+        try:
+            invoice = ocr_processor.scan(request.tenant_id, document,
+                                         use_cache=(not args.no_cache),
+                                         dump_model=args.dump_model)
+            if invoice is None:
+                # Add error handling here.
+                logger.error("Unable to generate invoice")
+                dump_document_to_file(document.id, request.content)
+                response_content = ApiResponse(code=500, type="error",
+                                               message="Unable to scan invoice")
+                response_content_class = "ApiResponse"
 
-        else:
-            logger.debug("Invoice: {0}".format(invoice))
+            else:
+                logger.debug("Invoice: {0}".format(invoice))
+                encoder = SwaggerJsonEncoder()
+                response_content = encoder.encode(invoice)
+                response_content_class = "Invoice"
+
+        except Exception as err:
+            # Add error handling here.
+            msg = "Unable to scan invoice: reason={0}".format(err)
+            logger.error(msg, err)
+            dump_document_to_file(document.id, request.content)
             encoder = SwaggerJsonEncoder()
-            response_content = encoder.encode(invoice)
-            response_content_class = "Invoice"
+            response_content = encoder.encode(
+                ApiResponse(code=500, type="error",
+                            message=msg))
+            response_content_class = "ApiResponse"
 
         # Send response back on response queue.
         response = sqs.StructuredMessage()
@@ -142,6 +159,14 @@ def processFromQueue(args, ocr_config):
         response.content = response_content
         response.content_class = response_content_class
         response_queue.send(response)
+
+def dump_document_to_file(id, content):
+    document_path = "/tmp/document-" + id + ".json"
+    logger.info(
+        "Storing document request to file: {0}".format(
+            document_path))
+    with open(document_path, "w") as document_file:
+        document_file.write(content)
 
 
 def get_sqs_connection(queue_opt, config):
@@ -177,6 +202,12 @@ parser.add_argument("--request",
                     help="Process OCR single request",
                     type=str, choices=['scan', 'validate'])
 parser.add_argument("--body", help="OCR Request body")
+parser.add_argument("--no-cache",
+                    help="Do not use cache for scanning results (expensive!)",
+                    action="store_true", default=False)
+parser.add_argument("--dump-model",
+                    help="Dump tabular model to file",
+                    action="store_true", default=False)
 parser.add_argument("--ocr-cfg",
                     help="OCR configuration file",
                     default="conf/ocr.yaml")
