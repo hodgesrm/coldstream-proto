@@ -7,7 +7,7 @@ import logging
 import re
 import unittest
 
-from goldfin_ocr.table.tabularmodel import TabularModel, Table, Page, Row, Cell, Region
+from goldfin_ocr.table.tabularmodel import TabularModel, Table, Page, Row, Cell, Region, Line
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -68,8 +68,8 @@ class TableModelTest(unittest.TestCase):
         row = Row()
         for c in range(1, 3):
             cell = Cell(c)
-            cell.add_text('a')
-            cell.add_text('b')
+            cell.add_line(Line('a', Region(13, (c-1)*100, 0, (c*100)-1, 25)))
+            cell.add_line(Line('b', Region(13, (c-1)*100, 26, (c*100)-1, 50)))
             cell.region = Region(13, (c - 1) * 100, 0, (c * 100) - 1, 50)
             row.add_cell(cell)
 
@@ -79,6 +79,24 @@ class TableModelTest(unittest.TestCase):
         region = cells[0].region
         self.assertIsNotNone(region)
         self.assertEqual(13, region.page_number)
+
+        text_array = cells[0].text
+        print(cells[0].lines)
+        print(text_array)
+        print(type(text_array))
+        self.assertEqual(2, len(text_array))
+        self.assertEqual('a', text_array[0])
+        self.assertEqual('b', text_array[1])
+
+    def test_lines(self):
+        """Validate that we can set line content and append text"""
+        line = Line('a', Region(13, 100, 0, 110, 25))
+        self.assertEqual('a', line.text)
+        self.assertIsNotNone(line.region)
+        self.assertEqual(13, line.region.page_number)
+
+        line.append_text('b')
+        self.assertEqual('ab', line.text)
 
     def test_regions(self):
         """Validate that we can create and compare regions"""

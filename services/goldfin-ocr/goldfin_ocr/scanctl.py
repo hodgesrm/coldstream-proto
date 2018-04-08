@@ -60,7 +60,7 @@ def init_logging(log_level, log_file=None):
                                                                log_level))
 
 
-def processFromCommandLine(args, ocr_config):
+def process_from_command_line(args, ocr_config):
     """Process a single request using command line arguments
 
     :param args: Argparse arguments
@@ -80,7 +80,7 @@ def processFromCommandLine(args, ocr_config):
     ocr_processor = OcrProcessor(ocr_config)
     invoice = ocr_processor.scan("ignore", document,
                                  use_cache=(not args.no_cache),
-                                 dump_model=args.dump_model)
+                                 preserve_work_files=args.preserve_work_files)
     if invoice is None:
         print("No invoice generated!")
     else:
@@ -91,7 +91,7 @@ def processFromCommandLine(args, ocr_config):
         print("JSON: {0}".format(back_to_json))
 
 
-def processFromQueue(args, ocr_config):
+def process_from_queue(args, ocr_config):
     """Process requests read from a queue.
 
     :param args: Argparse arguments
@@ -124,7 +124,7 @@ def processFromQueue(args, ocr_config):
         try:
             invoice = ocr_processor.scan(request.tenant_id, document,
                                          use_cache=(not args.no_cache),
-                                         dump_model=args.dump_model)
+                                         preserve_work_files=args.preserve_work_files)
             if invoice is None:
                 # Add error handling here.
                 logger.error("Unable to generate invoice")
@@ -167,6 +167,7 @@ def dump_document_to_file(id, content):
             document_path))
     with open(document_path, "w") as document_file:
         document_file.write(content)
+    return document_path
 
 
 def get_sqs_connection(queue_opt, config):
@@ -205,8 +206,8 @@ parser.add_argument("--body", help="OCR Request body")
 parser.add_argument("--no-cache",
                     help="Do not use cache for scanning results (expensive!)",
                     action="store_true", default=False)
-parser.add_argument("--dump-model",
-                    help="Dump tabular model to file",
+parser.add_argument("--preserve-work-files",
+                    help="Keep all work files even if scan is successful",
                     action="store_true", default=False)
 parser.add_argument("--ocr-cfg",
                     help="OCR configuration file",
@@ -230,8 +231,8 @@ with open(args.ocr_cfg, "r") as ocr_yaml:
 
 # Fork processing depending on whether we are a daemon or a command line request.
 if args.daemon is True:
-    processFromQueue(args, ocr_config)
+    process_from_queue(args, ocr_config)
 else:
-    processFromCommandLine(args, ocr_config)
+    process_from_command_line(args, ocr_config)
 
 print("Done!!!")

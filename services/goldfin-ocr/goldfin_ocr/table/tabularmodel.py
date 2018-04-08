@@ -5,10 +5,10 @@
 import hashlib
 import logging
 import re
-import unittest
 
 # Define logger
 logger = logging.getLogger(__name__)
+
 
 class TabularModel:
     """Root of a page-oriented table model"""
@@ -32,18 +32,23 @@ class TabularModel:
         return len(self._pages.keys())
 
     def select_blocks(self, predicate=None):
-        """Return all blocks that match the predicate or all blocks if predicate is None"""
+        """Return all blocks that match the predicate or all blocks if
+        predicate is None
+        """
         blocks = []
         for page in self.pages:
             blocks += page.select_blocks(predicate)
         return blocks
 
     def select_tables(self, predicate=None):
-        """Return all tables that match the predicate or all tables if predicate is None"""
+        """Return all tables that match the predicate or all tables if
+        predicate is None
+        """
         tables = []
         for page in self.pages:
             tables += page.select_tables(predicate)
         return tables
+
 
 class Page:
     """Denotes a page in the document, which may contain one or more tables"""
@@ -134,7 +139,8 @@ class Region:
             return None
         else:
             return Region(self.page_number, min(self.left, other.left),
-                          min(self.top, other.top), max(self.right, other.right),
+                          min(self.top, other.top),
+                          max(self.right, other.right),
                           max(self.bottom, other.bottom))
 
     def overlaps_vertically(self, other):
@@ -190,6 +196,7 @@ class Region:
                 self.bottom >= other.bottom and
                 self.left <= other.left and
                 self.right >= other.right)
+
 
 class Table:
     """Defines a table consisting of 0 or more rows"""
@@ -277,7 +284,7 @@ class Cell:
     """Defines a cell consisting of 0 or more lines of text"""
 
     def __init__(self, number):
-        self._text = []
+        self._lines = []
         self._number = number
         self._width = 0
         self._height = 0
@@ -303,12 +310,23 @@ class Cell:
     def height(self, height):
         self._height = height
 
-    def add_text(self, text):
-        self._text.append(text)
+    def add_line(self, line):
+        self._lines.append(line)
+
+    @property
+    def lines(self):
+        return self._lines
+
+    @lines.setter
+    def lines(self, lines):
+        self._lines = lines
 
     @property
     def text(self):
-        return self._text
+        l = []
+        for line in self._lines:
+            l.append(line.text)
+        return l
 
     @property
     def region(self):
@@ -334,7 +352,7 @@ class Cell:
 
     def joined_text(self, join_by=" "):
         """Return text joined by optional string argument joined_by"""
-        return join_by.join(self._text)
+        return join_by.join(self.text)
 
     def hexdigest(self):
         """Returns a SHA-256 hex digest of the cell text"""
@@ -343,14 +361,14 @@ class Cell:
     def select_text(self, regex):
         """Return any text that matches regex"""
         selected = []
-        for text in self._text:
+        for text in self.text:
             if re.match(regex, text):
                 selected.append(text)
         return selected
 
     def matches_text(self, regex):
         """Return true if we have this text"""
-        for text in self._text:
+        for text in self.text:
             if re.match(regex, text):
                 return True
         return False
@@ -364,19 +382,22 @@ class TextBlock:
     """Defines an area outside a table with one or more lines of text"""
 
     def __init__(self):
-        self._text = []
+        self._lines = []
         self._region = None
 
-    def add_text(self, text):
-        self._text.append(text)
+    def add_line(self, line):
+        self._lines.append(line)
 
     @property
     def text(self):
-        return self._text
+        l = []
+        for line in self._lines:
+            l.append(line.text)
+        return l
 
     def joined_text(self, join_by=" "):
         """Return text joined by optional string argument joined_by"""
-        return join_by.join(self._text)
+        return join_by.join(self.text)
 
     @property
     def region(self):
@@ -389,25 +410,25 @@ class TextBlock:
     def select_text(self, regex):
         """Return any text that matches regex"""
         selected = []
-        for text in self._text:
+        for text in self.text:
             if re.match(regex, text):
                 selected.append(text)
         return selected
 
     def matches(self, regex):
         """Return true if we have this text"""
-        for text in self._text:
+        for text in self.text:
             if re.match(regex, text):
                 return True
         return False
 
     def joined_text(self, join_by=" "):
         """Return text joined by optional string argument joined_by"""
-        return join_by.join(self._text)
+        return join_by.join(self.text)
 
 
 class Line:
-    """Defines a line of text"""
+    """Defines a line of text with a location"""
 
     def __init__(self, text=None, region=None):
         self._text = text
@@ -421,6 +442,12 @@ class Line:
     def text(self, text):
         self._text = text
 
+    def append_text(self, text_fragment):
+        if self._text:
+            self._text += text_fragment
+        else:
+            self._text = text_fragment
+
     @property
     def region(self):
         return self._region
@@ -428,100 +455,3 @@ class Line:
     @region.setter
     def region(self, region):
         self._region = region
-
-
-class TableModelTest(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_pages(self):
-        """Validate that we can set up a model with pages"""
-        model = TabularModel()
-        for p in range(1, 4):
-            page = Page(p)
-            self.assertEqual(p, page.number)
-            logger.info("Adding: " + str(page.__dict__))
-            model.add_page(page)
-
-        # Check page counts.
-        pages = model.pages
-        self.assertIsNotNone(pages)
-        self.assertEqual(3, model.page_count)
-
-        # Check prev/next relationships.
-        page_number = 0
-        for page in pages:
-            page_number += 1
-            logger.info("Verifying: " + str(page.__dict__))
-            self.assertEqual(page_number, page.number)
-
-    def test_tables(self):
-        """Validate that we can add tables to pages"""
-        page = Page(2)
-        for t in range(2):
-            table = Table()
-            page.add_table(table)
-
-        tables = page.tables
-        self.assertIsNotNone(tables)
-        self.assertEqual(2, len(tables))
-
-    def test_rows(self):
-        """Validate that we can create rows and add them to tables"""
-        table = Table()
-        r1 = Row()
-        r2 = Row()
-        table.add_row(r1)
-        table.add_row(r2)
-
-        self.assertEqual(2, table.row_count())
-        self.assertIsNotNone(table.rows)
-        self.assertEqual(r1, table.header_row())
-
-    def test_cells(self):
-        """Validate that we can add cells to a row"""
-        row = Row()
-        for c in range(1, 3):
-            cell = Cell(c)
-            cell.add_text('a')
-            cell.add_text('b')
-            cell.region = Region(13, (c - 1) * 100, 0, (c * 100) - 1, 50)
-            row.add_cell(cell)
-
-        self.assertEqual(2, row.cell_count())
-        cells = row.cells
-        self.assertIsNotNone(cells)
-        region = cells[0].region
-        self.assertIsNotNone(region)
-        self.assertEqual(13, region.page_number)
-
-    def test_regions(self):
-        """Validate that we can create and compare regions"""
-        r0 = Region(1, 1, 1, 100, 100)
-        r1 = Region(2, 1, 1, 30, 30)
-        r2 = Region(2, 25, 25, 75, 75)
-        r3 = Region(2, 70, 70, 100, 100)
-        r4 = Region(2, 1, 1, 100, 100)
-
-        self.assertFalse(r0.contains(r2))
-        self.assertFalse(r0.overlaps_vertically(r1))
-        self.assertFalse(r0.overlaps_horizontally(r2))
-
-        self.assertTrue(r4.contains(r1))
-        self.assertTrue(r4.contains(r2))
-        self.assertTrue(r4.contains(r4))
-        self.assertFalse(r2.contains(r3))
-
-        self.assertTrue(r1.overlaps_horizontally(r2))
-        self.assertTrue(r1.overlaps_vertically(r2))
-        self.assertTrue(r1.overlaps_horizontally(r4))
-        self.assertTrue(r4.overlaps_vertically(r3))
-        self.assertFalse(r1.overlaps_horizontally(r3))
-        self.assertFalse(r1.overlaps_vertically(r3))
-
-
-if __name__ == '__main__':
-    unittest.main()
