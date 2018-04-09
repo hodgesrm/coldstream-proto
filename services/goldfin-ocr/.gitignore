@@ -3,3 +3,5 @@ goldfin_ocr.egg-info/
 ocr.log
 output.log
 .idea/
+conf/ocr.yaml
+tests/ocr-test.yaml
