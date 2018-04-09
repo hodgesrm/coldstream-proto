@@ -2,4 +2,5 @@
 .classpath
 .project
 .settings/
-`
+conf/aws-test.yaml
+conf/aws.yaml

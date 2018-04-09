@@ -1,0 +1,10 @@
+---
+accessKeyId: "<AWS access key ID>"
+secretAccessKey: "<AWS secret access key>"
+s3:
+  bucket: "test1-service-goldfin-io"
+  location: "us-west-1"
+ocr:
+  ocrRequestQueue: "ocr-processing-request"
+  ocrResponseQueue: "ocr-processing-response"
+  region: "us-west-2"

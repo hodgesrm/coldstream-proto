@@ -1,2 +1,5 @@
 __pycache__/
 goldfin_ocr.egg-info/
+ocr.log
+output.log
+.idea/

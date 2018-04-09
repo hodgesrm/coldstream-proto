@@ -1,8 +1,8 @@
 ---
 # AWS credentials
 aws:
-  accessKeyId: "AKIAJ7TJPRS2OBXCM3KA"
-  secretAccessKey: "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"
+  accessKeyId: "<AWS access key ID>"
+  secretAccessKey: "<AWS secret access key>"
 # OCR cache in S3
 cache:
   bucket: "unittest-ocr-cache-test1-service-goldfin-io"
@@ -10,4 +10,7 @@ cache:
 # OCR online service
 abbyy:
   appid: "Goldfin IT Analytics"
-  pwd: "sG1faAb/JwKk2YqDigMbZ2M6"
+  pwd: "<PASSWORD>"
+# OCR work directory and other service parameters.
+ocr:
+  work_dir: "/tmp/ocr"
