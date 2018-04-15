@@ -9,6 +9,7 @@ from lxml import etree
 import unittest
 
 import goldfin_ocr.table.tabularmodel as tm
+import goldfin_ocr.table.tabularquery as tq
 import goldfin_ocr.table.tablebuilder as tb
 
 # Define logger
@@ -33,30 +34,15 @@ class TableBuilderTest(unittest.TestCase):
         self.assertIsNotNone(model)
 
         # Ensure we find a block with OVH.com in it.
-        def ovh_predicate(block):
-            return (len(block.select_text(r'OVH\.com')) > 0)
-
-        ovh_com_blocks = model.select_blocks(ovh_predicate)
-        self.assertTrue(len(ovh_com_blocks) == 1)
-        logger.info(self._dump_to_json(ovh_com_blocks))
+        engine = tq.QueryEngine(model)
+        ovh_com_count = engine.line_query().matches_regex(r'OVH\.com').count()
+        self.assertTrue(ovh_com_count == 1)
 
         # Ensure we can find the total by finding a block with "TOTAL" then
         # finding a block that overlaps horizontally.
-        def total_predicate(block):
-            return (len(block.select_text(r'^TOTAL$')) > 0)
-
-        total_blocks = model.select_blocks(total_predicate)
-        logger.info(self._dump_to_json(total_blocks))
-        self.assertTrue(len(total_blocks) == 1)
-        total_region = total_blocks[0].region
-
-        def total_value_predicate(block):
-            return (block.region.overlaps_vertically(total_region) and
-                    block != total_blocks[0])
-
-        total_value_blocks = model.select_blocks(total_value_predicate)
-        logger.info(self._dump_to_json(total_value_blocks))
-        self.assertTrue(len(total_blocks) == 1)
+        total = engine.line_query().matches_regex(r'^TOTAL$').first()
+        overlapping_count = engine.line_query().page(total.page_number).is_to_right_of(total.region).count()
+        self.assertTrue(overlapping_count == 1)
 
     def test_build_2_large(self):
         """Validate that we can set up a model from a multi-page invoice from Internap"""
@@ -69,31 +55,15 @@ class TableBuilderTest(unittest.TestCase):
         logger.info(self._dump_to_json(model))
 
         # Ensure we find a block with Internap Corporation in it.
-        def inap_predicate(block):
-            return (len(block.select_text(r'Internap Corporation')) > 0)
-
-        inap_blocks = model.select_blocks(inap_predicate)
-        self.assertTrue(len(inap_blocks) == 1)
-        logger.info(self._dump_to_json(inap_blocks))
+        engine = tq.QueryEngine(model)
+        inap_count = engine.line_query().matches_regex(r'Internap Corporation').count()
+        self.assertTrue(inap_count == 1)
 
         # Ensure we can find the total by finding a block with "Invoice Total"
         # then finding a block that overlaps horizontally.
-        def total_predicate(block):
-            return (len(block.select_text(r'^Invoice Total')) > 0 and block.region.page_number == 1)
-
-        total_blocks = model.select_blocks(total_predicate)
-        logger.info(self._dump_to_json(total_blocks))
-        self.assertTrue(len(total_blocks) == 1)
-        total_region = total_blocks[0].region
-
-        def total_value_predicate(block):
-            return (block.region.overlaps_vertically(total_region) and
-                    block != total_blocks[0] and
-                    block.region.is_to_right_of(total_region))
-
-        total_value_blocks = model.select_blocks(total_value_predicate)
-        logger.info(self._dump_to_json(total_value_blocks))
-        self.assertTrue(len(total_value_blocks) == 1)
+        total = engine.line_query().matches_regex(r'^Invoice Total').first()
+        overlapping_count = engine.line_query().page(total.page_number).is_to_right_of(total.region).count()
+        self.assertTrue(overlapping_count == 1)
 
     def _dump_to_json(self, obj, indent=2, sort_keys=True):
         """Dumps a object to JSON by supplying default to

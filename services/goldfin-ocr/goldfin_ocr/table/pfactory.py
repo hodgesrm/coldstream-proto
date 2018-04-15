@@ -2,8 +2,9 @@
 # Copyright (c) 2017 Robert Hodges.  All rights reserved. 
 
 """Factory class to pick a provider translator class"""
-from table.providers.inap import InapProcessor
-from table.providers.ovh import OvhProcessor
+from .providers.inap import InapProcessor
+from .providers.leaseweb import LeasewebProcessor
+from .providers.ovh import OvhProcessor
 
 
 def get_provider(tabular_model):
@@ -12,5 +13,7 @@ def get_provider(tabular_model):
         return InapProcessor(tabular_model)
     elif OvhProcessor.conforms(tabular_model):
         return OvhProcessor(tabular_model)
+    elif LeasewebProcessor.conforms(tabular_model):
+        return LeasewebProcessor(tabular_model)
     else:
         return None

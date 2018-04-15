@@ -16,8 +16,12 @@ class TabularModel:
     def __init__(self):
         self._pages = {}
 
+    @property
+    def children(self):
+        return self.pages
+
     def add_page(self, page):
-        self._pages[page.number] = page
+        self._pages[page.page_number] = page
 
     @property
     def pages(self):
@@ -54,13 +58,21 @@ class Page:
     """Denotes a page in the document, which may contain one or more tables"""
 
     def __init__(self, number):
-        self._number = number
+        self._page_number = number
         self._tables = []
         self._blocks = []
 
     @property
-    def number(self):
-        return self._number
+    def children(self):
+        return self.blocks + self.tables
+
+    @property
+    def page_number(self):
+        return self._page_number
+
+    @page_number.setter
+    def page_number(self, page_number):
+        self._page_number = page_number
 
     def add_table(self, table):
         self._tables.append(table)
@@ -92,15 +104,20 @@ class Page:
 
 
 class Region:
-    """Defines an area within a scanned document using the page number
-    and pixel coordinates.  Regions can be thought of as a set for pixels"""
+    """Defines an area within a scanned document page using
+    pixel coordinates.  Regions can be thought of as a set for pixels"""
 
-    def __init__(self, page_number, left, top, right, bottom):
-        self._page_number = page_number
+    def __init__(self, left, top, right, bottom):
         self._left = left
         self._top = top
         self._right = right
         self._bottom = bottom
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def __repr__(self):
+        return self.__str__()
 
     @property
     def page_number(self):
@@ -124,7 +141,7 @@ class Region:
 
     def sort_key(self):
         """Return a comparable value that supports > and < operators."""
-        return [self.page_number, self.left, self.top, self.right, self.bottom]
+        return [self.left, self.top, self.right, self.bottom]
 
     def width(self):
         return self.right - self.left
@@ -132,80 +149,90 @@ class Region:
     def height(self):
         return self.bottom - self.top
 
+    def area(self):
+        return self.width() * self.height()
+
     def merge(self, other):
         """Returns a region set that contains both this and the other region or None if
         the regions are on different pages and therefore not able to merge"""
-        if self.page_number != other.page_number:
-            return None
-        else:
-            return Region(self.page_number, min(self.left, other.left),
+        return Region(min(self.left, other.left),
                           min(self.top, other.top),
                           max(self.right, other.right),
                           max(self.bottom, other.bottom))
 
+    def intersect(self, other):
+        """Returns returns a region that is the intersection of this and the
+        other region or None if regions do not intersect"""
+        left = max(self.left, other.left)
+        top = max(self.top, other.top)
+        right = min(self.right, other.right)
+        bottom = min(self.bottom, other.bottom)
+        if left < right and top < bottom:
+            return Region(left, top, right, bottom)
+        else:
+            return None
+
     def overlaps_vertically(self, other):
         """Returns true if regions overlap along vertical axis"""
-        if self.page_number != other.page_number:
-            return False
-        else:
-            min_bottom = min(self.bottom, other.bottom)
-            max_top = max(self.top, other.top)
-            return (min_bottom - max_top) >= 0
+        min_bottom = min(self.bottom, other.bottom)
+        max_top = max(self.top, other.top)
+        return (min_bottom - max_top) >= 0
 
     def overlaps_horizontally(self, other):
         """Returns true if regions overlap along horizontal axis"""
-        if self.page_number != other.page_number:
-            return False
-        else:
-            min_right = min(self.right, other.right)
-            max_left = max(self.left, other.left)
-            return (min_right - max_left) >= 0
+        min_right = min(self.right, other.right)
+        max_left = max(self.left, other.left)
+        return (min_right - max_left) >= 0
 
     def is_to_left_of(self, other):
         """Returns true if this region is to left of other region"""
-        if self.page_number != other.page_number:
-            return False
-        else:
-            return self.right < other.left
+        return self.right < other.left
 
     def is_to_right_of(self, other):
         """Returns true if this region is to right of other region"""
-        if self.page_number != other.page_number:
-            return False
-        else:
-            return self.left > other.right
+        return self.left > other.right
 
     def is_above(self, other):
         """Returns true if this region is above other region"""
-        if self.page_number != other.page_number:
-            return False
-        else:
-            return self.bottom > other.top
+        return self.bottom > other.top
 
     def is_below(self, other):
         """Returns true if this region is below other region"""
-        if self.page_number != other.page_number:
-            return False
-        else:
-            return self.top < other.bottom
+        return self.top < other.bottom
 
     def contains(self, other):
         """Returns true if this region contains other region"""
-        return (self.page_number == other.page_number and
-                self.top <= other.top and
+        return (self.top <= other.top and
                 self.bottom >= other.bottom and
                 self.left <= other.left and
                 self.right >= other.right)
+
+    def intersects(self, other):
+        """Returns true if this region intersects other region"""
+        return self.intersect(other) is not None
 
 
 class Table:
     """Defines a table consisting of 0 or more rows"""
 
+    def __init__(self, page_number=None):
+        self._page_number = page_number
+        self._rows = []
+
+    @property
+    def page_number(self):
+        return self._page_number
+
+    @page_number.setter
+    def page_number(self, page_number):
+        self._page_number = page_number
+
+    @property
+    def children(self):
+        return self.rows
+
     def add_row(self, row):
         self._rows.append(row)
-
-    def __init__(self):
-        self._rows = []
 
     @property
     def rows(self):
@@ -225,8 +252,21 @@ class Table:
 class Row:
     """Defines a row consisting of cells"""
 
-    def __init__(self):
+    def __init__(self, page_number=None):
+        self._page_number = page_number
         self._cells = []
+
+    @property
+    def page_number(self):
+        return self._page_number
+
+    @page_number.setter
+    def page_number(self, page_number):
+        self._page_number = page_number
+
+    @property
+    def children(self):
+        return self.cells
 
     def add_cell(self, cell):
         self._cells.append(cell)
@@ -283,12 +323,25 @@ class Row:
 class Cell:
     """Defines a cell consisting of 0 or more lines of text"""
 
-    def __init__(self, number):
+    def __init__(self, number, page_number=None):
         self._lines = []
         self._number = number
         self._width = 0
         self._height = 0
+        self._page_number = page_number
         self._region = None
+
+    @property
+    def page_number(self):
+        return self._page_number
+
+    @page_number.setter
+    def page_number(self, page_number):
+        self._page_number = page_number
+
+    @property
+    def children(self):
+        return self.lines
 
     @property
     def number(self):
@@ -338,7 +391,8 @@ class Cell:
 
     def merge(self, other):
         """Return a new cell that is merged with the other"""
-        merged_cell = Cell(self.page)
+        merged_cell = Cell()
+        merged_cell.page_number = self.page_number
         merged_cell.text = merged_cell.text + other.text
 
         merged_region = self.region.merge(other.region)
@@ -381,12 +435,29 @@ class Cell:
 class TextBlock:
     """Defines an area outside a table with one or more lines of text"""
 
-    def __init__(self):
+    def __init__(self, page_number=None):
+        self._page_number = page_number
         self._lines = []
         self._region = None
 
+    @property
+    def page_number(self):
+        return self._page_number
+
+    @page_number.setter
+    def page_number(self, page_number):
+        self._page_number = page_number
+
+    @property
+    def children(self):
+        return self.lines
+
     def add_line(self, line):
         self._lines.append(line)
+
+    @property
+    def lines(self):
+        return self._lines
 
     @property
     def text(self):
@@ -430,9 +501,21 @@ class TextBlock:
 class Line:
     """Defines a line of text with a location"""
 
-    def __init__(self, text=None, region=None):
+    def __init__(self, text=None, region=None, page_number=None):
+        self._page_number = page_number
         self._text = text
         self._region = region
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    @property
+    def page_number(self):
+        return self._page_number
+
+    @page_number.setter
+    def page_number(self, page_number):
+        self._page_number = page_number
 
     @property
     def text(self):
@@ -455,3 +538,7 @@ class Line:
     @region.setter
     def region(self, region):
         self._region = region
+
+    def matches(self, regex):
+        """Return true if we have this text"""
+        return re.match(regex, self.text)

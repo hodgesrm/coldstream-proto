@@ -4,6 +4,9 @@
 
 import hashlib
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def sha256(path):
@@ -33,3 +36,28 @@ def dump_to_json(obj, indent=2, sort_keys=True):
     """
     converter_fn = lambda unserializable_obj: unserializable_obj.__dict__
     return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
+
+
+def init_logging(log_level, log_file=None):
+    """Validates log level and starts logging"""
+    if log_level == "CRITICAL":
+        level = logging.CRITICAL
+    elif log_level == "ERROR":
+        level = logging.ERROR
+    elif log_level == "WARNING":
+        level = logging.WARNING
+    elif log_level == "INFO":
+        level = logging.INFO
+    elif log_level == "DEBUG":
+        level = logging.DEBUG
+    else:
+        raise Exception("Unknown log level: " + log_level)
+
+    if log_file is None:
+        logging.basicConfig(level=level)
+    else:
+        logging.basicConfig(filename=log_file, level=level)
+
+    logger.debug(
+        "Initializing log: log_file={0}, log_level={1}".format(log_file,
+                                                               log_level))

@@ -6,18 +6,22 @@ from decimal import Decimal
 from datetime import datetime
 import re
 
-def is_valid_host(text:str):
+
+def is_valid_host(text: str):
     return is_valid_ip(text) or is_valid_dns_name(text)
 
-def is_valid_ip(text:str):
+
+def is_valid_ip(text: str):
     ip_regex = r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'
     return re.match(ip_regex, text) is not None
 
-def is_valid_dns_name(text:str):
+
+def is_valid_dns_name(text: str):
     dns_regex = r'^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$'
     return re.match(dns_regex, text) is not None
 
-def clean_host_name(text:str, samples:list=None):
+
+def clean_host_name(text: str, samples: list = None):
     """Takes a 'dirty' host name + optional likely 'clean' names
     and return a fixed up, valid host name
     """
@@ -35,8 +39,77 @@ def clean_host_name(text:str, samples:list=None):
             return text_with_periods
 
         text_without_spaces = text.replace(' ', '')
-        if is_valid_host(text_without_spaces) and text_without_spaces in samples:
+        if is_valid_host(
+                text_without_spaces) and text_without_spaces in samples:
             return text_without_spaces
 
     # OK, we can't fix this unambiguously.  Let's just return.
     return text
+
+
+def extract_date(date_string):
+    """Extracts a date value from a string
+    :param date_string: Date in any of a number of forms
+    :type date_string: str
+    :return: Date in YYYY-MM-DD format
+    """
+    # Strip whitespace.
+    date_string = date_string.strip()
+
+    # MMM DD, YYYY format.
+    mmm_dd_yyyy = r'^.*?\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*([0-9]+)\s*,\s*([0-9]+).*$'
+    matcher = re.match(mmm_dd_yyyy, date_string.upper())
+    if matcher:
+        clean_date = "{m} {d}, {y}".format(m=matcher.group(1),
+                                              d=matcher.group(2),
+                                              y=matcher.group(3))
+        return datetime.strptime(clean_date, '%b %d, %Y').strftime('%Y-%m-%d')
+
+    # DD MMM YYYY format.
+    dd_mmm_yyyy = r'^.*?\s*([0-9]+)\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*([0-9]+).*$'
+    matcher = re.match(dd_mmm_yyyy, date_string.upper())
+    if matcher:
+        clean_date = "{d} {m} {y}".format(d=matcher.group(1),
+                                              m=matcher.group(2),
+                                              y=matcher.group(3))
+        return datetime.strptime(clean_date, '%d %b %Y').strftime('%Y-%m-%d')
+
+    # Other formats
+    return None
+
+def extract_currency(currency_string):
+    """Extracts a date value from a string
+    :param currency_string: Currency in any of a number of forms
+    :type currency_string: str
+    :return: Currency value with period as decimal point or None
+    """
+    # Strip whitespace.
+    currency_string = currency_string.strip()
+
+    # Currency number is a combination of numbers, commas, and periods with
+    # two trailing decimal digits.  We'll extract from surrounding symbols.
+    currency_regex1 = r'([0-9][0-9.,]*[.,]+[0-9][0-9]).*$'
+    currency_regex2 = r'.*(\s|:|\$)([0-9][0-9.,]*[.,]+[0-9][0-9]).*$'
+    matcher1 = re.match(currency_regex1, currency_string)
+    if matcher1:
+        raw_currency = matcher1.group(1)
+    else:
+        matcher2 = re.match(currency_regex2, currency_string)
+        if matcher2:
+            raw_currency = matcher2.group(2)
+        else:
+            raw_currency = None
+
+    if raw_currency:
+        if re.match(r'.*,[0-9][0-9]$', raw_currency):
+            # Looks like decimal point is a comma. Strip periods and convert
+            # comma to period.
+            return raw_currency.replace(".", "").replace(",", ".")
+        elif re.match(r'.*\.[0-9][0-9]$', raw_currency):
+            # Looks as if period is the comma. Strip commas and return.
+            return raw_currency.replace(",", "")
+        else:
+            # Not sure what this is, so just return it.
+            return raw_currency
+    else:
+        return None

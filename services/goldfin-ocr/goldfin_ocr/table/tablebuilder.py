@@ -13,11 +13,10 @@ from . import tabularmodel as tm
 logger = logging.getLogger(__name__)
 
 
-def _create_region(page_number, source_tag):
-    """Return region that contains page and pixel coordinates of a location"""
-    return tm.Region(int(page_number), int(source_tag.get("l")),
-                     int(source_tag.get("t")), int(source_tag.get("r")),
-                     int(source_tag.get("b")))
+def _create_region(source_tag):
+    """Return region that contains pixel coordinates of a resource"""
+    return tm.Region(int(source_tag.get("l")), int(source_tag.get("t")),
+                     int(source_tag.get("r")), int(source_tag.get("b")))
 
 
 def build_model(xml):
@@ -54,16 +53,14 @@ def build_model(xml):
             elif block_type == 'Text':
                 block = tm.TextBlock()
                 page.add_block(block)
-                block.region = _create_region(page_no, in_block)
+                block.page_number = page_no
+                block.region = _create_region(in_block)
 
                 for in_text in in_block.iter('text'):
                     for in_line in in_text.iter('line'):
                         line = tm.Line()
-                        line.region = tm.Region(page_number=page_no,
-                                                left=in_line.get("l"),
-                                                top=in_line.get("t"),
-                                                right=in_line.get("r"),
-                                                bottom=in_line.get("b"))
+                        line.page_number = page_no
+                        line.region = _create_region(in_line)
                         block.add_line(line)
                         str_value = ""
                         for in_formatting in in_line.iter('formatting'):
@@ -98,12 +95,8 @@ def build_model(xml):
                         for in_text in in_cell.iter('text'):
                             for in_line in in_text.iter('line'):
                                 line = tm.Line()
-                                line.region = tm.Region(page_number=page_no,
-                                                        left=in_line.get("l"),
-                                                        top=in_line.get("t"),
-                                                        right=in_line.get("r"),
-                                                        bottom=in_line.get(
-                                                            "b"))
+                                line.page_number = page_no
+                                line.region = _create_region(in_line)
                                 cell.add_line(line)
                                 str_value = ""
                                 for in_formatting in in_line.iter(

@@ -7,10 +7,12 @@ import logging
 import re
 import unittest
 
-from goldfin_ocr.table.tabularmodel import TabularModel, Table, Page, Row, Cell, Region, Line
+from goldfin_ocr.table.tabularmodel import TabularModel, Table, Page, Row, \
+    Cell, Region, Line
 
 # Define logger
 logger = logging.getLogger(__name__)
+
 
 class TableModelTest(unittest.TestCase):
     def setUp(self):
@@ -24,7 +26,7 @@ class TableModelTest(unittest.TestCase):
         model = TabularModel()
         for p in range(1, 4):
             page = Page(p)
-            self.assertEqual(p, page.number)
+            self.assertEqual(p, page.page_number)
             logger.info("Adding: " + str(page.__dict__))
             model.add_page(page)
 
@@ -38,7 +40,7 @@ class TableModelTest(unittest.TestCase):
         for page in pages:
             page_number += 1
             logger.info("Verifying: " + str(page.__dict__))
-            self.assertEqual(page_number, page.number)
+            self.assertEqual(page_number, page.page_number)
 
     def test_tables(self):
         """Validate that we can add tables to pages"""
@@ -67,10 +69,12 @@ class TableModelTest(unittest.TestCase):
         """Validate that we can add cells to a row"""
         row = Row()
         for c in range(1, 3):
-            cell = Cell(c)
-            cell.add_line(Line('a', Region(13, (c-1)*100, 0, (c*100)-1, 25)))
-            cell.add_line(Line('b', Region(13, (c-1)*100, 26, (c*100)-1, 50)))
-            cell.region = Region(13, (c - 1) * 100, 0, (c * 100) - 1, 50)
+            cell = Cell(c, page_number=13)
+            cell.add_line(
+                Line(text='a', region=Region((c - 1) * 100, 0, (c * 100) - 1, 25)))
+            cell.add_line(
+                Line('b', Region((c - 1) * 100, 26, (c * 100) - 1, 50)))
+            cell.region = Region((c - 1) * 100, 0, (c * 100) - 1, 50)
             row.add_cell(cell)
 
         self.assertEqual(2, row.cell_count())
@@ -78,7 +82,7 @@ class TableModelTest(unittest.TestCase):
         self.assertIsNotNone(cells)
         region = cells[0].region
         self.assertIsNotNone(region)
-        self.assertEqual(13, region.page_number)
+        self.assertEqual(13, cells[0].page_number)
 
         text_array = cells[0].text
         print(cells[0].lines)
@@ -90,25 +94,20 @@ class TableModelTest(unittest.TestCase):
 
     def test_lines(self):
         """Validate that we can set line content and append text"""
-        line = Line('a', Region(13, 100, 0, 110, 25))
+        line = Line('a', Region(100, 0, 110, 25), page_number=13)
         self.assertEqual('a', line.text)
         self.assertIsNotNone(line.region)
-        self.assertEqual(13, line.region.page_number)
+        self.assertEqual(13, line.page_number)
 
         line.append_text('b')
         self.assertEqual('ab', line.text)
 
     def test_regions(self):
         """Validate that we can create and compare regions"""
-        r0 = Region(1, 1, 1, 100, 100)
-        r1 = Region(2, 1, 1, 30, 30)
-        r2 = Region(2, 25, 25, 75, 75)
-        r3 = Region(2, 70, 70, 100, 100)
-        r4 = Region(2, 1, 1, 100, 100)
-
-        self.assertFalse(r0.contains(r2))
-        self.assertFalse(r0.overlaps_vertically(r1))
-        self.assertFalse(r0.overlaps_horizontally(r2))
+        r1 = Region(1, 1, 30, 30)
+        r2 = Region(25, 25, 75, 75)
+        r3 = Region(70, 70, 100, 100)
+        r4 = Region(1, 1, 100, 100)
 
         self.assertTrue(r4.contains(r1))
         self.assertTrue(r4.contains(r2))
@@ -121,6 +120,32 @@ class TableModelTest(unittest.TestCase):
         self.assertTrue(r4.overlaps_vertically(r3))
         self.assertFalse(r1.overlaps_horizontally(r3))
         self.assertFalse(r1.overlaps_vertically(r3))
+
+    def test_regions_intersection(self):
+        """Validate that intersecting regions return a region and
+        non-intersecting regions return None"""
+        r1 = Region(10, 20, 30, 40)
+        r2 = Region(20, 30, 40, 50)
+        r3 = Region(30, 40, 50, 60)
+
+        r1_r2 = r1.intersect(r2)
+        self.assertIsNotNone(r1_r2)
+        self.assertEqual(100, r1_r2.area())
+
+        r2_r3 = r2.intersect(r3)
+        self.assertIsNotNone(r2_r3)
+        self.assertEqual(100, r2_r3.area())
+
+        self.assertIsNone(r1.intersect(r3))
+
+        self.assertTrue(r2.intersects(r1))
+        self.assertTrue(r1.intersects(r1))
+        self.assertFalse(r3.intersects(r1))
+
+        r10 = Region(166, 3035, 415, 3065)
+        r11 = Region(2168, 3033, 2385, 3072)
+        self.assertIsNone(r10.intersect(r11))
+        self.assertFalse(r11.intersects(r10))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 __pycache__/
 goldfin_ocr.egg-info/
 ocr.log
+invoice.log
 output.log
 .idea/
 conf/ocr.yaml

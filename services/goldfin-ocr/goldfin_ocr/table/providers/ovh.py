@@ -5,12 +5,10 @@
 from datetime import datetime
 import logging
 import re
-import uuid
 from decimal import Decimal
 from goldfin_ocr.api.models.invoice import Invoice
 from goldfin_ocr.api.models.invoice_item import InvoiceItem
-
-import data
+import goldfin_ocr.data as data
 
 # Define logger
 logger = logging.getLogger(__name__)
