@@ -973,6 +973,9 @@ definitions:
       resourceId:
         type: string
         description: Inventory resource ID
+      description:
+        type: string
+        description: Invoice item description
       unitAmount:
         type: number
         description: Cost per unit
@@ -993,6 +996,9 @@ definitions:
         type: string
         format: date-time
         description: End of the time range
+      oneTimeCharge:
+        type: boolean
+        description: If true, this is a one-time charge and the starting date provides the date
       region:
         $ref: '#/definitions/DocumentRegion'
       inventoryId:

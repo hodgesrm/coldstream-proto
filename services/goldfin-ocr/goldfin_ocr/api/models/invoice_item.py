@@ -33,12 +33,14 @@ class InvoiceItem(object):
     swagger_types = {
         'item_id': 'str',
         'resource_id': 'str',
+        'description': 'str',
         'unit_amount': 'float',
         'units': 'int',
         'total_amount': 'float',
         'currency': 'str',
-        'start_date': 'str',
-        'end_date': 'str',
+        'start_date': 'datetime',
+        'end_date': 'datetime',
+        'one_time_charge': 'bool',
         'region': 'DocumentRegion',
         'inventory_id': 'str',
         'inventory_type': 'str'
@@ -47,30 +49,34 @@ class InvoiceItem(object):
     attribute_map = {
         'item_id': 'itemId',
         'resource_id': 'resourceId',
+        'description': 'description',
         'unit_amount': 'unitAmount',
         'units': 'units',
         'total_amount': 'totalAmount',
         'currency': 'currency',
         'start_date': 'startDate',
         'end_date': 'endDate',
+        'one_time_charge': 'oneTimeCharge',
         'region': 'region',
         'inventory_id': 'inventoryId',
         'inventory_type': 'inventoryType'
     }
 
-    def __init__(self, item_id=None, resource_id=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, region=None, inventory_id=None, inventory_type=None):
+    def __init__(self, item_id=None, resource_id=None, description=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, one_time_charge=None, region=None, inventory_id=None, inventory_type=None):
         """
         InvoiceItem - a model defined in Swagger
         """
 
         self._item_id = None
         self._resource_id = None
+        self._description = None
         self._unit_amount = None
         self._units = None
         self._total_amount = None
         self._currency = None
         self._start_date = None
         self._end_date = None
+        self._one_time_charge = None
         self._region = None
         self._inventory_id = None
         self._inventory_type = None
@@ -79,6 +85,8 @@ class InvoiceItem(object):
           self.item_id = item_id
         if resource_id is not None:
           self.resource_id = resource_id
+        if description is not None:
+          self.description = description
         if unit_amount is not None:
           self.unit_amount = unit_amount
         if units is not None:
@@ -91,6 +99,8 @@ class InvoiceItem(object):
           self.start_date = start_date
         if end_date is not None:
           self.end_date = end_date
+        if one_time_charge is not None:
+          self.one_time_charge = one_time_charge
         if region is not None:
           self.region = region
         if inventory_id is not None:
@@ -143,6 +153,29 @@ class InvoiceItem(object):
         """
 
         self._resource_id = resource_id
+
+    @property
+    def description(self):
+        """
+        Gets the description of this InvoiceItem.
+        Invoice item description
+
+        :return: The description of this InvoiceItem.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """
+        Sets the description of this InvoiceItem.
+        Invoice item description
+
+        :param description: The description of this InvoiceItem.
+        :type: str
+        """
+
+        self._description = description
 
     @property
     def unit_amount(self):
@@ -243,7 +276,7 @@ class InvoiceItem(object):
         Begining of the time range
 
         :return: The start_date of this InvoiceItem.
-        :rtype: str
+        :rtype: datetime
         """
         return self._start_date
 
@@ -254,7 +287,7 @@ class InvoiceItem(object):
         Begining of the time range
 
         :param start_date: The start_date of this InvoiceItem.
-        :type: str
+        :type: datetime
         """
 
         self._start_date = start_date
@@ -266,7 +299,7 @@ class InvoiceItem(object):
         End of the time range
 
         :return: The end_date of this InvoiceItem.
-        :rtype: str
+        :rtype: datetime
         """
         return self._end_date
 
@@ -277,10 +310,33 @@ class InvoiceItem(object):
         End of the time range
 
         :param end_date: The end_date of this InvoiceItem.
-        :type: str
+        :type: datetime
         """
 
         self._end_date = end_date
+
+    @property
+    def one_time_charge(self):
+        """
+        Gets the one_time_charge of this InvoiceItem.
+        If true, this is a one-time charge and the starting date provides the date
+
+        :return: The one_time_charge of this InvoiceItem.
+        :rtype: bool
+        """
+        return self._one_time_charge
+
+    @one_time_charge.setter
+    def one_time_charge(self, one_time_charge):
+        """
+        Sets the one_time_charge of this InvoiceItem.
+        If true, this is a one-time charge and the starting date provides the date
+
+        :param one_time_charge: The one_time_charge of this InvoiceItem.
+        :type: bool
+        """
+
+        self._one_time_charge = one_time_charge
 
     @property
     def region(self):

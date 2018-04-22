@@ -57,7 +57,7 @@ class LoginCredentials(object):
     def user(self):
         """
         Gets the user of this LoginCredentials.
-        User name
+        User name in form 'username@tenantname'
 
         :return: The user of this LoginCredentials.
         :rtype: str
@@ -68,7 +68,7 @@ class LoginCredentials(object):
     def user(self, user):
         """
         Sets the user of this LoginCredentials.
-        User name
+        User name in form 'username@tenantname'
 
         :param user: The user of this LoginCredentials.
         :type: str

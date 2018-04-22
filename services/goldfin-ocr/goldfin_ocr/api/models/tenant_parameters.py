@@ -32,24 +32,29 @@ class TenantParameters(object):
     """
     swagger_types = {
         'name': 'str',
+        'schema_suffix': 'str',
         'description': 'str'
     }
 
     attribute_map = {
         'name': 'name',
+        'schema_suffix': 'schema_suffix',
         'description': 'description'
     }
 
-    def __init__(self, name=None, description=None):
+    def __init__(self, name=None, schema_suffix=None, description=None):
         """
         TenantParameters - a model defined in Swagger
         """
 
         self._name = None
+        self._schema_suffix = None
         self._description = None
 
         if name is not None:
           self.name = name
+        if schema_suffix is not None:
+          self.schema_suffix = schema_suffix
         if description is not None:
           self.description = description
 
@@ -75,6 +80,29 @@ class TenantParameters(object):
         """
 
         self._name = name
+
+    @property
+    def schema_suffix(self):
+        """
+        Gets the schema_suffix of this TenantParameters.
+        Tenant schema suffix
+
+        :return: The schema_suffix of this TenantParameters.
+        :rtype: str
+        """
+        return self._schema_suffix
+
+    @schema_suffix.setter
+    def schema_suffix(self, schema_suffix):
+        """
+        Sets the schema_suffix of this TenantParameters.
+        Tenant schema suffix
+
+        :param schema_suffix: The schema_suffix of this TenantParameters.
+        :type: str
+        """
+
+        self._schema_suffix = schema_suffix
 
     @property
     def description(self):

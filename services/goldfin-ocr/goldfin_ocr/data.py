@@ -74,6 +74,24 @@ def extract_date(date_string):
                                               y=matcher.group(3))
         return datetime.strptime(clean_date, '%d %b %Y').strftime('%Y-%m-%d')
 
+    # DD-MM-YYYY format.
+    dd_dash_mm_dash_yyyy = r'^.*?\s*([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})'
+    matcher = re.match(dd_dash_mm_dash_yyyy, date_string)
+    if matcher:
+        clean_date = "{d}-{m}-{y}".format(d=matcher.group(1),
+                                              m=matcher.group(2),
+                                              y=matcher.group(3))
+        return datetime.strptime(clean_date, '%d-%m-%Y').strftime('%Y-%m-%d')
+
+    # MM/DD/YYYY format.
+    dd_slash_mm_slash_yyyy = r'^.*?\s*([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})'
+    matcher = re.match(dd_slash_mm_slash_yyyy, date_string)
+    if matcher:
+        clean_date = "{d}-{m}-{y}".format(d=matcher.group(2),
+                                              m=matcher.group(1),
+                                              y=matcher.group(3))
+        return datetime.strptime(clean_date, '%d-%m-%Y').strftime('%Y-%m-%d')
+
     # Other formats
     return None
 

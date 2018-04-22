@@ -186,19 +186,19 @@ class Region:
 
     def is_to_left_of(self, other):
         """Returns true if this region is to left of other region"""
-        return self.right < other.left
+        return self.right <= other.left
 
     def is_to_right_of(self, other):
         """Returns true if this region is to right of other region"""
-        return self.left > other.right
+        return self.left >= other.right
 
     def is_above(self, other):
         """Returns true if this region is above other region"""
-        return self.bottom > other.top
+        return self.bottom >= other.top
 
     def is_below(self, other):
         """Returns true if this region is below other region"""
-        return self.top < other.bottom
+        return self.top <= other.bottom
 
     def contains(self, other):
         """Returns true if this region contains other region"""
@@ -211,6 +211,15 @@ class Region:
         """Returns true if this region intersects other region"""
         return self.intersect(other) is not None
 
+    def intersects_vertical_edge(self, x):
+        """Returns true if this region intersects a vertical edge give by x
+        coordinate"""
+        return self.left <= x <= self.right
+
+    def intersects_horizontal_edge(self, y):
+        """Returns true if this region intersects a horizontal edge give by y
+        coordinate"""
+        return self.top <= y <= self.bottom
 
 class Table:
     """Defines a table consisting of 0 or more rows"""

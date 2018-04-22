@@ -18,25 +18,147 @@ class QueryEngine:
     def __init__(self, model):
         """Load a tabular model into the engine"""
         self._model = model
+        self._build_index()
+
+    def _build_index(self):
+        """Builds page index by running query over each page"""
+        self._page_index = PageLocationIndex()
+        page_query = self.tabular_query().matches_type(
+            tm.Page).cut().generate()
+        for page in page_query:
+            for entity in self.tabular_query(root=page).generate():
+                self._page_index.add(entity)
 
     @property
     def model(self):
         return self._model
 
-    def query(self, root=None):
-        """Creates a query query"""
+    @property
+    def page_index(self):
+        return self._page_index
+
+    def tabular_query(self, root=None):
+        """Creates a query that operates by scanning the document model
+        recursively"""
         if root is None:
             root = self._model
-        return TabularQuery(engine=self, root=root)
+        return TabularQuery(root=root)
 
-    def page_query(self, page_number, root=None):
-        """Short hand to get a single page"""
-        return self.query(root=root).matches_type(tm.Page).page(
+    def tabular_page_query(self, page_number, root=None):
+        """Short hand to get a query to operate on a single page"""
+        return self.tabular_query(root=root).matches_type(tm.Page).page(
             page_number)
 
-    def line_query(self, root=None):
+    def tabular_line_query(self, root=None):
         """Shorthand to get a query on Lines"""
-        return self.query(root=root).matches_type(tm.Line)
+        return self.tabular_query(root=root).matches_type(tm.Line)
+
+    def indexed_query(self):
+        """Creates a query that uses a page index to return values"""
+        return IndexedQuery(index=self._page_index)
+
+
+class PageLocationIndex:
+    """Implements an index of entities by page and cell where cells are
+    defined by a region and point to all entities that overlap the region.
+    """
+
+    def __init__(self, x_step=200, y_step=100):
+        """Construct page index
+
+        :param x_step: Index cell width
+        :type x_step: int
+        :param y_step: Index cell height
+        :type y_step: int
+        """
+        self._x_step = x_step
+        self._y_step = y_step
+        self._page_nodes = {}
+
+    def pages(self):
+        return sorted(self._page_nodes.keys())
+
+    def add(self, entity):
+        """Add provided entity to the index, adding a page node if required.
+
+        :param entity: An entity to add.  Must be a page or lower entity
+        """
+        page_number = entity.page_number
+        if page_number is not None:
+            if self._page_nodes.get(page_number) is None:
+                # Add new page node.
+                self._page_nodes[page_number] = PageNode(page_number,
+                                                         self._x_step,
+                                                         self._y_step)
+            page_node = self._page_nodes.get(page_number)
+            page_node.add(entity)
+
+    def page_left_right_accessor(self, page_number, left, right):
+        if page_number is None or self._page_nodes.get(page_number):
+            yield from self._page_nodes[page_number].generate_x_range(left,
+                                                                      right)
+
+    def page_top_bottom_accessor(self, page_number, top, bottom):
+        if page_number is None or self._page_nodes.get(page_number):
+            yield from self._page_nodes[page_number].generate_y_range(top,
+                                                                      bottom)
+
+
+class PageNode:
+    """Indexes entity edges within a single page"""
+
+    def __init__(self, page, x_step, y_step):
+        self._page = page
+        self._x_step = x_step
+        self._y_step = y_step
+        self._x_cells = []
+        self._y_cells = []
+
+    def add(self, entity):
+        """"Add an entity to the index"""
+        if hasattr(entity, 'region') and entity.region is not None:
+            self._add_to_x_cells(entity)
+            self._add_to_y_cells(entity)
+
+    def _add_to_x_cells(self, entity):
+        for x in range(entity.region.left, entity.region.right + 1,
+                       self._x_step):
+            x_index = x // self._x_step
+            self._add_entity_to_cell(self._x_cells, x_index, entity)
+
+    def _add_to_y_cells(self, entity):
+        for y in range(entity.region.top, entity.region.bottom + 1,
+                       self._y_step):
+            y_index = y // self._y_step
+            self._add_entity_to_cell(self._y_cells, y_index, entity)
+
+    def _add_entity_to_cell(self, cells, index, entity):
+        # Ensure we have enough cells. Each cell gets a set.
+        while index > len(cells) - 1:
+            cells.append(set())
+        cells[index].add(entity)
+
+    def generate_x_range(self, start, end):
+        yield from self._generate_range(self._x_cells, start, end,
+                                        self._x_step)
+
+    def generate_y_range(self, start, end):
+        yield from self._generate_range(self._y_cells, start, end,
+                                        self._y_step)
+
+    def _generate_range(self, cells, start, end, step):
+        found = set()
+        # Collect set of entities in range.
+        for coord in range(start, end + 1, step):
+            coord_index = coord // step
+            if coord_index > len(cells) - 1:
+                break
+            else:
+                found |= cells[coord_index]
+
+        # Generate from found entities.
+        for entity in found:
+            yield entity
 
 
 # Cut functions for queries.  These control recursion on entities that pass
@@ -51,25 +173,32 @@ def cut(entity):
     return True
 
 
-class TabularQuery:
-    """Does all the work of handling queries"""
-    def __init__(self, engine, root=None):
+class AbstractQuery:
+    """Implements shared logic common to all query types"""
+
+    def __init__(self):
         """Creates a new query
-        :param engine: Query engine
-        :type engine: TabularEngine
-        :param root: Root query location.  Defaults to top of model.
         """
-        self._engine = engine
-        self._root = root
-        self._cut = no_cut
         self._predicates = []
+
+    # Add a general predicate.  You can put in any logic that pleases you.
+    def predicate(self, predicate):
+        """Adds a predicate to the query. Predicates are applied in FIFO order
+        so it's better to put cheap operations in first so expensive ones can
+        run on a smaller set.
+
+        :param predicate: A function of the form (entity) -> Boolean
+        :type predicate: function
+        """
+        self._predicates.append(predicate)
+        return self
 
     # General predicate functions that work on all entities start here.
     def matches_type(self, type):
         def _matches_type(entity):
             return isinstance(entity, type)
 
-        self._predicates.append(_matches_type)
+        self.predicate(_matches_type)
         return self
 
     def page(self, page_no):
@@ -78,30 +207,32 @@ class TabularQuery:
         def _matches_page_number(entity):
             return page_no == entity.page_number
 
-        self._predicates.append(_matches_page_number)
+        self.predicate(_matches_page_number)
         return self
 
     def matches_regex(self, regex):
         """Returns true if entity text contains the provided regex"""
+
         def _matches_regex(entity):
             if re.match(regex, entity.text):
                 return True
             else:
                 return False
 
-        self._predicates.append(_matches_regex)
+        self.predicate(_matches_regex)
         return self
 
     def matches_currency(self):
         """Returns true if entity text contains currency data"""
 
         def _matches_currency(entity):
-            if entity.text is None or data.extract_currency(entity.text) is None:
+            if entity.text is None or data.extract_currency(
+                    entity.text) is None:
                 return False
             else:
                 return True
 
-        self._predicates.append(_matches_currency)
+        self.predicate(_matches_currency)
         return self
 
     def matches_date(self):
@@ -110,16 +241,44 @@ class TabularQuery:
         def _matches_date(entity):
             return False
 
-        self._predicates.append(_matches_date)
+        self.predicate(_matches_date)
         return self
 
     # Geometric location predicates start here.
+    def contains(self, region):
+        """Returns true if the entity's region contains the given region"""
+
+        def _contains(entity):
+            return entity.region.contains(region)
+
+        self.predicate(_contains)
+        return self
+
     def intersects(self, region):
         """Returns true if the entity's region intersects the given region"""
+
         def _intersects(entity):
             return entity.region.intersects(region)
 
-        self._predicates.append(_intersects)
+        self.predicate(_intersects)
+        return self
+
+    def intersects_vertical_edge(self, x):
+        """Returns true if the entity's region intersects a vertical edge"""
+
+        def _intersects_vertical_edge(entity):
+            return entity.region.intersects_vertical_edge(x)
+
+        self.predicate(_intersects_vertical_edge)
+        return self
+
+    def intersects_horizontal_edge(self, y):
+        """Returns true if the entity's region intersects a horizontal edge"""
+
+        def _intersects_horizontal_edge(entity):
+            return entity.region.intersects_horizontal_edge(y)
+
+        self.predicate(_intersects_horizontal_edge)
         return self
 
     def is_to_right_of(self, region):
@@ -127,9 +286,10 @@ class TabularQuery:
         with intersecting vertical axes"""
 
         def _is_to_right_of(entity):
-            return entity.region.is_to_right_of(region) and entity.region.overlaps_vertically(region)
+            return entity.region.is_to_right_of(
+                region) and entity.region.overlaps_vertically(region)
 
-        self._predicates.append(_is_to_right_of)
+        self.predicate(_is_to_right_of)
         return self
 
     def is_to_left_of(self, region):
@@ -137,10 +297,51 @@ class TabularQuery:
         with intersecting vertical axes"""
 
         def _is_to_left_of(entity):
-            return entity.region.is_to_left_of(region) and entity.region.overlaps_vertically(region)
+            return entity.region.is_to_left_of(
+                region) and entity.region.overlaps_vertically(region)
 
-        self._predicates.append(_is_to_left_of)
+        self.predicate(_is_to_left_of)
         return self
+
+    # Query execution functions start here.
+    def generate(self):
+        """Returns a generator that iterates over query results qualified
+        by predicates"""
+        pass
+
+    def first(self):
+        """Returns the first item in the generated list or none"""
+        for entity in self.generate():
+            return entity
+        return None
+
+    def count(self):
+        """Returns number of entities found, just like SQL count"""
+        count = 0
+        for entity in self.generate():
+            count += 1
+        return count
+
+    def order_by_left_edge(self):
+        """Returns entities in increasing left edge order"""
+        return sorted(self.generate(), key=lambda entity: entity.region.left)
+
+    def order_by_top_edge(self):
+        """Returns entities in increasing left edge order"""
+        return sorted(self.generate(), key=lambda entity: entity.region.top)
+
+
+class TabularQuery(AbstractQuery):
+    """Implements a query that uses recursion over the tabular model to
+    access entities"""
+
+    def __init__(self, root=None):
+        """Creates a new query
+        :param root: Root query location.  Defaults to top of model.
+        """
+        super().__init__()
+        self._root = root
+        self._cut = no_cut
 
     # Cut functions to control recursion start here.
     def cut(self):
@@ -176,15 +377,78 @@ class TabularQuery:
         for entity in _recursively_generate(self._root):
             yield entity
 
-    def first(self):
-        """Returns the first item in the generated list or none"""
-        for entity in self.generate():
-            return entity
-        return None
 
-    def count(self):
-        """Returns number of entities found, just like SQL count"""
-        count = 0
-        for entity in self.generate():
-            count += 1
-        return count
+class IndexedQuery(AbstractQuery):
+    """Implements a query that uses recursion over the tabular model to
+    access entities"""
+
+    def __init__(self, index):
+        """Creates a new query
+        :param index: Index used by query
+        :type index: PageLocationIndex
+        """
+        super().__init__()
+        self._index = index
+        self._page = None
+        self._range = None
+
+    # Predicate implementations that are specific to index queries.
+    def page(self, page_no):
+        """Selects entities that match a specific page"""
+        self._page = page_no
+        return self
+
+    def x_range(self, start, end):
+        """Selects entities whose left value falls in the start-end range"""
+        self._range = tm.Region(left=start, top=None, right=end, bottom=None)
+        return self
+
+    def y_range(self, start, end):
+        """Selects entities whose top value falls in the start-end range"""
+        self._range = tm.Region(left=None, top=start, right=None, bottom=end)
+        return self
+
+    # Query execution functions start here.
+    def generate(self):
+        """Iterates over values read from the index"""
+
+        # Select pages over which to iterate.
+        if self._page is None:
+            pages = self._index.pages()
+        else:
+            pages = [self._page]
+
+        # Start iteration.
+        for page_number in pages:
+            # Select iterator.
+            if self._range is None:
+                logger.debug("STARTING: NO RANGE")
+                accessor = self._index.page_left_right_accessor(page_number, 0,
+                                                                99999)
+            elif self._range.left is not None:
+                logger.debug("STARTING: left range")
+                accessor = self._index.page_left_right_accessor(page_number,
+                                                                self._range.left,
+                                                                self._range.right)
+            elif self._range.top is not None:
+                logger.info("STARTING: top range")
+                accessor = self._index.page_top_bottom_accessor(page_number,
+                                                                self._range.top,
+                                                                self._range.bottom)
+            else:
+                logger.info("STARTING: default")
+                accessor = self._index.page_left_right_accessor(page_number, 0,
+                                                                99999)
+
+            for entity in accessor:
+                # See if entity can pass predicates.
+                logger.debug("Candidate: {0}".format(entity))
+                passed = True
+                for predicate in self._predicates:
+                    if predicate(entity) is False:
+                        passed = False
+                        break
+
+                # Yield entity that passes predicates
+                if passed:
+                    yield entity

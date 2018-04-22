@@ -31,83 +31,55 @@ class UserParameters(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'tenant_id': 'str',
-        'username': 'str',
+        'user': 'str',
         'initial_password': 'str',
         'roles': 'str'
     }
 
     attribute_map = {
-        'tenant_id': 'tenantId',
-        'username': 'username',
+        'user': 'user',
         'initial_password': 'initialPassword',
         'roles': 'roles'
     }
 
-    def __init__(self, tenant_id=None, username=None, initial_password=None, roles=None):
+    def __init__(self, user=None, initial_password=None, roles=None):
         """
         UserParameters - a model defined in Swagger
         """
 
-        self._tenant_id = None
-        self._username = None
+        self._user = None
         self._initial_password = None
         self._roles = None
 
-        if tenant_id is not None:
-          self.tenant_id = tenant_id
-        if username is not None:
-          self.username = username
+        if user is not None:
+          self.user = user
         if initial_password is not None:
           self.initial_password = initial_password
         if roles is not None:
           self.roles = roles
 
     @property
-    def tenant_id(self):
+    def user(self):
         """
-        Gets the tenant_id of this UserParameters.
-        Tenant ID, cannot be changed after creation
+        Gets the user of this UserParameters.
+        Unique user name in form 'username@tenantname'
 
-        :return: The tenant_id of this UserParameters.
+        :return: The user of this UserParameters.
         :rtype: str
         """
-        return self._tenant_id
+        return self._user
 
-    @tenant_id.setter
-    def tenant_id(self, tenant_id):
+    @user.setter
+    def user(self, user):
         """
-        Sets the tenant_id of this UserParameters.
-        Tenant ID, cannot be changed after creation
+        Sets the user of this UserParameters.
+        Unique user name in form 'username@tenantname'
 
-        :param tenant_id: The tenant_id of this UserParameters.
+        :param user: The user of this UserParameters.
         :type: str
         """
 
-        self._tenant_id = tenant_id
-
-    @property
-    def username(self):
-        """
-        Gets the username of this UserParameters.
-        Unique user name
-
-        :return: The username of this UserParameters.
-        :rtype: str
-        """
-        return self._username
-
-    @username.setter
-    def username(self, username):
-        """
-        Sets the username of this UserParameters.
-        Unique user name
-
-        :param username: The username of this UserParameters.
-        :type: str
-        """
-
-        self._username = username
+        self._user = user
 
     @property
     def initial_password(self):

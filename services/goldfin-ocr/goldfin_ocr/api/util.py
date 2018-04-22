@@ -15,13 +15,7 @@ def _deserialize(data, klass):
     if data is None:
         return None
 
-    print("_deserialize klass: {0} {1}".format(klass, type(klass)))
-    if klass in integer_types:
-        print("I'm primitive")
-        return _deserialize_primitive(data, klass)
-        #elif klass in (float, str, bool):
-    elif klass == str:
-        print("I'm primitive")
+    if klass in integer_types or klass in (float, str, bool):
         return _deserialize_primitive(data, klass)
     elif klass == object:
         return _deserialize_object(data)
@@ -115,14 +109,10 @@ def deserialize_model(data, klass):
         return data
 
     for attr, attr_type in iteritems(instance.swagger_types):
-        print("deserialize_model: {0} {1} {2} {3}".format(attr, attr_type, type(attr_type), data))
         if data is not None \
                 and instance.attribute_map[attr] in data \
                 and isinstance(data, (list, dict)):
             value = data[instance.attribute_map[attr]]
-            print("deserialize_model: {0} {1} {2} {3}".format(attr, attr_type,
-                                                              type(attr_type),
-                                                              value))
             setattr(instance, attr, _deserialize(value, attr_type))
 
     return instance
