@@ -16,6 +16,7 @@ public class CmdInvoiceList implements Command {
 	public CmdInvoiceList() {
 		parser.accepts("full", "Return invoice items if true, otherwise only header").withRequiredArg()
 				.ofType(Boolean.class);
+		parser.accepts("id", "Return invoice with this ID otherwise all").withRequiredArg().ofType(String.class);
 	}
 
 	public String getName() {
@@ -32,12 +33,17 @@ public class CmdInvoiceList implements Command {
 
 	public void exec(CliContext ctx) {
 		Boolean full = (Boolean) ctx.options().valueOf("full");
+		String id = (String) ctx.options().valueOf("id");
 
 		String path;
-		if (full == null) {
+		if (id == null) {
 			path = "/invoice";
 		} else {
-			path = String.format("/invoice?full=%s", full.toString());
+			path = String.format("/invoice/%s", id);
+		}
+			
+		if (full != null) {
+			path += String.format("?full=%s", full.toString());
 		}
 
 		MinimalRestClient client = ctx.getRestClient();

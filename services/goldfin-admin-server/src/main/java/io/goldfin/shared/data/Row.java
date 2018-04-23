@@ -98,8 +98,12 @@ public class Row {
 		} else if (o instanceof String) {
 			return java.sql.Date.valueOf((String) o);
 		} else {
-			// Not sure what to do here, so we'll just lose data. 
+			// Not sure what to do here, so we'll just lose data.
 			return null;
 		}
+	}
+
+	public Boolean getAsBoolean(String name) {
+		return (Boolean) get(name);
 	}
 }

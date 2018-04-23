@@ -198,7 +198,8 @@ public class MinimalRestClient {
 
 			// Buffer the entity if we have it.
 			HttpEntity entity = response.getEntity();
-			if (entity != null && entity.getContentLength() > 0) {
+			//if (entity != null && entity.getContentLength() > 0) {
+			if (entity != null) {
 				InputStream contentInputStream = entity.getContent();
 				ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
 				int oneByte;

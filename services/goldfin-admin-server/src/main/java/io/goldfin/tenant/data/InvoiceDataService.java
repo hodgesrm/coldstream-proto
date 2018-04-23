@@ -35,8 +35,8 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 	private static final String[] COLUMN_NAMES = { "id", "document_id", "identifier", "description", "tags",
 			"effective_date", "vendor", "subtotal_amount", "tax", "total_amount", "currency", "creation_date" };
 	private static final String[] COLUMN_NAMES_ITEMS = { "invoice_id", "item_row_number", "item_id", "resource_id",
-			"unit_amount", "units", "total_amount", "currency", "start_date", "end_date", "region", "inventory_id",
-			"inventory_type", "creation_date" };
+			"description", "unit_amount", "units", "total_amount", "currency", "start_date", "end_date",
+			"one_time_charge", "region", "inventory_id", "inventory_type", "creation_date" };
 
 	private Session session;
 
@@ -68,11 +68,12 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 			for (InvoiceItem invItem : model.getItems()) {
 				new SqlInsert().table("invoice_items").put("invoice_id", model.getId())
 						.put("item_row_number", itemRowNumber++).put("item_id", invItem.getItemId())
-						.put("resource_id", invItem.getResourceId()).put("unit_amount", invItem.getUnitAmount())
-						.put("units", invItem.getUnits()).put("total_amount", invItem.getTotalAmount())
-						.put("currency", invItem.getCurrency())
+						.put("resource_id", invItem.getResourceId()).put("description", invItem.getDescription())
+						.put("unit_amount", invItem.getUnitAmount()).put("units", invItem.getUnits())
+						.put("total_amount", invItem.getTotalAmount()).put("currency", invItem.getCurrency())
 						.put("start_date", timestampOrNull(invItem.getStartDate()))
 						.put("end_date", timestampOrNull(invItem.getEndDate()))
+						.put("one_time_charge", invItem.getOneTimeCharge())
 						.put("inventory_id", invItem.getInventoryId())
 						.put("inventory_type", inventoryTypeOrNull(invItem.getInventoryType())).run(session);
 			}
@@ -168,17 +169,17 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 	public List<Invoice> getAllComplete() {
 		// To make matching as easy as possible we put the invoices in a hash table and
 		// then match line items to them.
-		List<Invoice> invoices = getAll(); 
+		List<Invoice> invoices = getAll();
 		if (invoices.size() == 0) {
 			return invoices;
 		}
 
-		// Prepare the map to allow us to do a merge. 
+		// Prepare the map to allow us to do a merge.
 		Map<UUID, Invoice> map = new HashMap<UUID, Invoice>();
-		for (Invoice invoice: invoices) {
+		for (Invoice invoice : invoices) {
 			map.put(invoice.getId(), invoice);
 		}
-		
+
 		// Fetch invoice items ordered by line number and add to invoices.
 		// (Ordering is by primary key, hence should be relatively efficient.)
 		TabularResultSet result = new SqlSelect().table("invoice_items").get(COLUMN_NAMES_ITEMS)
@@ -190,7 +191,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 			enclosingInvoice.addItemsItem(item);
 		}
 
-		// Return the full list.  This could be quite large.
+		// Return the full list. This could be quite large.
 		return invoices;
 	}
 
@@ -215,12 +216,14 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		InvoiceItem item = new InvoiceItem();
 		item.setItemId(row.getAsString("item_id"));
 		item.setResourceId(row.getAsString("resource_id"));
+		item.setDescription(row.getAsString("description"));
 		item.setUnitAmount(row.getAsBigDecimal("unit_amount"));
 		item.setUnits(row.getAsInt("units"));
 		item.setTotalAmount(row.getAsBigDecimal("total_amount"));
 		item.setCurrency(row.getAsString("currency"));
 		item.setStartDate(row.getAsJavaDate("start_date"));
 		item.setEndDate(row.getAsJavaDate("end_date"));
+		item.setOneTimeCharge(row.getAsBoolean("one_time_charge"));
 		item.setInventoryId(row.getAsString("inventory_id"));
 		item.setInventoryType(toInventoryTypeOrNull(row.getAsString("inventory_type")));
 		return item;
@@ -231,21 +234,5 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 			return null;
 		else
 			return InventoryTypeEnum.fromValue(s);
-	}
-
-	private String toJson(Object o) {
-		if (o == null) {
-			return null;
-		} else {
-			return JsonHelper.writeToString(o);
-		}
-	}
-
-	private <T> T fromJson(String s, Class<T> ref) {
-		if (s == null) {
-			return null;
-		} else {
-			return (T) JsonHelper.readFromString(s, ref);
-		}
 	}
 }

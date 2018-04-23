@@ -36,6 +36,9 @@ public class InvoiceItem   {
   @JsonProperty("resourceId")
   private String resourceId = null;
 
+  @JsonProperty("description")
+  private String description = null;
+
   @JsonProperty("unitAmount")
   private BigDecimal unitAmount = null;
 
@@ -53,6 +56,9 @@ public class InvoiceItem   {
 
   @JsonProperty("endDate")
   private Date endDate = null;
+
+  @JsonProperty("oneTimeCharge")
+  private Boolean oneTimeCharge = null;
 
   @JsonProperty("region")
   private DocumentRegion region = null;
@@ -128,6 +134,25 @@ public class InvoiceItem   {
 
   public void setResourceId(String resourceId) {
     this.resourceId = resourceId;
+  }
+
+  public InvoiceItem description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  /**
+   * Invoice item description
+   * @return description
+   **/
+  @JsonProperty("description")
+  @ApiModelProperty(value = "Invoice item description")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   public InvoiceItem unitAmount(BigDecimal unitAmount) {
@@ -244,6 +269,25 @@ public class InvoiceItem   {
     this.endDate = endDate;
   }
 
+  public InvoiceItem oneTimeCharge(Boolean oneTimeCharge) {
+    this.oneTimeCharge = oneTimeCharge;
+    return this;
+  }
+
+  /**
+   * If true, this is a one-time charge and the starting date provides the date
+   * @return oneTimeCharge
+   **/
+  @JsonProperty("oneTimeCharge")
+  @ApiModelProperty(value = "If true, this is a one-time charge and the starting date provides the date")
+  public Boolean getOneTimeCharge() {
+    return oneTimeCharge;
+  }
+
+  public void setOneTimeCharge(Boolean oneTimeCharge) {
+    this.oneTimeCharge = oneTimeCharge;
+  }
+
   public InvoiceItem region(DocumentRegion region) {
     this.region = region;
     return this;
@@ -313,12 +357,14 @@ public class InvoiceItem   {
     InvoiceItem invoiceItem = (InvoiceItem) o;
     return Objects.equals(this.itemId, invoiceItem.itemId) &&
         Objects.equals(this.resourceId, invoiceItem.resourceId) &&
+        Objects.equals(this.description, invoiceItem.description) &&
         Objects.equals(this.unitAmount, invoiceItem.unitAmount) &&
         Objects.equals(this.units, invoiceItem.units) &&
         Objects.equals(this.totalAmount, invoiceItem.totalAmount) &&
         Objects.equals(this.currency, invoiceItem.currency) &&
         Objects.equals(this.startDate, invoiceItem.startDate) &&
         Objects.equals(this.endDate, invoiceItem.endDate) &&
+        Objects.equals(this.oneTimeCharge, invoiceItem.oneTimeCharge) &&
         Objects.equals(this.region, invoiceItem.region) &&
         Objects.equals(this.inventoryId, invoiceItem.inventoryId) &&
         Objects.equals(this.inventoryType, invoiceItem.inventoryType);
@@ -326,7 +372,7 @@ public class InvoiceItem   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(itemId, resourceId, unitAmount, units, totalAmount, currency, startDate, endDate, region, inventoryId, inventoryType);
+    return Objects.hash(itemId, resourceId, description, unitAmount, units, totalAmount, currency, startDate, endDate, oneTimeCharge, region, inventoryId, inventoryType);
   }
 
 
@@ -337,12 +383,14 @@ public class InvoiceItem   {
     
     sb.append("    itemId: ").append(toIndentedString(itemId)).append("\n");
     sb.append("    resourceId: ").append(toIndentedString(resourceId)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    unitAmount: ").append(toIndentedString(unitAmount)).append("\n");
     sb.append("    units: ").append(toIndentedString(units)).append("\n");
     sb.append("    totalAmount: ").append(toIndentedString(totalAmount)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
     sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
+    sb.append("    oneTimeCharge: ").append(toIndentedString(oneTimeCharge)).append("\n");
     sb.append("    region: ").append(toIndentedString(region)).append("\n");
     sb.append("    inventoryId: ").append(toIndentedString(inventoryId)).append("\n");
     sb.append("    inventoryType: ").append(toIndentedString(inventoryType)).append("\n");

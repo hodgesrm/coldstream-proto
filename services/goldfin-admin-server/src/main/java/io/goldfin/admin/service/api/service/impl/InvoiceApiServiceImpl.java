@@ -37,8 +37,13 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 
 	@Override
 	public Response invoiceShow(String id, Boolean full, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
+			Invoice invoice = im.getInvoice(securityContext.getUserPrincipal(), id);
+			return Response.ok().entity(invoice).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override
