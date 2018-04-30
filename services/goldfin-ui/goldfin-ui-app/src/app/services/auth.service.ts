@@ -4,6 +4,7 @@
 import { Injectable, OnInit } from '@angular/core';
 import { Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/catch';
 
 import { User } from './user';
 
@@ -40,6 +41,7 @@ export class AuthService {
     var request: Observable<{}>;
     request = this.securityApi.loginByCredentialsWithHttpInfo(loginCredential)
       .map((response: Response) => {
+        // Map 200 response to a session. 
         var apiKey = response.headers.get("vnd.io.goldfin.session");
         console.log("Status: " + response.status);
         console.log("Api Key: " + apiKey);
@@ -53,6 +55,16 @@ export class AuthService {
           session = { userName: name, apiKey: apiKey };
         }
         return session;
+      })
+      .catch((err) => {
+        // Convert any non-200 response (including client errors) to 
+        // an appropriate error message. 
+        console.log(err);
+        if (err.status == 401) {
+          throw new Error("Invalid user name or password");
+        } else {
+          throw new Error("Login attempt failed");
+        }
       });
     return request;
   }

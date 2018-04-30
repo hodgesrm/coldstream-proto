@@ -11,12 +11,14 @@
         <div class="login-group">
             <input [(ngModel)]="user.name" class="username" [ngModelOptions]="{standalone: true}" type="text" placeholder="Username">
             <input [(ngModel)]="user.password" class="password" [ngModelOptions]="{standalone: true}" type="password" placeholder="Password">
+            <!--
             <div class="checkbox">
                 <input type="checkbox" id="rememberme">
                 <label for="rememberme">
                     Remember me
                 </label>
             </div>
+            -->
             <div *ngIf="error_message">
               <div class="error active">
                     {{error_message}}
@@ -25,7 +27,9 @@
             <button type="button" class="btn btn-primary" (click)="login()">
               NEXT
             </button>
+            <!--
             <a href="javascript://" class="signup">Forgot your password?</a>
+            -->
         </div>
     </form>
 </div>

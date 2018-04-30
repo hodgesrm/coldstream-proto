@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
         .subscribe(
           session => {
             if (session == null) {
-              this.error_message = "Invalid user name or password";
+              this.error_message = "Unable to get server session";
               console.log(this.error_message);
             } else {
               console.log("Logged in: " + this.user.name);
@@ -48,7 +48,8 @@ export class LoginComponent implements OnInit {
             }
           }, 
           error => {
-            this.error_message = "Invalid user name or password";
+            console.log(error);
+            this.error_message = error.message;
             console.log(this.error_message);
           });
     }
