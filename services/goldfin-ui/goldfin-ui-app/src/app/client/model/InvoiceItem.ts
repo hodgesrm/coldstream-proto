@@ -27,6 +27,11 @@ export interface InvoiceItem {
     resourceId?: string;
 
     /**
+     * Invoice item description
+     */
+    description?: string;
+
+    /**
      * Cost per unit
      */
     unitAmount?: number;
@@ -55,6 +60,11 @@ export interface InvoiceItem {
      * End of the time range
      */
     endDate?: Date;
+
+    /**
+     * If true, this is a one-time charge and the starting date provides the date
+     */
+    oneTimeCharge?: boolean;
 
     region?: models.DocumentRegion;
 

@@ -4,6 +4,9 @@
 <clr-datagrid [(clrDgSelected)]="selected">
     <clr-dg-action-bar>
         <div class="btn-group">
+            <button type="button" class="btn btn-primary" (click)="onInvoiceDetail()">Review Invoice Items</button>
+        </div>
+        <div class="btn-group">
             <button type="button" class="btn btn-primary" (click)="onExport()">Export Data</button>
         </div>
         <div class="btn-group">
@@ -36,6 +39,143 @@
 
     <clr-dg-footer>{{invoices.length}} invoices</clr-dg-footer>
 </clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="invoice_detail_open" [clrModalSize]="'xl'">
+  <h3 class="modal-title">Review Invoice Item Details</h3>
+  <div class="modal-body">
+    <clr-datagrid>
+      <clr-dg-column [clrDgField]="'invoice_description'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Description
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_identifier'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Inv Identifier
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_effective_date'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Effective Date
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_vendor'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Vendor
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_subtotal_amount'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Subtotal
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_tax'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Tax
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_total_amount'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Total
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_currency'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Currency
+        </ng-container>
+      </clr-dg-column>
+
+      <clr-dg-column [clrDgField]="'item_id'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Item ID
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'resource_id'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Resource ID
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'description'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Description
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'unit_amount'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Unit Amount
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'units'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Units
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'total_amount'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Total Amount
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'currency'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Currency
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'start_date'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Start Date
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'end_date'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          End Date
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'one_time_charge'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          One Time Charge
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'inventory_id'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Inventory ID
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'inventory_type'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Inventory Type
+        </ng-container>
+      </clr-dg-column>
+
+      <clr-dg-row *clrDgItems="let item of invoice_items" [clrDgItem]="invoice_item">
+        <clr-dg-cell>{{item.invoice_description}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_identifier}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_effectiveDate}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_vendor}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_subtotalAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_tax}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_totalAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_currency}}</clr-dg-cell>
+        <clr-dg-cell>{{item.itemId}}</clr-dg-cell>
+        <clr-dg-cell>{{item.resourceId}}</clr-dg-cell>
+        <clr-dg-cell>{{item.description}}</clr-dg-cell>
+        <clr-dg-cell>{{item.unitAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{item.units}}</clr-dg-cell>
+        <clr-dg-cell>{{item.totalAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{item.currency}}</clr-dg-cell>
+        <clr-dg-cell>{{item.startDate}}</clr-dg-cell>
+        <clr-dg-cell>{{item.endDate}}</clr-dg-cell>
+        <clr-dg-cell>{{item.oneTimeCharge}}</clr-dg-cell>
+        <clr-dg-cell>{{item.inventoryId}}</clr-dg-cell>
+        <clr-dg-cell>{{item.inventoryType}}</clr-dg-cell>
+      </clr-dg-row>
+
+      <clr-dg-footer>{{invoice_items.length}} invoice items</clr-dg-footer>
+    </clr-datagrid>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="invoice_detail_open = false">Close</button>
+  </div>
+</clr-modal>
 
 <clr-modal [(clrModalOpen)]="delete_open">
   <h3 class="modal-title">Confirm Invoice Deletion</h3>

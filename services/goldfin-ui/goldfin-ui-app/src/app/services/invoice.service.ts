@@ -27,7 +27,7 @@ export class InvoiceService {
   ) {}
 
   loadInvoices(): Observable<Array<Invoice>> {
-    return this.invoiceApi.invoiceShowAll(false);
+    return this.invoiceApi.invoiceShowAll(true);
   }
 
   // Remaining calls are mocks. 
