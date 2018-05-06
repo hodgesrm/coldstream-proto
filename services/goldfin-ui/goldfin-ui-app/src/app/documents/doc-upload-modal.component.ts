@@ -41,9 +41,9 @@ export class DocUploadModalComponent implements OnInit {
         .then(function() {
           console.log("Submitted");
         });
-      //this.files = null;
-      //form.description = null;
-      //this.showChange.emit(false);
+      this.files = null;
+      form.description = null;
+      this.showChange.emit(false);
     }
   }
 
