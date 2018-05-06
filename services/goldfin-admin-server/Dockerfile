@@ -1,5 +1,5 @@
 FROM java
-MAINTAINER Robert Hodges <rhodges@goldfin.io>
+MAINTAINER Builds <builds@goldfin.io>
 
 ENTRYPOINT ["/usr/local/goldfin-admin-server/bin/admin-server", "console"]
 

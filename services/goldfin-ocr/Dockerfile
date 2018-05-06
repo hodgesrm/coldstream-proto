@@ -1,0 +1,10 @@
+FROM ubuntu:latest
+RUN apt-get update -y
+RUN apt-get install -y python3-pip python3-dev
+COPY . /ocr
+WORKDIR /ocr
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+RUN python3 setup.py install
+ENTRYPOINT ["python3"]
+CMD ["./goldfin_ocr/scanctl.py", "--daemon", "--log-level=INFO"]

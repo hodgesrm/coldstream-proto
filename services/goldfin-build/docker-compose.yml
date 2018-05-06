@@ -1,0 +1,23 @@
+version: '3.6'
+services:
+   ui:
+       image: goldfin-ui-app:latest
+       network_mode: host
+   api:
+       image: goldfin/admin-server:0.0.1
+       network_mode: host
+       #ports:
+       # - "8443:8443"
+   ocr:
+       image: goldfin-ocr:latest
+   dbms:
+       image: postgres:10
+       environment:
+         - POSTGRES_PASSWORD=secret
+       ports:
+        - "15432:5432"
+       volumes:
+        - postgresql-10:/var/lib/mysql/data
+
+volumes:
+  postgresql-10:

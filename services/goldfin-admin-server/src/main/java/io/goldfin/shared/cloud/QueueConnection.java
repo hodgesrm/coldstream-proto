@@ -45,7 +45,8 @@ public class QueueConnection {
 			BasicAWSCredentials credentials = new BasicAWSCredentials(params.getAccessKeyId(),
 					params.getSecretAccessKey());
 			AWSCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
-			client = AmazonSQSClientBuilder.standard().withCredentials(provider).build();
+			client = AmazonSQSClientBuilder.standard().withCredentials(provider)
+					.withRegion(params.getOcr().getProperty("region")).build();
 		}
 
 		public AmazonSQS getConnection() {
