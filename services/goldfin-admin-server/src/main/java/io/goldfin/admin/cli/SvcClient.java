@@ -39,6 +39,8 @@ public class SvcClient implements CliContext {
 		loadCommand(new CmdUserCreate());
 		loadCommand(new CmdUserDelete());
 		loadCommand(new CmdUserList());
+		loadCommand(new CmdVendorDelete());
+		loadCommand(new CmdVendorList());
 	}
 
 	private void loadCommand(Command cmd) {

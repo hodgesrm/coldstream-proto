@@ -17,6 +17,8 @@ tags:
     description: Per-tenant vendor management
   - name: invoice
     description: Per-tenant invoice management
+  - name: inventory
+    description: Per-tenant inventory data
 schemes:
   - https
 securityDefinitions:
@@ -697,6 +699,184 @@ paths:
           description: Accepted
         '404':
           description: Not Found
+  /observation:
+    post:
+      tags:
+        - inventory
+      summary: Upload observation
+      description: Upload a new observation
+      operationId: observationCreate
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: file
+          in: formData
+          description: Observation content
+          required: true
+          type: file
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Observation'
+        '400':
+          description: Creation failed
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      tags:
+        - inventory
+      summary: List observations
+      description: Return a list of all observations
+      operationId: observationShowAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Observation'
+  '/observation/{id}':
+    get:
+      tags:
+        - inventory
+      summary: Return observation content
+      description: Download observation content serialized to UTF-encoded string
+      operationId: observationFetchContent
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          description: Observation ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+    head:
+      tags:
+        - inventory
+      summary: Return observation metadata
+      description: Download observation metadata
+      operationId: observationShow
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Observation ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Observation'
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - inventory
+      summary: Delete a invoice
+      description: Delete an observation and derived inventory information
+      operationId: observationDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Observation ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/observation/{id}/process':
+    post:
+      tags:
+        - inventory
+      summary: Kick off background processing of observation
+      description: >-
+        Run background processing of observation, which may generate one or more inventory records.
+      operationId: observationProcess
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Observation ID
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Accepted
+        '404':
+          description: Not Found
+  /host:
+    get:
+      tags:
+        - inventory
+      summary: List current host inventory records
+      description: Return a list of current hosts in inventory.  This returns the most recent record for each host. 
+      operationId: hostShowAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Host'
+  '/host/{id}':
+    get:
+      tags:
+        - inventory
+      summary: Show single host inventory record
+      description: Returns the most recent inventory record for a specific host.  The host must be identified by the resource ID or internal ID
+      operationId: hostShow
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Host resource ID
+          type: string
+      responses:
+        '200':
+          description: Successful
+          schema:
+            $ref: '#/definitions/Host'
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - inventory
+      summary: Delete host record
+      description: Delete a host record.  It can be recreated by rescanning the corresponding
+        document
+      operationId: hostDelete
+      parameters:
+        - name: id
+          in: path
+          description: Invoice ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
 definitions:
   LoginCredentials:
     description: Login credentials
@@ -942,7 +1122,7 @@ definitions:
         description: Invoice effective date
       vendor:
         type: string
-        description: Vendor name
+        description: Vendor key
       subtotalAmount:
         type: number
         description: Invoice subtotal amount
@@ -998,7 +1178,9 @@ definitions:
         description: End of the time range
       oneTimeCharge:
         type: boolean
-        description: If true, this is a one-time charge and the starting date provides the date
+        description: >-
+          If true, this is a one-time charge and the starting date provides the
+          date
       region:
         $ref: '#/definitions/DocumentRegion'
       inventoryId:
@@ -1017,6 +1199,139 @@ definitions:
       tags:
         type: string
         description: A user-provided list of name-value pairs that describe the invoice
+  Observation:
+    description: 'An observation related to vendor inventory'
+    type: object
+    properties:
+      id:
+        type: string
+        description: Observation ID
+        format: uuid
+      vendor:
+        type: string
+        description: Vendor key
+      effectiveDate:
+        type: string
+        format: date-time
+        description: Effective date when observation was made
+      description:
+        type: string
+        description: Optional description
+      contentType:
+        type: string
+        description: 'Internet media type (e.g., application/octet-stream)'
+      contentLength:
+        type: number
+        format: int64
+        description: 'Content length in bytes'
+      thumbprint:
+        type: string
+        description: SHA-256 thumbprint of observation
+      locator:
+        type: string
+        format: url
+        description: Storage locator of the observation
+      state:
+        description: >-
+          The current processing state of the observation
+        enum:
+          - CREATED
+          - PROCESSED
+          - ERROR
+      observationType:
+        description: 'Kind of observation, e.g., inventory.'
+        enum:
+          - INVENTORY
+          - UNKNOWN
+  ObservationContent:
+    description: Raw observation data. 
+    type: object
+    properties:
+      vendor:
+        type: string
+        description: Vendor key
+      effectiveDate:
+        type: string
+        format: date-time
+        description: Effective date when observation was made
+      description:
+        type: string
+        description: Optional description
+      observationType:
+        description: 'Kind of observation, e.g., inventory.'
+        enum:
+          - INVENTORY
+          - UNKNOWN
+      data:
+        type: string
+        description: 'String containing serialized JSON observation'
+  Host:
+    description: Host record from inventory
+    properties:
+      hostId:
+        type: string
+        format: uuid
+        description: Internal host ID from vendor used to identify host in inventory
+      hostType:
+        description: 'Type of host'
+        enum:
+          - BARE_METAL
+          - CLOUD
+          - UNKNOWN
+      hostModel:
+        type: string
+        description: Host model or marketing name
+      observationId:
+        type: string
+        format: uuid
+        description: Observation from which this host record was derived
+      resourceId:
+        type: string
+        description: Inventory resource ID that can be related to invoice item resource ID
+      effectiveDate:
+        type: string
+        format: date-time
+        description: Invoice effective date
+      identifier:
+        type: string
+        description: Internal host identifier
+      vendor:
+        type: string
+        description: Vendor key
+      region:
+        type: string
+        description: Geographic region
+      zone:
+        type: string
+        description: Data center or availability zone within region
+      cpu:
+        type: string
+        description: CPU model
+      socketCount:
+        type: integer
+        description: Number of CPU sockets
+      coreCount:
+        type: integer
+        description: Number of cores per socket
+      ram:
+        type: integer
+        format: int64
+        description: Size of RAM in bytes
+      hdd:
+        type: integer
+        format: int64
+        description: Size of HDD storage in bytes
+      ssd:
+        type: integer
+        format: int64
+        description: Size of SSD storage in bytes
+      nicCount:
+        type: integer
+        description: Number of network interface cards (NICs)
+      networkTrafficLimit:
+        type: integer
+        format: int64
+        description: Number of bytes of network traffer per billing period if there is a hard limit
   Tag:
     type: object
     properties:
