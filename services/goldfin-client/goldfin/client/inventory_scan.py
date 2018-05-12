@@ -107,6 +107,7 @@ if os.path.exists(args.config):
     with open(output_file, "w") as obs_file:
         print_info("Writing observation to output file: {0}".format(output_file))
         json.dump(obs.to_dict(), obs_file)
+    sys.exit(0)
 else:
     print_error("Config file does not exist: {0}".format(args.config))
     sys.exit(1)
