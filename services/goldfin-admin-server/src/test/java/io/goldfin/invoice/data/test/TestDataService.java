@@ -29,6 +29,11 @@ public class TestDataService implements TransactionalService<SampleEntity> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	public void setup() {
 		String schema = session.getSchema();
 		new SqlStatement(String.format("DROP SCHEMA IF EXISTS %s CASCADE", schema)).run(session);

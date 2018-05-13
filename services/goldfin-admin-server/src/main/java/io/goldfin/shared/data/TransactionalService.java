@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.data;
 
@@ -11,6 +11,11 @@ import java.util.List;
  */
 public interface TransactionalService<T> {
 	public void setSession(Session session);
+
+	/**
+	 * If true the type this service manages is mutable and allows update. 
+	 */
+	public boolean mutable();
 
 	/** Store model in DBMS returning an ID. */
 	public String create(T model);

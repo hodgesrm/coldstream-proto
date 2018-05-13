@@ -1,6 +1,6 @@
 /*
- * Goldfin Service Admin API
- * REST API for Goldfin Service Administration
+ * Goldfin Service API
+ * REST API for Goldfin Intelligent Invoice Processing
  *
  * OpenAPI spec version: 1.0.0
  * Contact: info@goldfin.io
@@ -191,11 +191,11 @@ public class Invoice   {
   }
 
   /**
-   * Vendor name
+   * Vendor key
    * @return vendor
    **/
   @JsonProperty("vendor")
-  @ApiModelProperty(value = "Vendor name")
+  @ApiModelProperty(value = "Vendor key")
   public String getVendor() {
     return vendor;
   }

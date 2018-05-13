@@ -67,3 +67,52 @@ CREATE TABLE IF NOT EXISTS vendors (
   creation_date timestamp DEFAULT current_timestamp
 )
 ;
+
+// Create the data_series table. 
+CREATE TABLE IF NOT EXISTS data_series (
+  id uuid PRIMARY KEY,
+  name varchar(250),
+  description varchar(250),
+  content_type varchar(100),
+  content_length bigint, 
+  thumbprint varchar(100), 
+  locator varchar(250),
+  state varchar(20) CHECK (state IN ('CREATED', 'PROCESS_REQUESTED', 'PROCESSED', 'ERROR')),
+  format varchar(10) CHECK (format IN ('OBSERVATION', 'UNKNOWN')),
+  creation_date timestamp DEFAULT current_timestamp
+)
+;
+CREATE INDEX ON data_series USING hash(thumbprint)
+;
+
+// Create the hosts table. 
+CREATE TABLE IF NOT EXISTS hosts (
+  id uuid PRIMARY KEY,
+  host_id varchar(100) NOT NULL,
+  resource_id varchar(100),
+  effective_date timestamp NOT NULL, 
+  vendor_identifier varchar(250) NOT NULL,
+  data_series_id uuid REFERENCES data_series(id) ON DELETE CASCADE,
+  host_type varchar(20) CHECK (host_type IN ('BARE_METAL', 'CLOUD', 'UNKNOWN')),
+  host_model varchar(100), 
+  region varchar(50), 
+  zone varchar(50), 
+  datacenter varchar(50), 
+  cpu varchar(100), 
+  socket_count integer, 
+  core_count integer,
+  thread_count integer,
+  ram bigint,
+  hdd bigint,
+  ssd bigint,
+  nic_count integer,
+  network_traffic_limit bigint,
+  backup_enabled boolean
+)
+;
+CREATE INDEX ON hosts(host_id)
+;
+CREATE INDEX ON hosts(resource_id)
+;
+CREATE INDEX ON hosts(effective_date)
+;

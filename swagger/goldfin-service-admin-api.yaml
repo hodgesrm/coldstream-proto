@@ -1,12 +1,12 @@
 swagger: '2.0'
 info:
-  description: REST API for Goldfin Service Administration
+  description: REST API for Goldfin Intelligent Invoice Processing
   version: 1.0.0
-  title: Goldfin Service Admin API
+  title: Goldfin Service API
   termsOfService: 'http://goldfin.io/terms/'
   contact:
     email: info@goldfin.io
-host: admin.goldfin.io
+host: api.goldfin.io
 basePath: /api/v1
 tags:
   - name: security
@@ -699,13 +699,13 @@ paths:
           description: Accepted
         '404':
           description: Not Found
-  /observation:
+  /data:
     post:
       tags:
         - inventory
-      summary: Upload observation
-      description: Upload a new observation
-      operationId: observationCreate
+      summary: Upload data series
+      description: Upload data series in a file for analysis
+      operationId: dataCreate
       consumes:
         - multipart/form-data
       produces:
@@ -713,14 +713,14 @@ paths:
       parameters:
         - name: file
           in: formData
-          description: Observation content
+          description: Data series content
           required: true
           type: file
       responses:
         '201':
           description: Created
           schema:
-            $ref: '#/definitions/Observation'
+            $ref: '#/definitions/DataSeries'
         '400':
           description: Creation failed
           schema:
@@ -728,9 +728,9 @@ paths:
     get:
       tags:
         - inventory
-      summary: List observations
-      description: Return a list of all observations
-      operationId: observationShowAll
+      summary: List data serties
+      description: Return a list of metadata entries for all data series
+      operationId: dataShowAll
       produces:
         - application/json
       responses:
@@ -739,20 +739,20 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Observation'
-  '/observation/{id}':
+              $ref: '#/definitions/DataSeries'
+  '/data/{id}':
     get:
       tags:
         - inventory
-      summary: Return observation content
-      description: Download observation content serialized to UTF-encoded string
-      operationId: observationFetchContent
+      summary: Return data series content
+      description: Download data series content
+      operationId: dataFetchContent
       produces:
         - application/octet-stream
       parameters:
         - name: id
           in: path
-          description: Observation ID
+          description: Series ID
           required: true
           type: string
       responses:
@@ -763,36 +763,36 @@ paths:
     head:
       tags:
         - inventory
-      summary: Return observation metadata
-      description: Download observation metadata
-      operationId: observationShow
+      summary: Return data series metadata
+      description: Download data series metadata without content
+      operationId: dataShow
       produces:
         - application/json
       parameters:
         - name: id
           in: path
-          description: Observation ID
+          description: Series ID
           required: true
           type: string
       responses:
         '200':
           description: Successful
           schema:
-            $ref: '#/definitions/Observation'
+            $ref: '#/definitions/DataSeries'
         '404':
           description: Not Found
     delete:
       tags:
         - inventory
-      summary: Delete a invoice
-      description: Delete an observation and derived inventory information
-      operationId: observationDelete
+      summary: Delete a data series
+      description: Delete a data series and any derived information
+      operationId: dataDelete
       produces:
         - application/json
       parameters:
         - name: id
           in: path
-          description: Observation ID
+          description: Series ID
           required: true
           type: string
       responses:
@@ -800,20 +800,21 @@ paths:
           description: Successful
         '404':
           description: Not Found
-  '/observation/{id}/process':
+  '/data/{id}/process':
     post:
       tags:
         - inventory
-      summary: Kick off background processing of observation
+      summary: Kick off background processing of data series
       description: >-
-        Run background processing of observation, which may generate one or more inventory records.
-      operationId: observationProcess
+        Run background processing of data series, which may generate one or more
+        inventory records.
+      operationId: dataProcess
       produces:
         - application/json
       parameters:
         - name: id
           in: path
-          description: Observation ID
+          description: Series ID
           required: true
           type: string
       responses:
@@ -826,7 +827,9 @@ paths:
       tags:
         - inventory
       summary: List current host inventory records
-      description: Return a list of current hosts in inventory.  This returns the most recent record for each host. 
+      description: >-
+        Return a list of current hosts in inventory.  This returns the most
+        recent record for each host.
       operationId: hostShowAll
       produces:
         - application/json
@@ -842,7 +845,9 @@ paths:
       tags:
         - inventory
       summary: Show single host inventory record
-      description: Returns the most recent inventory record for a specific host.  The host must be identified by the resource ID or internal ID
+      description: >-
+        Returns the most recent inventory record for a specific host.  The host
+        must be identified by the resource ID or internal ID
       operationId: hostShow
       produces:
         - application/json
@@ -863,8 +868,9 @@ paths:
       tags:
         - inventory
       summary: Delete host record
-      description: Delete a host record.  It can be recreated by rescanning the corresponding
-        document
+      description: >-
+        Delete a host record.  It can be recreated by rescanning the
+        corresponding document
       operationId: hostDelete
       parameters:
         - name: id
@@ -1199,52 +1205,52 @@ definitions:
       tags:
         type: string
         description: A user-provided list of name-value pairs that describe the invoice
-  Observation:
-    description: 'An observation related to vendor inventory'
+  DataSeries:
+    description: 'A set of one or more observations for analysis'
     type: object
     properties:
       id:
         type: string
-        description: Observation ID
+        description: Series ID
         format: uuid
-      vendor:
+      name:
         type: string
-        description: Vendor key
-      effectiveDate:
-        type: string
-        format: date-time
-        description: Effective date when observation was made
+        description: Name of the source file if known
       description:
         type: string
-        description: Optional description
+        description: Optional description of the series
       contentType:
         type: string
-        description: 'Internet media type (e.g., application/octet-stream)'
+        description: 'Internet media type (e.g., application/json)'
       contentLength:
         type: number
         format: int64
-        description: 'Content length in bytes'
+        description: Content length in bytes
       thumbprint:
         type: string
-        description: SHA-256 thumbprint of observation
+        description: SHA-256 thumbprint of content
       locator:
         type: string
         format: url
-        description: Storage locator of the observation
+        description: Storage locator for content
       state:
         description: >-
-          The current processing state of the observation
+          The current processing state of the content.  
         enum:
           - CREATED
+          - PROCESS_REQUESTED
           - PROCESSED
           - ERROR
-      observationType:
-        description: 'Kind of observation, e.g., inventory.'
+      format:
+        description: 'Kind of data series, e.g., observation'
         enum:
-          - INVENTORY
+          - OBSERVATION
           - UNKNOWN
-  ObservationContent:
-    description: Raw observation data. 
+      creationDate:
+        type: string
+        description: Date data was uploaded
+  Observation:
+    description: Raw observation data related to a vendor offering
     type: object
     properties:
       vendor:
@@ -1256,24 +1262,43 @@ definitions:
         description: Effective date when observation was made
       description:
         type: string
-        description: Optional description
+        description: Optional description of observation
       observationType:
         description: 'Kind of observation, e.g., inventory.'
         enum:
           - INVENTORY
-          - UNKNOWN
       data:
         type: string
-        description: 'String containing serialized JSON observation'
+        description: String containing serialized observations
+      version:
+        type: string
+        description: Data format version
   Host:
     description: Host record from inventory
     properties:
+      id:
+        type: string
+        description: Host record ID
+        format: uuid
       hostId:
         type: string
-        format: uuid
         description: Internal host ID from vendor used to identify host in inventory
+      resourceId:
+        type: string
+        description: Inventory resource ID that can be related to invoice item resource ID
+      effectiveDate:
+        type: string
+        format: date-time
+        description: Observation effective date
+      vendorIdentifier:
+        type: string
+        description: Vendor identifier key
+      dataSeriesId:
+        type: string
+        format: uuid
+        description: Id of data series from which this host record was derived
       hostType:
-        description: 'Type of host'
+        description: Type of host
         enum:
           - BARE_METAL
           - CLOUD
@@ -1281,29 +1306,15 @@ definitions:
       hostModel:
         type: string
         description: Host model or marketing name
-      observationId:
-        type: string
-        format: uuid
-        description: Observation from which this host record was derived
-      resourceId:
-        type: string
-        description: Inventory resource ID that can be related to invoice item resource ID
-      effectiveDate:
-        type: string
-        format: date-time
-        description: Invoice effective date
-      identifier:
-        type: string
-        description: Internal host identifier
-      vendor:
-        type: string
-        description: Vendor key
       region:
         type: string
         description: Geographic region
       zone:
         type: string
-        description: Data center or availability zone within region
+        description: Availability zone
+      datacenter:
+        type: string
+        description: Data center
       cpu:
         type: string
         description: CPU model
@@ -1313,6 +1324,9 @@ definitions:
       coreCount:
         type: integer
         description: Number of cores per socket
+      threadCount:
+        type: integer
+        description: Number of hardware threads per core
       ram:
         type: integer
         format: int64
@@ -1331,7 +1345,12 @@ definitions:
       networkTrafficLimit:
         type: integer
         format: int64
-        description: Number of bytes of network traffer per billing period if there is a hard limit
+        description: >-
+          Number of bytes of network traffer per billing period if there is a
+          hard limit
+      backupEnabled:
+        type: boolean
+        description: If true backup is enabled for this host
   Tag:
     type: object
     properties:

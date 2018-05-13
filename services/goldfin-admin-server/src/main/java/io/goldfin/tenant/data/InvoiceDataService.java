@@ -45,6 +45,11 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	/**
 	 * Create an invoice including line items if present.
 	 */

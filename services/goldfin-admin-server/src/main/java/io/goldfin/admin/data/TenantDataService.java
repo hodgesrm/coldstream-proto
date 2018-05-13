@@ -36,6 +36,11 @@ public class TenantDataService implements TransactionalService<Tenant> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	public String create(Tenant model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding new tenant: " + model.toString());

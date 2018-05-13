@@ -37,6 +37,11 @@ public class DocumentDataService implements TransactionalService<Document> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	public String create(Document model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding new invoice: " + model.toString());

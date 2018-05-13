@@ -6,7 +6,7 @@ pull and run:
 ```
 # Download latest version. 
 docker pull postgres
-# Run detached image. 
+# Run detached image without a volume. 
 #docker run --name postgres -e POSTGRES_PASSWORD=secret -d postgres
 docker run -e POSTGRES_PASSWORD=secret -p 15432:5432 -d postgres
 

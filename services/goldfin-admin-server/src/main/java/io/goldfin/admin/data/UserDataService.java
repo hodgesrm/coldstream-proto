@@ -34,6 +34,11 @@ public class UserDataService implements TransactionalService<UserData> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	public String create(UserData model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding new user: " + model.toString());

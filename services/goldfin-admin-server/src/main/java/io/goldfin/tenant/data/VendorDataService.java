@@ -36,6 +36,11 @@ public class VendorDataService implements TransactionalService<Vendor> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	/**
 	 * Create an vendor including line items if present.
 	 */

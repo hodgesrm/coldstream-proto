@@ -13,6 +13,7 @@ public class AwsConnectionParams {
 	private String secretAccessKey;
 	private Properties s3 = new Properties();
 	private Properties ocr = new Properties();
+	private Properties dataSeries = new Properties();
 
 	public String getAccessKeyId() {
 		return accessKeyId;
@@ -44,6 +45,14 @@ public class AwsConnectionParams {
 
 	public void setOcr(Properties ocr) {
 		this.ocr = ocr;
+	}
+
+	public Properties getDataSeries() {
+		return dataSeries;
+	}
+
+	public void setDataSeries(Properties dataSeries) {
+		this.dataSeries = dataSeries;
 	}
 
 	@Override

@@ -33,6 +33,11 @@ public class SessionDataService implements TransactionalService<SessionData> {
 		this.session = session;
 	}
 
+	@Override
+	public boolean mutable() {
+		return true;
+	}
+
 	public String create(SessionData model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding new session: " + model.toString());

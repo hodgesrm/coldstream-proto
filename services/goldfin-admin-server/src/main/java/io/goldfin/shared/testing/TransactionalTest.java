@@ -49,13 +49,17 @@ public class TransactionalTest<T> {
 			List<T> allEntities = ts.getAll();
 			Assert.assertTrue(entityInList(created, allEntities));
 
-			// Mutate the entity and show that it changes.
-			T mutated = testHelper.mutate(created);
-			int updateRows = ts.update(id, mutated);
-			session.commit();
-			Assert.assertEquals("Expect to update single row", 1, updateRows);
-			T storedMutation = ts.get(id);
-			Assert.assertNotEquals("mutation stored properly", created, storedMutation);
+			// If the entity is mutable, mutate the entity and show that it changes.
+			if (ts.mutable()) {
+				T mutated = testHelper.mutate(created);
+				int updateRows = ts.update(id, mutated);
+				session.commit();
+				Assert.assertEquals("Expect to update single row", 1, updateRows);
+				T storedMutation = ts.get(id);
+				Assert.assertNotEquals("mutation stored properly", created, storedMutation);
+			} else {
+				logger.debug("Entity is not mutable, skipping update");
+			}
 
 			// Delete the entity and show that it disappears.
 			int deleteRows = ts.delete(id);
