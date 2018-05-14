@@ -175,18 +175,18 @@ public class OcrResponseQueueTask implements Runnable {
 			documentDataService.update(documentId, document);
 
 			// See if the vendor exists. If not create one now.
-			if (invoice.getVendor() == null) {
+			if (invoice.getVendorIdentifier() == null) {
 				logger.warn(
 						String.format("No vendor on invoice, unable to validate vendor record: tenant=%s, invoice=%s",
 								tenantId, invoiceId));
 			} else {
-				Vendor vendor = vendorDataService.getByIdentifier(invoice.getVendor());
+				Vendor vendor = vendorDataService.getByIdentifier(invoice.getVendorIdentifier());
 				if (vendor == null) {
 					logger.info(String.format("Adding new vendor for tenant: tenant=%s, invoice=%s, vendor=%s",
-							tenantId, invoiceId, invoice.getVendor()));
+							tenantId, invoiceId, invoice.getVendorIdentifier()));
 					vendor = new Vendor();
-					vendor.setIdentifier(invoice.getVendor());
-					vendor.setName(invoice.getVendor());
+					vendor.setIdentifier(invoice.getVendorIdentifier());
+					vendor.setName(invoice.getVendorIdentifier());
 					vendor.setState(Vendor.StateEnum.ACTIVE);
 					vendorDataService.create(vendor);
 				}

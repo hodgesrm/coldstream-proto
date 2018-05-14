@@ -99,11 +99,11 @@ public class Vendor   {
   }
 
   /**
-   * Key used to describe vendor for accounting purposes
+   * Standard key used to describe vendor for accounting purposes
    * @return identifier
    **/
   @JsonProperty("identifier")
-  @ApiModelProperty(value = "Key used to describe vendor for accounting purposes")
+  @ApiModelProperty(value = "Standard key used to describe vendor for accounting purposes")
   public String getIdentifier() {
     return identifier;
   }

@@ -69,9 +69,11 @@ public class DataApi  {
     public Response dataCreate(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
+,@ApiParam(value = "A optional description of the data series")@FormDataParam("description")  String description
+,@ApiParam(value = "Optional flag to kick off processing automatically if true", defaultValue="true")@FormDataParam("process")  Boolean process
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.dataCreate(fileInputStream, fileDetail,securityContext);
+        return delegate.dataCreate(fileInputStream, fileDetail,description,process,securityContext);
     }
     @DELETE
     @Path("/{id}")
@@ -89,22 +91,6 @@ public class DataApi  {
     throws NotFoundException {
         return delegate.dataDelete(id,securityContext);
     }
-    @GET
-    @Path("/{id}")
-    
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Return data series content", notes = "Download data series content", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
-    }, tags={ "inventory", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
-    public Response dataFetchContent(@ApiParam(value = "Series ID",required=true) @PathParam("id") String id
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.dataFetchContent(id,securityContext);
-    }
     @POST
     @Path("/{id}/process")
     
@@ -121,7 +107,7 @@ public class DataApi  {
     throws NotFoundException {
         return delegate.dataProcess(id,securityContext);
     }
-    @HEAD
+    @GET
     @Path("/{id}")
     
     @Produces({ "application/json" })
@@ -149,5 +135,21 @@ public class DataApi  {
     public Response dataShowAll(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.dataShowAll(securityContext);
+    }
+    @GET
+    @Path("/{id}/content")
+    
+    @Produces({ "application/octet-stream" })
+    @io.swagger.annotations.ApiOperation(value = "Return data series content", notes = "Download data series content", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+    }, tags={ "inventory", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+    public Response dataShowContent(@ApiParam(value = "Series ID",required=true) @PathParam("id") String id
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.dataShowContent(id,securityContext);
     }
 }

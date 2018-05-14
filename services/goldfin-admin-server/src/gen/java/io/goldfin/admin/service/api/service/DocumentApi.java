@@ -71,10 +71,10 @@ public class DocumentApi  {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
 ,@ApiParam(value = "A optional description of the document")@FormDataParam("description")  String description
-,@ApiParam(value = "Flag to control scanning", defaultValue="true")@FormDataParam("scan")  Boolean scan
+,@ApiParam(value = "Optional flag to kick off scanning automatically if true", defaultValue="true")@FormDataParam("process")  Boolean process
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.documentCreate(fileInputStream, fileDetail,description,scan,securityContext);
+        return delegate.documentCreate(fileInputStream, fileDetail,description,process,securityContext);
     }
     @DELETE
     @Path("/{id}")
@@ -92,43 +92,27 @@ public class DocumentApi  {
     throws NotFoundException {
         return delegate.documentDelete(id,securityContext);
     }
-    @GET
-    @Path("/{id}")
-    
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Return document content", notes = "Download document content", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
-    }, tags={ "document", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
-    public Response documentFetchContent(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.documentFetchContent(id,securityContext);
-    }
     @POST
-    @Path("/{id}/scan")
+    @Path("/{id}/process")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Kick off document scanning", notes = "Run background scanning on document.  The document state and semantic information will be updated when finished.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Kick off document analysis", notes = "Run background scanning on document.  The document state and semantic information will be updated when finished.", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
-    public Response documentScan(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
+    public Response documentProcess(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.documentScan(id,securityContext);
+        return delegate.documentProcess(id,securityContext);
     }
-    @HEAD
+    @GET
     @Path("/{id}")
     
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Return document metadata", notes = "Download document content", response = Document.class, authorizations = {
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Return document metadata", notes = "Download document metadata without content", response = Document.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
@@ -152,6 +136,22 @@ public class DocumentApi  {
     public Response documentShowAll(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.documentShowAll(securityContext);
+    }
+    @GET
+    @Path("/{id}/content")
+    
+    @Produces({ "application/octet-stream" })
+    @io.swagger.annotations.ApiOperation(value = "Return document content", notes = "Download document content", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+    }, tags={ "document", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+    public Response documentShowContent(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.documentShowContent(id,securityContext);
     }
     @PUT
     @Path("/{id}")

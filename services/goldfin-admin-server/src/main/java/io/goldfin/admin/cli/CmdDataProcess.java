@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.cli;
 
@@ -8,19 +8,19 @@ import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
 import joptsimple.OptionParser;
 
-public class CmdDocumentProcess implements Command {
+public class CmdDataProcess implements Command {
 	private OptionParser parser = new OptionParser();
 
-	public CmdDocumentProcess() {
-		parser.accepts("id", "Document ID").withRequiredArg().ofType(String.class);
+	public CmdDataProcess() {
+		parser.accepts("id", "Data series ID").withRequiredArg().ofType(String.class);
 	}
 
 	public String getName() {
-		return "document-process";
+		return "data-process";
 	}
 
 	public String getDescription() {
-		return "Submit document for scanning";
+		return "Submit data series for analytical processing";
 	}
 
 	public OptionParser getOptParser() {
@@ -31,7 +31,7 @@ public class CmdDocumentProcess implements Command {
 		String id = (String) CliUtils.requiredOption(ctx.options(), "id");
 		MinimalRestClient client = ctx.getRestClient();
 		try {
-			client.post(String.format("/document/%s/process", id), null, null);
+			client.post(String.format("/data/%s/process", id), null, null);
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {

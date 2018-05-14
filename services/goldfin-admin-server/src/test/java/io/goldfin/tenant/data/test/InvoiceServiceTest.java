@@ -46,7 +46,7 @@ public class InvoiceServiceTest extends TransactionalTest<Invoice> {
 			env.setDescription("X");
 			env.setTags("tags");
 			env.setEffectiveDate(Date.valueOf("2016-12-01"));
-			env.setVendor("X");
+			env.setVendorIdentifier("X");
 			env.setSubtotalAmount(BigDecimal.valueOf(2000.0));
 			env.setTax(BigDecimal.valueOf(100.0));
 			env.setTotalAmount(BigDecimal.valueOf(210000, 2));

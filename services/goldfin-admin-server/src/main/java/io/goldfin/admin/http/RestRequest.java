@@ -84,8 +84,13 @@ public class RestRequest {
 
 	/** Add file to multipart request. */
 	public RestRequest addFile(String name, File file) {
+		return addFile(name, file, ContentType.DEFAULT_BINARY);
+	}
+
+	/** Add file to multipart request. */
+	public RestRequest addFile(String name, File file, ContentType contentType) {
 		assertMultipart();
-		multipartBuilder.addBinaryBody(name, file, ContentType.DEFAULT_BINARY, file.getName());
+		multipartBuilder.addBinaryBody(name, file, contentType, file.getName());
 		return this;
 	}
 

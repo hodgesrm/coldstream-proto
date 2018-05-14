@@ -28,8 +28,8 @@ import javax.validation.constraints.*;
 @ApiModel(description = "Raw observation data related to a vendor offering")
 
 public class Observation   {
-  @JsonProperty("vendor")
-  private String vendor = null;
+  @JsonProperty("vendorIdentifer")
+  private String vendorIdentifer = null;
 
   @JsonProperty("effectiveDate")
   private Date effectiveDate = null;
@@ -75,23 +75,23 @@ public class Observation   {
   @JsonProperty("version")
   private String version = null;
 
-  public Observation vendor(String vendor) {
-    this.vendor = vendor;
+  public Observation vendorIdentifer(String vendorIdentifer) {
+    this.vendorIdentifer = vendorIdentifer;
     return this;
   }
 
   /**
-   * Vendor key
-   * @return vendor
+   * Vendor identifier key
+   * @return vendorIdentifer
    **/
-  @JsonProperty("vendor")
-  @ApiModelProperty(value = "Vendor key")
-  public String getVendor() {
-    return vendor;
+  @JsonProperty("vendorIdentifer")
+  @ApiModelProperty(value = "Vendor identifier key")
+  public String getVendorIdentifer() {
+    return vendorIdentifer;
   }
 
-  public void setVendor(String vendor) {
-    this.vendor = vendor;
+  public void setVendorIdentifer(String vendorIdentifer) {
+    this.vendorIdentifer = vendorIdentifer;
   }
 
   public Observation effectiveDate(Date effectiveDate) {
@@ -199,7 +199,7 @@ public class Observation   {
       return false;
     }
     Observation observation = (Observation) o;
-    return Objects.equals(this.vendor, observation.vendor) &&
+    return Objects.equals(this.vendorIdentifer, observation.vendorIdentifer) &&
         Objects.equals(this.effectiveDate, observation.effectiveDate) &&
         Objects.equals(this.description, observation.description) &&
         Objects.equals(this.observationType, observation.observationType) &&
@@ -209,7 +209,7 @@ public class Observation   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(vendor, effectiveDate, description, observationType, data, version);
+    return Objects.hash(vendorIdentifer, effectiveDate, description, observationType, data, version);
   }
 
 
@@ -218,7 +218,7 @@ public class Observation   {
     StringBuilder sb = new StringBuilder();
     sb.append("class Observation {\n");
     
-    sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");
+    sb.append("    vendorIdentifer: ").append(toIndentedString(vendorIdentifer)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    observationType: ").append(toIndentedString(observationType)).append("\n");

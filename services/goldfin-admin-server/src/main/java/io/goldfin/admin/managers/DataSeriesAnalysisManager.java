@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.managers;
 
@@ -51,7 +51,7 @@ public class DataSeriesAnalysisManager implements Manager {
 	private String ensureQueue(String propName) {
 		// Get the queue location.
 		AwsConnectionParams awsParams = context.getAwsConnectionParams();
-		String queueName = awsParams.getDataSeries().getProperty(propName);
+		String queueName = awsParams.getInventory().getProperty(propName);
 		if (queueName == null) {
 			throw new RuntimeException(String.format("Queue property value missing: name=%s", propName));
 		}

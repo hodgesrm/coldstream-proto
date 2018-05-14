@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) 2018 Goldfin.io.  All rights reserved. 
+ */
 package io.goldfin.admin.service.api.service.impl;
 
 import java.util.List;

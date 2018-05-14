@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
+ */
 package io.goldfin.admin.service.api.service.impl;
 
 import java.io.InputStream;
@@ -28,11 +31,11 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 
 	@Override
 	public Response documentCreate(InputStream fileInputStream, FormDataContentDisposition fileDetail,
-			String description, Boolean scan, SecurityContext securityContext) throws NotFoundException {
+			String description, Boolean process, SecurityContext securityContext) throws NotFoundException {
 		try {
 			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
 			Document doc = dm.createDocument(securityContext.getUserPrincipal(), fileInputStream,
-					fileDetail.getFileName(), description, "application/octet-stream", scan);
+					fileDetail.getFileName(), description, "application/octet-stream", process);
 			return Response.ok().entity(doc).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
@@ -51,13 +54,13 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 	}
 
 	@Override
-	public Response documentFetchContent(String id, SecurityContext securityContext) throws NotFoundException {
+	public Response documentShowContent(String id, SecurityContext securityContext) throws NotFoundException {
 		// do some magic!
 		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
 	}
 
 	@Override
-	public Response documentScan(String id, SecurityContext securityContext) throws NotFoundException {
+	public Response documentProcess(String id, SecurityContext securityContext) throws NotFoundException {
 		try {
 			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
 			dm.scanDocument(securityContext.getUserPrincipal(), id);

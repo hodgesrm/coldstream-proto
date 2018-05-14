@@ -64,7 +64,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		new SqlInsert().table("invoices").put("id", model.getId()).put("document_id", model.getDocumentId())
 				.put("identifier", model.getIdentifier()).put("description", model.getDescription())
 				.put("tags", model.getTags()).put("effective_date", timestampOrNull(model.getEffectiveDate()))
-				.put("vendor", model.getVendor()).put("subtotal_amount", model.getSubtotalAmount())
+				.put("vendor", model.getVendorIdentifier()).put("subtotal_amount", model.getSubtotalAmount())
 				.put("tax", model.getTax()).put("total_amount", model.getTotalAmount())
 				.put("currency", model.getCurrency()).run(session);
 
@@ -207,7 +207,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		inv.setDescription(row.getAsString("description"));
 		inv.setTags(row.getAsString("tags"));
 		inv.setIdentifier(row.getAsString("identifier"));
-		inv.setVendor(row.getAsString("vendor"));
+		inv.setVendorIdentifier(row.getAsString("vendor"));
 		inv.setEffectiveDate(row.getAsJavaDate("effective_date"));
 		inv.setSubtotalAmount(row.getAsBigDecimal("subtotal_amount"));
 		inv.setTax(row.getAsBigDecimal("tax"));

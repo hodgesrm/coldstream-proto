@@ -8,3 +8,7 @@ ocr:
   ocrRequestQueue: "ocr-processing-request"
   ocrResponseQueue: "ocr-processing-response"
   region: "us-west-2"
+inventory:
+  dataSeriesRequestQueue: "inventory-processing-request"
+  dataSeriesResponseQueue: "inventory-processing-response"
+  region: "us-west-2"

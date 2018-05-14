@@ -1,27 +1,20 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.managers;
-
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.service.api.model.Document;
-import io.goldfin.admin.service.api.model.Document.SemanticTypeEnum;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
 import io.goldfin.admin.service.api.model.Host;
-import io.goldfin.admin.service.api.model.Invoice;
-import io.goldfin.admin.service.api.model.Vendor;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.data.Session;
 import io.goldfin.tenant.data.DocumentDataService;
-import io.goldfin.tenant.data.InvoiceDataService;
-import io.goldfin.tenant.data.VendorDataService;
 
 /**
  * Executes an endless loop to look for and process data series analysis responses.

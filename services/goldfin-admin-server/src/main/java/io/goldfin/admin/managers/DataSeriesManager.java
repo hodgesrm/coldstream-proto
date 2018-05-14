@@ -110,7 +110,7 @@ public class DataSeriesManager implements Manager {
 			logger.info("DataSeries created: id=" + id);
 		}
 
-		// Schedule a scan if desired.
+		// Schedule processing if desired.
 		if (scan != null && scan.booleanValue()) {
 			logger.info("Scan requested on new dataSeries: id=" + dataSeries.getId().toString());
 			processDataSeries(principal, dataSeries.getId().toString());
@@ -125,16 +125,16 @@ public class DataSeriesManager implements Manager {
 		DataSeries dataSeries = getDataSeries(principal, id);
 		String tenantId = getTenantId(principal);
 
-		// Get the OCR manager and submit the dataSeries for scanning.
+		// Get the backend analysis manager and submit the dataSeries for scanning.
 		DataSeriesAnalysisManager dsaMgr = ManagerRegistry.getInstance().getManager(DataSeriesAnalysisManager.class);
 		dsaMgr.process(tenantId, dataSeries);
 
 		// Assuming we're still alive here, update the dataSeries state to show
 		// processing has been requested.
-		DataSeriesDataService docService = new DataSeriesDataService();
-		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
+		DataSeriesDataService dataService = new DataSeriesDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(dataService)) {
 			dataSeries.setState(StateEnum.PROCESS_REQUESTED);
-			int rows = docService.update(dataSeries.getId().toString(), dataSeries);
+			int rows = dataService.update(dataSeries.getId().toString(), dataSeries);
 			session.commit();
 			if (rows == 0) {
 				// Could happen due to concurrent access.
@@ -178,7 +178,7 @@ public class DataSeriesManager implements Manager {
 		}
 	}
 
-	public List<DataSeries> getAllDataSeriess(Principal principal) {
+	public List<DataSeries> getAllDataSeries(Principal principal) {
 		String tenantId = getTenantId(principal);
 		DataSeriesDataService dataSeriesService = new DataSeriesDataService();
 		try (Session session = context.tenantSession(tenantId).enlist(dataSeriesService)) {

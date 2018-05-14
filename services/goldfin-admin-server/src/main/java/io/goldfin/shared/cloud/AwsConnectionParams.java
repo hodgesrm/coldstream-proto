@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.cloud;
 
@@ -13,7 +13,7 @@ public class AwsConnectionParams {
 	private String secretAccessKey;
 	private Properties s3 = new Properties();
 	private Properties ocr = new Properties();
-	private Properties dataSeries = new Properties();
+	private Properties inventory = new Properties();
 
 	public String getAccessKeyId() {
 		return accessKeyId;
@@ -47,12 +47,12 @@ public class AwsConnectionParams {
 		this.ocr = ocr;
 	}
 
-	public Properties getDataSeries() {
-		return dataSeries;
+	public Properties getInventory() {
+		return inventory;
 	}
 
-	public void setDataSeries(Properties dataSeries) {
-		this.dataSeries = dataSeries;
+	public void setInventory(Properties inventory) {
+		this.inventory = inventory;
 	}
 
 	@Override

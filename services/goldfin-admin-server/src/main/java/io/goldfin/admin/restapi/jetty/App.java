@@ -36,6 +36,8 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.managers.DataSeriesAnalysisManager;
+import io.goldfin.admin.managers.DataSeriesManager;
 import io.goldfin.admin.managers.DocumentManager;
 import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
@@ -153,12 +155,16 @@ public class App {
 		// Configure managers in registry.
 		ManagerRegistry registry = ManagerRegistry.getInstance();
 		registry.initialize(serviceConnectionParams, awsYaml);
+		// Managers for API services.
 		registry.addManager(new UserManager());
 		registry.addManager(new TenantManager());
+		registry.addManager(new DataSeriesManager());
 		registry.addManager(new InvoiceManager());
 		registry.addManager(new DocumentManager());
 		registry.addManager(new VendorManager());
+		// Managers to mediate with backend pipelines.
 		registry.addManager(new OcrManager());
+		registry.addManager(new DataSeriesAnalysisManager());
 		registry.start();
 	}
 

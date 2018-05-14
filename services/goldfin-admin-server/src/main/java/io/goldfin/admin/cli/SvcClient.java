@@ -25,10 +25,14 @@ public class SvcClient implements CliContext {
 	private File sessionFile = new File("svc-client-session.yaml");
 
 	public SvcClient() {
+		loadCommand(new CmdDataCreate());
+		loadCommand(new CmdDataDelete());
+		loadCommand(new CmdDataList());
+		loadCommand(new CmdDataProcess());
 		loadCommand(new CmdDocumentCreate());
 		loadCommand(new CmdDocumentDelete());
 		loadCommand(new CmdDocumentList());
-		loadCommand(new CmdDocumentScan());
+		loadCommand(new CmdDocumentProcess());
 		loadCommand(new CmdInvoiceDelete());
 		loadCommand(new CmdInvoiceList());
 		loadCommand(new CmdLogin());

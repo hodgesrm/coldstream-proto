@@ -50,8 +50,8 @@ public class Invoice   {
   @JsonProperty("effectiveDate")
   private Date effectiveDate = null;
 
-  @JsonProperty("vendor")
-  private String vendor = null;
+  @JsonProperty("vendorIdentifier")
+  private String vendorIdentifier = null;
 
   @JsonProperty("subtotalAmount")
   private BigDecimal subtotalAmount = null;
@@ -185,23 +185,23 @@ public class Invoice   {
     this.effectiveDate = effectiveDate;
   }
 
-  public Invoice vendor(String vendor) {
-    this.vendor = vendor;
+  public Invoice vendorIdentifier(String vendorIdentifier) {
+    this.vendorIdentifier = vendorIdentifier;
     return this;
   }
 
   /**
-   * Vendor key
-   * @return vendor
+   * Vendor identifier
+   * @return vendorIdentifier
    **/
-  @JsonProperty("vendor")
-  @ApiModelProperty(value = "Vendor key")
-  public String getVendor() {
-    return vendor;
+  @JsonProperty("vendorIdentifier")
+  @ApiModelProperty(value = "Vendor identifier")
+  public String getVendorIdentifier() {
+    return vendorIdentifier;
   }
 
-  public void setVendor(String vendor) {
-    this.vendor = vendor;
+  public void setVendorIdentifier(String vendorIdentifier) {
+    this.vendorIdentifier = vendorIdentifier;
   }
 
   public Invoice subtotalAmount(BigDecimal subtotalAmount) {
@@ -342,7 +342,7 @@ public class Invoice   {
         Objects.equals(this.tags, invoice.tags) &&
         Objects.equals(this.identifier, invoice.identifier) &&
         Objects.equals(this.effectiveDate, invoice.effectiveDate) &&
-        Objects.equals(this.vendor, invoice.vendor) &&
+        Objects.equals(this.vendorIdentifier, invoice.vendorIdentifier) &&
         Objects.equals(this.subtotalAmount, invoice.subtotalAmount) &&
         Objects.equals(this.tax, invoice.tax) &&
         Objects.equals(this.totalAmount, invoice.totalAmount) &&
@@ -353,7 +353,7 @@ public class Invoice   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, documentId, description, tags, identifier, effectiveDate, vendor, subtotalAmount, tax, totalAmount, currency, items, creationDate);
+    return Objects.hash(id, documentId, description, tags, identifier, effectiveDate, vendorIdentifier, subtotalAmount, tax, totalAmount, currency, items, creationDate);
   }
 
 
@@ -368,7 +368,7 @@ public class Invoice   {
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
-    sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");
+    sb.append("    vendorIdentifier: ").append(toIndentedString(vendorIdentifier)).append("\n");
     sb.append("    subtotalAmount: ").append(toIndentedString(subtotalAmount)).append("\n");
     sb.append("    tax: ").append(toIndentedString(tax)).append("\n");
     sb.append("    totalAmount: ").append(toIndentedString(totalAmount)).append("\n");
