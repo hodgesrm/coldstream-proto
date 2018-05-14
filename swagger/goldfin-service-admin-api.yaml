@@ -557,9 +557,9 @@ paths:
           in: formData
           description: A optional description of the document
           type: string
-        - name: scan
+        - name: process
           in: formData
-          description: Flag to control scanning
+          description: Optional flag to kick off scanning automatically if true
           type: boolean
           default: true
         - name: file
@@ -595,30 +595,11 @@ paths:
     get:
       tags:
         - document
-      summary: Return document content
-      description: Download document content
-      operationId: documentFetchContent
-      produces:
-        - application/octet-stream
-      parameters:
-        - name: id
-          in: path
-          description: Document ID
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Successful
-        '404':
-          description: Not Found
-    head:
-      tags:
-        - document
       summary: Return document metadata
-      description: Download document content
+      description: Download document metadata without content
       operationId: documentShow
       produces:
-        - application/octet-stream
+        - application/json
       parameters:
         - name: id
           in: path
@@ -677,15 +658,35 @@ paths:
           description: Successful
         '404':
           description: Not Found
-  '/document/{id}/scan':
+  '/document/{id}/content':
+    get:
+      tags:
+        - document
+      summary: Return document content
+      description: Download document content
+      operationId: documentShowContent
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/document/{id}/process':
     post:
       tags:
         - document
-      summary: Kick off document scanning
+      summary: Kick off document analysis
       description: >-
         Run background scanning on document.  The document state and semantic
         information will be updated when finished.
-      operationId: documentScan
+      operationId: documentProcess
       produces:
         - application/json
       parameters:
@@ -711,6 +712,15 @@ paths:
       produces:
         - application/json
       parameters:
+        - name: description
+          in: formData
+          description: A optional description of the data series
+          type: string
+        - name: process
+          in: formData
+          description: Optional flag to kick off processing automatically if true
+          type: boolean
+          default: true
         - name: file
           in: formData
           description: Data series content
@@ -744,25 +754,6 @@ paths:
     get:
       tags:
         - inventory
-      summary: Return data series content
-      description: Download data series content
-      operationId: dataFetchContent
-      produces:
-        - application/octet-stream
-      parameters:
-        - name: id
-          in: path
-          description: Series ID
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Successful
-        '404':
-          description: Not Found
-    head:
-      tags:
-        - inventory
       summary: Return data series metadata
       description: Download data series metadata without content
       operationId: dataShow
@@ -789,6 +780,26 @@ paths:
       operationId: dataDelete
       produces:
         - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Series ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/data/{id}/content':
+    get:
+      tags:
+        - inventory
+      summary: Return data series content
+      description: Download data series content
+      operationId: dataShowContent
+      produces:
+        - application/octet-stream
       parameters:
         - name: id
           in: path
@@ -980,7 +991,7 @@ definitions:
         description: Unique vendor id
       identifier:
         type: string
-        description: Key used to describe vendor for accounting purposes
+        description: Standard key used to describe vendor for accounting purposes
       name:
         type: string
         description: Vendor display name
@@ -1126,9 +1137,9 @@ definitions:
         type: string
         format: date-time
         description: Invoice effective date
-      vendor:
+      vendorIdentifier:
         type: string
-        description: Vendor key
+        description: Vendor identifier
       subtotalAmount:
         type: number
         description: Invoice subtotal amount
@@ -1206,7 +1217,7 @@ definitions:
         type: string
         description: A user-provided list of name-value pairs that describe the invoice
   DataSeries:
-    description: 'A set of one or more observations for analysis'
+    description: A set of one or more observations for analysis
     type: object
     properties:
       id:
@@ -1234,8 +1245,7 @@ definitions:
         format: url
         description: Storage locator for content
       state:
-        description: >-
-          The current processing state of the content.  
+        description: 'The current processing state of the content.  '
         enum:
           - CREATED
           - PROCESS_REQUESTED
@@ -1253,9 +1263,9 @@ definitions:
     description: Raw observation data related to a vendor offering
     type: object
     properties:
-      vendor:
+      vendorIdentifier:
         type: string
-        description: Vendor key
+        description: Vendor identifier key
       effectiveDate:
         type: string
         format: date-time
@@ -1264,9 +1274,9 @@ definitions:
         type: string
         description: Optional description of observation
       observationType:
-        description: 'Kind of observation, e.g., inventory.'
+        description: 'Kind of observation, e.g., host inventory.'
         enum:
-          - INVENTORY
+          - HOST_INVENTORY
       data:
         type: string
         description: String containing serialized observations

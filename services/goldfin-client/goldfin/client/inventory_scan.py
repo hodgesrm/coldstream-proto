@@ -9,6 +9,7 @@ import logging
 import os
 import sys
 
+from goldfin.client.json_xlate import SwaggerJsonEncoder
 from goldfin.client.inventory.ifactory import get_provider
 
 # Standard logging initialization.
@@ -102,11 +103,13 @@ if os.path.exists(args.config):
         params[key] = section[key]
     provider = get_provider(args.inventory, params)
     obs = provider.execute()
-    name = "{0}-{1}".format(obs.vendor, obs.effective_date)
+    name = "{0}-{1}.json".format(obs.vendor_identifier, obs.effective_date.strftime("%Y-%m-%d_%H:%M:%S"))
     output_file = os.path.join(args.out_dir, name)
     with open(output_file, "w") as obs_file:
         print_info("Writing observation to output file: {0}".format(output_file))
-        json.dump(obs.to_dict(), obs_file)
+        encoder = SwaggerJsonEncoder()
+        content = encoder.encode(obs)
+        obs_file.write(content)
     sys.exit(0)
 else:
     print_error("Config file does not exist: {0}".format(args.config))

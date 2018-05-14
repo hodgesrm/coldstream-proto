@@ -7,27 +7,32 @@ import json
 import logging
 import requests
 
-from goldfin.client.api.models.observation_content import ObservationContent
+from goldfin.client.api.models.observation import Observation
 
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
 
 VENDOR = "leaseweb"
 
-# Simplest possible script to read Leaseweb systems. 
 class LeasewebProcessor():
+    """Processing class for leaseweb inventory"""
     def __init__(self, api_key):
+        """Create processor
+
+        :param api_key: API key used to login to LeaseWeb REST API
+        :type api_key: str
+        """
         if api_key is None:
-            message = "No api_key value provided, check config file"
+            message = "No api_key value provided, required to login"
             logger.fatal(message)
             raise Exception(message)
         self._api_key = api_key
 
     def execute(self):
-        """Observe current inventory and return ObservationContent result
+        """Observe current inventory and return Observation result
 
 		:return: observation content containing current inventory
-        :rtype: ObservationContent
+        :rtype: Observation
         """
         servers_url = "https://api.leaseweb.com/bareMetals/v2/servers"
         logger.info("Checking inventory: url={0}".format(servers_url))
@@ -51,10 +56,10 @@ class LeasewebProcessor():
             logger.debug(json.dumps(r2.json(), indent=2))
             server_details.append(r2.json())
 
-        obs = ObservationContent()
-        obs.vendor = VENDOR
-        obs.effective_date = str(datetime.datetime.now())
-        obs.observation_type = "INVENTORY"
+        obs = Observation()
+        obs.vendor_identifier = VENDOR
+        obs.effective_date = datetime.datetime.now()
+        obs.observation_type = "HOST_INVENTORY"
         obs.data = json.dumps(server_details, sort_keys=True)
 
         return obs

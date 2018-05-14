@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Goldfin Service Admin API
+    Goldfin Service API
 
-    REST API for Goldfin Service Administration
+    REST API for Goldfin Intelligent Invoice Processing
 
     OpenAPI spec version: 1.0.0
     Contact: info@goldfin.io
@@ -31,113 +31,70 @@ class Observation(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'id': 'str',
-        'vendor': 'str',
+        'vendor_identifier': 'str',
         'effective_date': 'datetime',
         'description': 'str',
-        'content_type': 'str',
-        'content_length': 'float',
-        'thumbprint': 'str',
-        'locator': 'str',
-        'state': 'str',
-        'observation_type': 'str'
+        'observation_type': 'str',
+        'data': 'str',
+        'version': 'str'
     }
 
     attribute_map = {
-        'id': 'id',
-        'vendor': 'vendor',
+        'vendor_identifier': 'vendorIdentifier',
         'effective_date': 'effectiveDate',
         'description': 'description',
-        'content_type': 'contentType',
-        'content_length': 'contentLength',
-        'thumbprint': 'thumbprint',
-        'locator': 'locator',
-        'state': 'state',
-        'observation_type': 'observationType'
+        'observation_type': 'observationType',
+        'data': 'data',
+        'version': 'version'
     }
 
-    def __init__(self, id=None, vendor=None, effective_date=None, description=None, content_type=None, content_length=None, thumbprint=None, locator=None, state=None, observation_type=None):
+    def __init__(self, vendor_identifier=None, effective_date=None, description=None, observation_type=None, data=None, version=None):
         """
         Observation - a model defined in Swagger
         """
 
-        self._id = None
-        self._vendor = None
+        self._vendor_identifier = None
         self._effective_date = None
         self._description = None
-        self._content_type = None
-        self._content_length = None
-        self._thumbprint = None
-        self._locator = None
-        self._state = None
         self._observation_type = None
+        self._data = None
+        self._version = None
 
-        if id is not None:
-          self.id = id
-        if vendor is not None:
-          self.vendor = vendor
+        if vendor_identifier is not None:
+          self.vendor_identifier = vendor_identifier
         if effective_date is not None:
           self.effective_date = effective_date
         if description is not None:
           self.description = description
-        if content_type is not None:
-          self.content_type = content_type
-        if content_length is not None:
-          self.content_length = content_length
-        if thumbprint is not None:
-          self.thumbprint = thumbprint
-        if locator is not None:
-          self.locator = locator
-        if state is not None:
-          self.state = state
         if observation_type is not None:
           self.observation_type = observation_type
+        if data is not None:
+          self.data = data
+        if version is not None:
+          self.version = version
 
     @property
-    def id(self):
+    def vendor_identifier(self):
         """
-        Gets the id of this Observation.
-        Observation ID
+        Gets the vendor_identifier of this Observation.
+        Vendor identifier key
 
-        :return: The id of this Observation.
+        :return: The vendor_identifier of this Observation.
         :rtype: str
         """
-        return self._id
+        return self._vendor_identifier
 
-    @id.setter
-    def id(self, id):
+    @vendor_identifier.setter
+    def vendor_identifier(self, vendor_identifier):
         """
-        Sets the id of this Observation.
-        Observation ID
+        Sets the vendor_identifier of this Observation.
+        Vendor identifier key
 
-        :param id: The id of this Observation.
+        :param vendor_identifier: The vendor_identifier of this Observation.
         :type: str
         """
 
-        self._id = id
-
-    @property
-    def vendor(self):
-        """
-        Gets the vendor of this Observation.
-        Vendor key
-
-        :return: The vendor of this Observation.
-        :rtype: str
-        """
-        return self._vendor
-
-    @vendor.setter
-    def vendor(self, vendor):
-        """
-        Sets the vendor of this Observation.
-        Vendor key
-
-        :param vendor: The vendor of this Observation.
-        :type: str
-        """
-
-        self._vendor = vendor
+        self._vendor_identifier = vendor_identifier
 
     @property
     def effective_date(self):
@@ -166,7 +123,7 @@ class Observation(object):
     def description(self):
         """
         Gets the description of this Observation.
-        Optional description
+        Optional description of observation
 
         :return: The description of this Observation.
         :rtype: str
@@ -177,7 +134,7 @@ class Observation(object):
     def description(self, description):
         """
         Sets the description of this Observation.
-        Optional description
+        Optional description of observation
 
         :param description: The description of this Observation.
         :type: str
@@ -186,131 +143,10 @@ class Observation(object):
         self._description = description
 
     @property
-    def content_type(self):
-        """
-        Gets the content_type of this Observation.
-        Internet media type (e.g., application/octet-stream)
-
-        :return: The content_type of this Observation.
-        :rtype: str
-        """
-        return self._content_type
-
-    @content_type.setter
-    def content_type(self, content_type):
-        """
-        Sets the content_type of this Observation.
-        Internet media type (e.g., application/octet-stream)
-
-        :param content_type: The content_type of this Observation.
-        :type: str
-        """
-
-        self._content_type = content_type
-
-    @property
-    def content_length(self):
-        """
-        Gets the content_length of this Observation.
-        Content length in bytes
-
-        :return: The content_length of this Observation.
-        :rtype: float
-        """
-        return self._content_length
-
-    @content_length.setter
-    def content_length(self, content_length):
-        """
-        Sets the content_length of this Observation.
-        Content length in bytes
-
-        :param content_length: The content_length of this Observation.
-        :type: float
-        """
-
-        self._content_length = content_length
-
-    @property
-    def thumbprint(self):
-        """
-        Gets the thumbprint of this Observation.
-        SHA-256 thumbprint of observation
-
-        :return: The thumbprint of this Observation.
-        :rtype: str
-        """
-        return self._thumbprint
-
-    @thumbprint.setter
-    def thumbprint(self, thumbprint):
-        """
-        Sets the thumbprint of this Observation.
-        SHA-256 thumbprint of observation
-
-        :param thumbprint: The thumbprint of this Observation.
-        :type: str
-        """
-
-        self._thumbprint = thumbprint
-
-    @property
-    def locator(self):
-        """
-        Gets the locator of this Observation.
-        Storage locator of the observation
-
-        :return: The locator of this Observation.
-        :rtype: str
-        """
-        return self._locator
-
-    @locator.setter
-    def locator(self, locator):
-        """
-        Sets the locator of this Observation.
-        Storage locator of the observation
-
-        :param locator: The locator of this Observation.
-        :type: str
-        """
-
-        self._locator = locator
-
-    @property
-    def state(self):
-        """
-        Gets the state of this Observation.
-        The current processing state of the observation
-
-        :return: The state of this Observation.
-        :rtype: str
-        """
-        return self._state
-
-    @state.setter
-    def state(self, state):
-        """
-        Sets the state of this Observation.
-        The current processing state of the observation
-
-        :param state: The state of this Observation.
-        :type: str
-        """
-        allowed_values = ["CREATED", "PROCESSED", "ERROR"]
-        if state not in allowed_values:
-            raise ValueError(
-                "Invalid value for `state` ({0}), must be one of {1}"
-                .format(state, allowed_values)
-            )
-
-        self._state = state
-
-    @property
     def observation_type(self):
         """
         Gets the observation_type of this Observation.
-        Kind of observation, e.g., inventory.
+        Kind of observation, e.g., host inventory.
 
         :return: The observation_type of this Observation.
         :rtype: str
@@ -321,12 +157,12 @@ class Observation(object):
     def observation_type(self, observation_type):
         """
         Sets the observation_type of this Observation.
-        Kind of observation, e.g., inventory.
+        Kind of observation, e.g., host inventory.
 
         :param observation_type: The observation_type of this Observation.
         :type: str
         """
-        allowed_values = ["INVENTORY", "UNKNOWN"]
+        allowed_values = ["HOST_INVENTORY"]
         if observation_type not in allowed_values:
             raise ValueError(
                 "Invalid value for `observation_type` ({0}), must be one of {1}"
@@ -334,6 +170,52 @@ class Observation(object):
             )
 
         self._observation_type = observation_type
+
+    @property
+    def data(self):
+        """
+        Gets the data of this Observation.
+        String containing serialized observations
+
+        :return: The data of this Observation.
+        :rtype: str
+        """
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        """
+        Sets the data of this Observation.
+        String containing serialized observations
+
+        :param data: The data of this Observation.
+        :type: str
+        """
+
+        self._data = data
+
+    @property
+    def version(self):
+        """
+        Gets the version of this Observation.
+        Data format version
+
+        :return: The version of this Observation.
+        :rtype: str
+        """
+        return self._version
+
+    @version.setter
+    def version(self, version):
+        """
+        Sets the version of this Observation.
+        Data format version
+
+        :param version: The version of this Observation.
+        :type: str
+        """
+
+        self._version = version
 
     def to_dict(self):
         """

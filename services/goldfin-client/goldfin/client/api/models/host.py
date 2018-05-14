@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Goldfin Service Admin API
+    Goldfin Service API
 
-    REST API for Goldfin Service Administration
+    REST API for Goldfin Intelligent Invoice Processing
 
     OpenAPI spec version: 1.0.0
     Contact: info@goldfin.io
@@ -31,97 +31,110 @@ class Host(object):
                             and the value is json key in definition.
     """
     swagger_types = {
+        'id': 'str',
         'host_id': 'str',
-        'host_type': 'str',
-        'host_model': 'str',
-        'observation_id': 'str',
         'resource_id': 'str',
         'effective_date': 'datetime',
-        'identifier': 'str',
-        'vendor': 'str',
+        'vendor_identifier': 'str',
+        'data_series_id': 'str',
+        'host_type': 'str',
+        'host_model': 'str',
         'region': 'str',
         'zone': 'str',
+        'datacenter': 'str',
         'cpu': 'str',
         'socket_count': 'int',
         'core_count': 'int',
+        'thread_count': 'int',
         'ram': 'int',
         'hdd': 'int',
         'ssd': 'int',
         'nic_count': 'int',
-        'network_traffic_limit': 'int'
+        'network_traffic_limit': 'int',
+        'backup_enabled': 'bool'
     }
 
     attribute_map = {
+        'id': 'id',
         'host_id': 'hostId',
-        'host_type': 'hostType',
-        'host_model': 'hostModel',
-        'observation_id': 'observationId',
         'resource_id': 'resourceId',
         'effective_date': 'effectiveDate',
-        'identifier': 'identifier',
-        'vendor': 'vendor',
+        'vendor_identifier': 'vendorIdentifier',
+        'data_series_id': 'dataSeriesId',
+        'host_type': 'hostType',
+        'host_model': 'hostModel',
         'region': 'region',
         'zone': 'zone',
+        'datacenter': 'datacenter',
         'cpu': 'cpu',
         'socket_count': 'socketCount',
         'core_count': 'coreCount',
+        'thread_count': 'threadCount',
         'ram': 'ram',
         'hdd': 'hdd',
         'ssd': 'ssd',
         'nic_count': 'nicCount',
-        'network_traffic_limit': 'networkTrafficLimit'
+        'network_traffic_limit': 'networkTrafficLimit',
+        'backup_enabled': 'backupEnabled'
     }
 
-    def __init__(self, host_id=None, host_type=None, host_model=None, observation_id=None, resource_id=None, effective_date=None, identifier=None, vendor=None, region=None, zone=None, cpu=None, socket_count=None, core_count=None, ram=None, hdd=None, ssd=None, nic_count=None, network_traffic_limit=None):
+    def __init__(self, id=None, host_id=None, resource_id=None, effective_date=None, vendor_identifier=None, data_series_id=None, host_type=None, host_model=None, region=None, zone=None, datacenter=None, cpu=None, socket_count=None, core_count=None, thread_count=None, ram=None, hdd=None, ssd=None, nic_count=None, network_traffic_limit=None, backup_enabled=None):
         """
         Host - a model defined in Swagger
         """
 
+        self._id = None
         self._host_id = None
-        self._host_type = None
-        self._host_model = None
-        self._observation_id = None
         self._resource_id = None
         self._effective_date = None
-        self._identifier = None
-        self._vendor = None
+        self._vendor_identifier = None
+        self._data_series_id = None
+        self._host_type = None
+        self._host_model = None
         self._region = None
         self._zone = None
+        self._datacenter = None
         self._cpu = None
         self._socket_count = None
         self._core_count = None
+        self._thread_count = None
         self._ram = None
         self._hdd = None
         self._ssd = None
         self._nic_count = None
         self._network_traffic_limit = None
+        self._backup_enabled = None
 
+        if id is not None:
+          self.id = id
         if host_id is not None:
           self.host_id = host_id
-        if host_type is not None:
-          self.host_type = host_type
-        if host_model is not None:
-          self.host_model = host_model
-        if observation_id is not None:
-          self.observation_id = observation_id
         if resource_id is not None:
           self.resource_id = resource_id
         if effective_date is not None:
           self.effective_date = effective_date
-        if identifier is not None:
-          self.identifier = identifier
-        if vendor is not None:
-          self.vendor = vendor
+        if vendor_identifier is not None:
+          self.vendor_identifier = vendor_identifier
+        if data_series_id is not None:
+          self.data_series_id = data_series_id
+        if host_type is not None:
+          self.host_type = host_type
+        if host_model is not None:
+          self.host_model = host_model
         if region is not None:
           self.region = region
         if zone is not None:
           self.zone = zone
+        if datacenter is not None:
+          self.datacenter = datacenter
         if cpu is not None:
           self.cpu = cpu
         if socket_count is not None:
           self.socket_count = socket_count
         if core_count is not None:
           self.core_count = core_count
+        if thread_count is not None:
+          self.thread_count = thread_count
         if ram is not None:
           self.ram = ram
         if hdd is not None:
@@ -132,6 +145,31 @@ class Host(object):
           self.nic_count = nic_count
         if network_traffic_limit is not None:
           self.network_traffic_limit = network_traffic_limit
+        if backup_enabled is not None:
+          self.backup_enabled = backup_enabled
+
+    @property
+    def id(self):
+        """
+        Gets the id of this Host.
+        Host record ID
+
+        :return: The id of this Host.
+        :rtype: str
+        """
+        return self._id
+
+    @id.setter
+    def id(self, id):
+        """
+        Sets the id of this Host.
+        Host record ID
+
+        :param id: The id of this Host.
+        :type: str
+        """
+
+        self._id = id
 
     @property
     def host_id(self):
@@ -155,6 +193,98 @@ class Host(object):
         """
 
         self._host_id = host_id
+
+    @property
+    def resource_id(self):
+        """
+        Gets the resource_id of this Host.
+        Inventory resource ID that can be related to invoice item resource ID
+
+        :return: The resource_id of this Host.
+        :rtype: str
+        """
+        return self._resource_id
+
+    @resource_id.setter
+    def resource_id(self, resource_id):
+        """
+        Sets the resource_id of this Host.
+        Inventory resource ID that can be related to invoice item resource ID
+
+        :param resource_id: The resource_id of this Host.
+        :type: str
+        """
+
+        self._resource_id = resource_id
+
+    @property
+    def effective_date(self):
+        """
+        Gets the effective_date of this Host.
+        Observation effective date
+
+        :return: The effective_date of this Host.
+        :rtype: datetime
+        """
+        return self._effective_date
+
+    @effective_date.setter
+    def effective_date(self, effective_date):
+        """
+        Sets the effective_date of this Host.
+        Observation effective date
+
+        :param effective_date: The effective_date of this Host.
+        :type: datetime
+        """
+
+        self._effective_date = effective_date
+
+    @property
+    def vendor_identifier(self):
+        """
+        Gets the vendor_identifier of this Host.
+        Vendor identifier key
+
+        :return: The vendor_identifier of this Host.
+        :rtype: str
+        """
+        return self._vendor_identifier
+
+    @vendor_identifier.setter
+    def vendor_identifier(self, vendor_identifier):
+        """
+        Sets the vendor_identifier of this Host.
+        Vendor identifier key
+
+        :param vendor_identifier: The vendor_identifier of this Host.
+        :type: str
+        """
+
+        self._vendor_identifier = vendor_identifier
+
+    @property
+    def data_series_id(self):
+        """
+        Gets the data_series_id of this Host.
+        Id of data series from which this host record was derived
+
+        :return: The data_series_id of this Host.
+        :rtype: str
+        """
+        return self._data_series_id
+
+    @data_series_id.setter
+    def data_series_id(self, data_series_id):
+        """
+        Sets the data_series_id of this Host.
+        Id of data series from which this host record was derived
+
+        :param data_series_id: The data_series_id of this Host.
+        :type: str
+        """
+
+        self._data_series_id = data_series_id
 
     @property
     def host_type(self):
@@ -209,121 +339,6 @@ class Host(object):
         self._host_model = host_model
 
     @property
-    def observation_id(self):
-        """
-        Gets the observation_id of this Host.
-        Observation from which this host record was derived
-
-        :return: The observation_id of this Host.
-        :rtype: str
-        """
-        return self._observation_id
-
-    @observation_id.setter
-    def observation_id(self, observation_id):
-        """
-        Sets the observation_id of this Host.
-        Observation from which this host record was derived
-
-        :param observation_id: The observation_id of this Host.
-        :type: str
-        """
-
-        self._observation_id = observation_id
-
-    @property
-    def resource_id(self):
-        """
-        Gets the resource_id of this Host.
-        Inventory resource ID that can be related to invoice item resource ID
-
-        :return: The resource_id of this Host.
-        :rtype: str
-        """
-        return self._resource_id
-
-    @resource_id.setter
-    def resource_id(self, resource_id):
-        """
-        Sets the resource_id of this Host.
-        Inventory resource ID that can be related to invoice item resource ID
-
-        :param resource_id: The resource_id of this Host.
-        :type: str
-        """
-
-        self._resource_id = resource_id
-
-    @property
-    def effective_date(self):
-        """
-        Gets the effective_date of this Host.
-        Invoice effective date
-
-        :return: The effective_date of this Host.
-        :rtype: datetime
-        """
-        return self._effective_date
-
-    @effective_date.setter
-    def effective_date(self, effective_date):
-        """
-        Sets the effective_date of this Host.
-        Invoice effective date
-
-        :param effective_date: The effective_date of this Host.
-        :type: datetime
-        """
-
-        self._effective_date = effective_date
-
-    @property
-    def identifier(self):
-        """
-        Gets the identifier of this Host.
-        Internal host identifier
-
-        :return: The identifier of this Host.
-        :rtype: str
-        """
-        return self._identifier
-
-    @identifier.setter
-    def identifier(self, identifier):
-        """
-        Sets the identifier of this Host.
-        Internal host identifier
-
-        :param identifier: The identifier of this Host.
-        :type: str
-        """
-
-        self._identifier = identifier
-
-    @property
-    def vendor(self):
-        """
-        Gets the vendor of this Host.
-        Vendor key
-
-        :return: The vendor of this Host.
-        :rtype: str
-        """
-        return self._vendor
-
-    @vendor.setter
-    def vendor(self, vendor):
-        """
-        Sets the vendor of this Host.
-        Vendor key
-
-        :param vendor: The vendor of this Host.
-        :type: str
-        """
-
-        self._vendor = vendor
-
-    @property
     def region(self):
         """
         Gets the region of this Host.
@@ -350,7 +365,7 @@ class Host(object):
     def zone(self):
         """
         Gets the zone of this Host.
-        Data center or availability zone within region
+        Availability zone
 
         :return: The zone of this Host.
         :rtype: str
@@ -361,13 +376,36 @@ class Host(object):
     def zone(self, zone):
         """
         Sets the zone of this Host.
-        Data center or availability zone within region
+        Availability zone
 
         :param zone: The zone of this Host.
         :type: str
         """
 
         self._zone = zone
+
+    @property
+    def datacenter(self):
+        """
+        Gets the datacenter of this Host.
+        Data center
+
+        :return: The datacenter of this Host.
+        :rtype: str
+        """
+        return self._datacenter
+
+    @datacenter.setter
+    def datacenter(self, datacenter):
+        """
+        Sets the datacenter of this Host.
+        Data center
+
+        :param datacenter: The datacenter of this Host.
+        :type: str
+        """
+
+        self._datacenter = datacenter
 
     @property
     def cpu(self):
@@ -437,6 +475,29 @@ class Host(object):
         """
 
         self._core_count = core_count
+
+    @property
+    def thread_count(self):
+        """
+        Gets the thread_count of this Host.
+        Number of hardware threads per core
+
+        :return: The thread_count of this Host.
+        :rtype: int
+        """
+        return self._thread_count
+
+    @thread_count.setter
+    def thread_count(self, thread_count):
+        """
+        Sets the thread_count of this Host.
+        Number of hardware threads per core
+
+        :param thread_count: The thread_count of this Host.
+        :type: int
+        """
+
+        self._thread_count = thread_count
 
     @property
     def ram(self):
@@ -552,6 +613,29 @@ class Host(object):
         """
 
         self._network_traffic_limit = network_traffic_limit
+
+    @property
+    def backup_enabled(self):
+        """
+        Gets the backup_enabled of this Host.
+        If true backup is enabled for this host
+
+        :return: The backup_enabled of this Host.
+        :rtype: bool
+        """
+        return self._backup_enabled
+
+    @backup_enabled.setter
+    def backup_enabled(self, backup_enabled):
+        """
+        Sets the backup_enabled of this Host.
+        If true backup is enabled for this host
+
+        :param backup_enabled: The backup_enabled of this Host.
+        :type: bool
+        """
+
+        self._backup_enabled = backup_enabled
 
     def to_dict(self):
         """
