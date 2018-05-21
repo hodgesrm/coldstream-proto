@@ -1260,7 +1260,7 @@ definitions:
         type: string
         description: Date data was uploaded
   Observation:
-    description: Raw observation data related to a vendor offering
+    description: Generic observation data related to a vendor offering
     type: object
     properties:
       vendorIdentifier:
@@ -1279,10 +1279,24 @@ definitions:
           - HOST_INVENTORY
       data:
         type: string
-        description: String containing serialized observations
+        description: String containing serialized observation data
       version:
         type: string
         description: Data format version
+  Result:
+    description: Generic result of processing observation data
+    type: object
+    properties:
+      dataSeriesId:
+        type: string
+        description: Id of data series from which result is derived
+        format: uuid
+      resultType:
+        type: string
+        description: Class of result
+      data:
+        type: string
+        description: String containing serialized result data
   Host:
     description: Host record from inventory
     properties:

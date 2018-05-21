@@ -9,7 +9,7 @@ from goldfin_ocr.api.models.invoice import Invoice
 from goldfin_ocr.api.models.invoice_item import InvoiceItem
 import goldfin_ocr.table.tabularquery as tq
 import goldfin_ocr.table.tabularmodel as tm
-import goldfin_ocr.data as data
+import goldfin_ocr.data_utils as data_utils
 import goldfin_ocr.util as util
 
 # Define logger
@@ -68,7 +68,7 @@ class LeasewebProcessor:
         # Find effective date.
         eff_date_line = self._engine.tabular_line_query(root=page1).intersects(
             eff_date_region).first()
-        invoice.effective_date = data.extract_date(eff_date_line.text.strip())
+        invoice.effective_date = data_utils.extract_date(eff_date_line.text.strip())
         if invoice.effective_date is None:
             logger.warning("Unable to extract date: {0}".format(eff_date_line))
 
@@ -227,7 +227,7 @@ class LeasewebProcessor:
             # has a date in the first row item.  If we see this it's time
             # to look for the resource ID and also date range information.
             if len(item_list) > 1:
-                candidate_start_date = data.extract_date(item_list[0].text)
+                candidate_start_date = data_utils.extract_date(item_list[0].text)
                 if candidate_start_date is not None:
                     # This line starts an invoice group.  Start by looking
                     # for the resource id.
@@ -242,7 +242,7 @@ class LeasewebProcessor:
 
                     # Next store the date range.
                     item_start_date = candidate_start_date
-                    candidate_end_date = data.extract_date(item_list[1].text)
+                    candidate_end_date = data_utils.extract_date(item_list[1].text)
                     if candidate_end_date is not None:
                         item_end_date = candidate_end_date
                         item_one_time_charge = False
@@ -255,8 +255,8 @@ class LeasewebProcessor:
 
                 # Scan backwards to get the total and unit (actually monthly
                 # price).
-                item_total_amount = data.extract_currency(item_list[-1].text)
-                item_unit_amount = data.extract_currency(item_list[-2].text)
+                item_total_amount = data_utils.extract_currency(item_list[-1].text)
+                item_unit_amount = data_utils.extract_currency(item_list[-2].text)
 
                 # OK let's make an invoice item and add it.
                 invoice_item = InvoiceItem()
@@ -285,6 +285,6 @@ class LeasewebProcessor:
                 summary_tag_line.page_number).is_to_right_of(
                 summary_tag_line.region).matches_currency().first()
             logger.debug(summary_line)
-            return data.extract_currency(summary_line.text)
+            return data_utils.extract_currency(summary_line.text)
         else:
             return None

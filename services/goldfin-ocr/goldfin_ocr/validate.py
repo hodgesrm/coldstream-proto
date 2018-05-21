@@ -4,7 +4,7 @@
 
 from decimal import Decimal
 
-import data
+import data_utils
 import .api.models as models
 
 
@@ -88,7 +88,7 @@ def invoice_item_resource_id_check(invoice_item: models.InvoiceItem):
     """Ensure resource total is a valid host name"""
     if invoice_item.resource_id is None:
         return False, "Invoice resource ID is not set"
-    elif data.is_valid_host(invoice_item.resource_id) is False:
+    elif data_utils.is_valid_host(invoice_item.resource_id) is False:
         return False, "Invoice resource ID is not a valid host name: {0}".format(invoice_item.resource_id)
     else:
         return True, "Invoice resource ID is a valid host name: {0}".format(invoice_item.resource_id)

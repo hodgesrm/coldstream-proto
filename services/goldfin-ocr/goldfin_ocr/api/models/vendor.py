@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Goldfin Service Admin API
+    Goldfin Service API
 
-    REST API for Goldfin Service Administration
+    REST API for Goldfin Intelligent Invoice Processing
 
     OpenAPI spec version: 1.0.0
     Contact: info@goldfin.io
@@ -95,7 +95,7 @@ class Vendor(object):
     def identifier(self):
         """
         Gets the identifier of this Vendor.
-        Key used to describe vendor for accounting purposes
+        Standard key used to describe vendor for accounting purposes
 
         :return: The identifier of this Vendor.
         :rtype: str
@@ -106,7 +106,7 @@ class Vendor(object):
     def identifier(self, identifier):
         """
         Sets the identifier of this Vendor.
-        Key used to describe vendor for accounting purposes
+        Standard key used to describe vendor for accounting purposes
 
         :param identifier: The identifier of this Vendor.
         :type: str

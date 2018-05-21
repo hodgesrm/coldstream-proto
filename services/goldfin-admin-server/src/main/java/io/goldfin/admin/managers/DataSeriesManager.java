@@ -54,7 +54,7 @@ public class DataSeriesManager implements Manager {
 	public DataSeries createDataSeries(Principal principal, InputStream content, String fileName, String description,
 			String contentType, Boolean scan) throws IOException {
 		String tenantId = getTenantId(principal);
-		DataSeriesDataService docService = new DataSeriesDataService();
+		DataSeriesDataService dsdService = new DataSeriesDataService();
 
 		// Download the dataSeries into a temporary file.
 		File tempFile = Files.createTempFile(tenantId, fileName, new FileAttribute<?>[0]).toFile();
@@ -76,8 +76,8 @@ public class DataSeriesManager implements Manager {
 		String sha256 = Sha256HashingAlgorithm.generateHashString(tempFile);
 
 		// See if the thumbprint already exists.
-		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
-			DataSeries doc = docService.getByThumbprint(sha256);
+		try (Session session = context.tenantSession(tenantId).enlist(dsdService)) {
+			DataSeries doc = dsdService.getByThumbprint(sha256);
 			if (doc != null) {
 				throw new InvalidInputException(
 						String.format("DataSeries already exists: id=%s", doc.getId().toString()));
@@ -104,8 +104,8 @@ public class DataSeriesManager implements Manager {
 		dataSeries.setLocator(locator);
 		dataSeries.setState(StateEnum.CREATED);
 
-		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
-			String id = docService.create(dataSeries);
+		try (Session session = context.tenantSession(tenantId).enlist(dsdService)) {
+			String id = dsdService.create(dataSeries);
 			session.commit();
 			logger.info("DataSeries created: id=" + id);
 		}

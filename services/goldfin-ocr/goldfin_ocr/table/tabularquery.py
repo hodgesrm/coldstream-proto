@@ -5,7 +5,7 @@
 import logging
 import re
 from . import tabularmodel as tm
-import goldfin_ocr.data as data
+import goldfin_ocr.data_utils as data_utils
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -226,7 +226,7 @@ class AbstractQuery:
         """Returns true if entity text contains currency data"""
 
         def _matches_currency(entity):
-            if entity.text is None or data.extract_currency(
+            if entity.text is None or data_utils.extract_currency(
                     entity.text) is None:
                 return False
             else:

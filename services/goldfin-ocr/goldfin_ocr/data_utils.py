@@ -1,6 +1,6 @@
-# Copyright (c) 2017 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2017-2018 Goldfin Systems LLC.  All rights reserved. 
 
-"""Functions for cleaning scanned data"""
+"""Utility functions for cleaning scanned data"""
 
 from decimal import Decimal
 from datetime import datetime

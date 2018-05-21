@@ -245,7 +245,7 @@ public class MinimalRestClient {
 				}
 			}
 		} catch (SerializationException e) {
-			throw new RestRuntimeException("REST POST invocation failed", e);
+			throw new RestRuntimeException("Serialization error", e);
 		}
 	}
 
@@ -264,7 +264,7 @@ public class MinimalRestClient {
 						responseEntityClass);
 			}
 		} catch (SerializationException e) {
-			throw new RestRuntimeException("REST POST invocation failed");
+			throw new RestRuntimeException("Serialization error", e);
 		}
 	}
 

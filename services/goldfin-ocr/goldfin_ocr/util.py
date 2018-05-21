@@ -39,7 +39,13 @@ def dump_to_json(obj, indent=2, sort_keys=True):
 
 
 def init_logging(log_level, log_file=None):
-    """Validates log level and starts logging"""
+    """Validates log level and starts logging
+
+    :param log_level: Log level string label
+    :type log_level: str
+    :param log_file: Log file name (defaults to console)
+    :type log_file: str
+    """
     if log_level == "CRITICAL":
         level = logging.CRITICAL
     elif log_level == "ERROR":

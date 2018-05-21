@@ -4,5 +4,6 @@ ocr.log
 invoice.log
 output.log
 .idea/
+conf/data.yaml
 conf/ocr.yaml
 tests/ocr-test.yaml

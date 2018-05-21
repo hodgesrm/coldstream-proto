@@ -15,7 +15,6 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.managers.DataSeriesManager;

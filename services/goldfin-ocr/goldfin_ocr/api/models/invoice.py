@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Goldfin Service Admin API
+    Goldfin Service API
 
-    REST API for Goldfin Service Administration
+    REST API for Goldfin Intelligent Invoice Processing
 
     OpenAPI spec version: 1.0.0
     Contact: info@goldfin.io
@@ -37,7 +37,7 @@ class Invoice(object):
         'tags': 'str',
         'identifier': 'str',
         'effective_date': 'datetime',
-        'vendor': 'str',
+        'vendor_identifier': 'str',
         'subtotal_amount': 'float',
         'tax': 'float',
         'total_amount': 'float',
@@ -53,7 +53,7 @@ class Invoice(object):
         'tags': 'tags',
         'identifier': 'identifier',
         'effective_date': 'effectiveDate',
-        'vendor': 'vendor',
+        'vendor_identifier': 'vendorIdentifier',
         'subtotal_amount': 'subtotalAmount',
         'tax': 'tax',
         'total_amount': 'totalAmount',
@@ -62,7 +62,7 @@ class Invoice(object):
         'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, document_id=None, description=None, tags=None, identifier=None, effective_date=None, vendor=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, items=None, creation_date=None):
+    def __init__(self, id=None, document_id=None, description=None, tags=None, identifier=None, effective_date=None, vendor_identifier=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, items=None, creation_date=None):
         """
         Invoice - a model defined in Swagger
         """
@@ -73,7 +73,7 @@ class Invoice(object):
         self._tags = None
         self._identifier = None
         self._effective_date = None
-        self._vendor = None
+        self._vendor_identifier = None
         self._subtotal_amount = None
         self._tax = None
         self._total_amount = None
@@ -93,8 +93,8 @@ class Invoice(object):
           self.identifier = identifier
         if effective_date is not None:
           self.effective_date = effective_date
-        if vendor is not None:
-          self.vendor = vendor
+        if vendor_identifier is not None:
+          self.vendor_identifier = vendor_identifier
         if subtotal_amount is not None:
           self.subtotal_amount = subtotal_amount
         if tax is not None:
@@ -247,27 +247,27 @@ class Invoice(object):
         self._effective_date = effective_date
 
     @property
-    def vendor(self):
+    def vendor_identifier(self):
         """
-        Gets the vendor of this Invoice.
-        Vendor name
+        Gets the vendor_identifier of this Invoice.
+        Vendor identifier
 
-        :return: The vendor of this Invoice.
+        :return: The vendor_identifier of this Invoice.
         :rtype: str
         """
-        return self._vendor
+        return self._vendor_identifier
 
-    @vendor.setter
-    def vendor(self, vendor):
+    @vendor_identifier.setter
+    def vendor_identifier(self, vendor_identifier):
         """
-        Sets the vendor of this Invoice.
-        Vendor name
+        Sets the vendor_identifier of this Invoice.
+        Vendor identifier
 
-        :param vendor: The vendor of this Invoice.
+        :param vendor_identifier: The vendor_identifier of this Invoice.
         :type: str
         """
 
-        self._vendor = vendor
+        self._vendor_identifier = vendor_identifier
 
     @property
     def subtotal_amount(self):

@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Goldfin Service Admin API
+    Goldfin Service API
 
-    REST API for Goldfin Service Administration
+    REST API for Goldfin Intelligent Invoice Processing
 
     OpenAPI spec version: 1.0.0
     Contact: info@goldfin.io
@@ -15,13 +15,17 @@ from __future__ import absolute_import
 
 # import models into model package
 from .api_response import ApiResponse
+from .data_series import DataSeries
 from .document import Document
 from .document_parameters import DocumentParameters
 from .document_region import DocumentRegion
+from .host import Host
 from .invoice import Invoice
 from .invoice_item import InvoiceItem
 from .invoice_parameters import InvoiceParameters
 from .login_credentials import LoginCredentials
+from .observation import Observation
+from .result import Result
 from .tag import Tag
 from .tenant import Tenant
 from .tenant_parameters import TenantParameters

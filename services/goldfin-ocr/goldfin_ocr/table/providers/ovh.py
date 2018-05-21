@@ -8,7 +8,7 @@ import re
 from decimal import Decimal
 from goldfin_ocr.api.models.invoice import Invoice
 from goldfin_ocr.api.models.invoice_item import InvoiceItem
-import goldfin_ocr.data as data
+import goldfin_ocr.data_utils as data_utils
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -142,7 +142,7 @@ class OvhProcessor:
         for item in invoice.items:
             sample_resource_ids.append(item.resource_id)
         for item in invoice.items:
-            item.resource_id = data.clean_host_name(item.resource_id,
+            item.resource_id = data_utils.clean_host_name(item.resource_id,
                                                     sample_resource_ids)
 
         # Cross check content.

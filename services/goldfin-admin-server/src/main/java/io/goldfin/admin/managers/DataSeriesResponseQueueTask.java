@@ -6,18 +6,22 @@ package io.goldfin.admin.managers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.service.api.model.Document;
-import io.goldfin.admin.service.api.model.Document.StateEnum;
+import io.goldfin.admin.service.api.model.DataSeries;
+import io.goldfin.admin.service.api.model.DataSeries.StateEnum;
 import io.goldfin.admin.service.api.model.Host;
+import io.goldfin.admin.service.api.model.Result;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.data.Session;
-import io.goldfin.tenant.data.DocumentDataService;
+import io.goldfin.shared.utilities.JsonHelper;
+import io.goldfin.tenant.data.DataSeriesDataService;
+import io.goldfin.tenant.data.HostDataService;
 
 /**
- * Executes an endless loop to look for and process data series analysis responses.
+ * Executes an endless loop to look for and process data series analysis
+ * responses.
  */
 public class DataSeriesResponseQueueTask implements Runnable {
 	static final Logger logger = LoggerFactory.getLogger(DataSeriesResponseQueueTask.class);
@@ -88,13 +92,13 @@ public class DataSeriesResponseQueueTask implements Runnable {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Received message: " + response.toString());
 			}
-			if ("Host".equals(response.getContentClass())) {
+			if ("Result".equals(response.getContentClass())) {
 				processContent(response);
 			} else if ("ApiResponse".equals(response.getContentClass())) {
 				ApiResponseMessage apiResponse = response.decodeContent(ApiResponseMessage.class);
 				logger.error("Got an API response back: " + apiResponse.toString());
 				if ("error".equalsIgnoreCase(apiResponse.getType())) {
-					processScanError(response);
+					processError(response);
 				}
 			} else {
 				logger.error(String.format("Unexpected content class: class=%s, content=%s", response.getContentClass(),
@@ -109,11 +113,11 @@ public class DataSeriesResponseQueueTask implements Runnable {
 	 */
 	private void processContent(StructuredMessage inventoryResponse) {
 		// Fetch header information and validate information.
-		logger.info(String.format("Processing invoice response: %s", inventoryResponse.toString()));
+		logger.info(String.format("Processing data series response: %s", inventoryResponse.toString()));
 		String type = inventoryResponse.getType();
 		String operation = inventoryResponse.getOperation();
 		String tenantId = inventoryResponse.getTenantId();
-		String documentId = inventoryResponse.getXactTag();
+		String dataSeriesId = inventoryResponse.getXactTag();
 		if (!"process".equals(operation)) {
 			logger.error("ABORT: Expected a process operation");
 			return;
@@ -123,23 +127,68 @@ public class DataSeriesResponseQueueTask implements Runnable {
 			return;
 		}
 
-		// Decode the invoice and fill in document ID.
-		Host[] hosts = inventoryResponse.decodeContent(new Host[0].getClass());
-		throw new RuntimeException("Unimplemented");
+		// Decode the response.
+		Result[] results = inventoryResponse.decodeContent(new Result[0].getClass());
 
-		// Start a transaction to upsert host inventory records, then update the data series record. 
+		// Start a transaction to upsert inventory records, then update the data series
+		// record.
+		DataSeriesDataService dsDataService = new DataSeriesDataService();
+		HostDataService hostDataService = new HostDataService();
+		Session session = null;
+		try {
+			session = context.tenantSession(tenantId).enlist(dsDataService).enlist(hostDataService);
+			// See if we have a matching data series. If not, the transaction must be
+			// aborted.
+			DataSeries dataSeries = dsDataService.get(dataSeriesId);
+			if (dataSeries == null) {
+				throw new Exception(String.format(
+						"Data Series ID does not exist, discarding response: tenantId=%s, dataSeriesId=%s", tenantId,
+						dataSeriesId));
+			}
+
+			// Deserialize and add each result we recognize.
+			for (Result result : results) {
+				if ("Host".equals(result.getResultType())) {
+					Host host = JsonHelper.readFromString(result.getData(), Host.class);
+					hostDataService.create(host);
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("Adding host inventory record: resource=%s", host.getHostId(),
+								host.getResourceId(), host.getEffectiveDate()));
+					}
+				} else {
+					throw new Exception(
+							String.format("Unrecognized result type: resultType=%s, tenantId=%s, dataSeriesId=%s",
+									result.getResultType(), tenantId, dataSeriesId));
+				}
+			}
+
+			// Update the data series.
+			dataSeries.setState(StateEnum.PROCESSED);
+			dsDataService.update(dataSeries.getId().toString(), dataSeries);
+
+			// Great, we're done. Commit the whole thing and head for home.
+			session.commit();
+			logger.info(String.format("Successfully added data series response: tenantId=%s, dataSeriesId=%s", tenantId,
+					dataSeries.getId().toString()));
+		} catch (Exception e) {
+			logger.error(String.format("Transaction failed: %s", e.getMessage()), e);
+			if (session != null)
+				logger.debug("Rolling back session");
+			session.rollback();
+		}
+
 	}
 
 	/**
-	 * Handle a document scan error
+	 * Handle a data series processing error
 	 */
-	private void processScanError(StructuredMessage inventoryResponse) {
+	private void processError(StructuredMessage inventoryResponse) {
 		// Fetch header information and validate information.
 		logger.info(String.format("Processing inventory response: %s", inventoryResponse.toString()));
 		String type = inventoryResponse.getType();
 		String operation = inventoryResponse.getOperation();
 		String tenantId = inventoryResponse.getTenantId();
-		String documentId = inventoryResponse.getXactTag();
+		String dataSeriesId = inventoryResponse.getXactTag();
 		if (!"process".equals(operation)) {
 			logger.error("ABORT: Expected a process operation");
 			return;
@@ -152,27 +201,27 @@ public class DataSeriesResponseQueueTask implements Runnable {
 		// Decode the response message.
 		ApiResponseMessage apiResponse = inventoryResponse.decodeContent(ApiResponseMessage.class);
 
-		// Start a transaction to update the document with ERROR state.
-		DocumentDataService documentDataService = new DocumentDataService();
-		try (Session session = context.tenantSession(tenantId).enlist(documentDataService)) {
-			// See if we have a document. If not, the transaction must be aborted.
-			Document document = documentDataService.get(documentId);
-			if (document == null) {
+		// Start a transaction to update the data series with ERROR state.
+		DataSeriesDataService dsDataService = new DataSeriesDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(dsDataService)) {
+			// See if we have a data series. If not, the transaction must be aborted.
+			DataSeries dataSeries = dsDataService.get(dataSeriesId);
+			if (dataSeries == null) {
 				logger.error(String.format(
-						"Document ID does not exist, discarding error response: tenantId=%s, documentId=%s", tenantId,
-						documentId));
+						"Data Series ID does not exist, discarding error response: tenantId=%s, dataSeriesId=%s",
+						tenantId, dataSeriesId));
 				session.rollback();
 				return;
 			}
 
-			// Update the document.
-			document.setState(StateEnum.ERROR);
-			documentDataService.update(documentId, document);
+			// Update the data series.
+			dataSeries.setState(StateEnum.ERROR);
+			dsDataService.update(dataSeriesId, dataSeries);
 
 			// Commit.
 			session.commit();
-			logger.info(String.format("Logged document scan error: tenantId=%s, documentId=%s, message=%s", tenantId,
-					documentId, apiResponse.getMessage()));
+			logger.info(String.format("Logged data series processing error: tenantId=%s, dataSeriesId=%s, message=%s",
+					tenantId, dataSeriesId, apiResponse.getMessage()));
 		}
 	}
 }

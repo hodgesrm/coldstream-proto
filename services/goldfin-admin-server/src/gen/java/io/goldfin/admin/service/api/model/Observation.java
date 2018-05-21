@@ -23,13 +23,13 @@ import java.util.Date;
 import javax.validation.constraints.*;
 
 /**
- * Raw observation data related to a vendor offering
+ * Generic observation data related to a vendor offering
  */
-@ApiModel(description = "Raw observation data related to a vendor offering")
+@ApiModel(description = "Generic observation data related to a vendor offering")
 
 public class Observation   {
-  @JsonProperty("vendorIdentifer")
-  private String vendorIdentifer = null;
+  @JsonProperty("vendorIdentifier")
+  private String vendorIdentifier = null;
 
   @JsonProperty("effectiveDate")
   private Date effectiveDate = null;
@@ -38,10 +38,10 @@ public class Observation   {
   private String description = null;
 
   /**
-   * Kind of observation, e.g., inventory.
+   * Kind of observation, e.g., host inventory.
    */
   public enum ObservationTypeEnum {
-    INVENTORY("INVENTORY");
+    INVENTORY("HOST_INVENTORY");
 
     private String value;
 
@@ -75,23 +75,23 @@ public class Observation   {
   @JsonProperty("version")
   private String version = null;
 
-  public Observation vendorIdentifer(String vendorIdentifer) {
-    this.vendorIdentifer = vendorIdentifer;
+  public Observation vendorIdentifier(String vendorIdentifier) {
+    this.vendorIdentifier = vendorIdentifier;
     return this;
   }
 
   /**
    * Vendor identifier key
-   * @return vendorIdentifer
+   * @return vendorIdentifier
    **/
-  @JsonProperty("vendorIdentifer")
+  @JsonProperty("vendorIdentifier")
   @ApiModelProperty(value = "Vendor identifier key")
-  public String getVendorIdentifer() {
-    return vendorIdentifer;
+  public String getVendorIdentifier() {
+    return vendorIdentifier;
   }
 
-  public void setVendorIdentifer(String vendorIdentifer) {
-    this.vendorIdentifer = vendorIdentifer;
+  public void setVendorIdentifier(String vendorIdentifier) {
+    this.vendorIdentifier = vendorIdentifier;
   }
 
   public Observation effectiveDate(Date effectiveDate) {
@@ -138,11 +138,11 @@ public class Observation   {
   }
 
   /**
-   * Kind of observation, e.g., inventory.
+   * Kind of observation, e.g., host inventory.
    * @return observationType
    **/
   @JsonProperty("observationType")
-  @ApiModelProperty(value = "Kind of observation, e.g., inventory.")
+  @ApiModelProperty(value = "Kind of observation, e.g., host inventory.")
   public ObservationTypeEnum getObservationType() {
     return observationType;
   }
@@ -157,11 +157,11 @@ public class Observation   {
   }
 
   /**
-   * String containing serialized observations
+   * String containing serialized observation data
    * @return data
    **/
   @JsonProperty("data")
-  @ApiModelProperty(value = "String containing serialized observations")
+  @ApiModelProperty(value = "String containing serialized observation data")
   public String getData() {
     return data;
   }
@@ -199,7 +199,7 @@ public class Observation   {
       return false;
     }
     Observation observation = (Observation) o;
-    return Objects.equals(this.vendorIdentifer, observation.vendorIdentifer) &&
+    return Objects.equals(this.vendorIdentifier, observation.vendorIdentifier) &&
         Objects.equals(this.effectiveDate, observation.effectiveDate) &&
         Objects.equals(this.description, observation.description) &&
         Objects.equals(this.observationType, observation.observationType) &&
@@ -209,7 +209,7 @@ public class Observation   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(vendorIdentifer, effectiveDate, description, observationType, data, version);
+    return Objects.hash(vendorIdentifier, effectiveDate, description, observationType, data, version);
   }
 
 
@@ -218,7 +218,7 @@ public class Observation   {
     StringBuilder sb = new StringBuilder();
     sb.append("class Observation {\n");
     
-    sb.append("    vendorIdentifer: ").append(toIndentedString(vendorIdentifer)).append("\n");
+    sb.append("    vendorIdentifier: ").append(toIndentedString(vendorIdentifier)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    observationType: ").append(toIndentedString(observationType)).append("\n");
