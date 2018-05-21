@@ -147,8 +147,18 @@ public class DataSeriesResponseQueueTask implements Runnable {
 			}
 
 			// Deserialize and add each result we recognize.
+			boolean deleteObsoleteHostRecords = true;
 			for (Result result : results) {
 				if ("Host".equals(result.getResultType())) {
+					// Ensure any host records from this data series are deleted before adding new
+					// ones.
+					if (deleteObsoleteHostRecords) {
+						int deleted = hostDataService.deleteByDataSeriesId(dataSeriesId);
+						logger.info(String.format("Deleting obsolete host records: dataSeriesId=%s, deleted=%d",
+								dataSeriesId, deleted));
+						deleteObsoleteHostRecords = false;
+					}
+
 					Host host = JsonHelper.readFromString(result.getData(), Host.class);
 					hostDataService.create(host);
 					if (logger.isDebugEnabled()) {

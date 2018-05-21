@@ -90,6 +90,11 @@ public class HostDataService implements TransactionalService<Host> {
 		return new SqlDelete().table("hosts").id(UUID.fromString(id)).run(session);
 	}
 
+	/** Delete all hosts with a specific data series ID. */
+	public int deleteByDataSeriesId(String dataSeriesId) {
+		return new SqlDelete().table("hosts").where("data_series_id = ?", UUID.fromString(dataSeriesId)).run(session);
+	}
+
 	/** Return the host. */
 	public Host get(String id) {
 		TabularResultSet result = new SqlSelect().table("hosts").get(COLUMN_NAMES).id(UUID.fromString(id)).run(session);
