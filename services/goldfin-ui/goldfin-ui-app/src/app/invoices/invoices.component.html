@@ -21,7 +21,7 @@
 
     <clr-dg-column [clrDgField]="'identifier'">Identifier</clr-dg-column>
     <clr-dg-column [clrDgField]="'effective_date'">Effective Date</clr-dg-column>
-    <clr-dg-column [clrDgField]="'vendor'">Vendor</clr-dg-column>
+    <clr-dg-column [clrDgField]="'vendor_identifier'">Vendor</clr-dg-column>
     <clr-dg-column [clrDgField]="'subtotal_amount'">Subtotal</clr-dg-column>
     <clr-dg-column [clrDgField]="'tax'">Tax</clr-dg-column>
     <clr-dg-column [clrDgField]="'total_amount'">Total</clr-dg-column>
@@ -30,7 +30,7 @@
     <clr-dg-row *clrDgItems="let invoice of invoices" [clrDgItem]="invoice">
         <clr-dg-cell>{{invoice.identifier}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.effectiveDate}}</clr-dg-cell>
-        <clr-dg-cell>{{invoice.vendor}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.vendorIdentifier}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.subtotalAmount}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.tax}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.totalAmount}}</clr-dg-cell>
@@ -59,7 +59,7 @@
           Inv Effective Date
         </ng-container>
       </clr-dg-column>
-      <clr-dg-column [clrDgField]="'invoice_vendor'">
+      <clr-dg-column [clrDgField]="'invoice_vendor_identifier'">
         <ng-container *clrDgHideableColumn="{hidden: true}">
           Inv Vendor
         </ng-container>
@@ -150,7 +150,7 @@
         <clr-dg-cell>{{item.invoice_description}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_identifier}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_effectiveDate}}</clr-dg-cell>
-        <clr-dg-cell>{{item.invoice_vendor}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_vendorIdentifier}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_subtotalAmount}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_tax}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_totalAmount}}</clr-dg-cell>

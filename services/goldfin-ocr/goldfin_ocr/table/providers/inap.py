@@ -38,7 +38,7 @@ class InapProcessor:
         # Extract invoice header information available from text blocks.
         # For OVH the sub-total is in the same table as the invoice item rows.
         invoice = Invoice()
-        invoice.vendor = "Internap Corporation"
+        invoice.vendor_identifier = "Internap Corporation"
 
         invoice.identifier = self._find_first_group_1(
             r'.*Invoice\s*Number:\s*(\S*)\s*')

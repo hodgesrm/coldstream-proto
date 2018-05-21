@@ -1,0 +1,17 @@
+<!--
+  ~ Copyright (c) 2017-2018 Goldfin.io. All Rights Reserved.
+  -->
+<clr-tabs>
+    <clr-tab>
+        <button clrTabLink id="documents">Documents</button>
+        <clr-tab-content id="content1" *clrIfActive>
+           <documents>Loading...</documents>
+        </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+        <button clrTabLink id="data_series">Monitoring Data</button>
+        <clr-tab-content id="content2" *clrIfActive>
+        Your data sources do not include any monitoring data series
+        </clr-tab-content>
+    </clr-tab>
+</clr-tabs>

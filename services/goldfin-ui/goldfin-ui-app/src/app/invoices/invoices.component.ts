@@ -17,7 +17,7 @@ export class InvoiceJoinedToItem {
   invoice_description?: string;
   invoice_identifier?: string;
   invoice_effectiveDate?: Date;
-  invoice_vendor?: string;
+  invoice_vendorIdentifier?: string;
   invoice_subtotalAmount?: number;
   invoice_tax?: number;
   invoice_totalAmount?: number;
@@ -86,7 +86,7 @@ export class InvoicesComponent implements OnInit {
           joined.invoice_description = invoice.description;
           joined.invoice_identifier = invoice.identifier;
           joined.invoice_effectiveDate = invoice.effectiveDate;
-          joined.invoice_vendor = invoice.vendor;
+          joined.invoice_vendorIdentifier = invoice.vendorIdentifier;
           joined.invoice_subtotalAmount = invoice.subtotalAmount;
           joined.invoice_tax = invoice.tax;
           joined.invoice_totalAmount = invoice.totalAmount;

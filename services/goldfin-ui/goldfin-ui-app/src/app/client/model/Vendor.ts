@@ -1,6 +1,6 @@
 /**
- * Goldfin Service Admin API
- * REST API for Goldfin Service Administration
+ * Goldfin Service API
+ * REST API for Goldfin Intelligent Invoice Processing
  *
  * OpenAPI spec version: 1.0.0
  * Contact: info@goldfin.io
@@ -22,7 +22,7 @@ export interface Vendor {
     id?: string;
 
     /**
-     * Key used to describe vendor for accounting purposes
+     * Standard key used to describe vendor for accounting purposes
      */
     identifier?: string;
 

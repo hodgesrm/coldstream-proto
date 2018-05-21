@@ -51,7 +51,7 @@ export class DocumentService {
     for (var i = 0; i < documents.length; i++) {
       var doc = documents[i];
       console.log("Scan scheduled: " + doc.id);
-      var next = this.documentApi.documentScan(doc.id).toPromise();
+      var next = this.documentApi.documentProcess(doc.id).toPromise();
       promises.push(next);
     }
     return Promise.all(promises)

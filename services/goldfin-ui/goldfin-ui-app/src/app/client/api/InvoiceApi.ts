@@ -1,6 +1,6 @@
 /**
- * Goldfin Service Admin API
- * REST API for Goldfin Service Administration
+ * Goldfin Service API
+ * REST API for Goldfin Intelligent Invoice Processing
  *
  * OpenAPI spec version: 1.0.0
  * Contact: info@goldfin.io
@@ -28,7 +28,7 @@ import { Configuration }                                     from '../configurat
 @Injectable()
 export class InvoiceApi {
 
-    protected basePath = 'https://admin.goldfin.io/api/v1';
+    protected basePath = 'https://api.goldfin.io/api/v1';
     public defaultHeaders: Headers = new Headers();
     public configuration: Configuration = new Configuration();
 

@@ -13,17 +13,22 @@
 import * as models from './models';
 
 /**
- * User settable invoice parameters
+ * Generic result of processing observation data
  */
-export interface InvoiceParameters {
+export interface Result {
     /**
-     * A user-provided description of the invoice
+     * Id of data series from which result is derived
      */
-    description?: string;
+    dataSeriesId?: string;
 
     /**
-     * A user-provided list of name-value pairs that describe the invoice
+     * Class of result
      */
-    tags?: string;
+    resultType?: string;
+
+    /**
+     * String containing serialized result data
+     */
+    data?: string;
 
 }

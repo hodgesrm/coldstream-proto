@@ -8,6 +8,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AboutComponent } from './about/about.component';
 import { HomeComponent } from './home/home.component';
+import { SourcesComponent } from './documents/sources.component';
 import { DocumentsComponent } from './documents/documents.component';
 import { InvoicesComponent } from './invoices/invoices.component';
 import { InventoryComponent } from './inventory/inventory.component';
@@ -24,7 +25,7 @@ export const ROUTES: Routes = [
       canActivate: [AuthGuardService]
     },
     {
-      path: 'documents', component: DocumentsComponent,
+      path: 'sources', component: SourcesComponent,
       canActivate: [AuthGuardService]
     },
     {

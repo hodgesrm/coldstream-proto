@@ -48,7 +48,7 @@ class LeasewebProcessor:
         # Extract invoice header information available from text blocks.
         logger.info(util.dump_to_json(self._tabular_model))
         invoice = Invoice()
-        invoice.vendor = "LeaseWeb"
+        invoice.vendor_identifier = "LeaseWeb"
         invoice.items = []
 
         # Find first page and define geometric positions of header info.

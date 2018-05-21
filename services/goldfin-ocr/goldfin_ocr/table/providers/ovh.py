@@ -42,7 +42,7 @@ class OvhProcessor:
         # Extract invoice header information available from text blocks.
         # For OVH the sub-total is in the same table as the invoice item rows.
         invoice = Invoice()
-        invoice.vendor = "OVH.com"
+        invoice.vendor_identifier = "OVH.com"
         invoice.identifier = self._find_first_group_1(
             r'^Invoice:\s*(\S.*\S)\s*$')
         logger.debug(invoice.identifier)

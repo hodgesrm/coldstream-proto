@@ -11,6 +11,7 @@ import { AssetSpendComponent } from "./home/asset-spend.component";
 import { IndustryBaselineComponent } from "./home/industry-baseline.component";
 import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
+import { SourcesComponent } from "./documents/sources.component";
 import { DocumentsComponent } from "./documents/documents.component";
 import { DocUploadModalComponent } from "./documents/doc-upload-modal.component";
 import { InventoryComponent } from "./inventory/inventory.component";
@@ -51,6 +52,7 @@ import { DocumentApiExtended } from "./services/DocumentApiExtended";
         HomeComponent,
         AssetSpendComponent,
         IndustryBaselineComponent,
+        SourcesComponent,
         DocumentsComponent,
         DocUploadModalComponent,
         InvoicesComponent,

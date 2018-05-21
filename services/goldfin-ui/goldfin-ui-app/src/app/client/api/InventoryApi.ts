@@ -26,7 +26,7 @@ import { Configuration }                                     from '../configurat
 
 
 @Injectable()
-export class TenantApi {
+export class InventoryApi {
 
     protected basePath = 'https://api.goldfin.io/api/v1';
     public defaultHeaders: Headers = new Headers();
@@ -42,12 +42,14 @@ export class TenantApi {
     }
 
     /**
-     * Upload a new tenant registration request.
-     * @summary Create a new tenant
-     * @param body Tenant creation parameters
+     * Upload data series in a file for analysis
+     * @summary Upload data series
+     * @param file Data series content
+     * @param description A optional description of the data series
+     * @param process Optional flag to kick off processing automatically if true
      */
-    public tenantCreate(body: models.TenantParameters, extraHttpRequestParams?: any): Observable<models.Tenant> {
-        return this.tenantCreateWithHttpInfo(body, extraHttpRequestParams)
+    public dataCreate(file: any, description?: string, process?: boolean, extraHttpRequestParams?: any): Observable<models.DataSeries> {
+        return this.dataCreateWithHttpInfo(file, description, process, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -58,12 +60,12 @@ export class TenantApi {
     }
 
     /**
-     * Delete a single tenant
-     * @summary Delete a tenant
-     * @param id Tenant ID
+     * Delete a data series and any derived information
+     * @summary Delete a data series
+     * @param id Series ID
      */
-    public tenantDelete(id: string, extraHttpRequestParams?: any): Observable<{}> {
-        return this.tenantDeleteWithHttpInfo(id, extraHttpRequestParams)
+    public dataDelete(id: string, extraHttpRequestParams?: any): Observable<{}> {
+        return this.dataDeleteWithHttpInfo(id, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -74,12 +76,12 @@ export class TenantApi {
     }
 
     /**
-     * Return all information relative to a single tenant
-     * @summary Show a single tenant
-     * @param id Tenant ID
+     * Run background processing of data series, which may generate one or more inventory records.
+     * @summary Kick off background processing of data series
+     * @param id Series ID
      */
-    public tenantShow(id: string, extraHttpRequestParams?: any): Observable<models.Tenant> {
-        return this.tenantShowWithHttpInfo(id, extraHttpRequestParams)
+    public dataProcess(id: string, extraHttpRequestParams?: any): Observable<{}> {
+        return this.dataProcessWithHttpInfo(id, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -90,11 +92,12 @@ export class TenantApi {
     }
 
     /**
-     * Return a list of all tenants
-     * @summary List tenants
+     * Download data series metadata without content
+     * @summary Return data series metadata
+     * @param id Series ID
      */
-    public tenantShowall(extraHttpRequestParams?: any): Observable<{}> {
-        return this.tenantShowallWithHttpInfo(extraHttpRequestParams)
+    public dataShow(id: string, extraHttpRequestParams?: any): Observable<models.DataSeries> {
+        return this.dataShowWithHttpInfo(id, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -105,13 +108,11 @@ export class TenantApi {
     }
 
     /**
-     * Update invoice description and tags. Changes to other fields are ignored
-     * @summary Update a tenant
-     * @param id Tenant ID
-     * @param body Tenant parameters
+     * Return a list of metadata entries for all data series
+     * @summary List data serties
      */
-    public tenantUpdate(id: string, body?: models.TenantParameters, extraHttpRequestParams?: any): Observable<{}> {
-        return this.tenantUpdateWithHttpInfo(id, body, extraHttpRequestParams)
+    public dataShowAll(extraHttpRequestParams?: any): Observable<Array<models.DataSeries>> {
+        return this.dataShowAllWithHttpInfo(extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -122,12 +123,12 @@ export class TenantApi {
     }
 
     /**
-     * Upload a new user registration request.
-     * @summary Create a new user for a tenant
-     * @param body User registration request parameters
+     * Download data series content
+     * @summary Return data series content
+     * @param id Series ID
      */
-    public userCreate(body: models.UserParameters, extraHttpRequestParams?: any): Observable<models.User> {
-        return this.userCreateWithHttpInfo(body, extraHttpRequestParams)
+    public dataShowContent(id: string, extraHttpRequestParams?: any): Observable<{}> {
+        return this.dataShowContentWithHttpInfo(id, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -138,12 +139,12 @@ export class TenantApi {
     }
 
     /**
-     * Delete a user
-     * @summary Delete a user
-     * @param id User ID
+     * Delete a host record.  It can be recreated by rescanning the corresponding document
+     * @summary Delete host record
+     * @param id Invoice ID
      */
-    public userDelete(id: string, extraHttpRequestParams?: any): Observable<{}> {
-        return this.userDeleteWithHttpInfo(id, extraHttpRequestParams)
+    public hostDelete(id: string, extraHttpRequestParams?: any): Observable<{}> {
+        return this.hostDeleteWithHttpInfo(id, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -154,12 +155,12 @@ export class TenantApi {
     }
 
     /**
-     * Return all information relative to a single user
-     * @summary Show a single user
-     * @param id User ID
+     * Returns the most recent inventory record for a specific host.  The host must be identified by the resource ID or internal ID
+     * @summary Show single host inventory record
+     * @param id Host resource ID
      */
-    public userShow(id: string, extraHttpRequestParams?: any): Observable<models.Tenant> {
-        return this.userShowWithHttpInfo(id, extraHttpRequestParams)
+    public hostShow(id: string, extraHttpRequestParams?: any): Observable<models.Host> {
+        return this.hostShowWithHttpInfo(id, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -170,45 +171,11 @@ export class TenantApi {
     }
 
     /**
-     * Return a list of all users visible to current user
-     * @summary List users
+     * Return a list of current hosts in inventory.  This returns the most recent record for each host.
+     * @summary List current host inventory records
      */
-    public userShowall(extraHttpRequestParams?: any): Observable<Array<models.User>> {
-        return this.userShowallWithHttpInfo(extraHttpRequestParams)
-            .map((response: Response) => {
-                if (response.status === 204) {
-                    return undefined;
-                } else {
-                    return response.json() || {};
-                }
-            });
-    }
-
-    /**
-     * Update user description
-     * @summary Update a user
-     * @param id User ID
-     * @param body User parameters
-     */
-    public userUpdate(id: string, body?: models.UserParameters, extraHttpRequestParams?: any): Observable<{}> {
-        return this.userUpdateWithHttpInfo(id, body, extraHttpRequestParams)
-            .map((response: Response) => {
-                if (response.status === 204) {
-                    return undefined;
-                } else {
-                    return response.json() || {};
-                }
-            });
-    }
-
-    /**
-     * Sets a new user password
-     * @summary Update user password
-     * @param id User ID
-     * @param body Password change parameters
-     */
-    public userUpdatePassword(id: string, body?: models.UserPasswordParameters, extraHttpRequestParams?: any): Observable<{}> {
-        return this.userUpdatePasswordWithHttpInfo(id, body, extraHttpRequestParams)
+    public hostShowAll(extraHttpRequestParams?: any): Observable<Array<models.Host>> {
+        return this.hostShowAllWithHttpInfo(extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -220,22 +187,26 @@ export class TenantApi {
 
 
     /**
-     * Create a new tenant
-     * Upload a new tenant registration request.
-     * @param body Tenant creation parameters
+     * Upload data series
+     * Upload data series in a file for analysis
+     * @param file Data series content
+     * @param description A optional description of the data series
+     * @param process Optional flag to kick off processing automatically if true
      */
-    public tenantCreateWithHttpInfo(body: models.TenantParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/tenant';
+    public dataCreateWithHttpInfo(file: any, description?: string, process?: boolean, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/data';
 
         let queryParameters = new URLSearchParams();
         let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'body' is not null or undefined
-        if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling tenantCreate.');
+        let formParams = new URLSearchParams();
+
+        // verify required parameter 'file' is not null or undefined
+        if (file === null || file === undefined) {
+            throw new Error('Required parameter file was null or undefined when calling dataCreate.');
         }
         // to determine the Content-Type header
         let consumes: string[] = [
-            'application/json'
+            'multipart/form-data'
         ];
 
         // to determine the Accept header
@@ -248,12 +219,24 @@ export class TenantApi {
             headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
         }
 
-        headers.set('Content-Type', 'application/json');
+        headers.set('Content-Type', 'application/x-www-form-urlencoded');
+
+        if (description !== undefined) {
+            formParams.set('description', <any>description);
+        }
+
+        if (process !== undefined) {
+            formParams.set('process', <any>process);
+        }
+
+        if (file !== undefined) {
+            formParams.set('file', <any>file);
+        }
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Post,
             headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
+            body: formParams.toString(),
             search: queryParameters,
             withCredentials:this.configuration.withCredentials
         });
@@ -266,19 +249,19 @@ export class TenantApi {
     }
 
     /**
-     * Delete a tenant
-     * Delete a single tenant
-     * @param id Tenant ID
+     * Delete a data series
+     * Delete a data series and any derived information
+     * @param id Series ID
      */
-    public tenantDeleteWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/tenant/${id}'
+    public dataDeleteWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/data/${id}'
                     .replace('${' + 'id' + '}', String(id));
 
         let queryParameters = new URLSearchParams();
         let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
         // verify required parameter 'id' is not null or undefined
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling tenantDelete.');
+            throw new Error('Required parameter id was null or undefined when calling dataDelete.');
         }
         // to determine the Content-Type header
         let consumes: string[] = [
@@ -309,19 +292,19 @@ export class TenantApi {
     }
 
     /**
-     * Show a single tenant
-     * Return all information relative to a single tenant
-     * @param id Tenant ID
+     * Kick off background processing of data series
+     * Run background processing of data series, which may generate one or more inventory records.
+     * @param id Series ID
      */
-    public tenantShowWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/tenant/${id}'
+    public dataProcessWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/data/${id}/process'
                     .replace('${' + 'id' + '}', String(id));
 
         let queryParameters = new URLSearchParams();
         let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
         // verify required parameter 'id' is not null or undefined
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling tenantShow.');
+            throw new Error('Required parameter id was null or undefined when calling dataProcess.');
         }
         // to determine the Content-Type header
         let consumes: string[] = [
@@ -336,140 +319,10 @@ export class TenantApi {
         if (this.configuration.apiKey) {
             headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
         }
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Get,
-            headers: headers,
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * List tenants
-     * Return a list of all tenants
-     */
-    public tenantShowallWithHttpInfo(extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/tenant';
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // to determine the Content-Type header
-        let consumes: string[] = [
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-            'application/json'
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Get,
-            headers: headers,
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Update a tenant
-     * Update invoice description and tags. Changes to other fields are ignored
-     * @param id Tenant ID
-     * @param body Tenant parameters
-     */
-    public tenantUpdateWithHttpInfo(id: string, body?: models.TenantParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/tenant/${id}'
-                    .replace('${' + 'id' + '}', String(id));
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'id' is not null or undefined
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling tenantUpdate.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-            'application/json'
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        headers.set('Content-Type', 'application/json');
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Put,
-            headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Create a new user for a tenant
-     * Upload a new user registration request.
-     * @param body User registration request parameters
-     */
-    public userCreateWithHttpInfo(body: models.UserParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/user';
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'body' is not null or undefined
-        if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling userCreate.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-            'application/json'
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-            'application/json'
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        headers.set('Content-Type', 'application/json');
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Post,
             headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
             search: queryParameters,
             withCredentials:this.configuration.withCredentials
         });
@@ -482,19 +335,19 @@ export class TenantApi {
     }
 
     /**
-     * Delete a user
-     * Delete a user
-     * @param id User ID
+     * Return data series metadata
+     * Download data series metadata without content
+     * @param id Series ID
      */
-    public userDeleteWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/user/${id}'
+    public dataShowWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/data/${id}'
                     .replace('${' + 'id' + '}', String(id));
 
         let queryParameters = new URLSearchParams();
         let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
         // verify required parameter 'id' is not null or undefined
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling userDelete.');
+            throw new Error('Required parameter id was null or undefined when calling dataShow.');
         }
         // to determine the Content-Type header
         let consumes: string[] = [
@@ -503,6 +356,128 @@ export class TenantApi {
         // to determine the Accept header
         let produces: string[] = [
             'application/json'
+        ];
+
+        // authentication (APIKeyHeader) required
+        if (this.configuration.apiKey) {
+            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
+        }
+
+        let requestOptions: RequestOptionsArgs = new RequestOptions({
+            method: RequestMethod.Get,
+            headers: headers,
+            search: queryParameters,
+            withCredentials:this.configuration.withCredentials
+        });
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
+        }
+
+        return this.http.request(path, requestOptions);
+    }
+
+    /**
+     * List data serties
+     * Return a list of metadata entries for all data series
+     */
+    public dataShowAllWithHttpInfo(extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/data';
+
+        let queryParameters = new URLSearchParams();
+        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
+        // to determine the Content-Type header
+        let consumes: string[] = [
+        ];
+
+        // to determine the Accept header
+        let produces: string[] = [
+            'application/json'
+        ];
+
+        // authentication (APIKeyHeader) required
+        if (this.configuration.apiKey) {
+            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
+        }
+
+        let requestOptions: RequestOptionsArgs = new RequestOptions({
+            method: RequestMethod.Get,
+            headers: headers,
+            search: queryParameters,
+            withCredentials:this.configuration.withCredentials
+        });
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
+        }
+
+        return this.http.request(path, requestOptions);
+    }
+
+    /**
+     * Return data series content
+     * Download data series content
+     * @param id Series ID
+     */
+    public dataShowContentWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/data/${id}/content'
+                    .replace('${' + 'id' + '}', String(id));
+
+        let queryParameters = new URLSearchParams();
+        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
+        // verify required parameter 'id' is not null or undefined
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling dataShowContent.');
+        }
+        // to determine the Content-Type header
+        let consumes: string[] = [
+        ];
+
+        // to determine the Accept header
+        let produces: string[] = [
+            'application/octet-stream'
+        ];
+
+        // authentication (APIKeyHeader) required
+        if (this.configuration.apiKey) {
+            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
+        }
+
+        let requestOptions: RequestOptionsArgs = new RequestOptions({
+            method: RequestMethod.Get,
+            headers: headers,
+            search: queryParameters,
+            withCredentials:this.configuration.withCredentials
+        });
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
+        }
+
+        return this.http.request(path, requestOptions);
+    }
+
+    /**
+     * Delete host record
+     * Delete a host record.  It can be recreated by rescanning the corresponding document
+     * @param id Invoice ID
+     */
+    public hostDeleteWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/host/${id}'
+                    .replace('${' + 'id' + '}', String(id));
+
+        let queryParameters = new URLSearchParams();
+        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
+        // verify required parameter 'id' is not null or undefined
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling hostDelete.');
+        }
+        // to determine the Content-Type header
+        let consumes: string[] = [
+        ];
+
+        // to determine the Accept header
+        let produces: string[] = [
         ];
 
         // authentication (APIKeyHeader) required
@@ -525,19 +500,19 @@ export class TenantApi {
     }
 
     /**
-     * Show a single user
-     * Return all information relative to a single user
-     * @param id User ID
+     * Show single host inventory record
+     * Returns the most recent inventory record for a specific host.  The host must be identified by the resource ID or internal ID
+     * @param id Host resource ID
      */
-    public userShowWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/user/${id}'
+    public hostShowWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/host/${id}'
                     .replace('${' + 'id' + '}', String(id));
 
         let queryParameters = new URLSearchParams();
         let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
         // verify required parameter 'id' is not null or undefined
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling userShow.');
+            throw new Error('Required parameter id was null or undefined when calling hostShow.');
         }
         // to determine the Content-Type header
         let consumes: string[] = [
@@ -568,11 +543,11 @@ export class TenantApi {
     }
 
     /**
-     * List users
-     * Return a list of all users visible to current user
+     * List current host inventory records
+     * Return a list of current hosts in inventory.  This returns the most recent record for each host.
      */
-    public userShowallWithHttpInfo(extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/user';
+    public hostShowAllWithHttpInfo(extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/host';
 
         let queryParameters = new URLSearchParams();
         let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
@@ -593,100 +568,6 @@ export class TenantApi {
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Get,
             headers: headers,
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Update a user
-     * Update user description
-     * @param id User ID
-     * @param body User parameters
-     */
-    public userUpdateWithHttpInfo(id: string, body?: models.UserParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/user/${id}'
-                    .replace('${' + 'id' + '}', String(id));
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'id' is not null or undefined
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling userUpdate.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-            'application/json'
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        headers.set('Content-Type', 'application/json');
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Put,
-            headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Update user password
-     * Sets a new user password
-     * @param id User ID
-     * @param body Password change parameters
-     */
-    public userUpdatePasswordWithHttpInfo(id: string, body?: models.UserPasswordParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/user/${id}/password'
-                    .replace('${' + 'id' + '}', String(id));
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'id' is not null or undefined
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling userUpdatePassword.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-            'application/json'
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        headers.set('Content-Type', 'application/json');
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Put,
-            headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
             search: queryParameters,
             withCredentials:this.configuration.withCredentials
         });
