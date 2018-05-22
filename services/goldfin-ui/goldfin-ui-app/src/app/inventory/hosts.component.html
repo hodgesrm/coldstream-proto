@@ -1,0 +1,154 @@
+<!--
+  ~ Copyright (c) 2018 Goldfin.io. All Rights Reserved.
+  -->
+<clr-datagrid [(clrDgSelected)]="selected">
+    <clr-dg-action-bar>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" (click)="onHostDetail()">Show Details</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" (click)="onExport()">Export Data</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" (click)="onDelete()" >Delete</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-link" (click)="onRefresh()" clrPosition="bottom-right">
+                <clr-icon shape="refresh"></clr-icon>
+            </button>
+        </div>
+    </clr-dg-action-bar>
+
+    <clr-dg-column [clrDgField]="'hostId'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Host ID
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'resourceId'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Resource ID
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'effectiveDate'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Date
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'vendorIdentifier'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Vendor
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'hostType'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Type
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'hostModel'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Model
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'region'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Region
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'zone'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Zone
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'datacenter'">
+      <ng-container *clrDgHideableColumn="{hidden: false}">
+        Data Center
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'cpu'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        CPU
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'socketCount'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Sockets
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'coreCount'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Cores
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'threadCount'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Hardware Threads
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'ram'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        RAM
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'hdd'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Hard Disk Storage
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'ssd'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        SSD Storage
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'nicCount'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        NIC Count
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'networkTrafficLimit'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Network Traffic Limit
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'backupEnabled'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Backup Enabled
+      </ng-container>
+    </clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let host of hosts" [clrDgItem]="host">
+        <clr-dg-cell>{{host.hostId}}</clr-dg-cell>
+        <clr-dg-cell>{{host.resourceId}}</clr-dg-cell>
+        <clr-dg-cell>{{host.effectiveDate}}</clr-dg-cell>
+        <clr-dg-cell>{{host.vendorIdentifier}}</clr-dg-cell>
+        <clr-dg-cell>{{host.hostType}}</clr-dg-cell>
+        <clr-dg-cell>{{host.hostModel}}</clr-dg-cell>
+        <clr-dg-cell>{{host.region}}</clr-dg-cell>
+        <clr-dg-cell>{{host.zone}}</clr-dg-cell>
+        <clr-dg-cell>{{host.datacenter}}</clr-dg-cell>
+        <clr-dg-cell>{{host.cpu}}</clr-dg-cell>
+        <clr-dg-cell>{{host.socketCount}}</clr-dg-cell>
+        <clr-dg-cell>{{host.coreCount}}</clr-dg-cell>
+        <clr-dg-cell>{{host.threadCount}}</clr-dg-cell>
+        <clr-dg-cell>{{asGb(host.ram)}}</clr-dg-cell>
+        <clr-dg-cell>{{asGb(host.hdd)}}</clr-dg-cell>
+        <clr-dg-cell>{{asGb(host.ssd)}}</clr-dg-cell>
+        <clr-dg-cell>{{host.nicCount}}</clr-dg-cell>
+        <clr-dg-cell>{{asGb(host.networkTrafficLimit)}}</clr-dg-cell>
+        <clr-dg-cell>{{host.backupEnabled}}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{hosts.length}} hosts</clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="delete_open">
+  <h3 class="modal-title">Confirm Host Deletion</h3>
+  <div class="modal-body">
+    <p>Are you sure you want to delete the selected hosts? You will need to re-scan the corresponding data series to see them again.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="delete_open = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="onDeleteConfirmed()">Ok</button>
+  </div>
+</clr-modal>
+
+<error-modal [reporter]="errorReporter"></error-modal>

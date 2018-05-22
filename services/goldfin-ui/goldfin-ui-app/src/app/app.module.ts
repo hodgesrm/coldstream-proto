@@ -13,9 +13,10 @@ import { LoginComponent } from "./login/login.component";
 import { InvoicesComponent } from "./invoices/invoices.component";
 import { SourcesComponent } from "./documents/sources.component";
 import { DocumentsComponent } from "./documents/documents.component";
+import { DataSeriesComponent } from "./documents/data-series.component";
 import { DocUploadModalComponent } from "./documents/doc-upload-modal.component";
 import { InventoryComponent } from "./inventory/inventory.component";
-import { InventoryHostsComponent } from "./inventory/inventory_hosts.component";
+import { HostsComponent } from "./inventory/hosts.component";
 import { PricesComponent } from "./prices/prices.component";
 import { PricesHostsComponent } from "./prices/prices_hosts.component";
 import { VendorsComponent } from "./vendors/vendors.component";
@@ -30,6 +31,7 @@ import { AuthGuardService } from "./services/auth.guard.service";
 import { AuthService } from "./services/auth.service";
 import { ConfigurationService } from "./services/config.service";
 import { DocumentService } from "./services/document.service";
+import { DataSeriesService } from "./services/data-series.service";
 import { InvoiceService } from "./services/invoice.service";
 import { HostPriceService } from "./services/host_pricing.service";
 import { HostService } from "./services/host.service";
@@ -39,11 +41,13 @@ import { VendorService } from "./services/vendor.service";
 import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
 import { SecurityApi } from "./client/api/SecurityApi";
+import { InventoryApi } from "./client/api/InventoryApi";
 import { InvoiceApi } from "./client/api/InvoiceApi";
 import { VendorApi } from "./client/api/VendorApi";
 
 // Subclassed from generated code. 
 import { DocumentApiExtended } from "./services/DocumentApiExtended";
+import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
 
 @NgModule({
     declarations: [
@@ -54,10 +58,11 @@ import { DocumentApiExtended } from "./services/DocumentApiExtended";
         IndustryBaselineComponent,
         SourcesComponent,
         DocumentsComponent,
+        DataSeriesComponent,
         DocUploadModalComponent,
         InvoicesComponent,
         InventoryComponent,
-        InventoryHostsComponent,
+        HostsComponent,
         PricesComponent,
         PricesHostsComponent,
         VendorsComponent,
@@ -79,6 +84,7 @@ import { DocumentApiExtended } from "./services/DocumentApiExtended";
       AuthService,
       ConfigurationService,
       DocumentService,
+      DataSeriesService,
       InvoiceService,
       HostService,
       HostPriceService,
@@ -86,8 +92,10 @@ import { DocumentApiExtended } from "./services/DocumentApiExtended";
       Configuration,
       SecurityApi,
       DocumentApiExtended,
+      DataSeriesApiExtended,
+      InventoryApi,
       InvoiceApi,
-      VendorApi,
+      VendorApi
     ],
     bootstrap: [AppComponent]
 })
