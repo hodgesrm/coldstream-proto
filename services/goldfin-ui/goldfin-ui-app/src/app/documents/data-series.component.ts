@@ -27,7 +27,7 @@ export class DataSeriesComponent implements OnInit {
   dataSeries: DataSeries[] = [];
 
   constructor(
-    private documentService: DataSeriesService
+    private dataSeriesService: DataSeriesService
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +35,7 @@ export class DataSeriesComponent implements OnInit {
   }
 
   getDataSeries(): void {
-    this.documentService.loadDataSeries()
+    this.dataSeriesService.loadDataSeries()
       .subscribe(newDataSeries => {
         this.dataSeries = newDataSeries; 
         console.log("Total data series: " + this.dataSeries.length);
@@ -49,7 +49,7 @@ export class DataSeriesComponent implements OnInit {
       this.errorReporter.error_message = "Please select one or more items";
       this.errorReporter.error_open = true;
     } else {
-      this.documentService.processDataSeries(this.selected)
+      this.dataSeriesService.processDataSeries(this.selected)
         .then(function() {
           component.getDataSeries();
         });
@@ -92,7 +92,7 @@ export class DataSeriesComponent implements OnInit {
   onDeleteConfirmed(): void {
     console.log("onDeleteConfirmed invoked");
     var component = this;
-    this.documentService.deleteDataSeries(this.selected)
+    this.dataSeriesService.deleteDataSeries(this.selected)
       .then(function() {
         component.getDataSeries();
       });

@@ -1,3 +1,4 @@
+# Compose file for full Goldfin system.
 version: '3.6'
 services:
    ui:
@@ -10,6 +11,8 @@ services:
        # - "8443:8443"
    ocr:
        image: goldfin-ocr:latest
+   data:
+       image: goldfin-data:latest
    dbms:
        image: postgres:10
        environment:

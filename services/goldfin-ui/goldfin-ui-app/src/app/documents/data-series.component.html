@@ -7,7 +7,7 @@
             <button type="button" class="btn btn-primary" (click)="onUpload()">Upload</button>
         </div>
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" (click)="onScan()">Scan</button>
+            <button type="button" class="btn btn-primary" (click)="onProcess()">Analyze</button>
         </div>
         <div class="btn-group">
             <button type="button" class="btn btn-primary" (click)="onDelete()" >Delete</button>
@@ -27,7 +27,7 @@
     <clr-dg-column [clrDgField]="'format'">Series Type</clr-dg-column>
     <clr-dg-column [clrDgField]="'creationDate'">Load Date</clr-dg-column>
 
-    <clr-dg-row *clrDgItems="let ds of dataSeries" [clrDgItem]="dataSeries">
+    <clr-dg-row *clrDgItems="let ds of dataSeries" [clrDgItem]="ds">
         <clr-dg-cell>{{ds.name}}</clr-dg-cell>
         <clr-dg-cell>{{ds.description}}</clr-dg-cell>
         <clr-dg-cell>{{ds.contentType}}</clr-dg-cell>
@@ -51,6 +51,6 @@
   </div>
 </clr-modal>
 
-<doc-upload-modal [(show)]="upload_open" ></doc-upload-modal>
+<ds-upload-modal [(show)]="upload_open" ></ds-upload-modal>
 
 <error-modal [reporter]="errorReporter"></error-modal>

@@ -49,9 +49,11 @@ export class DataSeriesService {
   processDataSeries(dataSeries: DataSeries[]): Promise<{}> {
     var promises = [];
     for (var i = 0; i < dataSeries.length; i++) {
-      var ds = dataSeries[i];
-      console.log("Processing scheduled: " + ds.id);
-      var next = this.inventoryApi.dataProcess(ds.id).toPromise();
+      var dataS = dataSeries[i];
+      console.log("Processing scheduled: " + dataS.contentType);
+      console.log("Processing scheduled: " + dataS.id);
+      console.log("Processing scheduled: " + dataS);
+      var next = this.inventoryApi.dataProcess(dataS.id).toPromise();
       promises.push(next);
     }
     return Promise.all(promises)
