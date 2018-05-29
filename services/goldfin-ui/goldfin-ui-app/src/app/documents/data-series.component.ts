@@ -61,18 +61,6 @@ export class DataSeriesComponent implements OnInit {
     this.getDataSeries();
   }
 
-  onImport(): void {
-    console.log("onImport invoked");
-  }
-
-  onImportFiles(event): void {
-    console.log("onImport invoked");
-    var files = event.target.files;
-    for (let file of event.target.files) {
-      console.log(file); 
-    }
-  }
-
   onUpload(): void {
     console.log("onUpload invoked");
     this.upload_open = true;

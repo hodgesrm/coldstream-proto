@@ -28,9 +28,9 @@ export class DataSeriesApiExtended extends InventoryApi {
      * load data as URL-encoded search parameters. 
      * @param file DataSeries file
      * @param description A optional description of the data series
-     * @param scan Flag to control scanning
+     * @param process Flag to control automatic analysis of new series
      */
-    public dataCreateWithHttpInfo(file: any, description?: string, scan?: boolean, extraHttpRequestParams?: any): Observable<Response> {
+    public dataCreateWithHttpInfo(file: any, description?: string, process?: boolean, extraHttpRequestParams?: any): Observable<Response> {
         const path = this.basePath + '/data';
 
         let queryParameters = new URLSearchParams();
@@ -63,8 +63,8 @@ export class DataSeriesApiExtended extends InventoryApi {
             formParams.append('description', <any>description);
         }
 
-        if (scan !== undefined) {
-            formParams.append('scan', <any>scan);
+        if (process !== undefined) {
+            formParams.append('process', <any>process);
         }
 
         if (file !== undefined) {

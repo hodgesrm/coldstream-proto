@@ -9,6 +9,8 @@ import { Document } from '../client/model/Document';
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';
 
+import { UploadRequest } from '../utility/file-upload-modal.component';
+
 @Component({
     selector: 'documents', 
     templateUrl: './documents.component.html', 
@@ -17,6 +19,7 @@ import { ErrorModalComponent } from '../utility/error-modal.component';
 export class DocumentsComponent implements OnInit {
   // Model controls. 
   upload_open: boolean = false;
+  file_upload_open: boolean = false;
   delete_open: boolean = false;
 
   // Error reporter sub-component.
@@ -61,21 +64,20 @@ export class DocumentsComponent implements OnInit {
     this.getDocuments();
   }
 
-  onImport(): void {
-    console.log("onImport invoked");
-  }
-
-  onImportFiles(event): void {
-    console.log("onImport invoked");
-    var files = event.target.files;
-    for (let file of event.target.files) {
-      console.log(file); 
-    }
-  }
-
   onUpload(): void {
     console.log("onUpload invoked");
-    this.upload_open = true;
+    this.file_upload_open = true;
+  }
+
+  uploadFile(request: UploadRequest): void {
+    console.log("Upload file: " + request.files);
+    console.log("Upload description: " + request.description);
+    var component = this;
+    this.documentService.uploadDocuments(request.files, request.description)
+      .then(function() {
+        console.log("Submitted");
+        component.getDocuments();
+    });
   }
 
   onDelete(): void {

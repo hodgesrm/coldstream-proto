@@ -28,9 +28,9 @@ export class DocumentApiExtended extends DocumentApi {
      * load data as URL-encoded search parameters. 
      * @param file Document file
      * @param description A optional description of the document
-     * @param scan Flag to control scanning
+     * @param process Flag to control scanning
      */
-    public documentCreateWithHttpInfo(file: any, description?: string, scan?: boolean, extraHttpRequestParams?: any): Observable<Response> {
+    public documentCreateWithHttpInfo(file: any, description?: string, process?: boolean, extraHttpRequestParams?: any): Observable<Response> {
         const path = this.basePath + '/document';
 
         let queryParameters = new URLSearchParams();
@@ -63,8 +63,8 @@ export class DocumentApiExtended extends DocumentApi {
             formParams.append('description', <any>description);
         }
 
-        if (scan !== undefined) {
-            formParams.append('scan', <any>scan);
+        if (process !== undefined) {
+            formParams.append('process', <any>process);
         }
 
         if (file !== undefined) {
