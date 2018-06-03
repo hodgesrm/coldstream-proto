@@ -18,7 +18,6 @@ import { UploadRequest } from '../utility/file-upload-modal.component';
 })
 export class DocumentsComponent implements OnInit {
   // Model controls. 
-  upload_open: boolean = false;
   file_upload_open: boolean = false;
   delete_open: boolean = false;
 

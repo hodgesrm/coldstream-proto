@@ -9,6 +9,8 @@ import { DataSeries } from '../client/model/DataSeries';
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';
 
+import { UploadRequest } from '../utility/file-upload-modal.component';
+
 @Component({
     selector: 'data-series', 
     templateUrl: './data-series.component.html', 
@@ -16,7 +18,7 @@ import { ErrorModalComponent } from '../utility/error-modal.component';
 })
 export class DataSeriesComponent implements OnInit {
   // Model controls. 
-  upload_open: boolean = false;
+  file_upload_open: boolean = false;
   delete_open: boolean = false;
 
   // Error reporter sub-component.
@@ -63,7 +65,18 @@ export class DataSeriesComponent implements OnInit {
 
   onUpload(): void {
     console.log("onUpload invoked");
-    this.upload_open = true;
+    this.file_upload_open = true;
+  }
+
+  uploadFile(request: UploadRequest): void {
+    console.log("Upload file: " + request.files);
+    console.log("Upload description: " + request.description);
+    var component = this;
+    this.dataSeriesService.uploadDataSeries(request.files, request.description)
+      .then(function() {
+        console.log("Submitted");
+        component.getDataSeries();
+    });
   }
 
   onDelete(): void {

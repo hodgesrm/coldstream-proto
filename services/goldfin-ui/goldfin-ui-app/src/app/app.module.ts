@@ -15,8 +15,6 @@ import { SourcesComponent } from "./documents/sources.component";
 import { DocumentsComponent } from "./documents/documents.component";
 import { DataSeriesComponent } from "./documents/data-series.component";
 import { FileUploadModalComponent } from "./utility/file-upload-modal.component";
-import { DocUploadModalComponent } from "./documents/doc-upload-modal.component";
-import { DataSeriesUploadModalComponent } from "./documents/ds-upload-modal.component";
 import { InventoryComponent } from "./inventory/inventory.component";
 import { HostsComponent } from "./inventory/hosts.component";
 import { PricesComponent } from "./prices/prices.component";
@@ -62,8 +60,6 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
         DocumentsComponent,
         DataSeriesComponent,
         FileUploadModalComponent,
-        DocUploadModalComponent,
-        DataSeriesUploadModalComponent,
         InvoicesComponent,
         InventoryComponent,
         HostsComponent,

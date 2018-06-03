@@ -2,7 +2,7 @@
     <h3 class="modal-title">File Upload</h3>
     <div class="modal-body">
         <p>Select one or more files to upload</p>
-        <form #form="ngForm" class="form" (ngSubmit)="onSubmit()">
+        <form #uploadForm="ngForm" class="form" (ngSubmit)="onSubmit(); uploadForm.reset()">
             <section class="form-block">
                 <div class="form-group">
                     <label for="description">File</label>
@@ -21,7 +21,7 @@
                         Upload
                     </button>
                     <button type="button" class="btn btn-outline" 
-                        (click)="onCancel()">
+                        (click)="onCancel(); uploadForm.reset()">
                         Cancel
                     </button>
                 </div>

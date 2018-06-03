@@ -51,6 +51,8 @@
   </div>
 </clr-modal>
 
-<ds-upload-modal [(show)]="upload_open" ></ds-upload-modal>
+<file-upload-modal (uploadRequest)="uploadFile($event)" 
+  [(show)]="file_upload_open" >
+</file-upload-modal>
 
 <error-modal [reporter]="errorReporter"></error-modal>
