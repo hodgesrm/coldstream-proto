@@ -56,6 +56,13 @@ def extract_date(date_string):
     # Strip whitespace.
     date_string = date_string.strip()
 
+    # YYYY-MM-DD format. This is the default format so we just return the
+    # cleaned-up date staring.
+    yyyy_dash_mm_dash_dd = r'^.*?\s*([0-9]{4})-([0-9]{2})-([0-9]{2})'
+    matcher = re.match(yyyy_dash_mm_dash_dd, date_string)
+    if matcher:
+        return date_string
+
     # MMM DD, YYYY format.
     mmm_dd_yyyy = r'^.*?\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*([0-9]+)\s*,\s*([0-9]+).*$'
     matcher = re.match(mmm_dd_yyyy, date_string.upper())
@@ -74,6 +81,15 @@ def extract_date(date_string):
                                               y=matcher.group(3))
         return datetime.strptime(clean_date, '%d %b %Y').strftime('%Y-%m-%d')
 
+    # DD MMM YYYY format but with full month names.
+    dd_fullmonth_yyyy = r'^.*?\s*([0-9]+)\s*(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)\s*([0-9]+).*$'
+    matcher = re.match(dd_fullmonth_yyyy, date_string.upper())
+    if matcher:
+        clean_date = "{d} {m} {y}".format(d=matcher.group(1),
+                                              m=matcher.group(2),
+                                              y=matcher.group(3))
+        return datetime.strptime(clean_date, '%d %B %Y').strftime('%Y-%m-%d')
+
     # DD-MM-YYYY format.
     dd_dash_mm_dash_yyyy = r'^.*?\s*([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})'
     matcher = re.match(dd_dash_mm_dash_yyyy, date_string)
@@ -91,6 +107,15 @@ def extract_date(date_string):
                                               m=matcher.group(1),
                                               y=matcher.group(3))
         return datetime.strptime(clean_date, '%d-%m-%Y').strftime('%Y-%m-%d')
+
+    # MM/DD/YY format.
+    dd_slash_mm_slash_yy = r'^.*?\s*([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2})'
+    matcher = re.match(dd_slash_mm_slash_yy, date_string)
+    if matcher:
+        clean_date = "{d}-{m}-{y}".format(d=matcher.group(2),
+                                              m=matcher.group(1),
+                                              y=matcher.group(3))
+        return datetime.strptime(clean_date, '%d-%m-%y').strftime('%Y-%m-%d')
 
     # Other formats
     return None
@@ -129,5 +154,26 @@ def extract_currency(currency_string):
         else:
             # Not sure what this is, so just return it.
             return raw_currency
+    else:
+        return None
+
+def extract_integer(integer_string):
+    """Extracts an integer, filtering out common erroneous transformations
+
+    :param integer_string: Candidate integer string
+    :type integer_string: str
+    :return: int value or None
+    """
+    # Strip whitespace.
+    integer_string = integer_string.strip()
+
+    # Transform any 'l' (ell) values to ones.
+    integer_string = integer_string.replace("l", "1")
+
+    # Check for validity.
+    integer_regex = r'^[0-9]+$'
+    matcher = re.match(integer_regex, integer_string)
+    if matcher:
+        return int(integer_string)
     else:
         return None

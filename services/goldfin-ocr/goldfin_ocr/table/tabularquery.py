@@ -105,7 +105,19 @@ class PageLocationIndex:
 
 
 class PageNode:
-    """Indexes entity edges within a single page"""
+    """Indexes entity edges within a single page
+
+    Edge indexes work using a 'grid' approach.  Imagine that the page is
+    divided into a grid of rectangles say 100 pixels high and 200 wide.
+    The indexes track which entities fall into which rectangle, so that
+    when we run queries we first look for the rectangles that intersect
+    with our desired entity location.  This cuts down the query surface
+    considerably.
+
+    Since searches mostly look at full rows or columns it's enough to
+    track only the row or the column rather than all individual rectangles.
+    We do this with the _x_cells and _y_cells arrays.
+    """
 
     def __init__(self, page, x_step, y_step):
         self._page = page
@@ -115,42 +127,47 @@ class PageNode:
         self._y_cells = []
 
     def add(self, entity):
-        """"Add an entity to the index"""
+        """"Add an entity to the index."""
         if hasattr(entity, 'region') and entity.region is not None:
             self._add_to_x_cells(entity)
             self._add_to_y_cells(entity)
 
     def _add_to_x_cells(self, entity):
-        for x in range(entity.region.left, entity.region.right + 1,
-                       self._x_step):
-            x_index = x // self._x_step
+        """Add the entity to any column of rectangles it intersects."""
+        start_x_index = entity.region.left // self._x_step
+        end_x_index = entity.region.right // self._x_step
+        for x_index in range(start_x_index, end_x_index + 1):
             self._add_entity_to_cell(self._x_cells, x_index, entity)
 
     def _add_to_y_cells(self, entity):
-        for y in range(entity.region.top, entity.region.bottom + 1,
-                       self._y_step):
-            y_index = y // self._y_step
+        """Add the entity to any row of rectangles it intersects."""
+        start_y_index = entity.region.top // self._y_step
+        end_y_index = entity.region.bottom // self._y_step
+        for y_index in range(start_y_index, end_y_index + 1):
             self._add_entity_to_cell(self._y_cells, y_index, entity)
 
     def _add_entity_to_cell(self, cells, index, entity):
-        # Ensure we have enough cells. Each cell gets a set.
+        """Takes care of adding to array, extending if necessary."""
         while index > len(cells) - 1:
             cells.append(set())
         cells[index].add(entity)
 
     def generate_x_range(self, start, end):
+        """Generate entities in grid columns overlapping given start/end."""
         yield from self._generate_range(self._x_cells, start, end,
                                         self._x_step)
 
     def generate_y_range(self, start, end):
+        """Generate entities in grid rows overlapping given start/end."""
         yield from self._generate_range(self._y_cells, start, end,
                                         self._y_step)
 
     def _generate_range(self, cells, start, end, step):
         found = set()
         # Collect set of entities in range.
-        for coord in range(start, end + 1, step):
-            coord_index = coord // step
+        start_coord_index = start // step
+        end_coord_index = end // step
+        for coord_index in range(start_coord_index, end_coord_index + 1):
             if coord_index > len(cells) - 1:
                 break
             else:
@@ -426,12 +443,12 @@ class IndexedQuery(AbstractQuery):
                 accessor = self._index.page_left_right_accessor(page_number, 0,
                                                                 99999)
             elif self._range.left is not None:
-                logger.debug("STARTING: left range")
+                logger.debug("STARTING: left-right range")
                 accessor = self._index.page_left_right_accessor(page_number,
                                                                 self._range.left,
                                                                 self._range.right)
             elif self._range.top is not None:
-                logger.info("STARTING: top range")
+                logger.info("STARTING: top-bottom range")
                 accessor = self._index.page_top_bottom_accessor(page_number,
                                                                 self._range.top,
                                                                 self._range.bottom)
