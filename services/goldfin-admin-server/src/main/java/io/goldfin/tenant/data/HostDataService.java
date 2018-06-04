@@ -132,6 +132,7 @@ public class HostDataService implements TransactionalService<Host> {
 		host.setHostId(row.getAsString("host_id"));
 		host.setResourceId(row.getAsString("resource_id"));
 		host.setEffectiveDate(row.getAsTimestamp("effective_date"));
+		host.setVendorIdentifier(row.getAsString("vendor_identifier"));
 		host.setDataSeriesId(row.getAsUUID("data_series_id"));
 		host.setHostType(toHostTypeOrNull(row.getAsString("host_type")));
 		host.setHostModel(row.getAsString("host_model"));
