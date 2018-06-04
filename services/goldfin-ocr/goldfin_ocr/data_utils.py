@@ -8,15 +8,18 @@ import re
 
 
 def is_valid_host(text: str):
+    """Returns True if argument is a valid host name."""
     return is_valid_ip(text) or is_valid_dns_name(text)
 
 
 def is_valid_ip(text: str):
+    """Returns true if artument is a valid IPv4 address."""
     ip_regex = r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'
     return re.match(ip_regex, text) is not None
 
 
 def is_valid_dns_name(text: str):
+    """Returns true if argument is a valid DNS name."""
     dns_regex = r'^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$'
     return re.match(dns_regex, text) is not None
 

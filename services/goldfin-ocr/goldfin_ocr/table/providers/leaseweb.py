@@ -11,6 +11,7 @@ import goldfin_ocr.table.tabularquery as tq
 import goldfin_ocr.table.tabularmodel as tm
 import goldfin_ocr.data_utils as data_utils
 import goldfin_ocr.util as util
+import goldfin_ocr.vendors as vendors
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class LeasewebProcessor:
         return count >= 1
 
     def name(self):
-        return "LeaseWeb"
+        return vendors.LEASEWEB
 
     def get_content(self):
         """Analyzes the invoice tabular model and returns semantic content"""
@@ -48,7 +49,7 @@ class LeasewebProcessor:
         # Extract invoice header information available from text blocks.
         logger.info(util.dump_to_json(self._tabular_model))
         invoice = Invoice()
-        invoice.vendor_identifier = "LeaseWeb"
+        invoice.vendor_identifier = vendors.LEASEWEB
         invoice.items = []
 
         # Find first page and define geometric positions of header info.

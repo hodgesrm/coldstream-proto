@@ -9,6 +9,7 @@ from decimal import Decimal
 from goldfin_ocr.api.models.invoice import Invoice
 from goldfin_ocr.api.models.invoice_item import InvoiceItem
 import goldfin_ocr.data_utils as data_utils
+import goldfin_ocr.vendors as vendors
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class OvhProcessor:
         return len(ovh_com_blocks) >= 1
 
     def name(self):
-        return "OVH"
+        return vendors.OVH
 
     def get_content(self):
         """Analyzes the invoice tabular model and returns semantic content"""
@@ -42,7 +43,7 @@ class OvhProcessor:
         # Extract invoice header information available from text blocks.
         # For OVH the sub-total is in the same table as the invoice item rows.
         invoice = Invoice()
-        invoice.vendor_identifier = "OVH.com"
+        invoice.vendor_identifier = vendors.OVH
         invoice.identifier = self._find_first_group_1(
             r'^Invoice:\s*(\S.*\S)\s*$')
         logger.debug(invoice.identifier)

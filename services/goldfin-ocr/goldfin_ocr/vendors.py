@@ -1,7 +1,8 @@
 # Copyright (c) 2018 Robert Hodges.  All rights reserved. 
 
-"""Vendor identifier values"""
+"""Holds vendor identifiers."""
 
-LEASEWEB = "leaseweb"
-INTERNAP = "internap"
-OVH = "ovh"
+GRAND_COULEE = "GrandCoulee"
+INTERNAP = "Internap"
+LEASEWEB = "LeaseWeb"
+OVH = "OVH"
