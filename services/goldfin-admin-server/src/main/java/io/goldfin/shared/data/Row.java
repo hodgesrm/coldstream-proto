@@ -14,7 +14,8 @@ import java.util.UUID;
 import org.postgresql.util.PGobject;
 
 /**
- * Represents data for a single SQL row.
+ * Represents data for a single SQL row. Column values are 1-based in good JDBC
+ * tradition.
  */
 public class Row {
 	private final List<String> columnNames;

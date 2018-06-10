@@ -97,7 +97,7 @@ public class HostDataService implements TransactionalService<Host> {
 
 	/** Return the host. */
 	public Host get(String id) {
-		TabularResultSet result = new SqlSelect().table("hosts").get(COLUMN_NAMES).id(UUID.fromString(id)).run(session);
+		TabularResultSet result = new SqlSelect().from("hosts").get(COLUMN_NAMES).where_id(UUID.fromString(id)).run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {
@@ -107,7 +107,7 @@ public class HostDataService implements TransactionalService<Host> {
 
 	/** Return the host by identifier. */
 	public Host getByIdentifier(String identifier) {
-		TabularResultSet result = new SqlSelect().table("hosts").get(COLUMN_NAMES).where("identifier = ?", identifier)
+		TabularResultSet result = new SqlSelect().from("hosts").get(COLUMN_NAMES).where("identifier = ?", identifier)
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -118,7 +118,7 @@ public class HostDataService implements TransactionalService<Host> {
 
 	/** Return all hosts. */
 	public List<Host> getAll() {
-		TabularResultSet result = new SqlSelect().table("hosts").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("hosts").get(COLUMN_NAMES).run(session);
 		List<Host> hosts = new ArrayList<Host>(result.rowCount());
 		for (Row row : result.rows()) {
 			hosts.add(toHost(row));

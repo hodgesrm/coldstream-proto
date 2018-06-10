@@ -48,8 +48,8 @@ public class SimpleJdbcConnectionManager {
 			url = connectionParams.getUrl() + "?currentSchema=" + schema;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Connecting to DBMS: driver=%s, url=%s, user=%s", connectionParams.getDriver(), url,
-					connectionParams.getUser());
+			logger.debug(String.format("Connecting to DBMS: driver=%s, url=%s, user=%s", connectionParams.getDriver(),
+					url, connectionParams.getUser()));
 		}
 
 		// Load the driver.

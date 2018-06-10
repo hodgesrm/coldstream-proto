@@ -32,7 +32,7 @@ public class SqlUpdate {
 	public int updatedColumnsSize() {
 		return names.size();
 	}
-	
+
 	public SqlUpdate table(String table) {
 		this.table = table;
 		return this;
@@ -44,6 +44,10 @@ public class SqlUpdate {
 		}
 		values.put(name, value);
 		return this;
+	}
+
+	public SqlUpdate id(long id) {
+		return where("id = ?", id);
 	}
 
 	public SqlUpdate id(String id) {

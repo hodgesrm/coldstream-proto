@@ -95,7 +95,7 @@ public class DocumentDataService implements TransactionalService<Document> {
 	}
 
 	public Document get(String id) {
-		TabularResultSet result = new SqlSelect().table("documents").get(COLUMN_NAMES).id(UUID.fromString(id))
+		TabularResultSet result = new SqlSelect().from("documents").get(COLUMN_NAMES).where_id(UUID.fromString(id))
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -105,7 +105,7 @@ public class DocumentDataService implements TransactionalService<Document> {
 	}
 
 	public Document getByThumbprint(String thumbprint) {
-		TabularResultSet result = new SqlSelect().table("documents").get(COLUMN_NAMES)
+		TabularResultSet result = new SqlSelect().from("documents").get(COLUMN_NAMES)
 				.where("thumbprint = ?", thumbprint).run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -115,7 +115,7 @@ public class DocumentDataService implements TransactionalService<Document> {
 	}
 
 	public List<Document> getAll() {
-		TabularResultSet result = new SqlSelect().table("documents").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("documents").get(COLUMN_NAMES).run(session);
 		List<Document> invoiceEnvelopes = new ArrayList<Document>(result.rowCount());
 		for (Row row : result.rows()) {
 			invoiceEnvelopes.add(toDocument(row));

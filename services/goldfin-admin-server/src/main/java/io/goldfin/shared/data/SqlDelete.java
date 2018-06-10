@@ -24,6 +24,10 @@ public class SqlDelete {
 		return this;
 	}
 
+	public SqlDelete id(int id) {
+		return where("id = ?", id);
+	}
+
 	public SqlDelete id(String id) {
 		return where("id = ?", id);
 	}

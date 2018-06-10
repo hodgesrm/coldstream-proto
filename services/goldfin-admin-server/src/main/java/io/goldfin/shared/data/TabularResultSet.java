@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Result set stored as a static table with named columns and numbered rows.
+ * Row and column indexes start at 1 in good DBMS connectivity tradition.
  */
 public class TabularResultSet {
 	private List<String> columnNames;
@@ -51,6 +52,9 @@ public class TabularResultSet {
 		return new ArrayList<String>(columnNames);
 	}
 
+	/**
+	 * Return row at the given 1-based index value. 
+	 */
 	public Row row(int index) {
 		return new Row(columnNames(), rowData.get(index - 1));
 	}

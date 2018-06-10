@@ -16,6 +16,11 @@ docker network inspect bridge
 psql -hlocalhost -Upostgres -p15432
 ```
 
+Set the query path for a particular 
+```
+set search_path = tenant_skyline
+```
+
 Run PostgresSQL on docker with persistent volume. Image name is Postgres-10.
 ```
 # Create the volume.

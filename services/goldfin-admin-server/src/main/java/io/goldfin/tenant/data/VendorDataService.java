@@ -85,7 +85,7 @@ public class VendorDataService implements TransactionalService<Vendor> {
 
 	/** Return the vendor. */
 	public Vendor get(String id) {
-		TabularResultSet result = new SqlSelect().table("vendors").get(COLUMN_NAMES).id(UUID.fromString(id))
+		TabularResultSet result = new SqlSelect().from("vendors").get(COLUMN_NAMES).where_id(UUID.fromString(id))
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -96,7 +96,7 @@ public class VendorDataService implements TransactionalService<Vendor> {
 
 	/** Return the vendor by identifier. */
 	public Vendor getByIdentifier(String identifier) {
-		TabularResultSet result = new SqlSelect().table("vendors").get(COLUMN_NAMES).where("identifier = ?", identifier)
+		TabularResultSet result = new SqlSelect().from("vendors").get(COLUMN_NAMES).where("identifier = ?", identifier)
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -107,7 +107,7 @@ public class VendorDataService implements TransactionalService<Vendor> {
 
 	/** Return all vendors. */
 	public List<Vendor> getAll() {
-		TabularResultSet result = new SqlSelect().table("vendors").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("vendors").get(COLUMN_NAMES).run(session);
 		List<Vendor> vendors = new ArrayList<Vendor>(result.rowCount());
 		for (Row row : result.rows()) {
 			vendors.add(toVendor(row));
