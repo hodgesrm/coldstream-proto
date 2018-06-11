@@ -85,6 +85,62 @@ HOST_DEFINITIONS = [
         'resource_id': 'NQXF005', 
         'hw': FE, 
         'start': str_to_date('05/01/18'),
+        'end': str_to_date('06/30/18')
+    },
+    { 
+        'host_id': '13353',
+        'resource_id': 'NQXF006', 
+        'hw': FE, 
+        'start': str_to_date('05/01/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '13355',
+        'resource_id': 'NQXF008', 
+        'hw': FE, 
+        'start': str_to_date('05/01/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '13356',
+        'resource_id': 'NQXF009', 
+        'hw': FE, 
+        'start': str_to_date('05/01/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '13400',
+        'resource_id': 'NQXF010', 
+        'hw': FE, 
+        'start': str_to_date('05/01/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '79975',
+        'resource_id': 'NQXB089', 
+        'hw': BE, 
+        'start': str_to_date('05/01/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '79976',
+        'resource_id': 'NQXB090', 
+        'hw': BE, 
+        'start': str_to_date('05/01/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '79990',
+        'resource_id': 'NQXB092', 
+        'hw': BE, 
+        'start': str_to_date('05/11/18'),
+        'end': str_to_date('07/31/18')
+    },
+    { 
+        'host_id': '112529',
+        'resource_id': 'NQZC115', 
+        'hw': SBE, 
+        'start': str_to_date('07/14/18'),
         'end': str_to_date('07/31/18')
     }
 ]
@@ -94,7 +150,7 @@ HOST_DEFINITIONS = [
 parser = argparse.ArgumentParser(prog='generate_gch_data.py',
                                  usage="%(prog)s [options]")
 parser.add_argument("--out-dir",
-                    help="Output directory for observations", 
+                    help="Output directory for observations (default: %(default)s)", 
                     default="observations")
 parser.add_argument("--start",
                     help="Start date in mm/dd/yy format (default: %(default)s)",
@@ -102,6 +158,8 @@ parser.add_argument("--start",
 parser.add_argument("--end",
                     help="End date in mm/dd/yy format (default: %(default)s)",
                     default="07/31/18")
+parser.add_argument("--verbose",
+                    help="Print verbose output to see what's happening")
 
 # Process options.  This will automatically print help. 
 args = parser.parse_args()
@@ -118,6 +176,7 @@ if not os.path.exists(args.out_dir) or not os.access(args.out_dir, os.W_OK):
 # Loop through the dates from start to finish. 
 start_date = str_to_date(args.start) 
 end_date = str_to_date(args.end) 
+verbose = args.verbose is not None
 
 # Use generator to iterate over dates. 
 effective_date = start_date
@@ -125,16 +184,19 @@ while effective_date <= end_date:
     # Use a date that has an offset added for more realism.
     obs_date = effective_date + datetime.timedelta(hours=12)
     #obs_date_as_str = str(effective_date + datetime.timedelta(hours=12))
-    print(date_to_str(effective_date))
+    if verbose:
+        print(date_to_str(effective_date))
     # Generate host information. Each host is separately serialized to 
     # a string. 
     data = []
     for host_def in HOST_DEFINITIONS:
         if host_def['start'] > effective_date:
-            print("Host starts later: " + str(host_def))
+            if verbose:
+                print("Host starts later: " + str(host_def))
             continue
         elif host_def['end'] < effective_date:
-            print("Host ends earlier: " + str(host_def))
+            if verbose:
+                print("Host ends earlier: " + str(host_def))
             continue
 
         host = Host()
@@ -163,7 +225,8 @@ while effective_date <= end_date:
 
         host_encoder = SwaggerJsonEncoder(sort_keys=True)
         host_content = host_encoder.encode(host)
-        print(host_content)
+        if verbose:
+            print(host_content)
         data.append(host_content)
 
     # Create observation, serialize to JSON string, and add to data array.
@@ -177,8 +240,9 @@ while effective_date <= end_date:
     name = "{0}-{1}.json".format(obs.vendor_identifier, obs_date.strftime("%Y-%m-%d_%H:%M:%S"))
     output_file = os.path.join(args.out_dir, name)
     with open(output_file, "w") as obs_file:
-        print("Writing observation to output file: {0}".format(output_file))
-        print(str(obs.to_dict()))
+        print("Writing observation file: {0}".format(output_file))
+        if verbose:
+            print(str(obs.to_dict()))
         encoder = SwaggerJsonEncoder(sort_keys=True)
         content = encoder.encode(obs)
         obs_file.write(content)

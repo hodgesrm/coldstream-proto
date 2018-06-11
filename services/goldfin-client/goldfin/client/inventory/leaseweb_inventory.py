@@ -12,7 +12,7 @@ from goldfin.client.api.models.observation import Observation
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
 
-VENDOR = "leaseweb"
+VENDOR = "LeaseWeb"
 
 class LeasewebProcessor():
     """Processing class for leaseweb inventory"""

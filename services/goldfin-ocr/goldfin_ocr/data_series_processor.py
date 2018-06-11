@@ -88,7 +88,7 @@ class DataProcessor:
         # Get a provider.
         provider = get_provider(observation)
         if provider is None:
-            message = "Can't find a provider!!! data_series={0}, vendor={2}".format(
+            message = "Can't find a provider!!! data_series={0}, vendor={1}".format(
                     data_series.id, observation.vendor_identifier)
             logger.error(message)
             logger.info("Preserving work files: {0}".format(ds_work_dir))
