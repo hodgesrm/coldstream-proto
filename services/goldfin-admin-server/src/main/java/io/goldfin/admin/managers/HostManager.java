@@ -57,11 +57,11 @@ public class HostManager implements Manager {
 		}
 	}
 
-	public List<Host> getAllHosts(Principal principal) {
+	public List<Host> getLatestHosts(Principal principal) {
 		String tenantId = getTenantId(principal);
 		HostDataService hostService = new HostDataService();
 		try (Session session = context.tenantSession(tenantId).enlist(hostService)) {
-			return hostService.getAll();
+			return hostService.getLatest();
 		}
 	}
 

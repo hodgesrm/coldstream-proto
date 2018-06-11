@@ -28,8 +28,13 @@ public class HostApiServiceImpl extends HostApiService {
 
 	@Override
 	public Response hostDelete(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			HostManager hm = ManagerRegistry.getInstance().getManager(HostManager.class);
+			hm.deleteHost(securityContext.getUserPrincipal(), id);
+			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override
@@ -47,7 +52,7 @@ public class HostApiServiceImpl extends HostApiService {
 	public Response hostShowAll(SecurityContext securityContext) throws NotFoundException {
 		try {
 			HostManager hm = ManagerRegistry.getInstance().getManager(HostManager.class);
-			List<Host> hosts = hm.getAllHosts(securityContext.getUserPrincipal());
+			List<Host> hosts = hm.getLatestHosts(securityContext.getUserPrincipal());
 			return Response.ok().entity(hosts).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);

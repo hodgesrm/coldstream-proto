@@ -345,7 +345,7 @@ public class SqlSelect {
 				WindowExpression window = windows.get(i);
 				windowList.append(window.alias).append(" AS (PARTITION BY ");
 				for (int j = 0; j < window.partitionNames.size(); j++) {
-					if (i > 0) {
+					if (j > 0) {
 						windowList.append(", ");
 					}
 					windowList.append(window.partitionNames.get(j));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.tenant.data;
 
@@ -97,7 +97,8 @@ public class HostDataService implements TransactionalService<Host> {
 
 	/** Return the host. */
 	public Host get(String id) {
-		TabularResultSet result = new SqlSelect().from("hosts").project(COLUMN_NAMES).whereId(UUID.fromString(id)).run(session);
+		TabularResultSet result = new SqlSelect().from("hosts").project(COLUMN_NAMES).whereId(UUID.fromString(id))
+				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {
@@ -107,7 +108,8 @@ public class HostDataService implements TransactionalService<Host> {
 
 	/** Return the host by identifier. */
 	public Host getByIdentifier(String identifier) {
-		TabularResultSet result = new SqlSelect().from("hosts").project(COLUMN_NAMES).where("identifier = ?", identifier)
+		TabularResultSet result = new SqlSelect().from("hosts").project(COLUMN_NAMES)
+				.where("identifier = ?", identifier).orderByAscending("resource_id").orderByDescending("effective_date")
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -116,9 +118,23 @@ public class HostDataService implements TransactionalService<Host> {
 		}
 	}
 
-	/** Return all hosts. */
+	/** Return all host inventory records. */
 	public List<Host> getAll() {
 		TabularResultSet result = new SqlSelect().from("hosts").project(COLUMN_NAMES).run(session);
+		List<Host> hosts = new ArrayList<Host>(result.rowCount());
+		for (Row row : result.rows()) {
+			hosts.add(toHost(row));
+		}
+		return hosts;
+	}
+
+	/** Return the latest record for each host identified by resource_id. */
+	public List<Host> getLatest() {
+		SqlSelect windowQuery = new SqlSelect().from("hosts").project(COLUMN_NAMES)
+				.projectWindow("row_number", "row_number()", "rn").window("row_number").partition("vendor_identifier")
+				.partition("resource_id").orderByDescending("effective_date").done();
+		TabularResultSet result = new SqlSelect().from(windowQuery, "r1").project(COLUMN_NAMES)
+				.where("r1.rn = ?", 1).run(session);
 		List<Host> hosts = new ArrayList<Host>(result.rowCount());
 		for (Row row : result.rows()) {
 			hosts.add(toHost(row));
