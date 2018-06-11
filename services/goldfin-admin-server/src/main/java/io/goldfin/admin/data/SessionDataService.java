@@ -59,7 +59,7 @@ public class SessionDataService implements TransactionalService<SessionData> {
 	}
 
 	public SessionData get(String id) {
-		TabularResultSet result = new SqlSelect().from("sessions").get(COLUMN_NAMES).where_id(UUID.fromString(id))
+		TabularResultSet result = new SqlSelect().from("sessions").project(COLUMN_NAMES).whereId(UUID.fromString(id))
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -69,7 +69,7 @@ public class SessionDataService implements TransactionalService<SessionData> {
 	}
 
 	public SessionData getByToken(String token) {
-		TabularResultSet result = new SqlSelect().from("sessions").get(COLUMN_NAMES)
+		TabularResultSet result = new SqlSelect().from("sessions").project(COLUMN_NAMES)
 				.where("token = ?", token).run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -79,7 +79,7 @@ public class SessionDataService implements TransactionalService<SessionData> {
 	}
 
 	public List<SessionData> getAll() {
-		TabularResultSet result = new SqlSelect().from("sessions").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("sessions").project(COLUMN_NAMES).run(session);
 		List<SessionData> sessions = new ArrayList<SessionData>(result.rowCount());
 		for (Row row : result.rows()) {
 			sessions.add(toSessionRecord(row));

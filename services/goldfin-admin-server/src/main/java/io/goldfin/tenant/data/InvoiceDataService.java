@@ -126,7 +126,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 
 	/** Return the invoice header. */
 	public Invoice get(String id) {
-		TabularResultSet result = new SqlSelect().from("invoices").get(COLUMN_NAMES).where_id(UUID.fromString(id))
+		TabularResultSet result = new SqlSelect().from("invoices").project(COLUMN_NAMES).whereId(UUID.fromString(id))
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -139,7 +139,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 	public Invoice getComplete(String id) {
 		Invoice invoice = get(id);
 		if (invoice != null) {
-			TabularResultSet result = new SqlSelect().from("invoice_items").get(COLUMN_NAMES_ITEMS)
+			TabularResultSet result = new SqlSelect().from("invoice_items").project(COLUMN_NAMES_ITEMS)
 					.where("invoice_id", id).run(session);
 			for (Row row : result.rows()) {
 				InvoiceItem item = toInvoiceItem(row);
@@ -151,7 +151,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 
 	/** Return the invoice header by document ID. */
 	public Invoice getByDocumentId(String documentId) {
-		TabularResultSet result = new SqlSelect().from("invoices").get(COLUMN_NAMES)
+		TabularResultSet result = new SqlSelect().from("invoices").project(COLUMN_NAMES)
 				.where("document_id = ?", UUID.fromString(documentId)).run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -162,7 +162,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 
 	/** Return all invoice headers. */
 	public List<Invoice> getAll() {
-		TabularResultSet result = new SqlSelect().from("invoices").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("invoices").project(COLUMN_NAMES).run(session);
 		List<Invoice> invoices = new ArrayList<Invoice>(result.rowCount());
 		for (Row row : result.rows()) {
 			invoices.add(toInvoice(row));
@@ -187,7 +187,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 
 		// Fetch invoice items ordered by line number and add to invoices.
 		// (Ordering is by primary key, hence should be relatively efficient.)
-		TabularResultSet result = new SqlSelect().from("invoice_items").get(COLUMN_NAMES_ITEMS)
+		TabularResultSet result = new SqlSelect().from("invoice_items").project(COLUMN_NAMES_ITEMS)
 				.orderByAscending("invoice_id").orderByAscending("item_row_number").run(session);
 		for (Row row : result.rows()) {
 			UUID invoiceId = row.getAsUUID("invoice_id");

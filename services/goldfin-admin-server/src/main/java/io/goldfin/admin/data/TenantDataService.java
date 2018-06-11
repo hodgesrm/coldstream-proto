@@ -92,7 +92,7 @@ public class TenantDataService implements TransactionalService<Tenant> {
 	}
 
 	public Tenant get(String id) {
-		TabularResultSet result = new SqlSelect().from("tenants").get(COLUMN_NAMES).where_id(UUID.fromString(id))
+		TabularResultSet result = new SqlSelect().from("tenants").project(COLUMN_NAMES).whereId(UUID.fromString(id))
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -102,7 +102,7 @@ public class TenantDataService implements TransactionalService<Tenant> {
 	}
 
 	public Tenant getByName(String name) {
-		TabularResultSet result = new SqlSelect().from("tenants").get(COLUMN_NAMES).where("name = ?", name)
+		TabularResultSet result = new SqlSelect().from("tenants").project(COLUMN_NAMES).where("name = ?", name)
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -112,7 +112,7 @@ public class TenantDataService implements TransactionalService<Tenant> {
 	}
 
 	public List<Tenant> getAll() {
-		TabularResultSet result = new SqlSelect().from("tenants").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("tenants").project(COLUMN_NAMES).run(session);
 		List<Tenant> tenants = new ArrayList<Tenant>(result.rowCount());
 		for (Row row : result.rows()) {
 			tenants.add(toTenant(row));

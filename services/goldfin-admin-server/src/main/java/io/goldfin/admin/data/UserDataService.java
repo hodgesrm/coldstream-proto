@@ -81,7 +81,7 @@ public class UserDataService implements TransactionalService<UserData> {
 	}
 
 	public UserData get(String id) {
-		TabularResultSet result = new SqlSelect().from("users").get(COLUMN_NAMES).where_id(UUID.fromString(id)).run(session);
+		TabularResultSet result = new SqlSelect().from("users").project(COLUMN_NAMES).whereId(UUID.fromString(id)).run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {
@@ -90,7 +90,7 @@ public class UserDataService implements TransactionalService<UserData> {
 	}
 
 	public UserData getByUsername(String username) {
-		TabularResultSet result = new SqlSelect().from("users").get(COLUMN_NAMES).where("username = ?", username)
+		TabularResultSet result = new SqlSelect().from("users").project(COLUMN_NAMES).where("username = ?", username)
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -100,7 +100,7 @@ public class UserDataService implements TransactionalService<UserData> {
 	}
 
 	public UserData getByUserNameAndTenant(String username, UUID tenantId) {
-		TabularResultSet result = new SqlSelect().from("users").get(COLUMN_NAMES)
+		TabularResultSet result = new SqlSelect().from("users").project(COLUMN_NAMES)
 				.where("username = ? AND tenant_id = ?", username, tenantId).run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -110,7 +110,7 @@ public class UserDataService implements TransactionalService<UserData> {
 	}
 
 	public List<UserData> getAll() {
-		TabularResultSet result = new SqlSelect().from("users").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("users").project(COLUMN_NAMES).run(session);
 		List<UserData> users = new ArrayList<UserData>(result.rowCount());
 		for (Row row : result.rows()) {
 			users.add(toUserRecord(row));

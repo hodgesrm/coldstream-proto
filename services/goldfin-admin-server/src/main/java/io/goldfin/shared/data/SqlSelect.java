@@ -17,21 +17,25 @@ import org.slf4j.LoggerFactory;
  * Performs a SQL SELECT using a prepared statement. Supports subqueries and
  * windowing functions. In general:
  * <ul>
- * <li><em>get</em> adds one or more columns to the SQL projection including
+ * <li><em>project</em> adds one or more columns to the SQL projection including
  * both normal columns and window functions. If no column alias is provided the
  * column aliases to the first from object.</li>
  * <li><em>from</em> adds a 'from object', i.e., a table or subquery</li>
+ * <li><em>where</em> add a where clause expression</li>
+ * <li><em>window</em> adds a window expression</li>
  * <li><em>orderBy</em> adds an ordering column and direction</li>
- * <li><em>window</em> adds a window expression
  * </ul>
+ * Like other classes in this library the run() method then gets the job done.
  */
 public class SqlSelect {
 	static final Logger logger = LoggerFactory.getLogger(SqlSelect.class);
 
-	enum Ordering {
+	/** Specifies an ascending or descending sort. */
+	public enum Ordering {
 		ASC, DESC
 	};
 
+	/** Stores the definition of a column in a SQL projection. */
 	class ColumnExpression {
 		String tableAlias;
 		String windowAlias;
@@ -39,12 +43,14 @@ public class SqlSelect {
 		String alias;
 	}
 
-	class TableExpression {
+	/** Stores definition of a FROM-entity: a table or subquery. */
+	class FromExpression {
 		String alias;
 		String name;
 		SqlSelect subQuery;
 	}
 
+	/** Stores a window definition. */
 	public class WindowExpression {
 		// Retain link to parent statement.
 		SqlSelect parent;
@@ -87,26 +93,51 @@ public class SqlSelect {
 		Ordering order;
 	}
 
-	private String table;
+	// Properties of the query.
+	private List<FromExpression> froms = new ArrayList<FromExpression>();
 	private List<ColumnExpression> columns = new ArrayList<ColumnExpression>();
 	private List<WindowExpression> windows = new ArrayList<WindowExpression>();
 	private String where = "1 = 1";
 	private Object[] whereParams = {};
-	private List<OrderByExpression> sortExpressions = new ArrayList<OrderByExpression>();
+	private List<OrderByExpression> sorts = new ArrayList<OrderByExpression>();
 
 	public SqlSelect() {
 	}
 
 	/** Add a from clause for a table with no alias. */
-	public SqlSelect from(String table) {
-		this.table = table;
+	public SqlSelect from(String tableName) {
+		return from(tableName, null, null);
+	}
+
+	/** Add a from clause for a table including an alias. */
+	public SqlSelect from(String tableName, String alias) {
+		return from(tableName, null, alias);
+	}
+
+	/** Add a subselect, which must have an alias to be usable. */
+	public SqlSelect from(SqlSelect subQuery, String alias) {
+		return from(null, subQuery, alias);
+	}
+
+	private SqlSelect from(String name, SqlSelect subQuery, String alias) {
+		FromExpression from = new FromExpression();
+		from.name = name;
+		from.subQuery = subQuery;
+		from.alias = alias;
+		froms.add(from);
 		return this;
 	}
 
-	/** Add given names to project. */
-	public SqlSelect get(String... names) {
+	/** Add a from clause for a subquery. */
+	public SqlSelect from(String alias, SqlSelect subQuery) {
+
+		return this;
+	}
+
+	/** Add column names to projection. */
+	public SqlSelect project(String... names) {
 		for (String name : names) {
-			this.get(name);
+			this.project(name);
 		}
 		return this;
 	}
@@ -114,12 +145,12 @@ public class SqlSelect {
 	/**
 	 * Add to projection a single column with name and default from/alias values.
 	 */
-	public SqlSelect get(String expression) {
-		return this.get(null, expression, null);
+	public SqlSelect project(String expression) {
+		return this.project(null, expression, null);
 	}
 
 	/** Select a single column to projection. */
-	public SqlSelect get(String tableAlias, String expression, String alias) {
+	public SqlSelect project(String tableAlias, String expression, String alias) {
 		ColumnExpression column = new ColumnExpression();
 		column.tableAlias = tableAlias;
 		column.expression = expression;
@@ -129,7 +160,7 @@ public class SqlSelect {
 	}
 
 	/** Add a window function to projection. */
-	public SqlSelect getWindow(String windowAlias, String expression, String alias) {
+	public SqlSelect projectWindow(String windowAlias, String expression, String alias) {
 		ColumnExpression column = new ColumnExpression();
 		column.windowAlias = windowAlias;
 		column.expression = expression;
@@ -151,17 +182,17 @@ public class SqlSelect {
 	}
 
 	/** Adds standard where clause for ID-based key lookup. */
-	public SqlSelect where_id(int id) {
+	public SqlSelect whereId(int id) {
 		return where("id = ?", id);
 	}
 
 	/** Adds standard where clause for ID-based key lookup. */
-	public SqlSelect where_id(String id) {
+	public SqlSelect whereId(String id) {
 		return where("id = ?", id);
 	}
 
 	/** Adds standard where clause for ID-based key lookup. */
-	public SqlSelect where_id(UUID id) {
+	public SqlSelect whereId(UUID id) {
 		return where("id = ?", id);
 	}
 
@@ -183,17 +214,75 @@ public class SqlSelect {
 		OrderByExpression expression = new OrderByExpression();
 		expression.name = name;
 		expression.order = order;
-		sortExpressions.add(expression);
+		sorts.add(expression);
 		return this;
 	}
 
+	/** Construct a full query ready for parameter insertion. */
+	public String build() {
+		// Add clauses to build up the query. Each routine contributes
+		// a well-formed clause or an empty string.
+		StringBuffer queryBuf = new StringBuffer();
+		queryBuf.append(this.selectClause());
+		queryBuf.append(this.fromClause());
+		queryBuf.append(this.whereClause());
+		queryBuf.append(this.windowClause());
+		queryBuf.append(this.orderByClause());
+		return queryBuf.toString();
+	}
+
+	/** Return the current WHERE clause parameter list. */
+	public Object[] getWhereParams() {
+		return whereParams;
+	}
+
+	/** Build and execute the SQL query. */
 	public TabularResultSet run(Session session) throws DataException {
 		PreparedStatement pstmt = null;
 		ResultSet resultSet = null;
 		try {
-			// Generate insert SQL.
-			String format = "SELECT %s FROM %s WHERE %s%s";
+			String query = build();
+			if (logger.isDebugEnabled()) {
+				logger.debug("QUERY: " + query);
+			}
+
+			// Allocate prepared statement and assign parameter values by iterating first
+			// through any subqueries then the main query to ensure assignment in correct
+			// order within the generated string.
+			pstmt = session.getConnection().prepareStatement(query);
+			List<SqlSelect> selects = new ArrayList<SqlSelect>();
+			for (FromExpression from : froms) {
+				if (from.subQuery != null) {
+					selects.add(from.subQuery);
+				}
+			}
+			selects.add(this);
+
+			int paramIndex = 1;
+			for (SqlSelect select : selects) {
+				for (Object whereParam : select.getWhereParams()) {
+					pstmt.setObject(paramIndex++, whereParam);
+				}
+			}
+
+			// Execute and return the result.
+			resultSet = pstmt.executeQuery();
+			return new TabularResultSet(resultSet);
+
+		} catch (SQLException e) {
+			throw new DataException(e.getLocalizedMessage(), e);
+		} finally {
+			JdbcUtils.closeSoftly(resultSet);
+			JdbcUtils.closeSoftly(pstmt);
+		}
+	}
+
+	private String selectClause() {
+		if (columns.size() == 0) {
+			throw new DataException("Query does not have any select columns in projection");
+		} else {
 			StringBuffer columnList = new StringBuffer();
+			columnList.append("SELECT ");
 			for (int i = 0; i < columns.size(); i++) {
 				ColumnExpression column = columns.get(i);
 				if (i > 0) {
@@ -210,14 +299,51 @@ public class SqlSelect {
 					columnList.append(" AS ").append(column.alias);
 				}
 			}
+			return columnList.toString();
+		}
+	}
+
+	/**
+	 * FROM clauses are not optional in the current implementation, since leaving
+	 * them out is most likely a bug.
+	 */
+	private String fromClause() {
+		if (this.froms.size() == 0) {
+			throw new DataException("Query does not have any FROM objects");
+		} else {
+			StringBuffer fromList = new StringBuffer();
+			fromList.append(" FROM ");
+			for (int i = 0; i < froms.size(); i++) {
+				if (i > 0) {
+					fromList.append(", ");
+				}
+				FromExpression from = froms.get(i);
+				if (from.name != null) {
+					fromList.append(from.name);
+				} else if (from.subQuery != null) {
+					fromList.append("( ").append(from.subQuery.build()).append(")");
+				}
+				if (from.alias != null) {
+					fromList.append(" AS ").append(from.alias);
+				}
+			}
+			return fromList.toString();
+		}
+	}
+
+	/** WINDOW clause are optional. */
+	private String windowClause() {
+		if (windows.size() == 0) {
+			return "";
+		} else {
 			StringBuffer windowList = new StringBuffer();
+			windowList.append(" WINDOW ");
 			for (int i = 0; i < windows.size(); i++) {
 				if (i > 0) {
 					windowList.append(", ");
 				}
 				WindowExpression window = windows.get(i);
-				windowList.append(" WINDOW ").append(window.alias).append(" AS ");
-				windowList.append("(PARTITION BY ");
+				windowList.append(window.alias).append(" AS (PARTITION BY ");
 				for (int j = 0; j < window.partitionNames.size(); j++) {
 					if (i > 0) {
 						windowList.append(", ");
@@ -236,38 +362,31 @@ public class SqlSelect {
 				}
 				windowList.append(")");
 			}
-			String query = String.format(format, columnList, table, where, windowList);
-
-			// If we have order by expressions, add to the end of the query.
-			if (this.sortExpressions.size() > 0) {
-				StringBuffer orderByClause = new StringBuffer(" ORDER BY");
-				for (int i = 0; i < sortExpressions.size(); i++) {
-					OrderByExpression expression = sortExpressions.get(i);
-					if (i > 0) {
-						orderByClause.append(", ");
-					}
-					orderByClause.append(String.format(" %s %s", expression.name, expression.order.toString()));
-				}
-				query += orderByClause.toString();
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("QUERY: " + query);
-			}
-
-			// Allocate prepared statement and assign parameter values.
-			pstmt = session.getConnection().prepareStatement(query);
-			for (int i = 0; i < whereParams.length; i++) {
-				pstmt.setObject(i + 1, whereParams[i]);
-			}
-
-			// Execute and return the result.
-			resultSet = pstmt.executeQuery();
-			return new TabularResultSet(resultSet);
-		} catch (SQLException e) {
-			throw new DataException(e.getLocalizedMessage(), e);
-		} finally {
-			JdbcUtils.closeSoftly(resultSet);
-			JdbcUtils.closeSoftly(pstmt);
+			return windowList.toString();
 		}
+	}
+
+	private String whereClause() {
+		return " WHERE " + this.where;
+	}
+
+	/**
+	 * Generate the ORDER BY list, which is optional in the current implementation.
+	 */
+	private String orderByClause() {
+		if (this.sorts.size() == 0) {
+			return "";
+		} else {
+			StringBuffer orderByClause = new StringBuffer(" ORDER BY");
+			for (int i = 0; i < sorts.size(); i++) {
+				OrderByExpression expression = sorts.get(i);
+				if (i > 0) {
+					orderByClause.append(", ");
+				}
+				orderByClause.append(String.format(" %s %s", expression.name, expression.order.toString()));
+			}
+			return orderByClause.toString();
+		}
+
 	}
 }

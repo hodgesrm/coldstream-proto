@@ -84,7 +84,7 @@ public class DataSeriesDataService implements TransactionalService<DataSeries> {
 	}
 
 	public DataSeries get(String id) {
-		TabularResultSet result = new SqlSelect().from("data_series").get(COLUMN_NAMES).where_id(UUID.fromString(id))
+		TabularResultSet result = new SqlSelect().from("data_series").project(COLUMN_NAMES).whereId(UUID.fromString(id))
 				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -94,7 +94,7 @@ public class DataSeriesDataService implements TransactionalService<DataSeries> {
 	}
 
 	public DataSeries getByThumbprint(String thumbprint) {
-		TabularResultSet result = new SqlSelect().from("data_series").get(COLUMN_NAMES)
+		TabularResultSet result = new SqlSelect().from("data_series").project(COLUMN_NAMES)
 				.where("thumbprint = ?", thumbprint).run(session);
 		if (result.rowCount() == 0) {
 			return null;
@@ -104,7 +104,7 @@ public class DataSeriesDataService implements TransactionalService<DataSeries> {
 	}
 
 	public List<DataSeries> getAll() {
-		TabularResultSet result = new SqlSelect().from("data_series").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("data_series").project(COLUMN_NAMES).run(session);
 		List<DataSeries> series = new ArrayList<DataSeries>(result.rowCount());
 		for (Row row : result.rows()) {
 			series.add(toDataSeries(row));

@@ -79,7 +79,7 @@ public class TestDataService implements TransactionalService<SampleEntity> {
 
 	@Override
 	public SampleEntity get(String id) {
-		TabularResultSet result = new SqlSelect().from("foo").get(COLUMN_NAMES).where("id = ?", id).run(session);
+		TabularResultSet result = new SqlSelect().from("foo").project(COLUMN_NAMES).where("id = ?", id).run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else if (result.rowCount() == 1) {
@@ -91,7 +91,7 @@ public class TestDataService implements TransactionalService<SampleEntity> {
 
 	@Override
 	public List<SampleEntity> getAll() {
-		TabularResultSet result = new SqlSelect().from("foo").get(COLUMN_NAMES).run(session);
+		TabularResultSet result = new SqlSelect().from("foo").project(COLUMN_NAMES).run(session);
 		List<SampleEntity> entities = new ArrayList<SampleEntity>(result.rowCount());
 		for (Row row : result.rows()) {
 			entities.add(toSampleEntity(row));
