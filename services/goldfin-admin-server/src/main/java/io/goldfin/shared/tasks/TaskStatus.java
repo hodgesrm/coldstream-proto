@@ -4,9 +4,7 @@
 package io.goldfin.shared.tasks;
 
 /**
- * Initializes a new invoice service. Initialization logic runs in a separate
- * thread and reports progress back to client if a progress reporter is
- * available.
+ * Represents the status from a task. 
  */
 public class TaskStatus {
 	public enum Outcome {

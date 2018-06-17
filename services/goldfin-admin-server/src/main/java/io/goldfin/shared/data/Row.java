@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.data;
 
@@ -35,10 +35,12 @@ public class Row {
 
 	public String getAsString(int index) {
 		Object o = get(index);
-		if (o instanceof PGobject) {
+		if (o == null) {
+			return null;
+		} else if (o instanceof PGobject) {
 			return ((PGobject) o).getValue();
 		} else {
-			return (String) o;
+			return o.toString();
 		}
 	}
 

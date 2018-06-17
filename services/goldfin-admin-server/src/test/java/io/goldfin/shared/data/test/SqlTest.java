@@ -12,14 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import io.goldfin.shared.data.Row;
 import io.goldfin.shared.data.Session;
-import io.goldfin.shared.data.SessionBuilder;
 import io.goldfin.shared.data.SqlDelete;
-import io.goldfin.shared.data.SqlInsert;
 import io.goldfin.shared.data.SqlSelect;
-import io.goldfin.shared.data.SqlStatement;
 import io.goldfin.shared.data.SqlUpdate;
 import io.goldfin.shared.data.TabularResultSet;
 import io.goldfin.shared.testing.DbConnectionHelper;
+import io.goldfin.shared.testing.DbTestingHelper;
 
 /**
  * Tests SQL operation classes, focusing especially on SELECT statements. 
@@ -29,15 +27,14 @@ public class SqlTest {
 
 	private static final String SCHEMA = "test_sql";
 	private static DbConnectionHelper globalConnectionHelper;
+	private static DbTestingHelper globalDbHelper;
 
 	/** Ensure schema exists before starting any test. */
 	@BeforeClass
 	public static void setupAll() throws Exception {
 		globalConnectionHelper = new DbConnectionHelper(SCHEMA);
-		try (Session sess = createSession(false)) {
-			new SqlStatement(String.format("DROP SCHEMA IF EXISTS %s CASCADE", SCHEMA)).run(sess);
-			new SqlStatement(String.format("CREATE SCHEMA %s", SCHEMA)).run(sess);
-		}
+		globalDbHelper = new DbTestingHelper(globalConnectionHelper, SCHEMA);
+		globalDbHelper.initializeSchema();
 	}
 
 	@Before
@@ -51,8 +48,8 @@ public class SqlTest {
 	@Test
 	public void testBasicCrudOperations() {
 		String table = "basic_crud_operations";
-		createSimpleTestTable(table);
-		try (Session s = createSession(false)) {
+		globalDbHelper.createSimpleTestTable(table);
+		try (Session s = globalDbHelper.createSession(false)) {
 			// Confirm rows are inserted.
 			TabularResultSet result = new SqlSelect().from(table).project("id").project(table, "value", "v1").run(s);
 			Assert.assertEquals(10, result.rowCount());
@@ -79,8 +76,8 @@ public class SqlTest {
 	@Test
 	public void testWindowFunctions() {
 		String table = "window_functions";
-		createSimpleTestTable(table);
-		try (Session s = createSession(false)) {
+		globalDbHelper.createSimpleTestTable(table);
+		try (Session s = globalDbHelper.createSession(false)) {
 			// Select results with a window function that adds a column with reversed ID
 			// values partitioned across true/false values.
 			TabularResultSet result = new SqlSelect().from(table).project("id").project("value").project("boolval")
@@ -102,8 +99,8 @@ public class SqlTest {
 	@Test
 	public void testSubqueries() {
 		String table = "subqueries";
-		createSimpleTestTable(table);
-		try (Session s = createSession(false)) {
+		globalDbHelper.createSimpleTestTable(table);
+		try (Session s = globalDbHelper.createSession(false)) {
 			// Select results with a window function that adds a column with reversed ID
 			// values partitioned across true/false values.
 			SqlSelect sub = new SqlSelect().from(table).project("id").project("value").project("boolval")
@@ -127,8 +124,8 @@ public class SqlTest {
 	@Test
 	public void testWhereClauses() {
 		String table = "where_clause_1";
-		createSimpleTestTable(table);
-		try (Session s = createSession(false)) {
+		globalDbHelper.createSimpleTestTable(table);
+		try (Session s = globalDbHelper.createSession(false)) {
 			SqlSelect q1 = new SqlSelect().from(table, "t1").project("t1.*").where("t1.id > ?", 5);
 			SqlSelect q2 = new SqlSelect().from(q1, "q1").project("q1.*").where("q1.id < ?", 9);
 
@@ -148,26 +145,6 @@ public class SqlTest {
 		for (Row r : rs.rows()) {
 			logger.info(String.format("id=%s value=%s boolval=%s rn=%s", r.getAsInt("id"), r.getAsString("value"),
 					r.getAsBoolean("boolval"), r.getAsLong("rn")));
-		}
-	}
-	
-	/** Create a session and ensure that the schema exists. */
-	private static Session createSession(boolean transactional) {
-		Session session = new SessionBuilder().connectionManager(globalConnectionHelper.getConnectionManager())
-				.ensureSchema(globalConnectionHelper.getSchema()).transactional(transactional).build();
-		return session;
-	}
-
-	/** Create a simple test table with 10 rows. */
-	private void createSimpleTestTable(String name) {
-		try (Session session = createSession(false)) {
-			new SqlStatement(String.format(
-					"CREATE TABLE %s.%s (id int PRIMARY KEY, value varchar(100), boolval boolean)", SCHEMA, name))
-							.run(session);
-			for (int i = 1; i <= 10; i++) {
-				new SqlInsert().table(name).put("id", i).put("value", new Integer(i).toString())
-						.put("boolval", new Boolean(i % 2 == 0)).run(session);
-			}
 		}
 	}
 }

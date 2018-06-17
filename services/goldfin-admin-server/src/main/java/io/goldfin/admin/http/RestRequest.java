@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.http;
 
@@ -17,12 +17,13 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import io.goldfin.shared.utilities.JsonHelper;
 
 /**
- * Basic REST request.
+ * Basic REST request. 
  */
 public class RestRequest {
 	RestHttpMethod method;
 	String path;
 	Map<String, String> headers = new HashMap<String, String>();
+	Map<String, String> params = new HashMap<String, String>();
 	HttpEntity httpEntity;
 	MultipartEntityBuilder multipartBuilder;
 
@@ -59,6 +60,11 @@ public class RestRequest {
 		return this;
 	}
 
+	public RestRequest queryParam(String key, String value) {
+		params.put(key,  value);
+		return this;
+	}
+	
 	/** Method to set binary content. This must be the only content operation. */
 	public RestRequest content(byte[] content) {
 		assertNoContent();

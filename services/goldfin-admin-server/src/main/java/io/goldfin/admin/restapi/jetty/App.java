@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.restapi.jetty;
 
@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import io.goldfin.admin.managers.DataSeriesAnalysisManager;
 import io.goldfin.admin.managers.DataSeriesManager;
 import io.goldfin.admin.managers.DocumentManager;
+import io.goldfin.admin.managers.ExtractManager;
 import io.goldfin.admin.managers.HostManager;
 import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
@@ -165,6 +166,7 @@ public class App {
 		registry.addManager(new DocumentManager());
 		registry.addManager(new VendorManager());
 		registry.addManager(new HostManager());
+		registry.addManager(new ExtractManager());
 
 		// Managers to mediate with backend pipelines.
 		registry.addManager(new OcrManager());

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.http;
 
@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +31,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -129,7 +131,15 @@ public class MinimalRestClient {
 		String url = makeUrl(restRequest.path);
 		switch (restRequest.method) {
 		case GET:
-			uriRequest = new HttpGet(url);
+			try {
+				URIBuilder builder = new URIBuilder(url);
+				for (String param: restRequest.params.keySet()) {
+					builder.addParameter(param, restRequest.params.get(param));
+				}
+				uriRequest = new HttpGet(builder.build());
+			} catch (URISyntaxException e) {
+				throw new RestRuntimeException("Invalid URI", e);
+			}
 			break;
 		case POST:
 			uriRequest = new HttpPost(url);

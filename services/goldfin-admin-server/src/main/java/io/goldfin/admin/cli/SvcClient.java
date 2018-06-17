@@ -33,6 +33,7 @@ public class SvcClient implements CliContext {
 		loadCommand(new CmdDocumentDelete());
 		loadCommand(new CmdDocumentList());
 		loadCommand(new CmdDocumentProcess());
+		loadCommand(new CmdExtractDownload());
 		loadCommand(new CmdHostList());
 		loadCommand(new CmdInvoiceDelete());
 		loadCommand(new CmdInvoiceList());
