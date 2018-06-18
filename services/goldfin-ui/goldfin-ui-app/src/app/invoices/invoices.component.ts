@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2017 Goldfin.io.  All rights reserved.
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved.
  */
 import { Component, OnInit } from '@angular/core';
 import { Router }   from '@angular/router'
 
+import { saveAs } from 'file-saver/FileSaver';
+
+import { ExtractService }   from '../services/extract.service';
 import { InvoiceService }   from '../services/invoice.service';
 import { Invoice } from '../client/model/Invoice';
 import { InvoiceItem } from '../client/model/InvoiceItem';
@@ -60,7 +63,8 @@ export class InvoicesComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private invoiceService: InvoiceService
+    private invoiceService: InvoiceService,
+    private extractService: ExtractService
   ) {}
 
   ngOnInit(): void {
@@ -133,8 +137,13 @@ export class InvoicesComponent implements OnInit {
       this.errorReporter.error_message = "Please select one or more invoices";
       this.errorReporter.error_open = true;
     } else {
-      this.errorReporter.error_message = "Export is not implemented yet";
-      this.errorReporter.error_open = true;
+      this.extractService.fetchInvoiceCsv()
+        .subscribe(response => {
+          var text = response.text();
+          console.log(text);
+          var blob = new Blob([text], { type: 'text/csv' });
+          saveAs(blob, 'extract.csv');
+        });
     }
   }
 

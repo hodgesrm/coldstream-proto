@@ -32,6 +32,7 @@ import { AuthService } from "./services/auth.service";
 import { ConfigurationService } from "./services/config.service";
 import { DocumentService } from "./services/document.service";
 import { DataSeriesService } from "./services/data-series.service";
+import { ExtractService } from "./services/extract.service";
 import { InvoiceService } from "./services/invoice.service";
 import { HostPriceService } from "./services/host_pricing.service";
 import { HostService } from "./services/host.service";
@@ -41,6 +42,7 @@ import { VendorService } from "./services/vendor.service";
 import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
 import { SecurityApi } from "./client/api/SecurityApi";
+import { ExtractApi } from "./client/api/ExtractApi";
 import { InventoryApi } from "./client/api/InventoryApi";
 import { InvoiceApi } from "./client/api/InvoiceApi";
 import { VendorApi } from "./client/api/VendorApi";
@@ -85,6 +87,7 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
       ConfigurationService,
       DocumentService,
       DataSeriesService,
+      ExtractService,
       InvoiceService,
       HostService,
       HostPriceService,
@@ -93,6 +96,7 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
       SecurityApi,
       DocumentApiExtended,
       DataSeriesApiExtended,
+      ExtractApi,
       InventoryApi,
       InvoiceApi,
       VendorApi
