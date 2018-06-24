@@ -37,6 +37,7 @@ public class SvcClient implements CliContext {
 		loadCommand(new CmdHostList());
 		loadCommand(new CmdInvoiceDelete());
 		loadCommand(new CmdInvoiceList());
+		loadCommand(new CmdInvoiceValidate());
 		loadCommand(new CmdLogin());
 		loadCommand(new CmdLogout());
 		loadCommand(new CmdTenantCreate());

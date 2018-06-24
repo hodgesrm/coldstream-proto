@@ -536,9 +536,18 @@ paths:
           description: Invoice ID
           required: true
           type: string
+        - name: onlyFailing
+          in: query
+          description: 'If true, return only failing checks. Otherwise return all results including checks that succeed'
+          type: boolean
+          default: false
       responses:
-        '202':
-          description: Accepted
+        '200':
+          description: Successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/InvoiceValidationResult'
         '404':
           description: Not Found
   /document:
@@ -915,11 +924,13 @@ paths:
           required: true
         - name: filter
           in: query
-          description: 'A query string that specifies extract content.  If omitted all entities are selected.'
+          description: >-
+            A query string that specifies extract content.  If omitted all
+            entities are selected.
           type: string
         - name: output
           in: query
-          description: 'Selects the extract output type. Currently only CSV is supported.'
+          description: Selects the extract output type. Currently only CSV is supported.
           type: string
       responses:
         '200':
@@ -1266,6 +1277,48 @@ definitions:
       tags:
         type: string
         description: A user-provided list of name-value pairs that describe the invoice
+  ValidationType:
+    type: string
+    description: Key describing a specific validation type
+    enum: &VALIDATION_TYPE
+      - INVOICE
+      - INVOICE_LINE_ITEM
+  InvoiceValidationResult:
+    description: An validation result that checks a specific invoice rule
+    properties:
+      summary:
+        type: string
+        description: A concise summary of the check
+      passed:
+        type: boolean
+        description: If true the check passed
+      validationType:
+        type: string
+        description: The type of validation, which can be related to the invoice itself or an invoice line item.  In the latter case line item fields are included; otherwise line item information is omitted.
+        enum: *VALIDATION_TYPE
+      details:
+        type: string
+        description: Detailed information about the exception
+      invoiceId:
+        type: string
+        format: uuid
+        description: ID of invoice to which discrepancy applies
+      identifier:
+        type: string
+        description: Invoice identifier
+      effectiveDate:
+        type: string
+        format: date-time
+        description: Invoice effective date
+      vendorIdentifier:
+        type: string
+        description: Vendor identifier
+      invoiceItemId:
+        type: string
+        description: Invoice line item ID
+      invoiceItemResourceId:
+        type: string
+        description: Invoice line item inventory resource ID
   DataSeries:
     description: A set of one or more observations for analysis
     type: object

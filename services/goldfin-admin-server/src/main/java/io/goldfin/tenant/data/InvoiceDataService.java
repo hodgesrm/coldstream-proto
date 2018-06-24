@@ -139,7 +139,7 @@ public class InvoiceDataService implements TransactionalService<Invoice> {
 		Invoice invoice = get(id);
 		if (invoice != null) {
 			TabularResultSet result = new SqlSelect().from("invoice_items").project(COLUMN_NAMES_ITEMS)
-					.where("invoice_id", id).run(session);
+					.where("invoice_id = ?", UUID.fromString(id)).run(session);
 			for (Row row : result.rows()) {
 				InvoiceItem item = toInvoiceItem(row);
 				invoice.addItemsItem(item);

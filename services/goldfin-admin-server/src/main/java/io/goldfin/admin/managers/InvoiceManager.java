@@ -4,10 +4,16 @@
 package io.goldfin.admin.managers;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.goldfin.admin.exceptions.EntityNotFoundException;
+import io.goldfin.admin.managers.validation.InvoiceRuleSet;
+import io.goldfin.admin.managers.validation.Rule;
+import io.goldfin.admin.managers.validation.ValidationResult;
 import io.goldfin.admin.service.api.model.Invoice;
+import io.goldfin.admin.service.api.model.InvoiceValidationResult;
+import io.goldfin.admin.service.api.model.InvoiceValidationResult.ValidationTypeEnum;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.shared.data.Session;
 import io.goldfin.tenant.data.InvoiceDataService;
@@ -33,12 +39,6 @@ public class InvoiceManager implements Manager {
 		// Do nothing for now.
 	}
 
-	public void addScannedInvoice(String tenantId, Invoice invoice) {
-		// If there is an existing invoice for this document ID, we need to delete it. 
-
-		// Add the new invoice. 
-	}
-	
 	public void deleteInvoice(Principal principal, String id) {
 		String tenantId = getTenantId(principal);
 		InvoiceDataService invoiceEnvelopeService = new InvoiceDataService();
@@ -50,7 +50,7 @@ public class InvoiceManager implements Manager {
 			}
 		}
 	}
-	
+
 	public Invoice getInvoice(Principal principal, String id) {
 		String tenantId = getTenantId(principal);
 		InvoiceDataService invoiceDataService = new InvoiceDataService();
@@ -67,13 +67,55 @@ public class InvoiceManager implements Manager {
 		String tenantId = getTenantId(principal);
 		InvoiceDataService invoiceService = new InvoiceDataService();
 		try (Session session = context.tenantSession(tenantId).enlist(invoiceService)) {
-			if (full == null || ! full) {
+			if (full == null || !full) {
 				return invoiceService.getAll();
-			}
-			else {
+			} else {
 				return invoiceService.getAllComplete();
 			}
 		}
+	}
+
+	public List<InvoiceValidationResult> validate(Principal principal, String id, boolean onlyFailing) {
+		String tenantId = getTenantId(principal);
+
+		// Find the invoice in question.
+		InvoiceDataService invoiceDataService = new InvoiceDataService();
+		Invoice invoice = null;
+		try (Session session = context.tenantSession(tenantId).enlist(invoiceDataService)) {
+			invoice = invoiceDataService.getComplete(id);
+			if (invoice == null) {
+				throw new EntityNotFoundException("Invoice does not exist");
+			}
+		}
+
+		// Apply invoice-level rules.
+		InvoiceRuleSet ruleSet = new InvoiceRuleSet();
+		List<InvoiceValidationResult> results = new ArrayList<InvoiceValidationResult>();
+		for (Rule<Invoice> rule : ruleSet.getInvoiceRules()) {
+			for (ValidationResult result : rule.validate(invoice)) {
+				if (onlyFailing && !result.isPassed()) {
+					results.add(translateResult(invoice, result));
+				} else {
+					results.add(translateResult(invoice, result));
+				}
+			}
+		}
+
+		return results;
+	}
+
+	private InvoiceValidationResult translateResult(Invoice invoice, ValidationResult result) {
+		InvoiceValidationResult invResult = new InvoiceValidationResult();
+		invResult.setSummary(result.getSummary());
+		invResult.setPassed(result.isPassed());
+		ValidationTypeEnum validationEnum = ValidationTypeEnum.fromValue(result.getValidationType().name());
+		invResult.setValidationType(validationEnum);
+		invResult.setDetails(result.getDetails());
+		invResult.setInvoiceId(invoice.getId());
+		invResult.setIdentifier(invoice.getIdentifier());
+		invResult.setEffectiveDate(invoice.getEffectiveDate());
+		invResult.setVendorIdentifier(invoice.getVendorIdentifier());
+		return invResult;
 	}
 
 	/** Get the tenant ID for this user. */

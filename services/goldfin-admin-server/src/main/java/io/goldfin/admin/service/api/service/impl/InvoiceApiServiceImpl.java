@@ -16,6 +16,7 @@ import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.admin.service.api.model.InvoiceParameters;
+import io.goldfin.admin.service.api.model.InvoiceValidationResult;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.InvoiceApiService;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -68,8 +69,13 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	}
 
 	@Override
-	public Response invoiceValidate(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+	public Response invoiceValidate(String id, Boolean onlyFailing, SecurityContext securityContext) {
+		try {
+			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
+			List<InvoiceValidationResult> exceptions = im.validate(securityContext.getUserPrincipal(), id, onlyFailing);
+			return Response.ok().entity(exceptions).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 }

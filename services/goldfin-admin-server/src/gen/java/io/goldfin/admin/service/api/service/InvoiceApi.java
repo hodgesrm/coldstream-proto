@@ -9,6 +9,7 @@ import io.swagger.jaxrs.*;
 
 import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.admin.service.api.model.InvoiceParameters;
+import io.goldfin.admin.service.api.model.InvoiceValidationResult;
 
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -122,16 +123,17 @@ public class InvoiceApi  {
     @Path("/{id}/validate")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Start invoice validations", notes = "Run invoice validations", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Start invoice validations", notes = "Run invoice validations", response = InvoiceValidationResult.class, responseContainer = "List", authorizations = {
         @io.swagger.annotations.Authorization(value = "APIKeyHeader")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = InvoiceValidationResult.class, responseContainer = "List"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = InvoiceValidationResult.class, responseContainer = "List") })
     public Response invoiceValidate(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
+,@ApiParam(value = "If true, return only failing checks. Otherwise return all results including checks that succeed", defaultValue="false") @DefaultValue("false") @QueryParam("onlyFailing") Boolean onlyFailing
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.invoiceValidate(id,securityContext);
+        return delegate.invoiceValidate(id,onlyFailing,securityContext);
     }
 }
