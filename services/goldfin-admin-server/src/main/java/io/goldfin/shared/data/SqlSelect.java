@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * both normal columns and window functions. If no column alias is provided the
  * column aliases to the first from object.</li>
  * <li><em>from</em> adds a 'from object', i.e., a table or subquery</li>
+ * <li><em>join</em> adds a join on a table or subquery</li>
  * <li><em>where</em> add a where clause expression</li>
  * <li><em>window</em> adds a window expression</li>
  * <li><em>orderBy</em> adds an ordering column and direction</li>
@@ -48,6 +49,32 @@ public class SqlSelect {
 		String alias;
 		String name;
 		SqlSelect subQuery;
+	}
+
+	/** Defines the join type between tables. */
+	public enum JoinType {
+		/** Inner join between tables--unmatched rows on either side are dropped. */
+		INNER,
+		/**
+		 * All rows from left table are included with null fill if right table row(s)
+		 * missing.
+		 */
+		LEFT,
+		/**
+		 * All rows from right table are included with null fill if left table rows(s)
+		 * missing.
+		 */
+		RIGHT
+	}
+
+	/**
+	 * Adds a from clause with a join expression. Keys must include alias if
+	 * required to eliminate ambiguity.
+	 */
+	class JoinExpression extends FromExpression {
+		JoinType joinType = JoinType.INNER;
+		String leftKey;
+		String rightKey;
 	}
 
 	/** Stores a window definition. */
@@ -128,9 +155,41 @@ public class SqlSelect {
 		return this;
 	}
 
-	/** Add a from clause for a subquery. */
-	public SqlSelect from(String alias, SqlSelect subQuery) {
+	public SqlSelect innerJoin(String tableName, String alias, String leftKey, String rightKey) {
+		return join(tableName, null, alias, JoinType.INNER, leftKey, rightKey);
+	}
 
+	public SqlSelect innerJoin(SqlSelect subQuery, String alias, String leftKey, String rightKey) {
+		return join(null, subQuery, alias, JoinType.INNER, leftKey, rightKey);
+	}
+
+	public SqlSelect leftJoin(String tableName, String alias, String leftKey, String rightKey) {
+		return join(tableName, null, alias, JoinType.LEFT, leftKey, rightKey);
+	}
+
+	public SqlSelect leftJoin(SqlSelect subQuery, String alias, String leftKey, String rightKey) {
+		return join(null, subQuery, alias, JoinType.LEFT, leftKey, rightKey);
+	}
+
+	public SqlSelect rightJoin(String tableName, String alias, String leftKey, String rightKey) {
+		return join(tableName, null, alias, JoinType.RIGHT, leftKey, rightKey);
+	}
+
+	public SqlSelect rightJoin(SqlSelect subQuery, String alias, String leftKey, String rightKey) {
+		return join(null, subQuery, alias, JoinType.RIGHT, leftKey, rightKey);
+	}
+
+	/** Add a from with a join clause. Callers choose between subquery and table. */
+	public SqlSelect join(String tableName, SqlSelect subQuery, String alias, JoinType joinType, String leftKey,
+			String rightKey) {
+		JoinExpression join = new JoinExpression();
+		join.name = tableName;
+		join.subQuery = subQuery;
+		join.alias = alias;
+		join.joinType = joinType;
+		join.leftKey = leftKey;
+		join.rightKey = rightKey;
+		this.froms.add(join);
 		return this;
 	}
 
@@ -314,17 +373,46 @@ public class SqlSelect {
 			StringBuffer fromList = new StringBuffer();
 			fromList.append(" FROM ");
 			for (int i = 0; i < froms.size(); i++) {
-				if (i > 0) {
-					fromList.append(", ");
-				}
 				FromExpression from = froms.get(i);
-				if (from.name != null) {
-					fromList.append(from.name);
-				} else if (from.subQuery != null) {
-					fromList.append("( ").append(from.subQuery.build()).append(")");
-				}
-				if (from.alias != null) {
-					fromList.append(" AS ").append(from.alias);
+				if (from instanceof JoinExpression) {
+					// Handle case of a JOIN.
+					JoinExpression join = (JoinExpression) from;
+					switch (join.joinType) {
+					case INNER:
+						fromList.append(" INNER JOIN ");
+						break;
+					case LEFT:
+						fromList.append(" LEFT JOIN ");
+						break;
+					case RIGHT:
+						fromList.append(" RIGHT JOIN ");
+						break;
+					}
+					if (join.name != null) {
+						fromList.append(join.name);
+					} else if (join.subQuery != null) {
+						fromList.append("( ").append(join.subQuery.build()).append(")");
+					}
+					if (join.alias != null) {
+						fromList.append(" AS ").append(join.alias);
+					}
+					fromList.append(" ON ");
+					fromList.append(join.leftKey);
+					fromList.append(" = ");
+					fromList.append(join.rightKey);
+				} else {
+					// Handle a simple FROM.
+					if (i > 0) {
+						fromList.append(", ");
+					}
+					if (from.name != null) {
+						fromList.append(from.name);
+					} else if (from.subQuery != null) {
+						fromList.append("( ").append(from.subQuery.build()).append(")");
+					}
+					if (from.alias != null) {
+						fromList.append(" AS ").append(from.alias);
+					}
 				}
 			}
 			return fromList.toString();
@@ -387,6 +475,5 @@ public class SqlSelect {
 			}
 			return orderByClause.toString();
 		}
-
 	}
 }

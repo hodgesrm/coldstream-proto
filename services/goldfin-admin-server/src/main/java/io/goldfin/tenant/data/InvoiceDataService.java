@@ -24,7 +24,6 @@ import io.goldfin.shared.data.SqlSelect;
 import io.goldfin.shared.data.SqlUpdate;
 import io.goldfin.shared.data.TabularResultSet;
 import io.goldfin.shared.data.TransactionalService;
-import io.goldfin.shared.utilities.JsonHelper;
 
 /**
  * Service methods for working with invoices.
@@ -32,9 +31,9 @@ import io.goldfin.shared.utilities.JsonHelper;
 public class InvoiceDataService implements TransactionalService<Invoice> {
 	static private final Logger logger = LoggerFactory.getLogger(InvoiceDataService.class);
 
-	private static final String[] COLUMN_NAMES = { "id", "document_id", "identifier", "description", "tags",
+	public static final String[] COLUMN_NAMES = { "id", "document_id", "identifier", "description", "tags",
 			"effective_date", "vendor", "subtotal_amount", "tax", "total_amount", "currency", "creation_date" };
-	private static final String[] COLUMN_NAMES_ITEMS = { "invoice_id", "item_row_number", "item_id", "resource_id",
+	public static final String[] COLUMN_NAMES_ITEMS = { "invoice_id", "item_row_number", "item_id", "resource_id",
 			"description", "unit_amount", "units", "total_amount", "currency", "start_date", "end_date",
 			"one_time_charge", "region", "inventory_id", "inventory_type", "creation_date" };
 
