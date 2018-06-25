@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2017 Goldfin.io. All Rights Reserved.
+ * Copyright (c) 2017-2018 Goldfin.io. All Rights Reserved.
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { InvoiceApi } from '../client/api/InvoiceApi';
 import { Invoice } from '../client/model/Invoice';
+import { InvoiceValidationResult } from '../client/model/InvoiceValidationResult';
 
 export class FakeInvoice {
   identifier: string;
@@ -28,6 +29,16 @@ export class InvoiceService {
 
   loadInvoices(): Observable<Array<Invoice>> {
     return this.invoiceApi.invoiceShowAll(true);
+  }
+
+  // Run validation on all resources. 
+  validateInvoices(invoiceIds: string[]): Array<Observable<Array<InvoiceValidationResult>>> {
+    var observables = [];
+    for (let invoiceId of invoiceIds) {
+      var observable = this.invoiceApi.invoiceValidate(invoiceId, false);
+      observables.push(observable);
+    }
+    return observables;
   }
 
   // Remaining calls are mocks. 

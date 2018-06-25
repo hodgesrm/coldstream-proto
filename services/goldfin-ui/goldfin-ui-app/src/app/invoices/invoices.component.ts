@@ -10,6 +10,7 @@ import { ExtractService }   from '../services/extract.service';
 import { InvoiceService }   from '../services/invoice.service';
 import { Invoice } from '../client/model/Invoice';
 import { InvoiceItem } from '../client/model/InvoiceItem';
+import { InvoiceValidationResult } from '../client/model/InvoiceValidationResult';
 
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';
@@ -50,6 +51,7 @@ export class InvoicesComponent implements OnInit {
   // Model controls. 
   delete_open: boolean = false;
   invoice_detail_open: boolean = false;
+  invoice_validations_open: boolean = false;
 
   // Error reporter sub-component. 
   errorReporter: ErrorReporter = new ErrorReporter();
@@ -60,6 +62,9 @@ export class InvoicesComponent implements OnInit {
 
   // Invoice item listing.
   invoice_items: InvoiceJoinedToItem[] = [];
+
+  // Invoice validation listing. 
+  invoice_validations: InvoiceValidationResult[] = [];
 
   constructor(
     private router: Router,
@@ -128,6 +133,55 @@ export class InvoicesComponent implements OnInit {
     } else {
       this.populateInvoiceItems();
       this.invoice_detail_open = true;
+    }
+  }
+
+  onValidate(): void {
+    console.log("onValidate invoked " + this.selected);
+    if (this.selected == null || this.selected.length == 0) {
+      this.errorReporter.error_message = "Please select one or more invoices";
+      this.errorReporter.error_open = true;
+    } else {
+      // Put invoice IDs in an array. 
+      var invoiceIds: string[] = [];
+      for (let invoice of this.selected) {
+        invoiceIds.push(invoice.id);
+      }
+      console.log("Collected invoice Ids: " + invoiceIds);
+      var observables = this.invoiceService.validateInvoices(invoiceIds);
+      var expectedObservables = observables.length; 
+      var actualObservables = 0;
+      this.invoice_validations = [];
+      for (let observable of observables) {
+        observable
+          .subscribe(newValidations => {
+            this.invoice_validations = this.invoice_validations.concat(newValidations);
+            actualObservables += 1
+            console.log("Added more invoice validations: " + actualObservables);
+            if (actualObservables >= expectedObservables) {
+              this.invoice_validations_open = true;
+              console.log("Opened invoice validations");
+            }
+          });
+      }
+    }
+  }
+
+  // Return span class for the validation result based on whether it passed.
+  getValidationResultClass(passed: boolean): string {
+    if (passed) {
+      return "label label-success";
+    } else {
+      return "label label-danger";
+    }
+  }
+
+  // Convert passed true/false to OK/FAILED.
+  getValidationResultName(passed: boolean): string {
+    if (passed) {
+      return "OK";
+    } else {
+      return "FAILED";
     }
   }
 

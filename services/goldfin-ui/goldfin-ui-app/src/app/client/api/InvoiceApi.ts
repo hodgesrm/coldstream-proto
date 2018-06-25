@@ -111,9 +111,10 @@ export class InvoiceApi {
      * Run invoice validations
      * @summary Start invoice validations
      * @param id Invoice ID
+     * @param onlyFailing If true, return only failing checks. Otherwise return all results including checks that succeed
      */
-    public invoiceValidate(id: string, extraHttpRequestParams?: any): Observable<{}> {
-        return this.invoiceValidateWithHttpInfo(id, extraHttpRequestParams)
+    public invoiceValidate(id: string, onlyFailing?: boolean, extraHttpRequestParams?: any): Observable<Array<models.InvoiceValidationResult>> {
+        return this.invoiceValidateWithHttpInfo(id, onlyFailing, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -308,8 +309,9 @@ export class InvoiceApi {
      * Start invoice validations
      * Run invoice validations
      * @param id Invoice ID
+     * @param onlyFailing If true, return only failing checks. Otherwise return all results including checks that succeed
      */
-    public invoiceValidateWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+    public invoiceValidateWithHttpInfo(id: string, onlyFailing?: boolean, extraHttpRequestParams?: any): Observable<Response> {
         const path = this.basePath + '/invoice/${id}/validate'
                     .replace('${' + 'id' + '}', String(id));
 
@@ -319,6 +321,10 @@ export class InvoiceApi {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling invoiceValidate.');
         }
+        if (onlyFailing !== undefined) {
+            queryParameters.set('onlyFailing', <any>onlyFailing);
+        }
+
         // to determine the Content-Type header
         let consumes: string[] = [
         ];
