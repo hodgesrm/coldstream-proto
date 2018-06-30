@@ -48,6 +48,6 @@ public abstract class AbstractRule<T> implements Rule<T> {
 
 	/** Create partially filled in validation result for this rule. */
 	public ValidationResult createValidationResult() {
-		return new ValidationResult().setKey(key).setSummary(summary).setValidationType(validationType);
+		return new ValidationResult().setKey(key).setValidationType(validationType);
 	}
 }

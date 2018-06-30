@@ -27,18 +27,21 @@ public class InvoiceTotalRule extends AbstractRule<Invoice> {
 		// Ensure that the invoice has a visible total. If not that's already a problem.
 		List<ValidationResult> results = new ArrayList<ValidationResult>();
 		ValidationResult result1 = createValidationResult();
-		result1.setDetails("Invoice must have a total amount");
+		result1.setSummary("Invoice has total amount");
 		results.add(result1);
 
 		if (invoice.getTotalAmount() == null) {
+			result1.setDetails("Invoice total field missing/not found");
 			result1.setPassed(false);
 			return results;
 		} else {
+			result1.setDetails("Invoice total field found");
 			result1.setPassed(true);
 		}
 
 		// Now check that the invoice line item totals sum to the invoice total.
 		ValidationResult result2 = createValidationResult();
+		result2.setSummary("Invoice item totals match invoice total");
 		results.add(result2);
 		BigDecimal itemTotalAmount = new BigDecimal(0);
 		for (InvoiceItem item : invoice.getItems()) {
@@ -46,10 +49,17 @@ public class InvoiceTotalRule extends AbstractRule<Invoice> {
 				itemTotalAmount = itemTotalAmount.add(item.getTotalAmount());
 			}
 		}
-		result2.setDetails(
-				String.format("Invoice total matches summed invoice item totals: invoice total=%s, item total=%s",
-						invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
-		result2.setPassed(itemTotalAmount.equals(invoice.getTotalAmount()));
+		if (itemTotalAmount.equals(invoice.getTotalAmount())) {
+			result2.setDetails(
+					String.format("Totals matchs: invoice total=%s, item total=%s",
+							invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
+			result2.setPassed(true);
+		} else {
+			result2.setDetails(
+					String.format("Totals do not match: invoice total=%s, item total=%s",
+							invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
+			result2.setPassed(false);
+		}
 		return results;
 	}
 }
