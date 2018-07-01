@@ -8,7 +8,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import io.goldfin.admin.service.api.model.Document;
-import io.goldfin.admin.service.api.model.DocumentParameters;
 import java.io.File;
 import io.goldfin.admin.service.api.model.ModelApiResponse;
 
@@ -92,6 +91,22 @@ public class DocumentApi  {
     throws NotFoundException {
         return delegate.documentDelete(id,securityContext);
     }
+    @GET
+    @Path("/{id}/download")
+    
+    @Produces({ "application/pdf", "application/octet-stream" })
+    @io.swagger.annotations.ApiOperation(value = "Download content", notes = "Download document content", response = File.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+    }, tags={ "document", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = File.class) })
+    public Response documentDownload(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.documentDownload(id,securityContext);
+    }
     @POST
     @Path("/{id}/process")
     
@@ -136,38 +151,5 @@ public class DocumentApi  {
     public Response documentShowAll(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.documentShowAll(securityContext);
-    }
-    @GET
-    @Path("/{id}/content")
-    
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Return document content", notes = "Download document content", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
-    }, tags={ "document", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
-    public Response documentShowContent(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.documentShowContent(id,securityContext);
-    }
-    @PUT
-    @Path("/{id}")
-    
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update document information", notes = "Update document description and tags. Changes to other fields are ignored", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
-    }, tags={ "document", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
-    public Response documentUpdate(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
-,@ApiParam(value = "Document descriptor" ) DocumentParameters body
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.documentUpdate(id,body,securityContext);
     }
 }

@@ -3,6 +3,8 @@
  */
 package io.goldfin.admin.service.api.service.impl;
 
+import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -12,10 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.exceptions.ExceptionHelper;
+import io.goldfin.admin.managers.DocumentManager;
 import io.goldfin.admin.managers.InvoiceManager;
 import io.goldfin.admin.managers.ManagerRegistry;
+import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.Invoice;
-import io.goldfin.admin.service.api.model.InvoiceParameters;
 import io.goldfin.admin.service.api.model.InvoiceValidationResult;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.InvoiceApiService;
@@ -62,18 +65,31 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 	}
 
 	@Override
-	public Response invoiceUpdate(String id, InvoiceParameters body, SecurityContext securityContext)
-			throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-	}
-
-	@Override
 	public Response invoiceValidate(String id, Boolean onlyFailing, SecurityContext securityContext) {
 		try {
 			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
 			List<InvoiceValidationResult> exceptions = im.validate(securityContext.getUserPrincipal(), id, onlyFailing);
 			return Response.ok().entity(exceptions).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
+	}
+
+	@Override
+	public Response invoiceDownload(String id, SecurityContext securityContext) throws NotFoundException {
+		try {
+			InvoiceManager im = ManagerRegistry.getInstance().getManager(InvoiceManager.class);
+			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
+
+			// Find the invoice first.
+			Principal principal = securityContext.getUserPrincipal();
+			Invoice inv = im.getInvoice(principal, id);
+
+			// Next get the corresponding document and download same.
+			Document doc = dm.getDocument(principal, inv.getDocumentId().toString());
+			InputStream input = dm.downloadDocument(securityContext.getUserPrincipal(), doc.getId().toString());
+			return Response.ok(input).header("Content-Type", doc.getContentType())
+					.header("Content-Disposition", "attachment; filename=" + doc.getName()).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}

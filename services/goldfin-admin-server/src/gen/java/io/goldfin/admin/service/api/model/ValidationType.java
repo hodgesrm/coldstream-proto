@@ -13,6 +13,11 @@
 
 package io.goldfin.admin.service.api.model;
 
+import java.util.Objects;
+import io.swagger.annotations.ApiModel;
+import com.fasterxml.jackson.annotation.JsonValue;
+import javax.validation.constraints.*;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**

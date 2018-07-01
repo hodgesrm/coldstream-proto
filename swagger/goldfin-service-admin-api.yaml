@@ -476,30 +476,6 @@ paths:
             $ref: '#/definitions/Invoice'
         '404':
           description: Not Found
-    put:
-      tags:
-        - invoice
-      summary: Update an invoice
-      description: Update invoice description and tags. Changes to other fields are ignored
-      operationId: invoiceUpdate
-      produces:
-        - application/json
-      parameters:
-        - name: id
-          in: path
-          description: Invoice ID
-          required: true
-          type: string
-        - name: body
-          in: body
-          description: Invoice parameters
-          schema:
-            $ref: '#/definitions/InvoiceParameters'
-      responses:
-        '200':
-          description: Successful
-        '404':
-          description: Not Found
     delete:
       tags:
         - invoice
@@ -521,6 +497,29 @@ paths:
           description: Successful
         '404':
           description: Not Found
+  '/invoice/{id}/download':
+    get:
+      tags:
+        - invoice
+      summary: Download invoice document
+      description: Download invoice document
+      operationId: invoiceDownload
+      produces:
+        - application/pdf
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: file
+        '404':
+          description: Not Found
   '/invoice/{id}/validate':
     post:
       tags:
@@ -538,7 +537,9 @@ paths:
           type: string
         - name: onlyFailing
           in: query
-          description: 'If true, return only failing checks. Otherwise return all results including checks that succeed'
+          description: >-
+            If true, return only failing checks. Otherwise return all results
+            including checks that succeed
           type: boolean
           default: false
       responses:
@@ -622,32 +623,6 @@ paths:
             $ref: '#/definitions/Document'
         '404':
           description: Not Found
-    put:
-      tags:
-        - document
-      summary: Update document information
-      description: >-
-        Update document description and tags. Changes to other fields are
-        ignored
-      operationId: documentUpdate
-      produces:
-        - application/json
-      parameters:
-        - name: id
-          in: path
-          description: Document ID
-          required: true
-          type: string
-        - name: body
-          in: body
-          description: Document descriptor
-          schema:
-            $ref: '#/definitions/DocumentParameters'
-      responses:
-        '200':
-          description: Successful
-        '404':
-          description: Not Found
     delete:
       tags:
         - document
@@ -667,14 +642,15 @@ paths:
           description: Successful
         '404':
           description: Not Found
-  '/document/{id}/content':
+  '/document/{id}/download':
     get:
       tags:
         - document
-      summary: Return document content
+      summary: Download content
       description: Download document content
-      operationId: documentShowContent
+      operationId: documentDownload
       produces:
+        - application/pdf
         - application/octet-stream
       parameters:
         - name: id
@@ -684,7 +660,9 @@ paths:
           type: string
       responses:
         '200':
-          description: Successful
+          description: Successful query
+          schema:
+            type: file
         '404':
           description: Not Found
   '/document/{id}/process':
@@ -1280,7 +1258,7 @@ definitions:
   ValidationType:
     type: string
     description: Key describing a specific validation type
-    enum: &VALIDATION_TYPE
+    enum: &ref_0
       - INVOICE
       - INVOICE_LINE_ITEM
   InvoiceValidationResult:
@@ -1294,8 +1272,11 @@ definitions:
         description: If true the check passed
       validationType:
         type: string
-        description: The type of validation, which can be related to the invoice itself or an invoice line item.  In the latter case line item fields are included; otherwise line item information is omitted.
-        enum: *VALIDATION_TYPE
+        description: >-
+          The type of validation, which can be related to the invoice itself or
+          an invoice line item.  In the latter case line item fields are
+          included; otherwise line item information is omitted.
+        enum: *ref_0
       details:
         type: string
         description: Detailed information about the exception

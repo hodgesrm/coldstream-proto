@@ -178,6 +178,43 @@ public class DocumentManager implements Manager {
 		}
 	}
 
+	/**
+	 * Returns an input stream on a document downloaded from storage. Underlying
+	 * resources are deleted automatically.
+	 */
+	public InputStream downloadDocument(Principal principal, String id) throws IOException {
+		Document document = getDocument(principal, id);
+
+		// Download the document to a temp file, then return an inputstream on the file.
+		File documentTempFile = File.createTempFile(document.getId().toString(), ".download");
+		try {
+			StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
+			long contentLength = connection.fetchDocument(document.getLocator(), documentTempFile);
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Document downloaded: file=%s, contentLength=%d",
+						documentTempFile.getAbsoluteFile(), contentLength));
+			}
+			FileInputStream inputStream = new FileInputStream(documentTempFile);
+			return inputStream;
+		} catch (IOException e) {
+			throw new RuntimeException(
+					String.format("Unable to open temp file: %s", documentTempFile.getAbsolutePath()), e);
+		} finally {
+			boolean deleted = documentTempFile.delete();
+			if (deleted) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Temp file deleted: %s", documentTempFile.getAbsolutePath()));
+				}
+			} else {
+				// This should not happen on Unix-based systems, since they allow files to be
+				// unlinked while in use.
+				documentTempFile.deleteOnExit();
+				logger.warn(String.format("Temp file scheduled for deletion on process exit: %s",
+						documentTempFile.getAbsolutePath()));
+			}
+		}
+	}
+
 	public List<Document> getAllDocuments(Principal principal) {
 		String tenantId = getTenantId(principal);
 		DocumentDataService documentService = new DocumentDataService();

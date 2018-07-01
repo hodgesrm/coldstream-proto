@@ -7,8 +7,8 @@ import io.goldfin.admin.service.api.service.factories.InvoiceApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
+import java.io.File;
 import io.goldfin.admin.service.api.model.Invoice;
-import io.goldfin.admin.service.api.model.InvoiceParameters;
 import io.goldfin.admin.service.api.model.InvoiceValidationResult;
 
 import java.util.List;
@@ -72,6 +72,22 @@ public class InvoiceApi  {
         return delegate.invoiceDelete(id,securityContext);
     }
     @GET
+    @Path("/{id}/download")
+    
+    @Produces({ "application/pdf", "application/octet-stream" })
+    @io.swagger.annotations.ApiOperation(value = "Download invoice document", notes = "Download invoice document", response = File.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+    }, tags={ "invoice", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = File.class) })
+    public Response invoiceDownload(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.invoiceDownload(id,securityContext);
+    }
+    @GET
     @Path("/{id}")
     
     @Produces({ "application/json" })
@@ -101,23 +117,6 @@ public class InvoiceApi  {
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.invoiceShowAll(full,securityContext);
-    }
-    @PUT
-    @Path("/{id}")
-    
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update an invoice", notes = "Update invoice description and tags. Changes to other fields are ignored", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
-    }, tags={ "invoice", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
-    public Response invoiceUpdate(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
-,@ApiParam(value = "Invoice parameters" ) InvoiceParameters body
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.invoiceUpdate(id,body,securityContext);
     }
     @POST
     @Path("/{id}/validate")

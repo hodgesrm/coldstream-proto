@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StorageConnection;
+import io.goldfin.shared.cloud.StorageConnection.Locator;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 
@@ -106,6 +107,20 @@ public class CloudServiceTest {
 	}
 
 	/**
+	 * Validate that we can accept an Amazon S3 as a locator string and properly
+	 * return components.
+	 */
+	@Test
+	public void testLocator() throws Exception {
+		Locator loc = new StorageConnection.Locator(
+				"https://unit-test-service-goldfin-io.s3.us-west-1.amazonaws.com/tenant/b0711f8a-6b4b-4c90-bef8-5efde48f5040/7e388634-83ea-4153-bda8-e4e0656e995f");
+		Assert.assertEquals("Bucket name", "unit-test-service-goldfin-io", loc.getBucket());
+		Assert.assertEquals("Region", "us-west-1", loc.getRegion());
+		Assert.assertEquals("Key", "tenant/b0711f8a-6b4b-4c90-bef8-5efde48f5040/7e388634-83ea-4153-bda8-e4e0656e995f",
+				loc.getKey());
+	}
+
+	/**
 	 * Validate that we can insert a document in storage, retrieve it, and delete
 	 * it.
 	 */
@@ -130,15 +145,38 @@ public class CloudServiceTest {
 					contentLength, contentType);
 		} catch (Exception e) {
 			dataFile.delete();
+			throw e;
 		}
 		logger.debug(String.format("Test document created: %s", locator));
 		Assert.assertNotNull("Locator may not be null", locator);
 
-		// Delete the document.
+		// Fetch the document to a temporary file.
+		File fetchedFile = File.createTempFile("testStorageReadBack", ".dat");
+		long fetchedContentLength = conn.fetchDocument(locator, fetchedFile);
+		Assert.assertEquals("Written and stored content length must be equal", contentLength, fetchedContentLength);
+		String fetchedSha256 = Sha256HashingAlgorithm
+				.bytesToHexString(Sha256HashingAlgorithm.generateHash(fetchedFile));
+		Assert.assertEquals("Written and stored content SHA-256 must be equal", sha256, fetchedSha256);
+
+		// Delete the document. We can discard the test files as this point.
 		try {
 			conn.deleteTenantDocument(tenantId, docId);
 		} finally {
+			fetchedFile.delete();
 			dataFile.delete();
+		}
+
+		// Prove the document is gone by trying to fetch again.
+		boolean failed = false;
+		File deletedFile = File.createTempFile("testStorageReadBack", ".dat");
+		try {
+			conn.fetchDocument(locator, deletedFile);
+		} catch (RuntimeException e) {
+			logger.debug("Caught expected exception");
+			failed = true;
+		}
+		if (!failed) {
+			throw new Exception("Able download deleted document without error");
 		}
 	}
 

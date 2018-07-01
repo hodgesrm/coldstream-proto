@@ -4,6 +4,7 @@
 package io.goldfin.admin.service.api.service.impl;
 
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -17,7 +18,6 @@ import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.DocumentManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.service.api.model.Document;
-import io.goldfin.admin.service.api.model.DocumentParameters;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.DocumentApiService;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -54,9 +54,17 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 	}
 
 	@Override
-	public Response documentShowContent(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+	public Response documentDownload(String id, SecurityContext securityContext) throws NotFoundException {
+		try {
+			DocumentManager dm = ManagerRegistry.getInstance().getManager(DocumentManager.class);
+			Principal principal = securityContext.getUserPrincipal();
+			Document doc = dm.getDocument(principal, id);
+			InputStream input = dm.downloadDocument(securityContext.getUserPrincipal(), id);
+			return Response.ok(input).header("Content-Type", doc.getContentType())
+					.header("Content-Disposition", "attachment; filename=" + doc.getName()).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override
@@ -85,12 +93,5 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}
-	}
-
-	@Override
-	public Response documentUpdate(String id, DocumentParameters body, SecurityContext securityContext)
-			throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
 	}
 }
