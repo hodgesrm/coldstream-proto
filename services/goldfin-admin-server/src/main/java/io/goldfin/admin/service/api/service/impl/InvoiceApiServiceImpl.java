@@ -88,8 +88,11 @@ public class InvoiceApiServiceImpl extends InvoiceApiService {
 			// Next get the corresponding document and download same.
 			Document doc = dm.getDocument(principal, inv.getDocumentId().toString());
 			InputStream input = dm.downloadDocument(securityContext.getUserPrincipal(), doc.getId().toString());
+			// Access-Control-Expose-Headers is required if client enforces CORS. Otherwise
+			// header will not be shown.
 			return Response.ok(input).header("Content-Type", doc.getContentType())
-					.header("Content-Disposition", "attachment; filename=" + doc.getName()).build();
+					.header("Access-Control-Expose-Headers", "Content-Disposition")
+					.header("Content-Disposition", String.format("attachment; filename=\"%s\"", doc.getName())).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}

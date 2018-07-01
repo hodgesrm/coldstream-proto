@@ -3,6 +3,7 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { ResponseContentType } from '@angular/http';
 
 import { InvoiceApi } from '../client/api/InvoiceApi';
 import { Invoice } from '../client/model/Invoice';
@@ -29,6 +30,18 @@ export class InvoiceService {
 
   loadInvoices(): Observable<Array<Invoice>> {
     return this.invoiceApi.invoiceShowAll(true);
+  }
+
+  downloadInvoices(invoiceIds: string[]): Array<Observable<Response>> {
+    var observables = [];
+    let extraHttpOptions = {responseType: ResponseContentType.Blob};
+
+    for (let invoiceId of invoiceIds) {
+      var observable = this.invoiceApi.invoiceDownloadWithHttpInfo(
+        invoiceId, extraHttpOptions);
+      observables.push(observable);
+    }
+    return observables;
   }
 
   // Run validation on all resources. 

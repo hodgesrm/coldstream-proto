@@ -76,6 +76,22 @@ export class DocumentApi {
     }
 
     /**
+     * Download document content
+     * @summary Download content
+     * @param id Document ID
+     */
+    public documentDownload(id: string, extraHttpRequestParams?: any): Observable<any> {
+        return this.documentDownloadWithHttpInfo(id, extraHttpRequestParams)
+            .map((response: Response) => {
+                if (response.status === 204) {
+                    return undefined;
+                } else {
+                    return response.json() || {};
+                }
+            });
+    }
+
+    /**
      * Run background scanning on document.  The document state and semantic information will be updated when finished.
      * @summary Kick off document analysis
      * @param id Document ID
@@ -113,39 +129,6 @@ export class DocumentApi {
      */
     public documentShowAll(extraHttpRequestParams?: any): Observable<Array<models.Document>> {
         return this.documentShowAllWithHttpInfo(extraHttpRequestParams)
-            .map((response: Response) => {
-                if (response.status === 204) {
-                    return undefined;
-                } else {
-                    return response.json() || {};
-                }
-            });
-    }
-
-    /**
-     * Download document content
-     * @summary Return document content
-     * @param id Document ID
-     */
-    public documentShowContent(id: string, extraHttpRequestParams?: any): Observable<{}> {
-        return this.documentShowContentWithHttpInfo(id, extraHttpRequestParams)
-            .map((response: Response) => {
-                if (response.status === 204) {
-                    return undefined;
-                } else {
-                    return response.json() || {};
-                }
-            });
-    }
-
-    /**
-     * Update document description and tags. Changes to other fields are ignored
-     * @summary Update document information
-     * @param id Document ID
-     * @param body Document descriptor
-     */
-    public documentUpdate(id: string, body?: models.DocumentParameters, extraHttpRequestParams?: any): Observable<{}> {
-        return this.documentUpdateWithHttpInfo(id, body, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -262,6 +245,51 @@ export class DocumentApi {
     }
 
     /**
+     * Download content
+     * Download document content
+     * @param id Document ID
+     */
+    public documentDownloadWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/document/${id}/download'
+                    .replace('${' + 'id' + '}', String(id));
+
+        let queryParameters = new URLSearchParams();
+        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
+        // verify required parameter 'id' is not null or undefined
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling documentDownload.');
+        }
+        // to determine the Content-Type header
+        let consumes: string[] = [
+        ];
+
+        // to determine the Accept header
+        let produces: string[] = [
+            'application/pdf',
+            'application/octet-stream'
+        ];
+
+        // authentication (APIKeyHeader) required
+        if (this.configuration.apiKey) {
+            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
+        }
+
+        let requestOptions: RequestOptionsArgs = new RequestOptions({
+            method: RequestMethod.Get,
+            headers: headers,
+            search: queryParameters,
+            withCredentials:this.configuration.withCredentials
+        });
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
+        }
+        //requestOptions.responseType = ResponseContentType.Blob;
+
+        return this.http.request(path, requestOptions);
+    }
+
+    /**
      * Kick off document analysis
      * Run background scanning on document.  The document state and semantic information will be updated when finished.
      * @param id Document ID
@@ -373,96 +401,6 @@ export class DocumentApi {
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Get,
             headers: headers,
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Return document content
-     * Download document content
-     * @param id Document ID
-     */
-    public documentShowContentWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/document/${id}/content'
-                    .replace('${' + 'id' + '}', String(id));
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'id' is not null or undefined
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling documentShowContent.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-            'application/octet-stream'
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Get,
-            headers: headers,
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Update document information
-     * Update document description and tags. Changes to other fields are ignored
-     * @param id Document ID
-     * @param body Document descriptor
-     */
-    public documentUpdateWithHttpInfo(id: string, body?: models.DocumentParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/document/${id}'
-                    .replace('${' + 'id' + '}', String(id));
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'id' is not null or undefined
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling documentUpdate.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-            'application/json'
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        headers.set('Content-Type', 'application/json');
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Put,
-            headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
             search: queryParameters,
             withCredentials:this.configuration.withCredentials
         });

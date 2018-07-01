@@ -185,6 +185,35 @@ export class InvoicesComponent implements OnInit {
     }
   }
 
+  onDownload(): void {
+    console.log("onDownload invoked " + this.selected);
+    if (this.selected == null || this.selected.length == 0) {
+      this.errorReporter.error_message = "Please select one or more items";
+      this.errorReporter.error_open = true;
+    } else {
+      // Put invoice IDs in an array.
+      var invoiceIds: string[] = [];
+      for (let invoice of this.selected) {
+        invoiceIds.push(invoice.id);
+      }
+      console.log("Collected invoice Ids: " + invoiceIds);
+      var observables = this.invoiceService.downloadInvoices(invoiceIds);
+      for (let observable of observables) {
+        observable
+          .subscribe(response => {
+            console.log("Got download response");
+            var blob = new Blob([response.blob()], { type: 'application/octet-stream' });
+            // Find the file name.
+            var fileName = 'invoice.pdf';
+            var contentDisposition: string = response.headers.get('Content-Disposition');
+            var quotedName = contentDisposition.split(';')[1].trim().split('=')[1];
+            fileName = quotedName.replace(/"/g, '');
+            saveAs(blob, fileName);
+          });
+      }
+    }
+  }
+
   onExport(): void {
     console.log("onExport invoked " + this.selected);
     if (this.selected == null || this.selected.length == 0) {

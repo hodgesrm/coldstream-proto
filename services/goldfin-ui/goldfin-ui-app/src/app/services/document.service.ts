@@ -3,6 +3,7 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { ResponseContentType } from '@angular/http';
 
 import { DocumentApiExtended } from './DocumentApiExtended';
 import { Document } from '../client/model/Document';
@@ -44,6 +45,18 @@ export class DocumentService {
       );
       return Promise.all(promises);
     }
+  }
+
+  downloadDocuments(documentIds: string[]): Array<Observable<Response>> {
+    var observables = [];
+    let extraHttpOptions = {responseType: ResponseContentType.Blob};
+  
+    for (let documentId of documentIds) {
+      var observable = this.documentApi.documentDownloadWithHttpInfo(
+        documentId, extraHttpOptions);
+      observables.push(observable);
+    }
+    return observables;
   }
 
   scanDocuments(documents: Document[]): Promise<{}> {

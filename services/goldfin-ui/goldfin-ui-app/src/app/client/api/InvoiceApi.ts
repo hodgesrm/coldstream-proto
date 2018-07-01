@@ -58,6 +58,22 @@ export class InvoiceApi {
     }
 
     /**
+     * Download invoice document
+     * @summary Download invoice document
+     * @param id Document ID
+     */
+    public invoiceDownload(id: string, extraHttpRequestParams?: any): Observable<any> {
+        return this.invoiceDownloadWithHttpInfo(id, extraHttpRequestParams)
+            .map((response: Response) => {
+                if (response.status === 204) {
+                    return undefined;
+                } else {
+                    return response.json() || {};
+                }
+            });
+    }
+
+    /**
      * Return all information relative to a single invoice
      * @summary Show a single invoice
      * @param id Invoice ID
@@ -81,23 +97,6 @@ export class InvoiceApi {
      */
     public invoiceShowAll(full?: boolean, extraHttpRequestParams?: any): Observable<Array<models.Invoice>> {
         return this.invoiceShowAllWithHttpInfo(full, extraHttpRequestParams)
-            .map((response: Response) => {
-                if (response.status === 204) {
-                    return undefined;
-                } else {
-                    return response.json() || {};
-                }
-            });
-    }
-
-    /**
-     * Update invoice description and tags. Changes to other fields are ignored
-     * @summary Update an invoice
-     * @param id Invoice ID
-     * @param body Invoice parameters
-     */
-    public invoiceUpdate(id: string, body?: models.InvoiceParameters, extraHttpRequestParams?: any): Observable<{}> {
-        return this.invoiceUpdateWithHttpInfo(id, body, extraHttpRequestParams)
             .map((response: Response) => {
                 if (response.status === 204) {
                     return undefined;
@@ -156,6 +155,50 @@ export class InvoiceApi {
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Delete,
+            headers: headers,
+            search: queryParameters,
+            withCredentials:this.configuration.withCredentials
+        });
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
+        }
+
+        return this.http.request(path, requestOptions);
+    }
+
+    /**
+     * Download invoice document
+     * Download invoice document
+     * @param id Document ID
+     */
+    public invoiceDownloadWithHttpInfo(id: string, extraHttpRequestParams?: any): Observable<Response> {
+        const path = this.basePath + '/invoice/${id}/download'
+                    .replace('${' + 'id' + '}', String(id));
+
+        let queryParameters = new URLSearchParams();
+        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
+        // verify required parameter 'id' is not null or undefined
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling invoiceDownload.');
+        }
+        // to determine the Content-Type header
+        let consumes: string[] = [
+        ];
+
+        // to determine the Accept header
+        let produces: string[] = [
+            'application/pdf',
+            'application/octet-stream'
+        ];
+
+        // authentication (APIKeyHeader) required
+        if (this.configuration.apiKey) {
+            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
+        }
+
+        let requestOptions: RequestOptionsArgs = new RequestOptions({
+            method: RequestMethod.Get,
             headers: headers,
             search: queryParameters,
             withCredentials:this.configuration.withCredentials
@@ -247,53 +290,6 @@ export class InvoiceApi {
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Get,
             headers: headers,
-            search: queryParameters,
-            withCredentials:this.configuration.withCredentials
-        });
-        // https://github.com/swagger-api/swagger-codegen/issues/4037
-        if (extraHttpRequestParams) {
-            requestOptions = (<any>Object).assign(requestOptions, extraHttpRequestParams);
-        }
-
-        return this.http.request(path, requestOptions);
-    }
-
-    /**
-     * Update an invoice
-     * Update invoice description and tags. Changes to other fields are ignored
-     * @param id Invoice ID
-     * @param body Invoice parameters
-     */
-    public invoiceUpdateWithHttpInfo(id: string, body?: models.InvoiceParameters, extraHttpRequestParams?: any): Observable<Response> {
-        const path = this.basePath + '/invoice/${id}'
-                    .replace('${' + 'id' + '}', String(id));
-
-        let queryParameters = new URLSearchParams();
-        let headers = new Headers(this.defaultHeaders.toJSON()); // https://github.com/angular/angular/issues/6845
-        // verify required parameter 'id' is not null or undefined
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling invoiceUpdate.');
-        }
-        // to determine the Content-Type header
-        let consumes: string[] = [
-        ];
-
-        // to determine the Accept header
-        let produces: string[] = [
-            'application/json'
-        ];
-
-        // authentication (APIKeyHeader) required
-        if (this.configuration.apiKey) {
-            headers.set('vnd.io.goldfin.session', this.configuration.apiKey);
-        }
-
-        headers.set('Content-Type', 'application/json');
-
-        let requestOptions: RequestOptionsArgs = new RequestOptions({
-            method: RequestMethod.Put,
-            headers: headers,
-            body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
             search: queryParameters,
             withCredentials:this.configuration.withCredentials
         });

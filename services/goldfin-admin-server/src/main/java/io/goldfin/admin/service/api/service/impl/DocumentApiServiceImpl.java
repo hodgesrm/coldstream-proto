@@ -60,8 +60,11 @@ public class DocumentApiServiceImpl extends DocumentApiService {
 			Principal principal = securityContext.getUserPrincipal();
 			Document doc = dm.getDocument(principal, id);
 			InputStream input = dm.downloadDocument(securityContext.getUserPrincipal(), id);
+			// Access-Control-Expose-Headers is required if client enforces CORS. Otherwise
+			// header will not be shown.
 			return Response.ok(input).header("Content-Type", doc.getContentType())
-					.header("Content-Disposition", "attachment; filename=" + doc.getName()).build();
+					.header("Access-Control-Expose-Headers", "Content-Disposition")
+					.header("Content-Disposition", String.format("attachment; filename=\"%s\"", doc.getName())).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}

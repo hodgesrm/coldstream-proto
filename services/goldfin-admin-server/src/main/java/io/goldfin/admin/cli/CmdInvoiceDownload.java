@@ -58,7 +58,8 @@ public class CmdInvoiceDownload implements Command {
 			String fileName = "invoice.dat";
 			for (String disp : contentDisposition.split("; ")) {
 				if (disp.startsWith("filename=") && disp.length() > 9) {
-					fileName = disp.substring(9);
+					// File names are quoted, so we strip double quotes. 
+					fileName = disp.substring(9).replace("\"", "");
 					break;
 				}
 			}
