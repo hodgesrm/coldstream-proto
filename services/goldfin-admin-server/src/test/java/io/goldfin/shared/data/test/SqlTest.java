@@ -131,6 +131,8 @@ public class SqlTest {
 		try (Session s = globalDbHelper.createSession(false)) {
 			SqlSelect q1 = new SqlSelect().from(table, "t1").project("t1.*").where("t1.id > ?", 5);
 			SqlSelect q2 = new SqlSelect().from(q1, "q1").project("q1.*").where("q1.id < ?", 9);
+			SqlSelect q3 = new SqlSelect().from(table, "t1").project("t1.*").where("t1.id < ?", 9).where("t1.id > ?",
+					7);
 
 			// First query should get half the table.
 			TabularResultSet r1 = q1.run(s);
@@ -141,6 +143,41 @@ public class SqlTest {
 			TabularResultSet r2 = q2.run(s);
 			logResults(r2);
 			Assert.assertEquals(3, r2.rowCount());
+
+			// Using two conditions we can net 1 row.
+			TabularResultSet r3 = q3.run(s);
+			logResults(r3);
+			Assert.assertEquals(1, r3.rowCount());
+		}
+	}
+
+	/**
+	 * Verify that we can group values using GROUP BY.
+	 */
+	@Test
+	public void testGroupBy() {
+		String table = "group_by";
+		globalDbHelper.createSimpleTestTable(table);
+		try (Session s = globalDbHelper.createSession(false)) {
+			SqlSelect q = new SqlSelect().from(table).project("boolval").project(null, "count(*)", "c")
+					.project(null, "max(id)", "max_id").groupBy("boolval");
+
+			// Tabular result should return two rows.
+			TabularResultSet r = q.run(s);
+			logResults(r);
+			Assert.assertEquals(2, r.rowCount());
+
+			// Each row should have a count of five and the max even/odd number depending on
+			// the boolval value.
+			for (Row row : r.rows()) {
+				Assert.assertEquals("Group count", 5, (long) row.getAsLong("c"));
+				boolean boolval = row.getAsBoolean("boolval");
+				if (boolval) {
+					Assert.assertEquals("Max even number", 10, (int) row.getAsInt("max_id"));
+				} else {
+					Assert.assertEquals("Max odd number", 9, (int) row.getAsInt("max_id"));
+				}
+			}
 		}
 	}
 
@@ -209,9 +246,25 @@ public class SqlTest {
 	}
 
 	private void logResults(TabularResultSet rs) {
+		int colCount = rs.colCount();
 		for (Row r : rs.rows()) {
-			logger.info(String.format("id=%s value=%s boolval=%s rn=%s", r.getAsInt("id"), r.getAsString("value"),
-					r.getAsBoolean("boolval"), r.getAsLong("rn")));
+			StringBuffer data = new StringBuffer();
+			for (int i = 0; i < colCount; i++) {
+				if (i > 0) {
+					data.append(", ");
+				}
+				data.append(rs.columnNames().get(i)).append("=").append(getColumnValue(r, rs.columnNames().get(i)));
+			}
+			logger.info(data.toString());
+		}
+	}
+
+	private String getColumnValue(Row r, String colName) {
+		Object value = r.get(colName);
+		if (value == null) {
+			return null;
+		} else {
+			return value.toString();
 		}
 	}
 }

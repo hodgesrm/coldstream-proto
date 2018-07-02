@@ -124,8 +124,9 @@ public class SqlSelect {
 	private List<FromExpression> froms = new ArrayList<FromExpression>();
 	private List<ColumnExpression> columns = new ArrayList<ColumnExpression>();
 	private List<WindowExpression> windows = new ArrayList<WindowExpression>();
-	private String where = "1 = 1";
-	private Object[] whereParams = {};
+	private List<String> whereExpressions = new ArrayList<String>();
+	private List<Object> whereParams = new ArrayList<Object>();
+	private List<String> groupByExpressions = new ArrayList<String>();
 	private List<OrderByExpression> sorts = new ArrayList<OrderByExpression>();
 
 	public SqlSelect() {
@@ -255,9 +256,18 @@ public class SqlSelect {
 		return where("id = ?", id);
 	}
 
-	public SqlSelect where(String where, Object... value) {
-		this.where = where;
-		this.whereParams = value;
+	public SqlSelect where(String where, Object... values) {
+		this.whereExpressions.add(where);
+		for (Object value : values) {
+			this.whereParams.add(value);
+		}
+		return this;
+	}
+
+	public SqlSelect groupBy(String... columns) {
+		for (String column : columns) {
+			groupByExpressions.add(column);
+		}
 		return this;
 	}
 
@@ -285,24 +295,42 @@ public class SqlSelect {
 		queryBuf.append(this.selectClause());
 		queryBuf.append(this.fromClause());
 		queryBuf.append(this.whereClause());
+		queryBuf.append(this.groupByClause());
 		queryBuf.append(this.windowClause());
 		queryBuf.append(this.orderByClause());
 		return queryBuf.toString();
 	}
 
 	/** Return the current WHERE clause parameter list. */
-	public Object[] getWhereParams() {
+	public List<Object> getWhereParams() {
 		return whereParams;
 	}
 
-	/** Build and execute the SQL query. */
+	/** Build and execute query with verbose reporting suppressed. */
 	public TabularResultSet run(Session session) throws DataException {
+		return run(session, false);
+	}
+
+	/**
+	 * Build and execute the SQL query.
+	 * 
+	 * @param session
+	 *            A session instance
+	 * @param verbose
+	 *            If true print query text
+	 * @return A tabular result set containing column metadata and rows
+	 * @throws DataException
+	 */
+	public TabularResultSet run(Session session, boolean verbose) throws DataException {
 		PreparedStatement pstmt = null;
 		ResultSet resultSet = null;
+		String query = null;
 		try {
-			String query = build();
+			query = build();
 			if (logger.isDebugEnabled()) {
 				logger.debug("QUERY: " + query);
+			} else if (verbose) {
+				logger.info("QUERY: " + query);
 			}
 
 			// Allocate prepared statement and assign parameter values by iterating first
@@ -329,6 +357,9 @@ public class SqlSelect {
 			return new TabularResultSet(resultSet);
 
 		} catch (SQLException e) {
+			if (query != null) {
+				logger.error(String.format("Query failed: message=[%s], query=[%s]", e.getMessage(), query));
+			}
 			throw new DataException(e.getLocalizedMessage(), e);
 		} finally {
 			JdbcUtils.closeSoftly(resultSet);
@@ -454,8 +485,38 @@ public class SqlSelect {
 		}
 	}
 
+	/** Generate the WHERE clause, which can consist of 0 or more expressions. */
 	private String whereClause() {
-		return " WHERE " + this.where;
+		if (this.whereExpressions.size() == 0) {
+			return "";
+		} else {
+			StringBuffer whereClause = new StringBuffer(" WHERE ");
+			for (int i = 0; i < whereExpressions.size(); i++) {
+				String expression = whereExpressions.get(i);
+				if (i > 0) {
+					whereClause.append(" AND ");
+				}
+				whereClause.append(expression);
+			}
+			return whereClause.toString();
+		}
+	}
+
+	/** Generate the GROUP BY clause, which can consist of 0 or more columns. */
+	private String groupByClause() {
+		if (this.groupByExpressions.size() == 0) {
+			return "";
+		} else {
+			StringBuffer groupByClause = new StringBuffer(" GROUP BY ");
+			for (int i = 0; i < groupByExpressions.size(); i++) {
+				String expression = groupByExpressions.get(i);
+				if (i > 0) {
+					groupByClause.append(", ");
+				}
+				groupByClause.append(expression);
+			}
+			return groupByClause.toString();
+		}
 	}
 
 	/**

@@ -49,6 +49,14 @@ public class ManagerRegistry implements ManagementContext {
 		managers.put(manager.getClass(), manager);
 	}
 
+	/**
+	 * Hack method to get a management context so that validation rules can run
+	 * without a manager service.
+	 */
+	public ManagementContext getManagementContext() {
+		return registry;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> T getManager(Class<T> managerClass) {
 		return (T) managers.get(managerClass);

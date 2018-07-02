@@ -21,5 +21,5 @@ public interface Rule<T> {
 	public ValidationType getValidationType();
 
 	/** Execute rule and return one or more results. */
-	public List<ValidationResult> validate(T entity);
+	public List<ValidationResult> validate(T entity, String tenantId);
 }

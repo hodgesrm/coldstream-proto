@@ -23,6 +23,7 @@ public class InvoiceRuleSet {
 	// immutable.
 	static {
 		addInvoiceRule(new InvoiceTotalRule());
+		addInvoiceRule(new InvoiceToHostInventoryRule());
 	}
 
 	/** Return rules related to invoices. */

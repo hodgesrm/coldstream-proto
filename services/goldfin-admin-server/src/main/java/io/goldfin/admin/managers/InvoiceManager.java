@@ -92,7 +92,7 @@ public class InvoiceManager implements Manager {
 		InvoiceRuleSet ruleSet = new InvoiceRuleSet();
 		List<InvoiceValidationResult> results = new ArrayList<InvoiceValidationResult>();
 		for (Rule<Invoice> rule : ruleSet.getInvoiceRules()) {
-			for (ValidationResult result : rule.validate(invoice)) {
+			for (ValidationResult result : rule.validate(invoice, tenantId)) {
 				if (onlyFailing && !result.isPassed()) {
 					results.add(translateResult(invoice, result));
 				} else {

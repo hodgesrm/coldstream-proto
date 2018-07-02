@@ -38,7 +38,7 @@ public abstract class AbstractRule<T> implements Rule<T> {
 	}
 
 	@Override
-	public abstract List<ValidationResult> validate(T entity);
+	public abstract List<ValidationResult> validate(T entity, String tenantId);
 
 	@Override
 	public String toString() {

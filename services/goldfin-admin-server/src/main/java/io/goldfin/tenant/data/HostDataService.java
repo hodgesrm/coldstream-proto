@@ -26,7 +26,7 @@ import io.goldfin.shared.data.TransactionalService;
 public class HostDataService implements TransactionalService<Host> {
 	static private final Logger logger = LoggerFactory.getLogger(HostDataService.class);
 
-	private static final String[] COLUMN_NAMES = { "id", "host_id", "resource_id", "effective_date",
+	public static final String[] COLUMN_NAMES = { "id", "host_id", "resource_id", "effective_date",
 			"vendor_identifier", "data_series_id", "host_type", "host_model", "region", "zone", "datacenter", "cpu",
 			"socket_count", "core_count", "thread_count", "ram", "hdd", "ssd", "nic_count", "network_traffic_limit",
 			"backup_enabled" };

@@ -23,7 +23,7 @@ public class InvoiceTotalRule extends AbstractRule<Invoice> {
 	}
 
 	@Override
-	public List<ValidationResult> validate(Invoice invoice) {
+	public List<ValidationResult> validate(Invoice invoice, String tenantId) {
 		// Ensure that the invoice has a visible total. If not that's already a problem.
 		List<ValidationResult> results = new ArrayList<ValidationResult>();
 		ValidationResult result1 = createValidationResult();
@@ -50,14 +50,12 @@ public class InvoiceTotalRule extends AbstractRule<Invoice> {
 			}
 		}
 		if (itemTotalAmount.equals(invoice.getTotalAmount())) {
-			result2.setDetails(
-					String.format("Totals matchs: invoice total=%s, item total=%s",
-							invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
+			result2.setDetails(String.format("Totals matchs: invoice total=%s, item total=%s",
+					invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
 			result2.setPassed(true);
 		} else {
-			result2.setDetails(
-					String.format("Totals do not match: invoice total=%s, item total=%s",
-							invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
+			result2.setDetails(String.format("Totals do not match: invoice total=%s, item total=%s",
+					invoice.getTotalAmount().toString(), itemTotalAmount.toString()));
 			result2.setPassed(false);
 		}
 		return results;
