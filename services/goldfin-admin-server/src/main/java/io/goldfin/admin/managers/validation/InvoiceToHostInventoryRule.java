@@ -3,7 +3,6 @@
  */
 package io.goldfin.admin.managers.validation;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,15 +45,15 @@ public class InvoiceToHostInventoryRule extends AbstractRule<Invoice> {
 			TabularResultSet vendorResults = hostInventoryForVendor.run(sess, true);
 			long vendorRecords = vendorResults.row(1).getAsLong("record_count");
 			ValidationResult result = createValidationResult();
-			result.setSummary("Vendor inventory data available");
+			result.setSummary("Vendor inventory data missing");
 			results.add(result);
 
 			if (vendorRecords == 0) {
-				result.setDetails("Not available");
+				result.setDetails("No inventory data available for this vendor");
 				result.setPassed(false);
 				return results;
 			} else {
-				result.setDetails("Available");
+				result.setDetails("Inventory data available for this vendor");
 				result.setPassed(true);
 			}
 		}
@@ -104,15 +103,15 @@ public class InvoiceToHostInventoryRule extends AbstractRule<Invoice> {
 			this.logResults(rs2);
 
 			ValidationResult result = createValidationResult();
-			result.setSummary("Inventory data available for invoice time range");
+			result.setSummary("Vendor inventory data missing during invoice time range");
 			results.add(result);
 
 			if (rs2.rowCount() == 0) {
-				result.setDetails("Not available");
+				result.setDetails(String.format("No vendor data found from %s to %s", minStartDate, maxEndDate));
 				result.setPassed(false);
 				return results;
 			} else {
-				result.setDetails("Available");
+				result.setDetails(String.format("Vendor data found from %s to %s", minStartDate, maxEndDate));
 				result.setPassed(true);
 			}
 		}
@@ -126,18 +125,18 @@ public class InvoiceToHostInventoryRule extends AbstractRule<Invoice> {
 		for (Row row : trs.rows()) {
 			String resourceId = row.getAsString("invoice_item_resource_id");
 			String hostId = row.getAsString("host_id");
-			Timestamp minEffectiveDate = row.getAsTimestamp("min_effective_date");
+			//Timestamp minEffectiveDate = row.getAsTimestamp("min_effective_date");
 
 			ValidationResult result = createValidationResult();
-			result.setSummary("Host inventory check");
+			result.setSummary("Invoice Resource ID not in inventory");
 
 			results.add(result);
 
 			if (hostId == null) {
-				result.setDetails("Resource ID missing from inventory: " + resourceId);
+				result.setDetails(String.format("Resource ID not found in inventory: %s", resourceId));
 				result.setPassed(false);
 			} else {
-				result.setDetails("Resource ID: " + resourceId + " Host ID: " + hostId);
+				result.setDetails(String.format("Resource ID found in inventory: %s (Host ID=%s)", resourceId, hostId));
 				result.setPassed(true);
 			}
 		}
