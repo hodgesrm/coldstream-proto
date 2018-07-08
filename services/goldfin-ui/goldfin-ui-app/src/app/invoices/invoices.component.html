@@ -238,7 +238,7 @@
         </ng-container>
       </clr-dg-column>
 
-      <clr-dg-row *clrDgItems="let result of invoice_validations" [clrDgItem]="validation_result">
+      <clr-dg-row *clrDgItems="let result of filtered_validations" [clrDgItem]="validation_result">
         <clr-dg-cell>
           <span class={{getValidationResultClass(result.passed)}}>
             {{getValidationResultName(result.passed)}}
@@ -255,10 +255,19 @@
         <clr-dg-cell>{{result.invoiceItemResourceId}}</clr-dg-cell>
       </clr-dg-row>
 
-      <clr-dg-footer>{{invoice_validations.length}} validation checks</clr-dg-footer>
+      <clr-dg-footer>{{filtered_validations.length}} validation checks</clr-dg-footer>
     </clr-datagrid>
   </div>
   <div class="modal-footer">
+    <section class="form-block">
+      <div class="form-group">
+        <div class="toggle-switch">
+          <input type="checkbox" id="show_all_validations" 
+            (change)="onValidationToggleChange($event)">
+          <label for="show_all_validations">Show all validation results</label>
+        </div>
+      </div>
+    </section>
     <button type="button" class="btn btn-outline" (click)="invoice_validations_open = false">Close</button>
   </div>
 </clr-modal>

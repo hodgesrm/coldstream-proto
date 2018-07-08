@@ -63,8 +63,13 @@ export class InvoicesComponent implements OnInit {
   // Invoice item listing.
   invoice_items: InvoiceJoinedToItem[] = [];
 
-  // Invoice validation listing. 
+  // Invoice validation listing.  The first value is the full 
+  // set of validations.  We refine this to the filtered
+  // validation list, which includes all validations if 
+  // show_all_validations is true; otherwise only failures appear.
   invoice_validations: InvoiceValidationResult[] = [];
+  filtered_validations: InvoiceValidationResult[] = [];
+  show_all_validations: boolean = false;
 
   constructor(
     private router: Router,
@@ -159,12 +164,30 @@ export class InvoicesComponent implements OnInit {
             actualObservables += 1
             console.log("Added more invoice validations: " + actualObservables);
             if (actualObservables >= expectedObservables) {
+              this.filterValidations();
               this.invoice_validations_open = true;
               console.log("Opened invoice validations");
             }
           });
       }
     }
+  }
+
+  filterValidations() {
+    var filtered_validations = [];
+    for (let validation of this.invoice_validations) {
+      if (! validation.passed || this.show_all_validations) {
+        filtered_validations.push(validation);
+      }
+    }
+    this.filtered_validations = filtered_validations;
+  }
+
+  onValidationToggleChange(event) {
+    var checked = event.srcElement.checked;
+    console.log("Validation toggle switch value change: " + checked);
+    this.show_all_validations = checked;
+    this.filterValidations();
   }
 
   // Return span class for the validation result based on whether it passed.
