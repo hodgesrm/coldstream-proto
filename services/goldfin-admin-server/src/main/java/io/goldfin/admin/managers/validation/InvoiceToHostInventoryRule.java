@@ -92,12 +92,7 @@ public class InvoiceToHostInventoryRule extends AbstractRule<Invoice> {
 				.where("effective_date >= ? and effective_date <= ?", minStartDate, maxEndDate)
 				.groupBy("resource_id", "host_id");
 
-		// Left join on resource_id so that missing resource fields show up as nulls.
-		SqlSelect uberSelect = new SqlSelect().from(itemSubSelect, "invoice_items")
-				.leftJoin(hostSubSelect, "hosts", "invoice_items.invoice_item_resource_id", "hosts.host_resource_id")
-				.project("invoice_items.*").project("hosts.*");
-
-		// See if we can find invoice items and inventory.
+		// Check to ensure there is inventory for the time range of the invoice.
 		try (Session sess = context.tenantSession(tenantId)) {
 			TabularResultSet rs2 = hostSubSelect.run(sess, true);
 			this.logResults(rs2);
@@ -116,16 +111,23 @@ public class InvoiceToHostInventoryRule extends AbstractRule<Invoice> {
 			}
 		}
 
+		// Left join on resource_id so that missing inventory resources show up as
+		// nulls.
+		SqlSelect invoiceToInventorySelect = new SqlSelect().from(itemSubSelect, "invoice_items")
+				.leftJoin(hostSubSelect, "hosts", "invoice_items.invoice_item_resource_id", "hosts.host_resource_id")
+				.project("invoice_items.*").project("hosts.*");
+
+		// Compare resources on invoice to resources in inventory.
 		TabularResultSet trs = null;
 		try (Session sess = context.tenantSession(tenantId)) {
-			trs = uberSelect.run(sess);
+			trs = invoiceToInventorySelect.run(sess);
 		}
 		this.logResults(trs);
 
 		for (Row row : trs.rows()) {
 			String resourceId = row.getAsString("invoice_item_resource_id");
 			String hostId = row.getAsString("host_id");
-			//Timestamp minEffectiveDate = row.getAsTimestamp("min_effective_date");
+			// Timestamp minEffectiveDate = row.getAsTimestamp("min_effective_date");
 
 			ValidationResult result = createValidationResult();
 			result.setSummary("Invoice Resource ID not in inventory");
@@ -137,6 +139,39 @@ public class InvoiceToHostInventoryRule extends AbstractRule<Invoice> {
 				result.setPassed(false);
 			} else {
 				result.setDetails(String.format("Resource ID found in inventory: %s (Host ID=%s)", resourceId, hostId));
+				result.setPassed(true);
+			}
+		}
+
+		// Right join on resource_id so that missing invoice resources show up as nulls.
+		SqlSelect inventoryToInvoiceSelect = new SqlSelect().from(itemSubSelect, "invoice_items")
+				.rightJoin(hostSubSelect, "hosts", "invoice_items.invoice_item_resource_id", "hosts.host_resource_id")
+				.project("invoice_items.*").project("hosts.*");
+
+		// Compare resources on invoice to resources in inventory.
+		TabularResultSet trs2 = null;
+		try (Session sess = context.tenantSession(tenantId)) {
+			trs2 = inventoryToInvoiceSelect.run(sess);
+		}
+		this.logResults(trs2);
+
+		for (Row row : trs2.rows()) {
+			String invoiceResourceId = row.getAsString("invoice_item_resource_id");
+			String inventoryResourceId = row.getAsString("host_resource_id");
+			String hostId = row.getAsString("host_id");
+
+			ValidationResult result = createValidationResult();
+			result.setSummary("Inventory resource not on invoice");
+
+			results.add(result);
+
+			if (invoiceResourceId == null) {
+				result.setDetails(String.format("Inventory resource ID not found on invoice: %s (Host ID=%s)",
+						inventoryResourceId, hostId));
+				result.setPassed(false);
+			} else {
+				result.setDetails(String.format("Inventory resource ID found on invoice: %s (Host ID=%s)",
+						inventoryResourceId, hostId));
 				result.setPassed(true);
 			}
 		}
