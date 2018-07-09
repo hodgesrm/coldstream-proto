@@ -248,10 +248,10 @@ public class App {
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(true);
 		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
-		resourceHandler.setResourceBase("content");
+		resourceHandler.setResourceBase("ui");
 
 		ContextHandler contextHandler = new ContextHandler();
-		contextHandler.setContextPath("/content");
+		contextHandler.setContextPath("/ui");
 		contextHandler.setHandler(resourceHandler);
 		return contextHandler;
 	}

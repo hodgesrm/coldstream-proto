@@ -48,9 +48,9 @@ Attach to running container with bash shell.
 docker exec -i -t goldfin_api_1 /bin/bash
 ```
 
-View logs for a container.
+View logs for a container. (-f to follow.)
 ```
-docker logs goldfin_api_1 D
+docker logs goldfin_api_1 -f
 ```
 
 ## Image cleanup

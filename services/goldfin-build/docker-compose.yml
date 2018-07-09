@@ -1,9 +1,6 @@
 # Compose file for full Goldfin system.
 version: '3.6'
 services:
-   ui:
-       image: goldfin-ui-app:latest
-       network_mode: host
    api:
        image: goldfin/admin-server:0.0.1
        network_mode: host
