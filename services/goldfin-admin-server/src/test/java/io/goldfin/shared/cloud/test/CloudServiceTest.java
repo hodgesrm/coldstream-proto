@@ -23,6 +23,7 @@ import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.cloud.StorageConnection.Locator;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
+import io.goldfin.shared.utilities.FileHelper;
 
 /**
  * Verify operations on cloud services.
@@ -34,7 +35,7 @@ public class CloudServiceTest {
 	@Before
 	public void setup() {
 		factory = new CloudConnectionFactory();
-		factory.setConnectionParamsFile(new File("conf/aws-test.yaml"));
+		factory.setConnectionParamsFile(FileHelper.getConfigFile("aws-test.yaml"));
 	}
 
 	/**

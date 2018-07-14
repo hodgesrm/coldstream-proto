@@ -7,11 +7,18 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Useful routines related to files.
  */
 public class FileHelper {
+	static final Logger logger = LoggerFactory.getLogger(FileHelper.class);
+
 	/**
 	 * Return the home directory of the active service.
 	 */
@@ -21,6 +28,41 @@ public class FileHelper {
 			homeDirName = ".";
 		}
 		return new File(homeDirName);
+	}
+
+	/**
+	 * Finds a configuration file. The following directories are checked in priority
+	 * order.
+	 * <ol>
+	 * <li>GOLDFIN_CONFIG_DIR environmental variable</li>
+	 * <li>/var/lib/goldfin/conf</li>
+	 * <li>${api.server.home.dir}/conf</li>
+	 * </ol>
+	 * 
+	 * @param name
+	 *            Parameter file name
+	 * @return File if found or null
+	 */
+	public static File getConfigFile(String name) {
+		// Create the paths.
+		List<File> configPath = new ArrayList<File>();
+		String goldfinConfigDir = System.getenv("GOLDFIN_CONFIG_DIR");
+		if (goldfinConfigDir != null) {
+			configPath.add(new File(goldfinConfigDir));
+		}
+		configPath.add(new File("/var/lib/goldfin/conf"));
+		configPath.add(new File(homeDir(), "conf"));
+
+		// Now look for the file.
+		for (File configDir : configPath) {
+			File config = new File(configDir, name);
+			logger.info(String.format("Seeking config file: %s", config.getAbsolutePath()));
+			if (config.isFile() && config.canRead()) {
+				return config;
+			}
+		}
+
+		return null;
 	}
 
 	/**

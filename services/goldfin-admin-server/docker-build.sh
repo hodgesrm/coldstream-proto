@@ -1,4 +1,5 @@
 #!/bin/bash
+# Build admin server Docker image including all dependencies. 
 set -e
 
 # Build file for Docker services. 

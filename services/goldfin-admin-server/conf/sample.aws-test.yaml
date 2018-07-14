@@ -1,3 +1,4 @@
+# Sample AWS file for running unit tests. 
 ---
 accessKeyId: "<AWS access key ID>"
 secretAccessKey: "<AWS secret access key>"

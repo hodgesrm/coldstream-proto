@@ -1,9 +1,13 @@
 # Server Operation Guide
 
-## Building
-
+## Building. 'mvn install' required UI to be built and in target/ui directory.
 ```shell
-mvn clean install
+mvn clean package
+```
+
+## Full build to docker image. This creates the UI. 
+```
+./docker-build.sh
 ```
 
 ## Server start (console mode with debug enabled).
@@ -22,10 +26,10 @@ Here are the steps to create a new service.
 1. Create an init-params.yaml file from template in conf/init-params.yaml.sample. 
 2. Run servicectl init. 
 ```shell
-   # Must run in dist location for relative directory references to work. 
-   cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
-   bin/svc-init create --init-params=conf/init-params.sample.yaml \
-     --dbms-config=conf/dbms.yaml
+# Must run in dist location for relative directory references to work. 
+cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
+bin/svc-init create --init-params=$GOLDFIN_CONFIG_DIR/init-params.sample.yaml \
+     --dbms-config=$GOLDFIN_CONFIG_DIR/dbms.yaml
 ```
 The dbms-config.yaml file is required by the running image. 
 
@@ -34,7 +38,7 @@ Here are step(s) to remove a service.
 1. Stop any running images
 2. Using previous init.params file issue the following command: 
 ```shell
-   svc-init remove --init-params=$PWD/conf/init-params.sample.yaml
+   svc-init remove --init-params=$GOLDFIN_CONFIG_DIR/init-params.yaml
 ```
 ## Create a tenant. 
 ```shell
@@ -87,5 +91,4 @@ curl -d '{"user":"sysadmin", "password":"secret"}' \
 ## Generate New Cert
 
 Run bin/make-cert, and put resulting keystore.jks file in conf directory.
-A default file is already supplied, as are server-config.yaml and
-dbms-config.yaml.
+A default file is already supplied, as are server-config.yaml. 

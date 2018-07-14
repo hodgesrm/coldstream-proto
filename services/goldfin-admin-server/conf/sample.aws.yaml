@@ -1,3 +1,4 @@
+# Sample aws.yaml for running full server. 
 ---
 accessKeyId: "<AWS access key ID>"
 secretAccessKey: "<AWS secret access key>"

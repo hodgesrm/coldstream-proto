@@ -49,6 +49,7 @@ import io.goldfin.admin.managers.UserManager;
 import io.goldfin.admin.managers.VendorManager;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.utilities.FileHelper;
 import io.goldfin.shared.utilities.YamlHelper;
 
 public class App {
@@ -145,12 +146,12 @@ public class App {
 
 	/** Configure application logic managers. */
 	private static void setupManagers() throws IOException {
-		File dbmsYaml = new File("conf/dbms.yaml");
+		File dbmsYaml = FileHelper.getConfigFile("dbms.yaml");
 		ConnectionParams serviceConnectionParams = YamlHelper.readFromFile(dbmsYaml, ConnectionParams.class);
 		logger.info("Reading DBMS connections: " + dbmsYaml.getAbsolutePath());
 
 		// Initialize cloud services.
-		File awsYaml = new File("conf/aws.yaml");
+		File awsYaml = FileHelper.getConfigFile("aws.yaml");
 		CloudConnectionFactory cloudFactory = CloudConnectionFactory.getInstance();
 		cloudFactory.setConnectionParamsFile(awsYaml);
 
@@ -226,17 +227,17 @@ public class App {
 		// Register provider for multi-part requests.
 		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", MultiPartFeature.class.getName());
 
-		// Add CORS filter, and then use the provided FilterHolder to configure it. 
+		// Add CORS filter, and then use the provided FilterHolder to configure it.
 		// (Original example from StackOverflow:
 		// https://stackoverflow.com/questions/28190198/cross-origin-filter-with-embedded-jetty)
 		FilterHolder cors = servletHandler.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
 		cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD,UPDATE,DELETE");
-		// For now allow all headers on requests. 
+		// For now allow all headers on requests.
 		String allowedHeaders = "*";
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, allowedHeaders);
-		// Allow API key header to be exposed along with content-length.  
+		// Allow API key header to be exposed along with content-length.
 		String exposedResponseHeaders = String.format("Content-Length,%s", SecurityAuthenticator.API_KEY_HEADER);
 		cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, exposedResponseHeaders);
 

@@ -39,7 +39,7 @@ public class ServiceCtlTest {
 	public void testCreateRemove() throws Exception {
 		// Set up test directory & copy sample parameter file with substitutions.
 		File testDir = FileHelper.resetDirectory(new File("target/testdata/serviceCreateRemove"));
-		File sampleParamsFile = new File("conf/init-params.sample.yaml");
+		File sampleParamsFile = new File("conf/sample.init-params.yaml");
 		SystemInitParams initParams = YamlHelper.readFromFile(sampleParamsFile, SystemInitParams.class);
 		initParams.setServiceDb("goldfin_test");
 		initParams.setServiceUser("goldfin_test");

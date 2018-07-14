@@ -1,6 +1,7 @@
+# Sample dbms.yaml file. 
 ---
 driver: "org.postgresql.Driver"
 url: "jdbc:postgresql://localhost:15432/goldfin"
 user: "goldfin"
-password: "Asecret2"
+password: "some_secret_pw!"
 adminSchema: "admin"

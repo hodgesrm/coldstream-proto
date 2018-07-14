@@ -11,7 +11,9 @@ import io.goldfin.shared.data.SimpleJdbcConnectionManager;
 import io.goldfin.shared.utilities.YamlHelper;
 
 /**
- * Provides helper data for DBMS connections. 
+ * Provides helper data for DBMS connection testing. This class *does not* use
+ * the configuration search path for YAML config files since it's for unit
+ * tests.
  */
 public class DbConnectionHelper {
 	static final Logger logger = LoggerFactory.getLogger(DbConnectionHelper.class);
@@ -26,7 +28,7 @@ public class DbConnectionHelper {
 		this.testDbParams = YamlHelper.readFromClasspath(dbParamFile, ConnectionParams.class);
 		this.connectionManager = new SimpleJdbcConnectionManager(testDbParams);
 	}
-	
+
 	public DbConnectionHelper(String schema) throws Exception {
 		this(schema, "dbms.yaml");
 	}
@@ -41,5 +43,5 @@ public class DbConnectionHelper {
 
 	public SimpleJdbcConnectionManager getConnectionManager() {
 		return connectionManager;
-	}	
+	}
 }

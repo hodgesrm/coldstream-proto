@@ -4,20 +4,24 @@ services:
    api:
        image: goldfin/admin-server:0.0.1
        network_mode: host
+       volumes:
+         - type: bind
+           source: /home/rhodges/goldfin/conf
+           target: /var/lib/goldfin/conf
        #ports:
        # - "8443:8443"
    ocr:
        image: goldfin-ocr:latest
    data:
        image: goldfin-data:latest
-   dbms:
-       image: postgres:10
-       environment:
-         - POSTGRES_PASSWORD=secret
-       ports:
-        - "15432:5432"
-       volumes:
-        - postgresql-10:/var/lib/mysql/data
+#   dbms:
+#       image: postgres:10
+#       environment:
+#         - POSTGRES_PASSWORD=secret
+#       ports:
+#        - "15432:5432"
+#       volumes:
+#        - postgresql-10:/var/lib/mysql/data
 
 volumes:
   postgresql-10:

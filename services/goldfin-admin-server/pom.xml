@@ -180,6 +180,7 @@
 					</execution>
 				</executions>
 			</plugin>
+            <!-- Use docker-build.sh to ensure UI is built. -->
 			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>dockerfile-maven-plugin</artifactId>
