@@ -22,6 +22,10 @@ sudo apt update
 # Install docker-ce
 sudo apt install docker-ce
 ```
+Note:
+
+To run docker commands from non-root account, edit /etc/group and add
+account to docker group.
 
 ## Building 
 

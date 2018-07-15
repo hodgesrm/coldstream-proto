@@ -1,0 +1,6 @@
+# Variable settings for Goldfin on Amazon.
+access_key = "AWS_ACCESS_KEY"
+secret_key = "AWS_SECRET_KEY"
+region     = "REGION"
+eip_preprod_goldfin_io = "EIP_ALLOC_ID"
+private_key_file = "FULL_PATH_OF_PRIVATE_KEY"
