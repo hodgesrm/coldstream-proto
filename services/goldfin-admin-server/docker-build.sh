@@ -5,6 +5,9 @@ set -e
 # Build file for Docker services. 
 cd `dirname $0`
 
+# Clean the build to ensure we don't pick up obsolete libraries. 
+mvn clean
+
 # Build the UI distribution.  It's required by the docker file and must be
 # in-tree for the docker build to work. 
 rm -rf target/ui

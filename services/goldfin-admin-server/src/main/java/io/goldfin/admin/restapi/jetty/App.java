@@ -75,17 +75,15 @@ public class App {
 		handlers.setHandlers(new Handler[] { resourceContextHandler, securityHandler });
 		jettyServer.setHandler(handlers);
 
-		// Initialize managers.
 		try {
+			// Initialize managers.
 			setupManagers();
-		} catch (Exception e) {
-			logger.error("Fatal initialization error", e);
-		}
 
-		// Start web server.
-		try {
+			// Start web server.
 			jettyServer.start();
 			jettyServer.join();
+		} catch (Exception e) {
+			logger.error("Fatal initialization error", e);
 		} finally {
 			jettyServer.destroy();
 		}

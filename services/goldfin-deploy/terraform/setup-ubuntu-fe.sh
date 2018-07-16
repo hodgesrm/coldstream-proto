@@ -13,6 +13,9 @@ sudo add-apt-repository \
 # Update package index.
 sudo apt update
 # Install docker-ce
-sudo apt -y install -f docker-ce
+sudo apt -y install docker-ce
+# Install docker-compose. 
+sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod 755 /usr/local/bin/docker-compose 
 # Add ubuntu user to docker group. 
 sudo usermod -aG docker ubuntu

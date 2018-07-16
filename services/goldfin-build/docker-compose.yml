@@ -2,18 +2,18 @@
 version: '3.6'
 services:
    api:
-       image: goldfin/admin-server:0.0.1
+       image: goldfin/admin-server:0.9.0
        network_mode: host
        volumes:
          - type: bind
            source: /home/rhodges/goldfin/conf
            target: /var/lib/goldfin/conf
        #ports:
-       # - "8443:8443"
+       # - "443:8443"
    ocr:
-       image: goldfin-ocr:latest
+       image: goldfin/scanctl:0.9.0
    data:
-       image: goldfin-data:latest
+       image: goldfin/datactl:0.9.0
 #   dbms:
 #       image: postgres:10
 #       environment:

@@ -1,4 +1,4 @@
 # Default server configuration. 
-securePort: 8443
+securePort: 443
 keyStorePath: "conf/keystore.jks"
 keyStorePassword: "secret"
