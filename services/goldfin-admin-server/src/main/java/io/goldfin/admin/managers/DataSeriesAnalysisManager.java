@@ -10,19 +10,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.service.api.model.DataSeries;
-import io.goldfin.shared.cloud.AwsConnectionParams;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
 
 /**
- * Handles operations related to batch analysis of data series. 
+ * Handles operations related to batch analysis of data series.
  */
 public class DataSeriesAnalysisManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(DataSeriesAnalysisManager.class);
 	private ManagementContext context;
 
-	// Names of our queues. 
+	// Names of our queues.
 	private String dataSeriesRequestQueue;
 	private String dataSeriesResponseQueue;
 
@@ -48,23 +47,16 @@ public class DataSeriesAnalysisManager implements Manager {
 		threadPool.submit(task);
 	}
 
-	private String ensureQueue(String propName) {
-		// Get the queue location.
-		AwsConnectionParams awsParams = context.getAwsConnectionParams();
-		String queueName = awsParams.getInventory().getProperty(propName);
-		if (queueName == null) {
-			throw new RuntimeException(String.format("Queue property value missing: name=%s", propName));
-		}
-
+	private String ensureQueue(String queueHandle) {
 		// Ensure the queue exists.
-		QueueConnection queue = CloudConnectionFactory.getInstance().getQueueConnection(queueName);
+		QueueConnection queue = CloudConnectionFactory.getInstance().getQueueConnection(queueHandle);
 		if (queue.queueExists()) {
-			logger.info(String.format("Data series queue exists: %s", queueName));
+			logger.info(String.format("Data series queue exists: %s", queueHandle));
 		} else {
-			logger.info(String.format("Data series queue does not exist, creating: %s", queueName));
+			logger.info(String.format("Data series queue does not exist, creating: %s", queueHandle));
 			queue.queueCreate(false);
 		}
-		return queueName;
+		return queueHandle;
 	}
 
 	@Override
@@ -72,10 +64,13 @@ public class DataSeriesAnalysisManager implements Manager {
 		// Do nothing for now.
 	}
 
-	/** 
+	/**
 	 * Submit a data series for analysis.
-	 * @param tenantId Tenant ID
-	 * @param dataSeries DataSeries record
+	 * 
+	 * @param tenantId
+	 *            Tenant ID
+	 * @param dataSeries
+	 *            DataSeries record
 	 */
 	public void process(String tenantId, DataSeries dataSeries) {
 		// Generate a request to scan the dataSeries.
@@ -85,7 +80,7 @@ public class DataSeriesAnalysisManager implements Manager {
 		StructuredMessage request = new StructuredMessage().setOperation("process").setType("request")
 				.setXactTag(dataSeries.getId().toString()).setTenantId(tenantId).encodeContent(dataSeries);
 		conn.send(request);
-		logger.info(String.format("Data series analysis request enqueued: tenantId=%s, dataSeriesId=%s, name=%s", tenantId,
-				dataSeries.getId().toString(), dataSeries.getName()));
+		logger.info(String.format("Data series analysis request enqueued: tenantId=%s, dataSeriesId=%s, name=%s",
+				tenantId, dataSeries.getId().toString(), dataSeries.getName()));
 	}
 }

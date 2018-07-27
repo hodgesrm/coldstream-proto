@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.invoice.dbutils.test;
 
@@ -11,7 +11,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.config.ServiceConfig;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.dbutils.SqlScriptExecutor;
 import io.goldfin.shared.utilities.FileHelper;
 import io.goldfin.shared.utilities.YamlHelper;
@@ -23,12 +24,14 @@ import io.goldfin.shared.utilities.YamlHelper;
 public class SqlScriptExecutorTest {
 	static final Logger logger = LoggerFactory.getLogger(SqlScriptExecutorTest.class);
 
-	private ConnectionParams testDbParams;
+	private DbmsParams testDbParams;
 
 	/** Load DBMS connection parameters. */
 	@Before
 	public void setup() throws Exception {
-		testDbParams = YamlHelper.readFromClasspath("dbms.yaml", ConnectionParams.class);
+		File baseServiceConfigFile = FileHelper.getConfigFile("service.yaml");
+		ServiceConfig serviceConfig = YamlHelper.readFromFile(baseServiceConfigFile, ServiceConfig.class);
+		testDbParams = serviceConfig.getDbms();
 	}
 
 	/**

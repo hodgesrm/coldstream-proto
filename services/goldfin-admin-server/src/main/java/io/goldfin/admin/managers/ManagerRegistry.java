@@ -3,8 +3,6 @@
  */
 package io.goldfin.admin.managers;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,12 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.service.api.model.Tenant;
-import io.goldfin.shared.cloud.AwsConnectionParams;
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.cloud.AwsParams;
+import io.goldfin.shared.config.DataSeriesParams;
+import io.goldfin.shared.config.GatewayParams;
+import io.goldfin.shared.config.OcrParams;
+import io.goldfin.shared.config.ServiceConfig;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SessionBuilder;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
-import io.goldfin.shared.utilities.YamlHelper;
 
 /**
  * Singleton class that provides access to managers.
@@ -30,19 +31,17 @@ public class ManagerRegistry implements ManagementContext {
 
 	// Registry state.
 	private Map<Class<?>, Manager> managers = new HashMap<Class<?>, Manager>();
-	private ConnectionParams connectionParams;
+	private ServiceConfig serviceConfig;
 	private SimpleJdbcConnectionManager connectionManager;
-	private File awsYaml;
 
 	// Standard way to get a properly initialized manager
 	public static ManagerRegistry getInstance() {
 		return registry;
 	}
 
-	public void initialize(ConnectionParams connectionParams, File awsYaml) {
-		this.connectionParams = connectionParams;
-		this.connectionManager = new SimpleJdbcConnectionManager(this.connectionParams);
-		this.awsYaml = awsYaml;
+	public void initialize(ServiceConfig serviceConfig) {
+		this.serviceConfig = serviceConfig;
+		this.connectionManager = new SimpleJdbcConnectionManager(serviceConfig.getDbms());
 	}
 
 	public void addManager(Manager manager) {
@@ -93,13 +92,38 @@ public class ManagerRegistry implements ManagementContext {
 	 * @see io.goldfin.admin.managers.ManagementContext#getAwsConnectionParams()
 	 */
 	@Override
-	public AwsConnectionParams getAwsConnectionParams() {
-		// Load file each time to ensure it's current.
-		try {
-			return YamlHelper.readFromFile(awsYaml, AwsConnectionParams.class);
-		} catch (IOException e) {
-			throw new RuntimeException(String.format("Unable to load connection parameters: file=%s", awsYaml), e);
-		}
+	public AwsParams getAwsConnectionParams() {
+		return serviceConfig.getAws();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.goldfin.admin.managers.ManagementContext#getGatewayParams()
+	 */
+	@Override
+	public GatewayParams getGatewayParams() {
+		return serviceConfig.getGateway();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.goldfin.admin.managers.ManagementContext#getOcrParams()
+	 */
+	@Override
+	public OcrParams getOcrParams() {
+		return serviceConfig.getOcr();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.goldfin.admin.managers.ManagementContext#getDataSeriesParams()
+	 */
+	@Override
+	public DataSeriesParams getDataSeriesParams() {
+		return serviceConfig.getDataSeries();
 	}
 
 	/*
@@ -119,7 +143,7 @@ public class ManagerRegistry implements ManagementContext {
 	 */
 	@Override
 	public String getAdminSchema() {
-		return this.connectionParams.getAdminSchema();
+		return this.serviceConfig.getDbms().getAdminSchema();
 	}
 
 	/*
@@ -140,8 +164,8 @@ public class ManagerRegistry implements ManagementContext {
 	 * @see io.goldfin.admin.managers.ManagementContext#getConnectionParams()
 	 */
 	@Override
-	public ConnectionParams getConnectionParams() {
-		return this.connectionParams;
+	public DbmsParams getConnectionParams() {
+		return this.serviceConfig.getDbms();
 	}
 
 	/*

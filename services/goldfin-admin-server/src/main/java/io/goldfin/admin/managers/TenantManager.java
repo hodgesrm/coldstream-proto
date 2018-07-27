@@ -16,7 +16,7 @@ import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.admin.service.api.model.TenantParameters;
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.dbutils.SqlScriptExecutor;
 import io.goldfin.shared.utilities.FileHelper;
@@ -101,7 +101,7 @@ public class TenantManager implements Manager {
 		String tenantSchema = "tenant_" + tenantParams.getSchemaSuffix();
 		Properties tenantProps = new Properties();
 		tenantProps.setProperty("tenantSchema", tenantSchema);
-		ConnectionParams serviceConnectionParams = context.getConnectionParams();
+		DbmsParams serviceConnectionParams = context.getConnectionParams();
 		File tenantInitScript = new File(FileHelper.homeDir(), "sql/tenant-schema-init-01.sql");
 		SqlScriptExecutor systemExecutor = new SqlScriptExecutor(serviceConnectionParams, tenantProps, tenantSchema);
 		systemExecutor.execute(tenantInitScript);
@@ -143,7 +143,7 @@ public class TenantManager implements Manager {
 		String tenantSchema = "tenant_" + tenant.getSchemaSuffix();
 		Properties tenantProps = new Properties();
 		tenantProps.setProperty("tenantSchema", tenantSchema);
-		ConnectionParams serviceConnectionParams = context.getConnectionParams();
+		DbmsParams serviceConnectionParams = context.getConnectionParams();
 		File tenantInitScript = new File(FileHelper.homeDir(), "sql/tenant-schema-remove-01.sql");
 		SqlScriptExecutor systemExecutor = new SqlScriptExecutor(serviceConnectionParams, tenantProps, tenantSchema);
 		systemExecutor.execute(tenantInitScript);

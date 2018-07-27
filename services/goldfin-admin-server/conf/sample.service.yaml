@@ -1,0 +1,55 @@
+# Parameter file for Goldfin service group.  Principles of operation:
+#
+# 0. File consists of a set of orthogonal sections that can be read 
+#    independently if convenient.  Each section addresses a different type
+#    of configuration. 
+# 1. Credentials are in aws and dbms sections. They change between groups. 
+# 2. S3 bucket naming: <group>-<bucket>-<s3root>
+# 3. SQS queue naming: <group>-<queue>-{request|response}
+
+# Globally unique name for this service group plus Amazon access information.  
+aws:
+  # Group name must be globally unique.  
+  group: "dev"
+  accessKeyId: "<AWS access key ID>"
+  secretAccessKey: "<AWS secret access key>"
+  region: "us-west-2"
+  s3Root: "service-goldfin-io"
+
+# DBMS parameters.  User should match group name.
+dbms:
+  driver: "org.postgresql.Driver"
+  url: "jdbc:postgresql://localhost:15432"
+  user: "dev"
+  password: "<some secret pw>"
+  adminSchema: "admin"
+
+# API gateway parameters.
+gateway:
+  securePort: 8443
+  keyStorePath: "conf/keystore.jks"
+  keyStorePassword: "secret"
+  # Document storage parameters. 
+  documentBucket: "documents"
+
+# Text recognition service parameters.
+ocr:
+  # Processing queues.
+  requestQueue: "ocr-request"
+  requestQueue: "ocr-response"
+  # OCR cache in S3 (holds OCR scans for documents)
+  cacheBucket: "ocr-cache"
+  # OCR online service
+  abbyy:
+    appid: "<app name>"
+    pwd: "<app key>"
+  # OCR work directory and other service parameters.
+  work_dir: "/tmp/ocr"
+
+# Data series processing service parameters.
+dataSeries:
+  # Processing queues.
+  requestQueue: "data-series-request"
+  responseQueue: "data-series-response"
+  # Data series work directory and other service parameters.
+  work_dir: "/tmp/data_series"

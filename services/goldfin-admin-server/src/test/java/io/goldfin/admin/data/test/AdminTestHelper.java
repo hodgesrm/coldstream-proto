@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.data.test;
 
@@ -11,7 +11,7 @@ import io.goldfin.admin.data.TenantDataService;
 import io.goldfin.admin.data.UserData;
 import io.goldfin.admin.data.UserDataService;
 import io.goldfin.admin.service.api.model.Tenant;
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SessionBuilder;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
@@ -25,7 +25,7 @@ import io.goldfin.shared.utilities.FileHelper;
  */
 public class AdminTestHelper {
 	/** Load admin tables into a designated schema. */
-	public static void loadAdminSchema(ConnectionParams connectionParams, String schema) throws SqlLoadException {
+	public static void loadAdminSchema(DbmsParams connectionParams, String schema) throws SqlLoadException {
 		// Remove old schema.
 		Properties serviceProps = new Properties();
 		serviceProps.setProperty("serviceUser", connectionParams.getUser());
@@ -40,7 +40,7 @@ public class AdminTestHelper {
 	}
 
 	/** Create a tenant for testing purpose. */
-	public static String createTenant(ConnectionParams connectionParams, String schema, String name)
+	public static String createTenant(DbmsParams connectionParams, String schema, String name)
 			throws SqlLoadException {
 		SimpleJdbcConnectionManager cm = new SimpleJdbcConnectionManager(connectionParams);
 		TransactionalService<Tenant> svc = new TenantDataService();
@@ -57,7 +57,7 @@ public class AdminTestHelper {
 	}
 
 	/** Create a user for testing purpose. */
-	public static String createUser(ConnectionParams connectionParams, String schema, String tenantId, String username)
+	public static String createUser(DbmsParams connectionParams, String schema, String tenantId, String username)
 			throws SqlLoadException {
 		SimpleJdbcConnectionManager cm = new SimpleJdbcConnectionManager(connectionParams);
 		TransactionalService<UserData> svc = new UserDataService();

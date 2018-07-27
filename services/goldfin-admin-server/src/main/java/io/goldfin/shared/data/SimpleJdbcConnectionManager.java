@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.data;
 
@@ -19,9 +19,9 @@ public class SimpleJdbcConnectionManager {
 	static final Logger logger = LoggerFactory.getLogger(SimpleJdbcConnectionManager.class);
 
 	private final ConcurrentHashMap<String, Driver> drivers = new ConcurrentHashMap<String, Driver>();
-	private final ConnectionParams connectionParams;
+	private final DbmsParams connectionParams;
 
-	public SimpleJdbcConnectionManager(ConnectionParams connectionParams) {
+	public SimpleJdbcConnectionManager(DbmsParams connectionParams) {
 		this.connectionParams = connectionParams;
 	}
 
@@ -43,9 +43,9 @@ public class SimpleJdbcConnectionManager {
 		// Add schema to URL if present.
 		String url = null;
 		if (schema == null) {
-			url = connectionParams.getUrl();
+			url = String.format("%s/%s", connectionParams.getUrl(), connectionParams.getUser());
 		} else {
-			url = connectionParams.getUrl() + "?currentSchema=" + schema;
+			url = String.format("%s/%s?currentSchema=%s", connectionParams.getUrl(), connectionParams.getUser(), schema);
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Connecting to DBMS: driver=%s, url=%s, user=%s", connectionParams.getDriver(),

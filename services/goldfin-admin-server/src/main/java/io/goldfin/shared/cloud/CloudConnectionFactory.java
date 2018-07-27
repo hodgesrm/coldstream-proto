@@ -1,15 +1,10 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.cloud;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.goldfin.shared.utilities.YamlHelper;
 
 /**
  * Creates connections to services for storage, queueing, etc.
@@ -18,7 +13,7 @@ public class CloudConnectionFactory {
 	static final Logger logger = LoggerFactory.getLogger(CloudConnectionFactory.class);
 
 	private static CloudConnectionFactory instance;
-	private File connectionParamsFile;
+	private AwsParams connectionParams;
 
 	public CloudConnectionFactory() {
 	}
@@ -32,27 +27,30 @@ public class CloudConnectionFactory {
 	}
 
 	/**
-	 * Must be set once so that the factory knows where to find connectin
+	 * Must be set once so that the factory knows where to find connection
 	 * parameters.
 	 */
-	public synchronized void setConnectionParamsFile(File connectionParamsFile) {
-		this.connectionParamsFile = connectionParamsFile;
+	public synchronized void setConnectionParams(AwsParams connectionParams) {
+		this.connectionParams = connectionParams;
 	}
 
+	/**
+	 * Create a queue connection.
+	 * 
+	 * @param queue
+	 *            A stub queue name that is unique within the service group.
+	 */
 	public synchronized QueueConnection getQueueConnection(String queue) {
-		return new QueueConnection(loadConnectionParams(), queue);
+		return new QueueConnection(connectionParams, queue);
 	}
 
-	public synchronized StorageConnection getStorageConnection() {
-		return new StorageConnection(loadConnectionParams());
-	}
-
-	private AwsConnectionParams loadConnectionParams() {
-		try {
-			return YamlHelper.readFromFile(connectionParamsFile, AwsConnectionParams.class);
-		} catch (IOException e) {
-			throw new RuntimeException(
-					String.format("Unable to load connection parameters: file=%s", connectionParamsFile), e);
-		}
+	/**
+	 * Create an S3 storage connection.
+	 * 
+	 * @param bucket
+	 *            A stub bucket name that is unique within the service group.
+	 */
+	public synchronized StorageConnection getStorageConnection(String bucket) {
+		return new StorageConnection(connectionParams, bucket);
 	}
 }

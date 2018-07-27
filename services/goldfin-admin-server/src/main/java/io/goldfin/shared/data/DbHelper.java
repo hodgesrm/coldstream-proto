@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.data;
 
@@ -12,23 +12,11 @@ public class DbHelper {
 	/**
 	 * Get connection parameters for DBMS server.
 	 */
-	public static ConnectionParams systemConnectionParams(SystemInitParams initParams) {
-		ConnectionParams systemConnection = new ConnectionParams();
-		systemConnection.setUrl(initParams.getUrl() + "/" + initParams.getAdminUser());
+	public static DbmsParams systemConnectionParams(SystemInitParams initParams) {
+		DbmsParams systemConnection = new DbmsParams();
+		systemConnection.setUrl(initParams.getUrl());
 		systemConnection.setUser(initParams.getAdminUser());
 		systemConnection.setPassword(initParams.getAdminPassword());
 		return systemConnection;
-	}
-
-	/**
-	 * Get connection parameters for master tenant admin service.
-	 */
-	public static ConnectionParams tenantAdminConnectionParams(SystemInitParams initParams) {
-		ConnectionParams serviceConnection = new ConnectionParams();
-		serviceConnection.setUrl(initParams.getUrl() + "/" + initParams.getServiceUser());
-		serviceConnection.setUser(initParams.getServiceUser());
-		serviceConnection.setPassword(initParams.getServicePassword());
-		serviceConnection.setAdminSchema(initParams.getServiceSchema());
-		return serviceConnection;
 	}
 }

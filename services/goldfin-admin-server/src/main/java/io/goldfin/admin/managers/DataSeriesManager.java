@@ -88,7 +88,7 @@ public class DataSeriesManager implements Manager {
 		UUID docId = UUID.randomUUID();
 		String locator = null;
 		try (InputStream localInput = new FileInputStream(tempFile)) {
-			StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
+			StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection("documents");
 			locator = connection.storeTenantDocument(tenantId, docId.toString(), localInput, fileName, description,
 					sha256, contentLength, contentType);
 		}
@@ -151,7 +151,7 @@ public class DataSeriesManager implements Manager {
 		// Delete the dataSeries from storage. This has to go first so
 		// we don't lose the dataSeries.
 		String tenantId = getTenantId(principal);
-		StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
+		StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection("documents");
 		connection.deleteTenantDocument(tenantId, dataSeries.getId().toString());
 
 		// Now erase dataSeries metadata.

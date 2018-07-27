@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.initialization;
 
@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import io.goldfin.admin.exceptions.CommandError;
+import io.goldfin.shared.config.ServiceConfig;
 import io.goldfin.shared.config.SystemInitParams;
 import io.goldfin.shared.tasks.ProgressReporter;
 import io.goldfin.shared.tasks.TaskStatus;
@@ -56,8 +57,10 @@ public class SvcInit {
 	 * Processes a service create command.
 	 */
 	private void createCommand(String[] args) {
-		parser.accepts("init-params", "Initialization parameter file").withRequiredArg().ofType(File.class);
-		parser.accepts("dbms-config", "Generated DBMS connection parameters file").withRequiredArg().ofType(File.class);
+		parser.accepts("init-params", "Initialization parameter file (usually: init-params.yaml)").withRequiredArg()
+				.ofType(File.class);
+		parser.accepts("service-config", "Service configuration file (usually: system.yaml)").withRequiredArg()
+				.ofType(File.class);
 		if (!parseOptions("create", args)) {
 			return;
 		}
@@ -69,17 +72,22 @@ public class SvcInit {
 		if (!initParamsFile.canRead()) {
 			error("Unknown file: " + initParamsFile.getAbsolutePath());
 		}
-		File dbmsConfigFile = (File) options.valueOf("dbms-config");
-		if (dbmsConfigFile == null) {
-			error("You must specify a connection parameter file name with --dbms-config");
+		File serviceConfigFile = (File) options.valueOf("service-config");
+		if (serviceConfigFile == null) {
+			error("You must specify a service parameter file name with --service-config");
+		}
+		if (!serviceConfigFile.canRead()) {
+			error("Unknown file: " + serviceConfigFile.getAbsolutePath());
 		}
 
-		SystemInitParams params;
+		SystemInitParams initParams;
+		ServiceConfig serviceConfig;
 		try {
-			params = YamlHelper.readFromFile(initParamsFile, SystemInitParams.class);
-			ServiceManager initializer = new ServiceManager(params);
+			initParams = YamlHelper.readFromFile(initParamsFile, SystemInitParams.class);
+			serviceConfig = YamlHelper.readFromFile(serviceConfigFile, ServiceConfig.class);
+			ServiceManager initializer = new ServiceManager(initParams, serviceConfig);
 			initializer.addProgressReporter(createProgressReporter());
-			Future<TaskStatus> outcome = initializer.create(dbmsConfigFile);
+			Future<TaskStatus> outcome = initializer.create();
 			processOutcome(outcome);
 		} catch (Exception e) {
 			error("Operation failed", e);
@@ -87,13 +95,17 @@ public class SvcInit {
 	}
 
 	private void removeCommand(String[] args) {
-		parser.accepts("init-params", "YAML service parameter file").withRequiredArg().ofType(File.class);
+		parser.accepts("init-params", "Initialization parameter file (usually: init-params.yaml)").withRequiredArg()
+				.ofType(File.class);
+		parser.accepts("service-config", "Service configuration file (usually: system.yaml)").withRequiredArg()
+				.ofType(File.class);
 		parser.accepts("ignore-errors", "Ignore script errors");
 		if (!parseOptions("create", args)) {
 			return;
 		}
 
 		File initParamsFile = (File) options.valueOf("init-params");
+		File serviceConfigFile = (File) options.valueOf("service-config");
 		boolean ignoreErrors = options.has("ignore-errors");
 		if (initParamsFile == null) {
 			error("You must specify a parameter file with --init-params");
@@ -101,11 +113,19 @@ public class SvcInit {
 		if (!initParamsFile.canRead()) {
 			error("Unknown file: " + initParamsFile.getAbsolutePath());
 		}
+		if (serviceConfigFile == null) {
+			error("You must specify a service parameter file name with --service-config");
+		}
+		if (!serviceConfigFile.canRead()) {
+			error("Unknown file: " + serviceConfigFile.getAbsolutePath());
+		}
 
 		SystemInitParams params;
+		ServiceConfig serviceConfig;
 		try {
 			params = YamlHelper.readFromFile(initParamsFile, SystemInitParams.class);
-			ServiceManager initializer = new ServiceManager(params);
+			serviceConfig = YamlHelper.readFromFile(serviceConfigFile, ServiceConfig.class);
+			ServiceManager initializer = new ServiceManager(params, serviceConfig);
 			initializer.addProgressReporter(createProgressReporter());
 			Future<TaskStatus> outcome = initializer.remove(ignoreErrors);
 			processOutcome(outcome);

@@ -3,8 +3,11 @@
  */
 package io.goldfin.admin.managers;
 
-import io.goldfin.shared.cloud.AwsConnectionParams;
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.cloud.AwsParams;
+import io.goldfin.shared.config.DataSeriesParams;
+import io.goldfin.shared.config.GatewayParams;
+import io.goldfin.shared.config.OcrParams;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
 
@@ -13,10 +16,19 @@ import io.goldfin.shared.data.SimpleJdbcConnectionManager;
  */
 public interface ManagementContext {
 	/** Returns AWS connection parameters. */
-	public AwsConnectionParams getAwsConnectionParams();
+	public AwsParams getAwsConnectionParams();
 
+	/** Return gateway configuration parameters. */
+	public GatewayParams getGatewayParams();
+
+    /** Return OCR configuration parameters. */
+	public OcrParams getOcrParams();
+	
+	/** Return data series processing parameters. */
+	public DataSeriesParams getDataSeriesParams();
+	
 	/** Returns the DBMS connection parameters. */
-	public ConnectionParams getConnectionParams();
+	public DbmsParams getConnectionParams();
 
 	/** Returns the DBMS connection manager. */
 	public SimpleJdbcConnectionManager getConnectionManager();

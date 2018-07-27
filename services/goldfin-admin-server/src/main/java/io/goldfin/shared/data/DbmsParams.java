@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.data;
 
 /**
  * JDBC connection parameters.
  */
-public class ConnectionParams {
+public class DbmsParams {
 	private String driver = "org.postgresql.Driver";
 	private String url;
 	private String user;

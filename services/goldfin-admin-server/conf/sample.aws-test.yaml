@@ -1,7 +1,0 @@
-# Sample AWS file for running unit tests. 
----
-accessKeyId: "<AWS access key ID>"
-secretAccessKey: "<AWS secret access key>"
-s3:
-  bucket: "unit-test-service-goldfin-io"
-  location: "us-west-1"

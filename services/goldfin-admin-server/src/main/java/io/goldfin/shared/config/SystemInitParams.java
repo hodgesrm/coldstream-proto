@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.config;
 
@@ -8,18 +8,12 @@ package io.goldfin.shared.config;
  */
 
 public class SystemInitParams {
-	// DB connection and root account. 
+	// DB connection and root account.
 	private String driver = "org.postgresql.Driver";
 	private String url;
 	private String adminUser;
 	private String adminPassword;
-	
-	// DB that contains tenant data. 
-	private String serviceDb;
-	private String serviceUser;
-	private String servicePassword;
-	private String serviceSchema = "admin";
-	
+
 	// Application sysadmin user
 	private String sysUser;
 	private String sysPassword;
@@ -54,38 +48,6 @@ public class SystemInitParams {
 
 	public void setAdminPassword(String adminPassword) {
 		this.adminPassword = adminPassword;
-	}
-
-	public String getServiceDb() {
-		return serviceDb;
-	}
-
-	public void setServiceDb(String serviceDb) {
-		this.serviceDb = serviceDb;
-	}
-
-	public String getServiceUser() {
-		return serviceUser;
-	}
-
-	public void setServiceUser(String serviceUser) {
-		this.serviceUser = serviceUser;
-	}
-
-	public String getServicePassword() {
-		return servicePassword;
-	}
-
-	public void setServicePassword(String servicePassword) {
-		this.servicePassword = servicePassword;
-	}
-
-	public String getServiceSchema() {
-		return serviceSchema;
-	}
-
-	public void setServiceSchema(String serviceSchema) {
-		this.serviceSchema = serviceSchema;
 	}
 
 	public String getSysUser() {

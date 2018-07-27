@@ -1,5 +1,3 @@
-# (Sample service initialization parameters.)
-
 ##############################
 # Initialization parameters. #
 ##############################
@@ -8,14 +6,8 @@
 driver: "org.postgresql.Driver"
 url: "jdbc:postgresql://localhost:15432"
 adminUser: "postgres"
-adminPassword: "secret"
-
-# Service database name and service user/password.
-serviceDb: "goldfin"
-serviceUser: "goldfin"
-servicePassword: "Asecret2"
-serviceSchema: "admin"
+adminPassword: "<password>"
 
 # Service sysadmin user name and password. 
 sysUser: "sysadmin"
-sysPassword: "secret12"
+sysPassword: "<password>"

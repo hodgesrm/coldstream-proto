@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goldfin.admin.service.api.model.Document;
-import io.goldfin.shared.cloud.AwsConnectionParams;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
+import io.goldfin.shared.config.OcrParams;
 
 /**
  * Handles operations related to OCR, specifically initiating scans on documents
@@ -42,23 +42,17 @@ public class OcrManager implements Manager {
 	@Override
 	public void prepare() {
 		// Ensure the queues exist.
-		ocrRequestQueue = ensureQueue("ocrRequestQueue");
-		ocrResponseQueue = ensureQueue("ocrResponseQueue");
+		OcrParams ocrParams = context.getOcrParams();
+		ocrRequestQueue = ensureQueue(ocrParams.getRequestQueue());
+		ocrResponseQueue = ensureQueue(ocrParams.getResponseQueue());
 
 		// Start the response queue thread.
 		OcrResponseQueueTask task = new OcrResponseQueueTask(context, ocrResponseQueue);
 		threadPool.submit(task);
 	}
 
-	private String ensureQueue(String propName) {
-		// Get the queue location.
-		AwsConnectionParams awsParams = context.getAwsConnectionParams();
-		String queueName = awsParams.getOcr().getProperty(propName);
-		if (queueName == null) {
-			throw new RuntimeException(String.format("Queue property value missing: name=%s", propName));
-		}
-
-		// Ensure the queue exists.
+	// Ensure the queue exists.
+	private String ensureQueue(String queueName) {
 		QueueConnection queue = CloudConnectionFactory.getInstance().getQueueConnection(queueName);
 		if (queue.queueExists()) {
 			logger.info(String.format("OCR queue exists: %s", queueName));

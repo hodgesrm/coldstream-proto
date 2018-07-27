@@ -19,6 +19,16 @@ cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
 bin/admin-server console debug
 ```
 
+## Prerequisites
+
+For dev usage, GOLDFIN_CONFIG_DIR should point to directory with all config
+files. 
+```
+export GOLDFIN_CONFIG_DIR=$HOME/goldfin-dev/conf
+```
+
+For prod deployment, config files go in /var/lib/goldfin/conf. 
+
 ## Service Initialization and Removal 
 
 Here are the steps to create a new service. 
@@ -29,34 +39,36 @@ Here are the steps to create a new service.
 # Must run in dist location for relative directory references to work. 
 cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
 bin/svc-init create --init-params=$GOLDFIN_CONFIG_DIR/init-params.sample.yaml \
-     --dbms-config=$GOLDFIN_CONFIG_DIR/dbms.yaml
+     --service-config=$GOLDFIN_CONFIG_DIR/service.yaml
 ```
-The dbms-config.yaml file is required by the running image. 
+The service-config.yaml file defines parameters used across all services. 
 
 Here are step(s) to remove a service. 
 
 1. Stop any running images
 2. Using previous init.params file issue the following command: 
 ```shell
-   svc-init remove --init-params=$GOLDFIN_CONFIG_DIR/init-params.yaml
+svc-init remove --init-params=$GOLDFIN_CONFIG_DIR/init-params.yaml\
+ --service-config=$GOLDFIN_CONFIG_DIR/service.yaml
 ```
+
 ## Create a tenant. 
 ```shell
-   svc-client login --host localhost --user=sysadmin@system --password=secret12
-   svc-client tenant-create --name 'skylineresearch.com' \
-   --description "Skyline Research, Inc." --schema-suffix=skyline
-   svc-client tenant-list
-   # Get tenantId. 
-   svc-client user-create --initialPassword=secret12 \
-   --user=test@skylineresearch.com 
+svc-client login --host localhost --user=sysadmin@system --password=secret12
+svc-client tenant-create --name 'skylineresearch.com' \
+--description "Skyline Research, Inc." --schema-suffix=skyline
+svc-client tenant-list
+# Get tenantId. 
+svc-client user-create --initialPassword=secret12 \
+--user=test@skylineresearch.com 
 ```
 
 ### Load invoice for client. 
 ```shell
-   svc-client login --host localhost --user=test@skylineresearch.com --password=secret12
-   svc-client document-create --description='Test invoice' \
-   --file /home/rhodges/coldstream/invoices/ovh/invoice_WE666184.pdf
-   svc-client document-list
+svc-client login --host localhost --user=test@skylineresearch.com --password=secret12
+svc-client document-create --description='Test invoice' \
+--file /home/rhodges/coldstream/invoices/ovh/invoice_WE666184.pdf
+svc-client document-list
 ```
 
 ## Running Docker Images

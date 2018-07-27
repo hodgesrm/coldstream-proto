@@ -48,7 +48,8 @@ import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
 import io.goldfin.admin.managers.VendorManager;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.config.GatewayParams;
+import io.goldfin.shared.config.ServiceConfig;
 import io.goldfin.shared.utilities.FileHelper;
 import io.goldfin.shared.utilities.YamlHelper;
 
@@ -58,11 +59,13 @@ public class App {
 	public static void main(String[] args) throws Exception {
 		logger.info("Starting application");
 		// Load server configuration.
-		ServerConfig serverConfig = loadServerConfig();
+		File serviceConfigFile = FileHelper.getConfigFile("service.yaml");
+		logger.info("Reading service configuration file: " + serviceConfigFile.getAbsolutePath());
+		ServiceConfig serviceConfig = YamlHelper.readFromFile(serviceConfigFile, ServiceConfig.class);
 
 		// Instantiate the server and set up HTTPS connector.
 		Server jettyServer = new Server();
-		setupHttpsConnector(jettyServer, serverConfig);
+		setupHttpsConnector(jettyServer, serviceConfig.getGateway());
 
 		// Create handlers.
 		ServletContextHandler servletHandler = configureServletHandler();
@@ -77,7 +80,7 @@ public class App {
 
 		try {
 			// Initialize managers.
-			setupManagers();
+			setupManagers(serviceConfig);
 
 			// Start web server.
 			jettyServer.start();
@@ -90,26 +93,13 @@ public class App {
 	}
 
 	/**
-	 * Load the server configuration file.
-	 */
-	private static ServerConfig loadServerConfig() {
-		File configFile = new File("conf/server-config.yaml");
-		try {
-			ServerConfig config = YamlHelper.readFromFile(configFile, ServerConfig.class);
-			return config;
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to read config file: " + configFile.getAbsolutePath(), e);
-		}
-	}
-
-	/**
 	 * Set up a single HTTPS listener. For now HTTP is not supported at all.
 	 * 
 	 * @see <a href=
 	 *      "https://www.eclipse.org/jetty/documentation/9.4.x/embedded-examples.html">Jetty
 	 *      Embedded Server documentation</a>
 	 */
-	private static void setupHttpsConnector(Server server, ServerConfig serverConfig) {
+	private static void setupHttpsConnector(Server server, GatewayParams serverConfig) {
 		// Set up an SSL context. TODO: Define allowed/excluded protocols and cipher
 		// suites.
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -143,19 +133,15 @@ public class App {
 	}
 
 	/** Configure application logic managers. */
-	private static void setupManagers() throws IOException {
-		File dbmsYaml = FileHelper.getConfigFile("dbms.yaml");
-		ConnectionParams serviceConnectionParams = YamlHelper.readFromFile(dbmsYaml, ConnectionParams.class);
-		logger.info("Reading DBMS connections: " + dbmsYaml.getAbsolutePath());
+	private static void setupManagers(ServiceConfig serviceConfig) throws IOException {
 
 		// Initialize cloud services.
-		File awsYaml = FileHelper.getConfigFile("aws.yaml");
 		CloudConnectionFactory cloudFactory = CloudConnectionFactory.getInstance();
-		cloudFactory.setConnectionParamsFile(awsYaml);
+		cloudFactory.setConnectionParams(serviceConfig.getAws());
 
 		// Configure managers in registry.
 		ManagerRegistry registry = ManagerRegistry.getInstance();
-		registry.initialize(serviceConnectionParams, awsYaml);
+		registry.initialize(serviceConfig);
 
 		// Managers for API services.
 		registry.addManager(new UserManager());

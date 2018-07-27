@@ -1,15 +1,16 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
-package io.goldfin.admin.restapi.jetty;
+package io.goldfin.shared.config;
 
 /**
  * Server configuration parameters.
  */
-public class ServerConfig {
+public class GatewayParams {
 	private int securePort = 8443;
 	private String keyStorePath = "conf/keystore.jks";
 	private String keyStorePassword = "secret";
+	private String documentBucket;
 
 	public int getSecurePort() {
 		return securePort;
@@ -33,5 +34,13 @@ public class ServerConfig {
 
 	public void setKeyStorePassword(String keyStorePassword) {
 		this.keyStorePassword = keyStorePassword;
+	}
+
+	public String getDocumentBucket() {
+		return documentBucket;
+	}
+
+	public void setDocumentBucket(String documentBucket) {
+		this.documentBucket = documentBucket;
 	}
 }

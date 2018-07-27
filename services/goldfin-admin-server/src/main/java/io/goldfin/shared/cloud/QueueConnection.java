@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.cloud;
 
@@ -31,7 +31,8 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 public class QueueConnection {
 	static final Logger logger = LoggerFactory.getLogger(QueueConnection.class);
 
-	private final AwsConnectionParams connectionParams;
+	// Connection parameters.
+	private final AwsParams connectionParams;
 	private final String queue;
 
 	/**
@@ -41,12 +42,11 @@ public class QueueConnection {
 	class SqsClientWrapper implements AutoCloseable {
 		private final AmazonSQS client;
 
-		SqsClientWrapper(AwsConnectionParams params) {
+		SqsClientWrapper(AwsParams params) {
 			BasicAWSCredentials credentials = new BasicAWSCredentials(params.getAccessKeyId(),
 					params.getSecretAccessKey());
 			AWSCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
-			client = AmazonSQSClientBuilder.standard().withCredentials(provider)
-					.withRegion(params.getOcr().getProperty("region")).build();
+			client = AmazonSQSClientBuilder.standard().withCredentials(provider).withRegion(params.getRegion()).build();
 		}
 
 		public AmazonSQS getConnection() {
@@ -59,9 +59,18 @@ public class QueueConnection {
 		}
 	}
 
-	public QueueConnection(AwsConnectionParams connectionParams, String queue) {
+	/**
+	 * Starts a new queue connection.
+	 * 
+	 * @param connectionParams
+	 *            Amazon connection parameters.
+	 * @param queueHandle
+	 *            A short form of the queue name that is unique within the service
+	 *            and serves as the basis of the full queue name.
+	 */
+	public QueueConnection(AwsParams connectionParams, String queueHandle) {
 		this.connectionParams = connectionParams;
-		this.queue = queue;
+		this.queue = String.format("%s-%s", connectionParams.getGroup(), queueHandle);
 	}
 
 	/**

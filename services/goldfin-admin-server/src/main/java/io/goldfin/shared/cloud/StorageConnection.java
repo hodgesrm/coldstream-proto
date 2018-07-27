@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.cloud;
 
@@ -30,25 +30,24 @@ import com.amazonaws.services.s3.model.S3Object;
 /**
  * Implements operations on S3. Basic principles of operation:
  * <ul>
- * <li>Storage connection have an associated bucket and region that is pulled
- * from configuration data. Stored files go in this bucket/region.</li>
- * <li>The return value from a call to store the file is a locator, which is an
- * S3 URL that can be parsed to obtain the S3 bucket, region, and file key.</li>
- * <li>Operations to get and delete files work on locators. These calls work
- * across buckets/regions, because the locator has all information required to
- * locate the file.</li>
+ * <li>At session creation time clients provide Amazon parameters (AwsParams)
+ * plus a bucket, which is used to compute a unique bucket name within the
+ * service.</li>
+ * <li>The return value from a call to store a file is a locator. Clients should
+ * treat it as an opaque string.</li>
+ * <li>Operations to get and delete files work on locators. Clients do not need
+ * to supply any further information, because the locator has all information
+ * required to locate the file.</li>
  * </ul>
- * Clients should treat locators as opaque strings as the format is subject to
- * change.
  */
 public class StorageConnection {
 	static final Logger logger = LoggerFactory.getLogger(StorageConnection.class);
 
-	// Configuration properties.
-	private static final String BUCKET = "bucket";
-	private static final String REGION = "region";
-
-	private final AwsConnectionParams connectionParams;
+	// Connection parameters.
+	private final AwsParams connectionParams;
+	// A short form of the bucket name that is unique within the service and serves
+	// as the basis of the full bucket name.
+	private final String bucketHandle;
 
 	/**
 	 * Class to parse S3 locator values, which are URLs with the following form:
@@ -100,17 +99,10 @@ public class StorageConnection {
 	 * and free resources using a try block.
 	 */
 	class S3ClientWrapper implements AutoCloseable {
-		AwsConnectionParams params;
+		AwsParams params;
 		AmazonS3 client;
 		String bucket;
 		String region;
-
-		/**
-		 * Wrapper that obtains bucket and region from controlling parameter set.
-		 */
-		S3ClientWrapper() {
-			this(connectionParams.getS3().getProperty(BUCKET), connectionParams.getS3().getProperty(REGION));
-		}
 
 		/**
 		 * Instantiate a new wrapper.
@@ -143,8 +135,21 @@ public class StorageConnection {
 		}
 	}
 
-	public StorageConnection(AwsConnectionParams connectionParams) {
+	/**
+	 * Starts a new storage connection.
+	 * 
+	 * @param connectionParams
+	 *            Amazon connection parameters.
+	 * @param bucketHandle
+	 *            A partial name used to compute the full bucket name.
+	 */
+	public StorageConnection(AwsParams connectionParams, String bucketHandle) {
+		this.bucketHandle = bucketHandle;
 		this.connectionParams = connectionParams;
+	}
+
+	private String computeBucketName() {
+		return String.format("%s-%s-%s", connectionParams.getGroup(), bucketHandle, connectionParams.getS3Root());
 	}
 
 	/**
@@ -195,7 +200,7 @@ public class StorageConnection {
 	 * @return URL of file, to be used as locator.
 	 */
 	public String storeDocument(String documentKey, Map<String, String> docMetadata, InputStream input) {
-		try (S3ClientWrapper wrapper = new S3ClientWrapper()) {
+		try (S3ClientWrapper wrapper = new S3ClientWrapper(this.computeBucketName(), connectionParams.getRegion())) {
 			ObjectMetadata metadata = new ObjectMetadata();
 			for (String metaKey : docMetadata.keySet()) {
 				metadata.addUserMetadata(metaKey, docMetadata.get(metaKey));
@@ -269,7 +274,7 @@ public class StorageConnection {
 	 * Delete a tenant file from S3.
 	 */
 	public void deleteTenantDocument(String tenantId, String docId) {
-		try (S3ClientWrapper wrapper = new S3ClientWrapper()) {
+		try (S3ClientWrapper wrapper = new S3ClientWrapper(this.computeBucketName(), connectionParams.getRegion())) {
 			String key = tenantDocumentKey(tenantId, docId);
 			DeleteObjectRequest request = new DeleteObjectRequest(wrapper.getBucket(), key);
 			logger.info(String.format("Deleting document: tenantId=%s, docId=%s", tenantId, docId));

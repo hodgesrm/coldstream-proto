@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.admin.initialization;
 
@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.shared.config.ServiceConfig;
 import io.goldfin.shared.config.SystemInitParams;
 import io.goldfin.shared.tasks.ProgressReporter;
 import io.goldfin.shared.tasks.TaskStatus;
@@ -27,9 +28,11 @@ public class ServiceManager implements ProgressReporter {
 
 	private final List<ProgressReporter> progressReporters = new ArrayList<ProgressReporter>();
 	private final SystemInitParams initParams;
+	private final ServiceConfig serviceParams;
 
-	public ServiceManager(SystemInitParams initParams) {
+	public ServiceManager(SystemInitParams initParams, ServiceConfig serviceParams) {
 		this.initParams = initParams;
+		this.serviceParams = serviceParams;
 	}
 
 	public ServiceManager addProgressReporter(ProgressReporter reporter) {
@@ -45,14 +48,14 @@ public class ServiceManager implements ProgressReporter {
 	}
 
 	/** Initialize a new service. */
-	public Future<TaskStatus> create(File connectionParamsFile) {
-		ServiceCreateTask task = new ServiceCreateTask(initParams, connectionParamsFile, this);
+	public Future<TaskStatus> create() {
+		ServiceCreateTask task = new ServiceCreateTask(initParams, serviceParams, this);
 		return threadPool.submit(task);
 	}
 
 	/** Remove an existing service. */
 	public Future<TaskStatus> remove(boolean ignoreErrors) {
-		ServiceDeleteTask task = new ServiceDeleteTask(initParams, ignoreErrors, this);
+		ServiceDeleteTask task = new ServiceDeleteTask(initParams, serviceParams, ignoreErrors, this);
 		return threadPool.submit(task);
 	}
 }

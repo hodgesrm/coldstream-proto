@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.dbutils;
 
@@ -10,8 +10,8 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.shared.data.ConnectionParams;
 import io.goldfin.shared.data.DataException;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SessionBuilder;
 import io.goldfin.shared.data.SimpleJdbcConnectionManager;
@@ -37,7 +37,7 @@ public class SqlScriptExecutor {
 	 * @param schema
 	 *            DBMS schema to use for script
 	 */
-	public SqlScriptExecutor(ConnectionParams connectionParams, Properties scriptProperties, String schema) {
+	public SqlScriptExecutor(DbmsParams connectionParams, Properties scriptProperties, String schema) {
 		this.scriptProperties = scriptProperties;
 		this.connectionManager = new SimpleJdbcConnectionManager(connectionParams);
 		this.schema = schema;

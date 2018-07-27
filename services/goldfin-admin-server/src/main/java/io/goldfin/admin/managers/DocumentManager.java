@@ -88,7 +88,8 @@ public class DocumentManager implements Manager {
 		UUID docId = UUID.randomUUID();
 		String locator = null;
 		try (InputStream localInput = new FileInputStream(tempFile)) {
-			StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
+			StorageConnection connection = CloudConnectionFactory.getInstance()
+					.getStorageConnection(context.getGatewayParams().getDocumentBucket());
 			locator = connection.storeTenantDocument(tenantId, docId.toString(), localInput, fileName, description,
 					sha256, contentLength, contentType);
 		}
@@ -151,7 +152,8 @@ public class DocumentManager implements Manager {
 		// Delete the document from storage. This has to go first so
 		// we don't lose the document.
 		String tenantId = getTenantId(principal);
-		StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
+		StorageConnection connection = CloudConnectionFactory.getInstance()
+				.getStorageConnection(context.getGatewayParams().getDocumentBucket());
 		connection.deleteTenantDocument(tenantId, document.getId().toString());
 
 		// Now erase document metadata.
@@ -188,7 +190,8 @@ public class DocumentManager implements Manager {
 		// Download the document to a temp file, then return an inputstream on the file.
 		File documentTempFile = File.createTempFile(document.getId().toString(), ".download");
 		try {
-			StorageConnection connection = CloudConnectionFactory.getInstance().getStorageConnection();
+			StorageConnection connection = CloudConnectionFactory.getInstance()
+					.getStorageConnection(context.getGatewayParams().getDocumentBucket());
 			long contentLength = connection.fetchDocument(document.getLocator(), documentTempFile);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Document downloaded: file=%s, contentLength=%d",

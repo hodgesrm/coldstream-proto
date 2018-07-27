@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.shared.cloud.test;
 
@@ -17,25 +17,41 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.goldfin.shared.cloud.AwsParams;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.cloud.StorageConnection.Locator;
+import io.goldfin.shared.config.ServiceConfig;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 import io.goldfin.shared.utilities.FileHelper;
+import io.goldfin.shared.utilities.YamlHelper;
 
 /**
- * Verify operations on cloud services.
+ * Verify operations on cloud services. This test requires a standalone
+ * parameter file that contains AWS connection parameters.
  */
 public class CloudServiceTest {
 	static final Logger logger = LoggerFactory.getLogger(CloudServiceTest.class);
+	static final String PARAMS_FILE = "service.yaml";
+
 	CloudConnectionFactory factory;
 
 	@Before
 	public void setup() {
+		// Load connection params used for unit testing. This is a standalone file that
+		// contains only AWS connection parameters.
 		factory = new CloudConnectionFactory();
-		factory.setConnectionParamsFile(FileHelper.getConfigFile("aws-test.yaml"));
+		try {
+			File paramsFile = FileHelper.getConfigFile(PARAMS_FILE);
+			AwsParams params = YamlHelper.readFromFile(paramsFile, ServiceConfig.class).getAws();
+			factory.setConnectionParams(params);
+		} catch (IOException e) {
+			throw new RuntimeException(String.format("Unable to load connection parameters: file=%s", PARAMS_FILE), e);
+		}
 	}
 
 	/**
@@ -123,11 +139,11 @@ public class CloudServiceTest {
 
 	/**
 	 * Validate that we can insert a document in storage, retrieve it, and delete
-	 * it.
+	 * it.  This case creates a bucket and deletes it.  
 	 */
 	@Test
 	public void testStorageReadAndWrite() throws Exception {
-		StorageConnection conn = factory.getStorageConnection();
+		StorageConnection conn = factory.getStorageConnection("storage-testing");
 
 		// Create a test document.
 		String tenantId = UUID.randomUUID().toString();

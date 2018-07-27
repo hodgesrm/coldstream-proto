@@ -3,17 +3,23 @@
  */
 package io.goldfin.shared.cloud;
 
-import java.util.Properties;
-
 /**
- * Cloud connection parameters.
+ * Amazon cloud connection parameters.
  */
-public class AwsConnectionParams {
+public class AwsParams {
+	private String group;
 	private String accessKeyId;
 	private String secretAccessKey;
-	private Properties s3 = new Properties();
-	private Properties ocr = new Properties();
-	private Properties inventory = new Properties();
+	private String region;
+	private String s3Root;
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
+	}
 
 	public String getAccessKeyId() {
 		return accessKeyId;
@@ -31,36 +37,30 @@ public class AwsConnectionParams {
 		this.secretAccessKey = secretAccessKey;
 	}
 
-	public Properties getS3() {
-		return s3;
+	public String getRegion() {
+		return region;
 	}
 
-	public void setS3(Properties s3) {
-		this.s3 = s3;
+	public void setRegion(String region) {
+		this.region = region;
 	}
 
-	public Properties getOcr() {
-		return ocr;
+	public String getS3Root() {
+		return s3Root;
 	}
 
-	public void setOcr(Properties ocr) {
-		this.ocr = ocr;
-	}
-
-	public Properties getInventory() {
-		return inventory;
-	}
-
-	public void setInventory(Properties inventory) {
-		this.inventory = inventory;
+	public void setS3Root(String s3Root) {
+		this.s3Root = s3Root;
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buf.append(this.getClass().getSimpleName());
-		buf.append(" s3=").append(s3.toString());
-		buf.append(", sqs=").append(ocr.toString());
+		buf.append(" group=").append(group);
+		buf.append(", secretAccessKey=").append(secretAccessKey);
+		buf.append(", region=").append(region);
+		buf.append(", s3Root=").append(s3Root);
 		return buf.toString();
 	}
 }

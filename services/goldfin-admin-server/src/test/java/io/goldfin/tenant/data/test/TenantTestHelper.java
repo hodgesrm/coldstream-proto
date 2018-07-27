@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2017 Goldfin.io.  All rights reserved. 
+ * Copyright (c) 2017-2018 Goldfin.io.  All rights reserved. 
  */
 package io.goldfin.tenant.data.test;
 
 import java.io.File;
 import java.util.Properties;
 
-import io.goldfin.shared.data.ConnectionParams;
+import io.goldfin.shared.data.DbmsParams;
 import io.goldfin.shared.dbutils.SqlLoadException;
 import io.goldfin.shared.dbutils.SqlScriptExecutor;
 import io.goldfin.shared.utilities.FileHelper;
@@ -16,7 +16,7 @@ import io.goldfin.shared.utilities.FileHelper;
  */
 public class TenantTestHelper {
 	/** Load admin tables into a designated schema. */
-	public static void loadTenantSchema(ConnectionParams connectionParams, String schema) throws SqlLoadException {
+	public static void loadTenantSchema(DbmsParams connectionParams, String schema) throws SqlLoadException {
 		// Remove old schema.
 		Properties tenantProps = new Properties();
 		tenantProps.setProperty("tenantSchema", schema);
