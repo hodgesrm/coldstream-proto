@@ -20,17 +20,17 @@ logger = logging.getLogger(__name__)
 class DataProcessor:
     """Translates data series records to inventory data"""
 
-    def __init__(self, data_config):
+    def __init__(self, service_config):
         """Set up service including creating work directory
 
-        :param data_config: Data service configuration parameters
-        :type data_config: dict
+        :param service_config: Data service configuration parameters
+        :type service_config: dict
         """
         # Save the configuration.
-        self._data_config = data_config
+        self._service_config = service_config
 
         # Ensure work directory exists.
-        self._data_work_dir = self._data_config['data']['work_dir']
+        self._data_work_dir = self._service_config['dataSeries']['work_dir']
         logger.info(
             "Initializing work directory: {0}".format(self._data_work_dir))
         os.makedirs(self._data_work_dir, exist_ok=True)
@@ -169,13 +169,14 @@ class DataProcessor:
 
     def _get_content_s3_connection(self, bucket, region):
         """Allocate connection to an arbitrary bucket"""
-        access_key_id = self._data_config['aws']['accessKeyId']
-        secret_access_key = self._data_config['aws']['secretAccessKey']
+        group = self._service_config['aws']['group']
+        access_key_id = self._service_config['aws']['accessKeyId']
+        secret_access_key = self._service_config['aws']['secretAccessKey']
 
-        s3_conn = S3Connection(access_key_id=access_key_id,
+        s3_conn = S3Connection(group=group, access_key_id=access_key_id,
                                secret_access_key=secret_access_key,
                                bucket=bucket,
-                               location=region,
+                               region=region,
                                create_bucket=False)
         s3_conn.validate()
         return s3_conn

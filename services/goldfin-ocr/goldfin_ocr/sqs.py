@@ -65,12 +65,15 @@ class SqsConnection(object):
     """Implements a server that manages tenant files in a single SQS bucket.
     """
 
-    def __init__(self, name, access_key_id=None, secret_access_key=None,
+    def __init__(self, queue_handle, group=None, access_key_id=None, 
+                 secret_access_key=None,
                  region=None):
         """Initialize connection
 
-        :param name: Queue name
+        :param queue_handle: Unique queue name within the service. 
         :type name: str
+        :param group: Service group name
+        :type group: str
         :param access_key_id: AWS access key
         :type access_key_id: str
         :param secret_access_key: AWS secret key
@@ -78,7 +81,7 @@ class SqsConnection(object):
         :param region: Client region
         :type region: str
         """
-        self._name = name
+        self._name = "{0}-{1}".format(group, queue_handle)
         self._access_key_id = access_key_id
         self._secret_access_key = secret_access_key
         self._region = region

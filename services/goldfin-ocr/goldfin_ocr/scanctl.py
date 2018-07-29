@@ -60,11 +60,11 @@ def init_logging(log_level, log_file=None):
                                                                log_level))
 
 
-def process_from_command_line(args, ocr_config):
+def process_from_command_line(args, service_config):
     """Process a single request using command line arguments
 
     :param args: Argparse arguments
-    :param ocr_config: OCR config file contents
+    :param service_config: Service config file contents
     """
     request = args.request
     if args.body is None:
@@ -77,7 +77,7 @@ def process_from_command_line(args, ocr_config):
     document = json_dict_to_model(body, Document)
 
     # Invoke OCR scan.
-    ocr_processor = OcrProcessor(ocr_config)
+    ocr_processor = OcrProcessor(service_config)
     invoice = ocr_processor.scan("ignore", document,
                                  use_cache=(not args.no_cache),
                                  preserve_work_files=args.preserve_work_files)
@@ -91,16 +91,16 @@ def process_from_command_line(args, ocr_config):
         print("JSON: {0}".format(back_to_json))
 
 
-def process_from_queue(args, ocr_config):
+def process_from_queue(args, service_config):
     """Process requests read from a queue.
 
     :param args: Argparse arguments
-    :param ocr_config: OCR config file contents
+    :param service_config: Service config file contents
     """
     # Get queue connectors.
-    request_queue = get_sqs_connection('ocrRequestQueue', ocr_config)
-    response_queue = get_sqs_connection('ocrResponseQueue', ocr_config)
-    ocr_processor = OcrProcessor(ocr_config)
+    request_queue = get_sqs_connection('requestQueue', service_config)
+    response_queue = get_sqs_connection('responseQueue', service_config)
+    ocr_processor = OcrProcessor(service_config)
 
     # Loop until iteration count is exhausted.
     count = 0
@@ -172,12 +172,15 @@ def dump_document_to_file(id, content):
 
 def get_sqs_connection(queue_opt, config):
     """Allocate connection from configuration file"""
+    group = config['aws']['group']
     access_key_id = config['aws']['accessKeyId']
     secret_access_key = config['aws']['secretAccessKey']
-    queue = config['sqs'][queue_opt]
-    region = config['sqs']['region']
+    region = config['aws']['region']
+ 
+    queue = config['ocr'][queue_opt]
 
-    queue_conn = sqs.SqsConnection(queue, access_key_id=access_key_id,
+    queue_conn = sqs.SqsConnection(queue, group=group, 
+                                   access_key_id=access_key_id,
                                    secret_access_key=secret_access_key,
                                    region=region)
     if not queue_conn.queueExists():
@@ -209,9 +212,9 @@ parser.add_argument("--no-cache",
 parser.add_argument("--preserve-work-files",
                     help="Keep all work files even if scan is successful",
                     action="store_true", default=False)
-parser.add_argument("--ocr-cfg",
-                    help="OCR configuration file",
-                    default="conf/ocr.yaml")
+parser.add_argument("--service-cfg",
+                    help="Service configuration file (default: %(default)s)",
+                    default="service.yaml")
 parser.add_argument("--log-level",
                     help="CRITICAL/ERROR/WARNING/INFO/DEBUG (default: %(default)s)",
                     default="INFO")
@@ -225,14 +228,14 @@ args = parser.parse_args()
 # Start logging.
 init_logging(log_level=args.log_level, log_file=args.log_file)
 
-# Load the ocr configuration.
-with open(args.ocr_cfg, "r") as ocr_yaml:
-    ocr_config = yaml.load(ocr_yaml)
+# Load the service configuration.
+service_config = util.get_required_config(args.service_cfg)
 
-# Fork processing depending on whether we are a daemon or a command line request.
+# Fork processing depending on whether we are a daemon or a command 
+# line request.
 if args.daemon is True:
-    process_from_queue(args, ocr_config)
+    process_from_queue(args, service_config)
 else:
-    process_from_command_line(args, ocr_config)
+    process_from_command_line(args, service_config)
 
 print("Done!!!")

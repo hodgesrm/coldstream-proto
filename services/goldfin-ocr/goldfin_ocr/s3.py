@@ -33,23 +33,35 @@ class S3Connection(object):
     """Implements a server that manages tenant files in a single S3 bucket.
     """
 
-    def __init__(self, access_key_id=None, secret_access_key=None,
-                 bucket=None, location=None, create_bucket=False):
-        """Initialize connection
+    def __init__(self, group=None, access_key_id=None, secret_access_key=None,
+                 bucket_handle=None, bucket=None, s3_root=None, region=None, 
+                 create_bucket=False):
+        """Create a connection to S3.
 
+        :param group: Service group name
+        :type : str
         :param access_key_id: AWS access key
         :type access_key_id: str
         :param secret_access_key: AWS secret key
         :type secret_access_key: str
-        :param bucket: S3 bucket name
+        :param bucket_handle: Unique name for bucket within service
+        :type bucket_handle: str
+        :param bucket: Explicit bucket name
         :type bucket: str
-        :param location: S3 storage location
-        :type location: str
+        :param region: S3 storage region
+        :type region: str
+        :param s3_root: Suffix for service S3 bucket names
+        :type s3_root: str
+        :param create_bucket: If true create bucket automatically
+        :type create_bucket: boolean
         """
         self._access_key_id = access_key_id
         self._secret_access_key = secret_access_key
-        self._bucket = bucket
-        self._location = location
+        if bucket_handle:
+            self._bucket = "{0}-{1}-{2}".format(group, bucket_handle, s3_root)
+        else:
+            self._bucket = bucket
+        self._location = region
         self._create_bucket = create_bucket
 
         self._s3 = boto3.resource('s3',

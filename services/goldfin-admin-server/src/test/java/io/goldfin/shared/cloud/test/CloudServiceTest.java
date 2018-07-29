@@ -17,15 +17,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import io.goldfin.shared.cloud.AwsParams;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.cloud.StorageConnection.Locator;
-import io.goldfin.shared.config.ServiceConfig;
 import io.goldfin.shared.cloud.StructuredMessage;
+import io.goldfin.shared.config.ServiceConfig;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 import io.goldfin.shared.utilities.FileHelper;
 import io.goldfin.shared.utilities.YamlHelper;

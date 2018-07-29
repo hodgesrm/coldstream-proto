@@ -9,6 +9,7 @@ import os
 import shutil
 
 from .util import sha256
+from .util import get_required_config
 from .s3 import S3Connection, S3Ref
 from .table.tablebuilder import build_model
 from .table.pfactory import get_provider
@@ -22,17 +23,17 @@ logger = logging.getLogger(__name__)
 class OcrProcessor:
     """Submits files to OCR for scanning"""
 
-    def __init__(self, ocr_config):
+    def __init__(self, service_config):
         """Set up service including creating work directory
 
-        :param ocr_config: OCR service configuration parameters
-        :type ocr_config: dict
+        :param service_config: Service configuration parameters
+        :type service_config: dict
         """
         # Save the configuration.
-        self._ocr_config = ocr_config
+        self._service_config = service_config
 
         # Ensure work directory exists.
-        self._ocr_work_dir = self._ocr_config['ocr']['work_dir']
+        self._ocr_work_dir = self._service_config['ocr']['work_dir']
         logger.info(
             "Initializing work directory: {0}".format(self._ocr_work_dir))
         os.makedirs(self._ocr_work_dir, exist_ok=True)
@@ -231,8 +232,8 @@ class OcrProcessor:
         """Dispatches file-like object to OCR, returns XML file path if successful"""
         with open(path, 'rb') as ocr_file:
             ocr_engine = CloudOCR(
-                application_id=self._ocr_config['abbyy']['appid'],
-                password=self._ocr_config['abbyy']['pwd'])
+                application_id=self._service_config['ocr']['abbyy']['appid'],
+                password=self._service_config['ocr']['abbyy']['pwd'])
             scan_file = {path: ocr_file}
             result = ocr_engine.process_and_download(scan_file,
                                                      exportFormat='xml',
@@ -249,26 +250,31 @@ class OcrProcessor:
 
     def _get_cache_s3_connection(self):
         """Allocate connection to S3 from configuration file"""
-        access_key_id = self._ocr_config['aws']['accessKeyId']
-        secret_access_key = self._ocr_config['aws']['secretAccessKey']
-        bucket = self._ocr_config['cache']['bucket']
-        location = self._ocr_config['cache']['location']
+        group = self._service_config['aws']['group']
+        access_key_id = self._service_config['aws']['accessKeyId']
+        secret_access_key = self._service_config['aws']['secretAccessKey']
+        region = self._service_config['aws']['region']
+        s3_root = self._service_config['aws']['s3Root']
+        bucket_handle = self._service_config['ocr']['cacheBucket']
 
-        return S3Connection(access_key_id=access_key_id,
-                            secret_access_key=secret_access_key,
-                            bucket=bucket,
-                            location=location,
-                            create_bucket=True)
+        return S3Connection(group=group,
+                               access_key_id=access_key_id,
+                               secret_access_key=secret_access_key,
+                               bucket_handle=bucket_handle,
+                               region=region,
+                               s3_root=s3_root,
+                               create_bucket=True)
 
     def _get_document_s3_connection(self, bucket, region):
         """Allocate connection to an arbitrary bucket"""
-        access_key_id = self._ocr_config['aws']['accessKeyId']
-        secret_access_key = self._ocr_config['aws']['secretAccessKey']
+        group = self._service_config['aws']['group']
+        access_key_id = self._service_config['aws']['accessKeyId']
+        secret_access_key = self._service_config['aws']['secretAccessKey']
 
-        s3_conn = S3Connection(access_key_id=access_key_id,
+        s3_conn = S3Connection(group=group, access_key_id=access_key_id,
                                secret_access_key=secret_access_key,
                                bucket=bucket,
-                               location=region,
+                               region=region,
                                create_bucket=False)
         s3_conn.validate()
         return s3_conn

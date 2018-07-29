@@ -10,24 +10,28 @@ import warnings
 import yaml
 
 import goldfin_ocr.s3 as s3
+import goldfin_ocr.util as util
 
 # Set log level. 
 logging.basicConfig(filename="output.log", level=logging.DEBUG)
 
 def get_s3_connection():
     """Allocate connection from configuration file"""
-    with open("ocr-test.yaml", "r") as ocr_yaml:
-        config = yaml.load(ocr_yaml)
-
+    
+    config = util.get_required_config("service.yaml")
+    group = config['aws']['group']
     access_key_id = config['aws']['accessKeyId']
     secret_access_key = config['aws']['secretAccessKey']
-    bucket = config['cache']['bucket']
-    location = config['cache']['location']
+    region = config['aws']['region']
+    s3_root = config['aws']['s3Root']
+    bucket_handle = config['ocr']['cacheBucket']
 
-    return s3.S3Connection(access_key_id=access_key_id, 
+    return s3.S3Connection(group=group, 
+                access_key_id=access_key_id, 
                 secret_access_key=secret_access_key, 
-                bucket=bucket,
-                location=location,
+                bucket_handle=bucket_handle,
+                region=region,
+                s3_root=s3_root,
                 create_bucket=True)
 
 

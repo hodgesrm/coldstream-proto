@@ -39,7 +39,7 @@ class GrandCouleeDataProcessor:
         # Host instance for each one.
         results = []
         for host_object in host_object_list:
-            print("HOST: {0}".format(host_object))
+            #print("HOST: {0}".format(host_object))
 
             # Deserialize Host string and add additional data. 
             host_content = json.loads(host_object)
@@ -47,7 +47,7 @@ class GrandCouleeDataProcessor:
             host.data_series_id = data_series_id
             host.vendor_identifier = vendors.GRAND_COULEE
 
-            print(host.to_dict())
+            #print(host.to_dict())
 
             # Create and append a result for this server.
             result = Result()

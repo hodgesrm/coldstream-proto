@@ -10,6 +10,7 @@ import warnings
 import yaml
 
 import goldfin_ocr.sqs as sqs
+import goldfin_ocr.util as util
 
 # Set log level. 
 logging.basicConfig(filename="output.log", level=logging.INFO)
@@ -18,15 +19,16 @@ logger = logging.getLogger(__name__)
 
 def get_sqs_connection(queue):
     """Allocate connection from configuration file"""
-    with open("ocr-test.yaml", "r") as ocr_yaml:
-        config = yaml.load(ocr_yaml)
-
+    config = util.get_required_config("service.yaml")
+    group = config['aws']['group']
     access_key_id = config['aws']['accessKeyId']
     secret_access_key = config['aws']['secretAccessKey']
+    region = config['aws']['region']
 
-    return sqs.SqsConnection(queue, access_key_id=access_key_id, 
+    return sqs.SqsConnection(queue, group=group, 
+                access_key_id=access_key_id, 
                 secret_access_key=secret_access_key, 
-                region='us-west-1')
+                region=region)
 
 class TestSqs(unittest.TestCase):
     def setUp(self):

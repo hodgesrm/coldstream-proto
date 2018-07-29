@@ -5,6 +5,8 @@
 import hashlib
 import json
 import logging
+import os.path
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -67,3 +69,32 @@ def init_logging(log_level, log_file=None):
     logger.debug(
         "Initializing log: log_file={0}, log_level={1}".format(log_file,
                                                                log_level))
+
+def get_required_config(config_file_name):
+    """Locates and loads a required YAML configuration file into a dictionary.
+
+    Observes the standard config file path.  First look in 
+    $GOLDFIN_CONFIG_DIR, next /var/lib/goldfin/conf, then finally in 
+    $PWD/conf.  Raises an exception if we cannot successfully load using
+    this path.
+
+    :param config_file_name: Name of the file
+    :type config_file_name: string
+    """
+    paths = []
+    goldfin_config_dir = os.getenv('GOLDFIN_CONFIG_DIR')
+    if goldfin_config_dir:
+        paths.append(goldfin_config_dir)
+    paths.append('/var/lib/goldfin/conf')
+    paths.append('os.getenv("PWD")' + '/conf')
+
+    for path in paths:
+        candidate = os.path.join(path, config_file_name)
+        if os.path.exists(candidate):
+            logger.info("Loading configuration file: {0}".format(candidate))
+            with open(candidate, "r") as config_file:
+                config = yaml.load(config_file)
+                return config
+
+    # Config files are required.  No point in continuing.
+    raise Exception("Unable to find config file: {0}".format(config_file_name))

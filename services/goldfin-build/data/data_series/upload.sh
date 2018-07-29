@@ -2,7 +2,7 @@
 
 # Upload observations efficiently.
 SCRIPT_DIR=`dirname $0`
-CLI="$SCRIPT_DIR/../../../goldfin-admin-server/target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1/bin/svc-client"
+CLI="$SCRIPT_DIR/../../../goldfin-admin-server/target/goldfin-admin-server-0.9.0-distribution/goldfin-admin-server-0.9.0/bin/svc-client"
 if [ ! -x $CLI ]; then
   echo "Can't find client: $CLI"
   exit 1 

@@ -13,6 +13,7 @@ import io.goldfin.admin.service.api.model.DataSeries;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
+import io.goldfin.shared.config.DataSeriesParams;
 
 /**
  * Handles operations related to batch analysis of data series.
@@ -39,8 +40,9 @@ public class DataSeriesAnalysisManager implements Manager {
 	@Override
 	public void prepare() {
 		// Ensure the queues exist.
-		dataSeriesRequestQueue = ensureQueue("dataSeriesRequestQueue");
-		dataSeriesResponseQueue = ensureQueue("dataSeriesResponseQueue");
+		DataSeriesParams config = context.getDataSeriesParams();
+		dataSeriesRequestQueue = ensureQueue(config.getRequestQueue());
+		dataSeriesResponseQueue = ensureQueue(config.getResponseQueue());
 
 		// Start the response queue thread.
 		DataSeriesResponseQueueTask task = new DataSeriesResponseQueueTask(context, dataSeriesResponseQueue);
