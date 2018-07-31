@@ -12,8 +12,16 @@ services:
        # - "443:8443"
    ocr:
        image: goldfin/scanctl:0.9.0
+       volumes:
+         - type: bind
+           source: /home/rhodges/goldfin/conf
+           target: /var/lib/goldfin/conf
    data:
        image: goldfin/datactl:0.9.0
+       volumes:
+         - type: bind
+           source: /home/rhodges/goldfin/conf
+           target: /var/lib/goldfin/conf
 #   dbms:
 #       image: postgres:10
 #       environment:

@@ -4,18 +4,22 @@ Code is based on clarity seed application (https://github.com/vmware/clarity-see
 
 Cd to the main goldfin-ui-app directory to do anything. 
 
-To run the application and develop interactively: 
+To run the application and develop interactively:
 
 ng serve --open --host=0.0.0.0 --port=8080
 
-To build a dev application: 
+To build a dev application:
 
 ng build
 
-To build the dev application for a particular code path and serve up using
-running Jetty app server.  
+Both of the foregoing build dev applications.  REST API URLs resolve to 
+https://localhost:8443. 
 
-ng build --base-href=/ui/
+To build the dev application for a particular code path and serve up using
+running Jetty app server.  Prod environment is required to force REST API 
+URLs to resolve to the server location. 
+
+ng build --base-href=/ui/ --environment=prod
 rsync -avr dist/ ../../goldfin-admin-server/target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1/ui
 
 To build and run docker image based on Nginx. 

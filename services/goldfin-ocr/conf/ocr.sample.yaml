@@ -1,21 +1,3 @@
 ---
-# AWS credentials
-aws:
-  accessKeyId: "<AWS access key ID>"
-  secretAccessKey: "<AWS secret access key>"
-# OCR request/response queues
-sqs:
-  ocrRequestQueue: ocr-processing-request
-  ocrResponseQueue: ocr-processing-response
-  region: "us-west-2"
-# OCR cache in S3 (holds OCR scans for documents)
-cache:
-  bucket: "ocr-cache-test1-service-goldfin-io"
-  location: "us-west-2"
-# OCR online service
-abbyy:
-  appid: "Goldfin IT Analytics"
-  pwd: "<PASSWORD>"
-# OCR work directory and other service parameters.
-ocr:
-  work_dir: "/tmp/ocr"
+# See sample in goldfin-admin-server/conf/sample.service.yaml. 
+# All services use the same service.yaml file format. 

@@ -38,6 +38,10 @@ import { HostPriceService } from "./services/host_pricing.service";
 import { HostService } from "./services/host.service";
 import { VendorService } from "./services/vendor.service";
 
+// Provider factories. 
+import { baseUrlFactory } from "./services/location.factory";
+
+
 // Generated REST API.
 import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
@@ -81,7 +85,7 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
         ROUTING
     ],
     providers: [
-      { provide: BASE_PATH, useValue: 'https://localhost:8443/api/v1' },
+      { provide: BASE_PATH, useFactory: baseUrlFactory },
       AuthGuardService,
       AuthService,
       ConfigurationService,

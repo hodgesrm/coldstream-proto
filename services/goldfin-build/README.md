@@ -63,3 +63,16 @@ Clean up old docker images.
 ```
 docker image rm $(docker images -f dangling=true -q)
 ```
+
+## Using build docker images. 
+Login to Docker Hub and upload built images. 
+```
+docker login -u goldfin -p '<password>'
+./docker-push-all.sh
+```
+
+Start built images on another host. 
+```
+docker login -u goldfin -p '<password>'
+docker-compose -p goldfin up -d
+```
