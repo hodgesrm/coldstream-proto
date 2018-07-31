@@ -3,6 +3,7 @@ provider "aws" {
   access_key = "${var.access_key}"
   secret_key = "${var.secret_key}"
   region     = "${var.region}"
+  version = "~> 1.26"
 }
 
 
@@ -69,10 +70,10 @@ resource "aws_security_group" "preprod" {
 
   # HTTP access from the VPC
   ingress {
-    from_port   = 8443
-    to_port     = 8443
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # Enable group to access its own members. (Required for external 

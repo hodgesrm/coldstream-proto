@@ -7,6 +7,12 @@ CREATE ROLE {{serviceUser}}
   PASSWORD '{{servicePassword}}'
 ;
 
+// Grant this role to current user.  Necessary for RDS PostgreSQL
+// or CREATE DATABASE will fail.  (See 
+// https://stackoverflow.com/questions/26684643/error-must-be-member-of-role-when-creating-schema-in-postgresql). 
+GRANT {{serviceUser}} TO CURRENT_USER
+;
+
 // Create service database. 
 CREATE DATABASE {{serviceDb}} WITH
   OWNER = {{serviceUser}}
