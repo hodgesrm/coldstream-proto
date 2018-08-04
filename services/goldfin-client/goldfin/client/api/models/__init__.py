@@ -23,13 +23,16 @@ from .host import Host
 from .invoice import Invoice
 from .invoice_item import InvoiceItem
 from .invoice_parameters import InvoiceParameters
+from .invoice_validation_result import InvoiceValidationResult
 from .login_credentials import LoginCredentials
 from .observation import Observation
+from .result import Result
 from .tag import Tag
 from .tenant import Tenant
 from .tenant_parameters import TenantParameters
 from .user import User
 from .user_parameters import UserParameters
 from .user_password_parameters import UserPasswordParameters
+from .validation_type import ValidationType
 from .vendor import Vendor
 from .vendor_parameters import VendorParameters

@@ -175,7 +175,7 @@ class Observation(object):
     def data(self):
         """
         Gets the data of this Observation.
-        String containing serialized observations
+        String containing serialized observation data
 
         :return: The data of this Observation.
         :rtype: str
@@ -186,7 +186,7 @@ class Observation(object):
     def data(self, data):
         """
         Sets the data of this Observation.
-        String containing serialized observations
+        String containing serialized observation data
 
         :param data: The data of this Observation.
         :type: str

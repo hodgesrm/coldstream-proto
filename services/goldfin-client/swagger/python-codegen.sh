@@ -20,6 +20,9 @@ elif [ "$OPT" = "help" ]; then
 elif [ "$OPT" = "config-help" ]; then
   shift
   args="config-help $@"
+elif [ "$OPT" = "langs" ]; then
+  shift
+  args="langs $@"
 elif [ "$OPT" = "generate" ]; then
   shift
   mkdir -p $CLIENT_CODEGEN_DIR
