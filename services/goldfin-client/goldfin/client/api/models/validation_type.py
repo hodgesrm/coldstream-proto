@@ -25,6 +25,8 @@ class ValidationType(object):
     """
     allowed enum values
     """
+    INVOICE = "INVOICE"
+    INVOICE_LINE_ITEM = "INVOICE_LINE_ITEM"
 
     """
     Attributes:

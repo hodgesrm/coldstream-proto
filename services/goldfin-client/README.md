@@ -10,10 +10,10 @@ python3 setup.py develop
 
 ```shell
 # Use defaults.
-python3 goldfin/client/inventory_scan.py --inventory leaseweb --log-level=DEBUG 
+python3 goldfin/client/data_collector.py --collector leaseweb --log-level=DEBUG 
 
 # Redirect inventory.ini and output from/to alternative locations. 
-inventory_scan --inventory leaseweb \
---config ~/coldstream/inventory/inventory.ini \
+data_collector --collector leaseweb \
+--config ~/coldstream/inventory/data_collector.ini \
 --out-dir ~/coldstream/inventory/data 
 ```

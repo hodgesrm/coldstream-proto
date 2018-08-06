@@ -26,7 +26,7 @@ elif [ "$OPT" = "langs" ]; then
 elif [ "$OPT" = "generate" ]; then
   shift
   mkdir -p $CLIENT_CODEGEN_DIR
-  args="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i $CLIENT_HOME/../../swagger/goldfin-service-admin-api.yaml -l python-flask -o $CLIENT_CODEGEN_DIR -DpackageName=api -Dservice $@"
+  args="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i $CLIENT_HOME/../../swagger/goldfin-service-admin-api.yaml -l python -o $CLIENT_CODEGEN_DIR -DpackageName=api -Dservice $@"
 else
   echo "Usage: ${SCRIPT} { generate | clean | help } [ options ]"
   exit 1

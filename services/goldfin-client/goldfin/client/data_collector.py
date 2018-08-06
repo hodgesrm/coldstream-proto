@@ -10,7 +10,7 @@ import os
 import sys
 
 from goldfin.client.json_xlate import SwaggerJsonEncoder
-from goldfin.client.inventory.ifactory import get_provider
+from goldfin.client.collectors.ifactory import get_provider
 
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
@@ -52,22 +52,23 @@ def print_error(msg):
     print(msg)
 
 # Define top-level command line parsing.
-parser = argparse.ArgumentParser(prog='inventory_scan.py',
+parser = argparse.ArgumentParser(prog='data_collector.py',
                                  usage="%(prog)s [options]")
-parser.add_argument("--inventory",
-                    help="Type of inventory scan to run")
+parser.add_argument("--collector",
+                    help="Type of collector scan to run")
 parser.add_argument("--config",
-                    help="Configuration containing inventory access credentials",
-                    default="inventory.ini")
+                    help="Configuration containing API access credentials (default %(default)s)",
+                    default="data_collector.ini")
 parser.add_argument("--out-dir",
-                    help="Output directory for observations", 
+                    help="Output directory for observations (default: %(default)s)", 
                     default="data")
+parser.add_argument("--upload", help="If present, upload to goldfin.io")
 parser.add_argument("--log-level",
                     help="CRITICAL/ERROR/WARNING/INFO/DEBUG (default: %(default)s)",
                     default="INFO")
 parser.add_argument("--log-file",
                     help="Name of log file (default: %(default)s)",
-                    default=os.getenv("LOG_FILE", "inventory.log"))
+                    default=os.getenv("LOG_FILE", "data_collector.log"))
 parser.add_argument("--verbose",
                     help="Log verbose information", 
                     action="store_true", default=False)
@@ -78,9 +79,9 @@ args = parser.parse_args()
 # Start logging.
 init_logging(log_level=args.log_level, log_file=args.log_file)
 
-# Ensure we have inventory type and can find implementation class. 
-if args.inventory is None:
-    print_error("You must specify an inventory type with --inventory")
+# Ensure we have a collector type and can find implementation class. 
+if args.collector is None:
+    print_error("You must specify a collector type with --collector")
     sys.exit(1)
 
 # Ensure we have a writable output director
@@ -92,16 +93,16 @@ if not os.path.exists(args.out_dir) or not os.access(args.out_dir, os.W_OK):
     print_error("Output directory does not exist or is not writable: {0}".format(args.out_dir))
     sys.exit(1)
 
-# Load config for inventory 
+# Load config for collector.
 if os.path.exists(args.config):
     config_parser = configparser.ConfigParser()
     with open(args.config, "r") as config_file:
         config_parser.read_file(config_file)
-    section = config_parser[args.inventory]
+    section = config_parser[args.collector]
     params = {}
     for key in section:
         params[key] = section[key]
-    provider = get_provider(args.inventory, params)
+    provider = get_provider(args.collector, params)
     obs = provider.execute()
     name = "{0}-{1}.json".format(obs.vendor_identifier, obs.effective_date.strftime("%Y-%m-%d_%H:%M:%S"))
     output_file = os.path.join(args.out_dir, name)
@@ -114,4 +115,3 @@ if os.path.exists(args.config):
 else:
     print_error("Config file does not exist: {0}".format(args.config))
     sys.exit(1)
-

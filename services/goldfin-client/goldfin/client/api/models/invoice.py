@@ -42,7 +42,7 @@ class Invoice(object):
         'tax': 'float',
         'total_amount': 'float',
         'currency': 'str',
-        'items': 'List[InvoiceItem]',
+        'items': 'list[InvoiceItem]',
         'creation_date': 'str'
     }
 
@@ -368,7 +368,7 @@ class Invoice(object):
         Invoice items
 
         :return: The items of this Invoice.
-        :rtype: List[InvoiceItem]
+        :rtype: list[InvoiceItem]
         """
         return self._items
 
@@ -379,7 +379,7 @@ class Invoice(object):
         Invoice items
 
         :param items: The items of this Invoice.
-        :type: List[InvoiceItem]
+        :type: list[InvoiceItem]
         """
 
         self._items = items

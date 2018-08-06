@@ -28,6 +28,6 @@ setup(
     Goldfin toolset for inventory scanning.
     """,
     entry_points = {
-        'console_scripts': ['inventory_scan=goldfin.client.inventory_scan']
+        'console_scripts': ['data_collector=goldfin.client.data_collector']
     }
 )

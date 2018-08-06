@@ -35,6 +35,6 @@ tox.ini
 .dockerignore
 
 # Suppress REST API controller and test classes. 
-api/controllers/*
-api/swagger/*
-api/test/*
+#api/controllers/*
+#api/swagger/*
+#api/test/*
