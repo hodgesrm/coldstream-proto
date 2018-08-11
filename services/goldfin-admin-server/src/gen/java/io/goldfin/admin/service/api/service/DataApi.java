@@ -60,7 +60,8 @@ public class DataApi  {
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Upload data series", notes = "Upload data series in a file for analysis", response = DataSeries.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = DataSeries.class),
@@ -80,7 +81,8 @@ public class DataApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a data series", notes = "Delete a data series and any derived information", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -96,7 +98,8 @@ public class DataApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Kick off background processing of data series", notes = "Run background processing of data series, which may generate one or more inventory records.", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
@@ -112,7 +115,8 @@ public class DataApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Return data series metadata", notes = "Download data series metadata without content", response = DataSeries.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = DataSeries.class),
@@ -128,7 +132,8 @@ public class DataApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List data serties", notes = "Return a list of metadata entries for all data series", response = DataSeries.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = DataSeries.class, responseContainer = "List") })
@@ -141,7 +146,8 @@ public class DataApi  {
     
     @Produces({ "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Return data series content", notes = "Download data series content", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),

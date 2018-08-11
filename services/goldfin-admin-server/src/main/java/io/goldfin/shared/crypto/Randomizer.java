@@ -8,7 +8,7 @@ import java.util.Base64;
 
 /**
  * Implements generation of cryptographically secure random tokens. This class
- * is currently a wrapper on SecureRandom.
+ * is currently a wrapper on SecureRandom.  
  */
 public class Randomizer {
 	private SecureRandom secureRandom = new SecureRandom();

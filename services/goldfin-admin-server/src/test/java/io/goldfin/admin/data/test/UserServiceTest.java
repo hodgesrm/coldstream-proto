@@ -45,6 +45,8 @@ public class UserServiceTest extends TransactionalTest<UserData> {
 			ur.setId(UUID.randomUUID());
 			ur.setTenantId(tenantId);
 			ur.setUsername("username_" + index.getAndIncrement());
+			ur.setAlgorithm("Dummy");
+			ur.setPasswordHash("Dummy");
 			ur.setRoles("admin");
 			return ur;
 		}

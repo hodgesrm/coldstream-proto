@@ -22,12 +22,17 @@ tags:
 schemes:
   - https
 securityDefinitions:
-  APIKeyHeader:
+  SessionKey:
     type: apiKey
     in: header
     name: vnd.io.goldfin.session
+  ApiKey:
+    type: apiKey
+    in: header
+    name: vnd.io.goldfin.apikey
 security:
-  - APIKeyHeader: []
+  - SessionKey: []
+  - ApiKey: []
 paths:
   /session:
     post:
@@ -312,6 +317,81 @@ paths:
           description: Password change parameters
           schema:
             $ref: '#/definitions/UserPasswordParameters'
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Not Found
+  '/user/{id}/apikey':
+    post:
+      tags:
+        - tenant
+      summary: Create a new API key
+      description: Create a new API key that can be used for application access.
+      operationId: apikeyCreate
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: API Key parameters, including name of key. 
+          schema:
+            $ref: '#/definitions/ApiKeyParameters'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/ApiKey'
+    get:
+      tags:
+        - tenant
+      summary: Return list of API keys
+      description: Return a list of API keys.  Secrets are not shown.
+      operationId: apikeyShowAll
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ApiKey'
+  '/user/{id}/apikey/{keyid}':
+    delete:
+      tags:
+        - tenant
+      summary: Delete an API key
+      description: >-
+        Deletes API key.  Any applications using the key will no longer
+        function.
+      operationId: apikeyDelete
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: keyid
+          in: path
+          description: API Key ID
+          required: true
+          type: string
       responses:
         '200':
           description: Successful
@@ -1021,6 +1101,31 @@ definitions:
       newPassword:
         type: string
         description: New user password.
+  ApiKey:
+    description: API key pair
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique API key ID
+      name:
+        type: string
+        description: Name of this API key; must be unique among keys owned by a user.
+      userId:
+        type: string
+        format: uuid
+        description: User ID
+      secret:
+        type: string
+        description: >-
+          Secret password for the API key. This is only shown on initial
+          creation; if lost a new API key must be created to replace it.
+  ApiKeyParameters:
+    description: Parameters to create a new API Key
+    properties:
+      name:
+        type: string
+        description: Name of this API key; must be unique among keys owned by a user.
   Vendor:
     description: Vendor description
     properties:

@@ -60,7 +60,8 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an invoice", notes = "Delete an invoice.  It can be recreated by rescanning the corresponding document", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -76,7 +77,8 @@ public class InvoiceApi  {
     
     @Produces({ "application/pdf", "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Download invoice document", notes = "Download invoice document", response = File.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
@@ -92,7 +94,8 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Show a single invoice", notes = "Return all information relative to a single invoice", response = Invoice.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Invoice.class),
@@ -109,7 +112,8 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List invoices", notes = "Return a list of all invoices", response = Invoice.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Invoice.class, responseContainer = "List") })
@@ -123,7 +127,8 @@ public class InvoiceApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Start invoice validations", notes = "Run invoice validations", response = InvoiceValidationResult.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = InvoiceValidationResult.class, responseContainer = "List"),

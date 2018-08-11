@@ -60,7 +60,8 @@ public class DocumentApi  {
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Upload document", notes = "Upload a new document for scanning", response = Document.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Document.class),
@@ -80,7 +81,8 @@ public class DocumentApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a invoice", notes = "Delete a single document and associated semantic content", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -96,7 +98,8 @@ public class DocumentApi  {
     
     @Produces({ "application/pdf", "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Download content", notes = "Download document content", response = File.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
@@ -112,7 +115,8 @@ public class DocumentApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Kick off document analysis", notes = "Run background scanning on document.  The document state and semantic information will be updated when finished.", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
@@ -128,7 +132,8 @@ public class DocumentApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Return document metadata", notes = "Download document metadata without content", response = Document.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Document.class),
@@ -144,7 +149,8 @@ public class DocumentApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List documents", notes = "Return a list of all documents", response = Document.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Document.class, responseContainer = "List") })

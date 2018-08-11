@@ -67,6 +67,8 @@ public class AdminTestHelper {
 			u.setUsername(username);
 			u.setTenantId(UUID.fromString(tenantId));
 			u.setRoles("");
+			u.setAlgorithm("Dummy");
+			u.setPasswordHash("Dummy");
 			String id = svc.create(u);
 			session.commit();
 			return id;

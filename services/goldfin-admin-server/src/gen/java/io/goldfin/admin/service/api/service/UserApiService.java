@@ -5,6 +5,8 @@ import io.goldfin.admin.service.api.model.*;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
+import io.goldfin.admin.service.api.model.ApiKey;
+import io.goldfin.admin.service.api.model.ApiKeyParameters;
 import io.goldfin.admin.service.api.model.ModelApiResponse;
 import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.admin.service.api.model.User;
@@ -21,6 +23,9 @@ import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
 
 public abstract class UserApiService {
+    public abstract Response apikeyCreate(String id,ApiKeyParameters body,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response apikeyDelete(String id,String keyid,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response apikeyShowAll(String id,SecurityContext securityContext) throws NotFoundException;
     public abstract Response userCreate(UserParameters body,SecurityContext securityContext) throws NotFoundException;
     public abstract Response userDelete(String id,SecurityContext securityContext) throws NotFoundException;
     public abstract Response userShow(String id,SecurityContext securityContext) throws NotFoundException;

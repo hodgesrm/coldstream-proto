@@ -58,7 +58,8 @@ public class HostApi  {
     
     
     @io.swagger.annotations.ApiOperation(value = "Delete host record", notes = "Delete a host record.  It can be recreated by rescanning the corresponding document", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -74,7 +75,8 @@ public class HostApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Show single host inventory record", notes = "Returns the most recent inventory record for a specific host.  The host must be identified by the resource ID or internal ID", response = Host.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Host.class),
@@ -90,7 +92,8 @@ public class HostApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List current host inventory records", notes = "Return a list of current hosts in inventory.  This returns the most recent record for each host.", response = Host.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Host.class, responseContainer = "List") })

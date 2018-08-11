@@ -58,7 +58,8 @@ public class ExtractApi  {
     
     @Produces({ "text/csv", "text/json" })
     @io.swagger.annotations.ApiOperation(value = "Download a data extract", notes = "Extract data for a particular extract type, where these correspond to schema types as well as  reports that join data from multiple schema types", response = File.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "extract", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
@@ -76,7 +77,8 @@ public class ExtractApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List available extract types", notes = "Return a list of available extrac types", response = String.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "extract", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = String.class, responseContainer = "List") })

@@ -6,12 +6,15 @@ package io.goldfin.admin.managers;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.ApiKeyData;
+import io.goldfin.admin.data.ApiKeyService;
 import io.goldfin.admin.data.SessionData;
 import io.goldfin.admin.data.SessionDataService;
 import io.goldfin.admin.data.TenantDataService;
@@ -20,6 +23,8 @@ import io.goldfin.admin.data.UserDataService;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.exceptions.UnauthorizedException;
+import io.goldfin.admin.service.api.model.ApiKey;
+import io.goldfin.admin.service.api.model.ApiKeyParameters;
 import io.goldfin.admin.service.api.model.LoginCredentials;
 import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.admin.service.api.model.User;
@@ -42,6 +47,9 @@ public class UserManager implements Manager {
 	private Randomizer randomizer = new Randomizer();
 
 	private static Pattern userAtTenantPattern = Pattern.compile("([a-zA-z0-9.]+)@([a-zA-z0-9.]+)");
+
+	/** A special ID that represents the currently logged in user. */
+	public static String CURRENT_USER_ID = "00000000-0000-0000-0000-000000000000";
 
 	/** Session timeout (defaults to 30 minutes) */
 	private static long LOGIN_TIMEOUT_MILLIS = 1800 * 1000;
@@ -134,8 +142,8 @@ public class UserManager implements Manager {
 			}
 		}
 
-		// Apply parameters to the body and update.  NOTE:  This is incorrect; 
-		// we need to revisit changing user names. 
+		// Apply parameters to the body and update. NOTE: This is incorrect;
+		// we need to revisit changing user names.
 		userRecord.setUsername(userParams.getUser());
 		userRecord.setRoles(userParams.getRoles());
 		try (Session session = context.adminSession().enlist(userService)) {
@@ -207,6 +215,115 @@ public class UserManager implements Manager {
 		user.setRoles(userData.getRoles());
 		user.setCreationDate(userData.getCreationDate().toString());
 		return user;
+	}
+
+	public ApiKey createApiKey(String userId, ApiKeyParameters apiKeyParams) {
+		// Ensure that the user ID actually exists and belongs to tenant.
+		User user = this.getUser(userId);
+		logger.info(String.format("Creating new API key: tenant=%s, userId=%s, userName=%s, apiKeyName=%s",
+				user.getTenantId(), userId, user.getUsername(), apiKeyParams.getName()));
+
+		// Ensure that the API key name is not empty.
+		String name = apiKeyParams.getName().trim();
+		if (name == null || "".equals(name)) {
+			throw new InvalidInputException("API key name may not be empty");
+		}
+
+		// See if the key name already exists for this user.
+		for (ApiKey apiKey : this.getAllApiKeys(userId)) {
+			if (apiKey.getName().equals(name)) {
+				throw new InvalidInputException(String.format("API key name already exists: %s", name));
+			}
+		}
+
+		// Create a random secret password, and test that it will be unique. We
+		// allow up to three tries though the chances that values will clash
+		// should be extremely small.
+		ApiKeyService apiKeyService = new ApiKeyService();
+		String secret = null;
+		String secretHash = null;
+		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
+		for (int i = 0; i < 3; i++) {
+			secret = randomizer.base64RandomBytes(20);
+			secretHash = hashPassword(algorithm, secret);
+
+			try (Session session = makeSession(apiKeyService)) {
+				ApiKeyData apiKeyData = apiKeyService.getBySecretHash(secretHash);
+				session.commit();
+				if (apiKeyData == null) {
+					break;
+				} else {
+					logger.warn(String.format(
+							"API key generation collision: userId=%s, userName=%s, apiKeyName=%s, hash=%s)",
+							user.getId(), user.getUsername(), name, secretHash));
+				}
+			}
+		}
+
+		// At this point we're good to go. Create the API key.
+		ApiKeyData model = new ApiKeyData();
+		model.setUserId(UUID.fromString(userId));
+		model.setName(name);
+		model.setSecretHash(secretHash);
+		model.setAlgorithm(algorithm.getName());
+		model.setLastTouchedDate(new Timestamp(System.currentTimeMillis()));
+
+		try (Session session = makeSession(apiKeyService)) {
+			apiKeyService.create(model);
+			session.commit();
+		}
+
+		// Fetch the ApiKey back and insert the secret. This is the only time we
+		// expose the secret value.
+		ApiKey apiKey = getApiKeyBySecretHash(secretHash);
+		apiKey.setSecret(secret);
+		return apiKey;
+	}
+
+	public List<ApiKey> getAllApiKeys(String userId) {
+		ApiKeyService apiKeyService = new ApiKeyService();
+		List<ApiKey> apiKeys = new ArrayList<ApiKey>();
+		try (Session session = context.adminSession().enlist(apiKeyService)) {
+			List<ApiKeyData> rawKeys = apiKeyService.getAllForUser(userId);
+			for (ApiKeyData rawKey : rawKeys) {
+				apiKeys.add(toApiKey(rawKey));
+			}
+		}
+		return apiKeys;
+	}
+
+	public void deleteApiKey(String userId, String id) {
+		ApiKeyService apiKeyService = new ApiKeyService();
+		ApiKeyData apiKey;
+		try (Session session = context.adminSession().enlist(apiKeyService)) {
+			apiKey = apiKeyService.get(id);
+			if (apiKey == null) {
+				throw new EntityNotFoundException("API key does not exist");
+			}
+		}
+		logger.info(String.format("Removing API key: userId=%s, id=%s, name=%s", userId, id, apiKey.getName()));
+		try (Session session = context.adminSession().enlist(apiKeyService)) {
+			apiKeyService.delete(id);
+			session.commit();
+		}
+	}
+
+	private ApiKey getApiKeyBySecretHash(String secretHash) {
+		ApiKeyService apiKeyService = new ApiKeyService();
+		try (Session session = makeSession(apiKeyService)) {
+			ApiKeyData apiKeyData = apiKeyService.getBySecretHash(secretHash);
+			session.commit();
+			return toApiKey(apiKeyData);
+		}
+	}
+
+	private ApiKey toApiKey(ApiKeyData apiKeyData) {
+		ApiKey apiKey = new ApiKey();
+		apiKey.setId(apiKeyData.getId());
+		apiKey.setUserId(apiKeyData.getUserId());
+		apiKey.setName(apiKeyData.getName());
+		apiKey.setSecret("********");
+		return apiKey;
 	}
 
 	public String login(LoginCredentials credentials) {

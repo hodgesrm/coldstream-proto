@@ -33,8 +33,9 @@ For prod deployment, config files go in /var/lib/goldfin/conf.
 
 Here are the steps to create a new service. 
 
-1. Create an init-params.yaml file from template in conf/init-params.yaml.sample. 
-2. Run servicectl init. 
+1. Create an init-params.yaml file in `$GOLDFIN_CONFIG_DIR/init-params.yaml`. 
+2. Create an service.yaml in `$GOLDFIN_CONFIG_DIR/service.yaml`.
+3. Run servicectl init. 
 ```shell
 # Must run in dist location for relative directory references to work. 
 cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
@@ -51,6 +52,10 @@ Here are step(s) to remove a service.
 svc-init remove --init-params=$GOLDFIN_CONFIG_DIR/init-params.yaml\
  --service-config=$GOLDFIN_CONFIG_DIR/service.yaml
 ```
+
+## Start API server
+
+After creating the service data start an API server. 
 
 ## Create a tenant. 
 ```shell

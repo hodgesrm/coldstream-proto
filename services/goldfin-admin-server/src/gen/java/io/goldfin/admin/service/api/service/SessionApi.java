@@ -73,7 +73,8 @@ public class SessionApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Logout from system", notes = "Delete session, which is no longer usable after this call", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "security", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),

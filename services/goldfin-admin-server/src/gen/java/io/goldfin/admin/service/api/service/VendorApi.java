@@ -60,7 +60,8 @@ public class VendorApi  {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a new vendor", notes = "Upload a new vendor definition.  Vendors are also created automatically if a vendor invoice is processed.", response = Vendor.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Vendor.class),
@@ -76,7 +77,8 @@ public class VendorApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a vendor", notes = "Delete a single vendor.  This can only be done if the vendor is not attached to invoices or existing inventory.", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
@@ -94,7 +96,8 @@ public class VendorApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Show a single vendor", notes = "Return all information relative to a single vendor", response = Vendor.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Vendor.class),
@@ -110,7 +113,8 @@ public class VendorApi  {
     
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List vendors", notes = "Return a list of all vendors", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = void.class) })
@@ -123,7 +127,8 @@ public class VendorApi  {
     @Consumes({ "application/json" })
     
     @io.swagger.annotations.ApiOperation(value = "Update a vendor", notes = "Update vendor description.", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "APIKeyHeader")
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
