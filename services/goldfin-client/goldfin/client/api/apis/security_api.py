@@ -227,7 +227,7 @@ class SecurityApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/session/{token}', 'DELETE',
                                         path_params,

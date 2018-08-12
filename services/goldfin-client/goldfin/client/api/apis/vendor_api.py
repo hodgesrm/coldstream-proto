@@ -129,7 +129,7 @@ class VendorApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/vendor', 'POST',
                                         path_params,
@@ -231,7 +231,7 @@ class VendorApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/vendor/{id}', 'DELETE',
                                         path_params,
@@ -333,7 +333,7 @@ class VendorApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/vendor/{id}', 'GET',
                                         path_params,
@@ -427,7 +427,7 @@ class VendorApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/vendor', 'GET',
                                         path_params,
@@ -533,7 +533,7 @@ class VendorApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/vendor/{id}', 'PUT',
                                         path_params,

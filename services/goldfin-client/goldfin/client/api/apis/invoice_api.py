@@ -125,7 +125,7 @@ class InvoiceApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/invoice/{id}', 'DELETE',
                                         path_params,
@@ -227,7 +227,7 @@ class InvoiceApi(object):
             select_header_accept(['application/pdf', 'application/octet-stream'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/invoice/{id}/download', 'GET',
                                         path_params,
@@ -333,7 +333,7 @@ class InvoiceApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/invoice/{id}', 'GET',
                                         path_params,
@@ -432,7 +432,7 @@ class InvoiceApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/invoice', 'GET',
                                         path_params,
@@ -538,7 +538,7 @@ class InvoiceApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/invoice/{id}/validate', 'POST',
                                         path_params,

@@ -14,6 +14,8 @@
 from __future__ import absolute_import
 
 # import models into sdk package
+from .models.api_key import ApiKey
+from .models.api_key_parameters import ApiKeyParameters
 from .models.api_response import ApiResponse
 from .models.data_series import DataSeries
 from .models.document import Document

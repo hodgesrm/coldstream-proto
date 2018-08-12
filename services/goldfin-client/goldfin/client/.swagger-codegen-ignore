@@ -25,7 +25,6 @@
 # Suppress top-level files. 
 Dockerfile
 git_push.sh
-README.md
 requirements.txt
 setup.py
 test-requirements.txt

@@ -133,7 +133,7 @@ class ExtractApi(object):
             select_header_accept(['text/csv', 'text/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/extract/download', 'GET',
                                         path_params,
@@ -227,7 +227,7 @@ class ExtractApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/extract/types', 'GET',
                                         path_params,

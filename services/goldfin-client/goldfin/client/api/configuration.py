@@ -207,7 +207,14 @@ class Configuration(object):
         :return: The Auth Settings information dict.
         """
         return {
-            'APIKeyHeader':
+            'ApiKey':
+                {
+                    'type': 'api_key',
+                    'in': 'header',
+                    'key': 'vnd.io.goldfin.apikey',
+                    'value': self.get_api_key_with_prefix('vnd.io.goldfin.apikey')
+                },
+            'SessionKey':
                 {
                     'type': 'api_key',
                     'in': 'header',

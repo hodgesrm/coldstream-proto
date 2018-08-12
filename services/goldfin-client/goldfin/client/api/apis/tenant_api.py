@@ -40,6 +40,327 @@ class TenantApi(object):
                 config.api_client = ApiClient()
             self.api_client = config.api_client
 
+    def apikey_create(self, id, **kwargs):
+        """
+        Create a new API key
+        Create a new API key that can be used for application access.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.apikey_create(id, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: User ID (required)
+        :param ApiKeyParameters body: API Key parameters, including name of key.
+        :return: ApiKey
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('callback'):
+            return self.apikey_create_with_http_info(id, **kwargs)
+        else:
+            (data) = self.apikey_create_with_http_info(id, **kwargs)
+            return data
+
+    def apikey_create_with_http_info(self, id, **kwargs):
+        """
+        Create a new API key
+        Create a new API key that can be used for application access.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.apikey_create_with_http_info(id, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: User ID (required)
+        :param ApiKeyParameters body: API Key parameters, including name of key.
+        :return: ApiKey
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id', 'body']
+        all_params.append('callback')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method apikey_create" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params) or (params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `apikey_create`")
+
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.\
+            select_header_accept(['application/json'])
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.\
+            select_header_content_type(['application/json'])
+
+        # Authentication setting
+        auth_settings = ['ApiKey', 'SessionKey']
+
+        return self.api_client.call_api('/user/{id}/apikey', 'POST',
+                                        path_params,
+                                        query_params,
+                                        header_params,
+                                        body=body_params,
+                                        post_params=form_params,
+                                        files=local_var_files,
+                                        response_type='ApiKey',
+                                        auth_settings=auth_settings,
+                                        callback=params.get('callback'),
+                                        _return_http_data_only=params.get('_return_http_data_only'),
+                                        _preload_content=params.get('_preload_content', True),
+                                        _request_timeout=params.get('_request_timeout'),
+                                        collection_formats=collection_formats)
+
+    def apikey_delete(self, id, keyid, **kwargs):
+        """
+        Delete an API key
+        Deletes API key.  Any applications using the key will no longer function.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.apikey_delete(id, keyid, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: User ID (required)
+        :param str keyid: API Key ID (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('callback'):
+            return self.apikey_delete_with_http_info(id, keyid, **kwargs)
+        else:
+            (data) = self.apikey_delete_with_http_info(id, keyid, **kwargs)
+            return data
+
+    def apikey_delete_with_http_info(self, id, keyid, **kwargs):
+        """
+        Delete an API key
+        Deletes API key.  Any applications using the key will no longer function.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.apikey_delete_with_http_info(id, keyid, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: User ID (required)
+        :param str keyid: API Key ID (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id', 'keyid']
+        all_params.append('callback')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method apikey_delete" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params) or (params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `apikey_delete`")
+        # verify the required parameter 'keyid' is set
+        if ('keyid' not in params) or (params['keyid'] is None):
+            raise ValueError("Missing the required parameter `keyid` when calling `apikey_delete`")
+
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']
+        if 'keyid' in params:
+            path_params['keyid'] = params['keyid']
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.\
+            select_header_accept(['application/json'])
+
+        # Authentication setting
+        auth_settings = ['ApiKey', 'SessionKey']
+
+        return self.api_client.call_api('/user/{id}/apikey/{keyid}', 'DELETE',
+                                        path_params,
+                                        query_params,
+                                        header_params,
+                                        body=body_params,
+                                        post_params=form_params,
+                                        files=local_var_files,
+                                        response_type=None,
+                                        auth_settings=auth_settings,
+                                        callback=params.get('callback'),
+                                        _return_http_data_only=params.get('_return_http_data_only'),
+                                        _preload_content=params.get('_preload_content', True),
+                                        _request_timeout=params.get('_request_timeout'),
+                                        collection_formats=collection_formats)
+
+    def apikey_show_all(self, id, **kwargs):
+        """
+        Return list of API keys
+        Return a list of API keys.  Secrets are not shown.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.apikey_show_all(id, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: User ID (required)
+        :return: list[ApiKey]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('callback'):
+            return self.apikey_show_all_with_http_info(id, **kwargs)
+        else:
+            (data) = self.apikey_show_all_with_http_info(id, **kwargs)
+            return data
+
+    def apikey_show_all_with_http_info(self, id, **kwargs):
+        """
+        Return list of API keys
+        Return a list of API keys.  Secrets are not shown.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.apikey_show_all_with_http_info(id, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: User ID (required)
+        :return: list[ApiKey]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id']
+        all_params.append('callback')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method apikey_show_all" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params) or (params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `apikey_show_all`")
+
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.\
+            select_header_accept(['application/json'])
+
+        # Authentication setting
+        auth_settings = ['ApiKey', 'SessionKey']
+
+        return self.api_client.call_api('/user/{id}/apikey', 'GET',
+                                        path_params,
+                                        query_params,
+                                        header_params,
+                                        body=body_params,
+                                        post_params=form_params,
+                                        files=local_var_files,
+                                        response_type='list[ApiKey]',
+                                        auth_settings=auth_settings,
+                                        callback=params.get('callback'),
+                                        _return_http_data_only=params.get('_return_http_data_only'),
+                                        _preload_content=params.get('_preload_content', True),
+                                        _request_timeout=params.get('_request_timeout'),
+                                        collection_formats=collection_formats)
+
     def tenant_create(self, body, **kwargs):
         """
         Create a new tenant
@@ -129,7 +450,7 @@ class TenantApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/tenant', 'POST',
                                         path_params,
@@ -231,7 +552,7 @@ class TenantApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/tenant/{id}', 'DELETE',
                                         path_params,
@@ -333,7 +654,7 @@ class TenantApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/tenant/{id}', 'GET',
                                         path_params,
@@ -427,7 +748,7 @@ class TenantApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/tenant', 'GET',
                                         path_params,
@@ -533,7 +854,7 @@ class TenantApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/tenant/{id}', 'PUT',
                                         path_params,
@@ -639,7 +960,7 @@ class TenantApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/user', 'POST',
                                         path_params,
@@ -741,7 +1062,7 @@ class TenantApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/user/{id}', 'DELETE',
                                         path_params,
@@ -843,7 +1164,7 @@ class TenantApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/user/{id}', 'GET',
                                         path_params,
@@ -937,7 +1258,7 @@ class TenantApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/user', 'GET',
                                         path_params,
@@ -1043,7 +1364,7 @@ class TenantApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/user/{id}', 'PUT',
                                         path_params,
@@ -1149,7 +1470,7 @@ class TenantApi(object):
             select_header_content_type(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/user/{id}/password', 'PUT',
                                         path_params,

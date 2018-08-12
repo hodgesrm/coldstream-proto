@@ -14,6 +14,8 @@
 from __future__ import absolute_import
 
 # import models into model package
+from .api_key import ApiKey
+from .api_key_parameters import ApiKeyParameters
 from .api_response import ApiResponse
 from .data_series import DataSeries
 from .document import Document

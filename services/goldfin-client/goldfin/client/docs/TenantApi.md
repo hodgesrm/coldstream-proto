@@ -4,6 +4,9 @@ All URIs are relative to *https://api.goldfin.io/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**apikey_create**](TenantApi.md#apikey_create) | **POST** /user/{id}/apikey | Create a new API key
+[**apikey_delete**](TenantApi.md#apikey_delete) | **DELETE** /user/{id}/apikey/{keyid} | Delete an API key
+[**apikey_show_all**](TenantApi.md#apikey_show_all) | **GET** /user/{id}/apikey | Return list of API keys
 [**tenant_create**](TenantApi.md#tenant_create) | **POST** /tenant | Create a new tenant
 [**tenant_delete**](TenantApi.md#tenant_delete) | **DELETE** /tenant/{id} | Delete a tenant
 [**tenant_show**](TenantApi.md#tenant_show) | **GET** /tenant/{id} | Show a single tenant
@@ -16,6 +19,180 @@ Method | HTTP request | Description
 [**user_update**](TenantApi.md#user_update) | **PUT** /user/{id} | Update a user
 [**user_update_password**](TenantApi.md#user_update_password) | **PUT** /user/{id}/password | Update user password
 
+
+# **apikey_create**
+> ApiKey apikey_create(id, body=body)
+
+Create a new API key
+
+Create a new API key that can be used for application access.
+
+### Example 
+```python
+from __future__ import print_function
+import time
+import api
+from api.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
+api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = api.TenantApi()
+id = 'id_example' # str | User ID
+body = api.ApiKeyParameters() # ApiKeyParameters | API Key parameters, including name of key. (optional)
+
+try: 
+    # Create a new API key
+    api_response = api_instance.apikey_create(id, body=body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling TenantApi->apikey_create: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **str**| User ID | 
+ **body** | [**ApiKeyParameters**](ApiKeyParameters.md)| API Key parameters, including name of key. | [optional] 
+
+### Return type
+
+[**ApiKey**](ApiKey.md)
+
+### Authorization
+
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apikey_delete**
+> apikey_delete(id, keyid)
+
+Delete an API key
+
+Deletes API key.  Any applications using the key will no longer function.
+
+### Example 
+```python
+from __future__ import print_function
+import time
+import api
+from api.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
+api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = api.TenantApi()
+id = 'id_example' # str | User ID
+keyid = 'keyid_example' # str | API Key ID
+
+try: 
+    # Delete an API key
+    api_instance.apikey_delete(id, keyid)
+except ApiException as e:
+    print("Exception when calling TenantApi->apikey_delete: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **str**| User ID | 
+ **keyid** | **str**| API Key ID | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apikey_show_all**
+> list[ApiKey] apikey_show_all(id)
+
+Return list of API keys
+
+Return a list of API keys.  Secrets are not shown.
+
+### Example 
+```python
+from __future__ import print_function
+import time
+import api
+from api.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
+api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = api.TenantApi()
+id = 'id_example' # str | User ID
+
+try: 
+    # Return list of API keys
+    api_response = api_instance.apikey_show_all(id)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling TenantApi->apikey_show_all: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **str**| User ID | 
+
+### Return type
+
+[**list[ApiKey]**](ApiKey.md)
+
+### Authorization
+
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tenant_create**
 > Tenant tenant_create(body)
@@ -32,7 +209,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -61,7 +242,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -85,7 +266,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -113,7 +298,7 @@ void (empty response body)
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -137,7 +322,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -166,7 +355,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -190,7 +379,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -214,7 +407,7 @@ void (empty response body)
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -238,7 +431,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -268,7 +465,7 @@ void (empty response body)
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -292,7 +489,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -321,7 +522,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -345,7 +546,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -373,7 +578,7 @@ void (empty response body)
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -397,7 +602,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -426,7 +635,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -450,7 +659,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -475,7 +688,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -499,7 +712,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -529,7 +746,7 @@ void (empty response body)
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 
@@ -553,7 +770,11 @@ import api
 from api.rest import ApiException
 from pprint import pprint
 
-# Configure API key authorization: APIKeyHeader
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
 api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
@@ -583,7 +804,7 @@ void (empty response body)
 
 ### Authorization
 
-[APIKeyHeader](../README.md#APIKeyHeader)
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
 
 ### HTTP request headers
 

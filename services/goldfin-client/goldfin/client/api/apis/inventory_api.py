@@ -137,7 +137,7 @@ class InventoryApi(object):
             select_header_content_type(['multipart/form-data'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/data', 'POST',
                                         path_params,
@@ -239,7 +239,7 @@ class InventoryApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/data/{id}', 'DELETE',
                                         path_params,
@@ -341,7 +341,7 @@ class InventoryApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/data/{id}/process', 'POST',
                                         path_params,
@@ -443,7 +443,7 @@ class InventoryApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/data/{id}', 'GET',
                                         path_params,
@@ -537,7 +537,7 @@ class InventoryApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/data', 'GET',
                                         path_params,
@@ -639,7 +639,7 @@ class InventoryApi(object):
             select_header_accept(['application/octet-stream'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/data/{id}/content', 'GET',
                                         path_params,
@@ -737,7 +737,7 @@ class InventoryApi(object):
 
         body_params = None
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/host/{id}', 'DELETE',
                                         path_params,
@@ -839,7 +839,7 @@ class InventoryApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/host/{id}', 'GET',
                                         path_params,
@@ -933,7 +933,7 @@ class InventoryApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/host', 'GET',
                                         path_params,

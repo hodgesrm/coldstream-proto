@@ -137,7 +137,7 @@ class DocumentApi(object):
             select_header_content_type(['multipart/form-data'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/document', 'POST',
                                         path_params,
@@ -239,7 +239,7 @@ class DocumentApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/document/{id}', 'DELETE',
                                         path_params,
@@ -341,7 +341,7 @@ class DocumentApi(object):
             select_header_accept(['application/pdf', 'application/octet-stream'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/document/{id}/download', 'GET',
                                         path_params,
@@ -443,7 +443,7 @@ class DocumentApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/document/{id}/process', 'POST',
                                         path_params,
@@ -545,7 +545,7 @@ class DocumentApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/document/{id}', 'GET',
                                         path_params,
@@ -639,7 +639,7 @@ class DocumentApi(object):
             select_header_accept(['application/json'])
 
         # Authentication setting
-        auth_settings = ['APIKeyHeader']
+        auth_settings = ['ApiKey', 'SessionKey']
 
         return self.api_client.call_api('/document', 'GET',
                                         path_params,
