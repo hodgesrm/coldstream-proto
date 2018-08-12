@@ -4,6 +4,7 @@
 package io.goldfin.admin.data;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class ApiKeyData {
 	private String name;
 	private String secretHash;
 	private String algorithm;
-	private Timestamp lastTouchedDate;
+	private Date lastTouchedDate;
 	private Timestamp creationDate;
 
 	public UUID getId() {
@@ -59,11 +60,11 @@ public class ApiKeyData {
 		this.algorithm = algorithm;
 	}
 
-	public Timestamp getLastTouchedDate() {
+	public Date getLastTouchedDate() {
 		return lastTouchedDate;
 	}
 
-	public void setLastTouchedDate(Timestamp lastTouchedDate) {
+	public void setLastTouchedDate(Date lastTouchedDate) {
 		this.lastTouchedDate = lastTouchedDate;
 	}
 
@@ -85,8 +86,9 @@ public class ApiKeyData {
 		}
 		ApiKeyData apiKey = (ApiKeyData) o;
 		return Objects.equals(this.id, apiKey.id) && Objects.equals(this.userId, apiKey.userId)
-				&& Objects.equals(this.secretHash, apiKey.secretHash) && Objects.equals(this.algorithm, apiKey.algorithm)
+				&& Objects.equals(this.secretHash, apiKey.secretHash)
+				&& Objects.equals(this.algorithm, apiKey.algorithm)
 				&& Objects.equals(this.lastTouchedDate, apiKey.lastTouchedDate)
-		&& Objects.equals(this.creationDate, apiKey.creationDate);
+				&& Objects.equals(this.creationDate, apiKey.creationDate);
 	}
 }

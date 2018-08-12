@@ -222,7 +222,7 @@ public class App {
 		String allowedHeaders = "*";
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, allowedHeaders);
 		// Allow API key header to be exposed along with content-length.
-		String exposedResponseHeaders = String.format("Content-Length,%s", SecurityAuthenticator.API_KEY_HEADER);
+		String exposedResponseHeaders = String.format("Content-Length,%s", SecurityAuthenticator.SESSION_KEY_HEADER);
 		cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, exposedResponseHeaders);
 
 		return servletHandler;

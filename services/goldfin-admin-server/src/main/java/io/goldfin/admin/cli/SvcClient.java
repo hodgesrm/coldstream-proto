@@ -77,10 +77,23 @@ public class SvcClient implements CliContext {
 			throw new CommandError(String.format("Unknown command: %s", commandName));
 		}
 
+		// Read environmentals to get defaults for host and port.
+		String host = System.getenv("GOLDFIN_API_HOST");
+		if (host == null) {
+			host = "localhost";
+		}
+		String port = System.getenv("GOLDFIN_API_PORT");
+		if (port == null) {
+			port = "443";
+		}
+
 		// Add options to parser and parse arguments.
 		OptionParser parser = command.getOptParser();
 		parser.acceptsAll(Arrays.asList("h", "help"), "Print help").forHelp();
 		parser.accepts("verbose", "Give extra information about calls");
+		parser.accepts("useApiKey", "Use API key even if session key is available");
+		parser.accepts("host", "Host name").withRequiredArg().ofType(String.class).defaultsTo(host);
+		parser.accepts("port", "Port number").withRequiredArg().ofType(Integer.class).defaultsTo(new Integer(port));
 		String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
 		options = parser.parse(commandArgs);
 
@@ -166,16 +179,29 @@ public class SvcClient implements CliContext {
 	 */
 	@Override
 	public MinimalRestClient getRestClient() {
-		if (!sessionFile.canRead()) {
-			throw new CommandError("Session file does not exist, must login first");
-		}
-		try {
-			Session session = YamlHelper.readFromFile(sessionFile, Session.class);
-			return new MinimalRestClient().host(session.getHost()).port(session.getPort()).prefix("/api/v1")
-					.verbose(options.has("verbose")).header(SecurityAuthenticator.API_KEY_HEADER, session.getToken())
-					.connect();
-		} catch (IOException e) {
-			throw new CommandError("Unable to read session file: " + sessionFile.getAbsolutePath(), e);
+		String goldfinSecretApiKey = System.getenv("GOLDFIN_API_SECRET_KEY");
+		boolean verbose = options.has("verbose");
+		if (sessionFile.canRead() && !options.has("useApiKey")) {
+			try {
+				if (verbose) {
+					println("Using session token: " + sessionFile.getAbsolutePath());
+				}
+				Session session = YamlHelper.readFromFile(sessionFile, Session.class);
+				return new MinimalRestClient().host(session.getHost()).port(session.getPort()).prefix("/api/v1")
+						.verbose(verbose).header(SecurityAuthenticator.SESSION_KEY_HEADER, session.getToken())
+						.connect();
+			} catch (IOException e) {
+				throw new CommandError("Unable to read session file: " + sessionFile.getAbsolutePath(), e);
+			}
+		} else if (goldfinSecretApiKey != null) {
+			if (verbose) {
+				println("Using API key in GOLDFIN_SECRET_API_KEY variable");
+			}
+			return new MinimalRestClient().host((String) options.valueOf("host"))
+					.port((Integer) options.valueOf("port")).prefix("/api/v1").verbose(verbose)
+					.header(SecurityAuthenticator.API_KEY_HEADER, goldfinSecretApiKey).connect();
+		} else {
+			throw new CommandError("Please login or set an API key in GOLDFIN_SECRET_API_KEY");
 		}
 	}
 

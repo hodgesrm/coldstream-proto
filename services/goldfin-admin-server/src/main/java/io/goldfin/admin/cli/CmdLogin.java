@@ -19,8 +19,6 @@ public class CmdLogin implements Command {
 	private OptionParser parser = new OptionParser();
 
 	public CmdLogin() {
-		parser.accepts("host", "Host name").withRequiredArg().ofType(String.class);
-		parser.accepts("port", "Port number").withRequiredArg().ofType(Integer.class).defaultsTo(8443);
 		parser.accepts("user", "User name").withRequiredArg().ofType(String.class);
 		parser.accepts("password", "Password").withRequiredArg().ofType(String.class);
 	}
@@ -60,7 +58,7 @@ public class CmdLogin implements Command {
 				throw new CommandError(
 						String.format("Login failed: code=%d, reason=%s", response.getCode(), response.getReason()));
 			}
-			String token = response.getHeader(SecurityAuthenticator.API_KEY_HEADER);
+			String token = response.getHeader(SecurityAuthenticator.SESSION_KEY_HEADER);
 
 			// Save session.
 			Session session = new Session();

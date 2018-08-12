@@ -18,14 +18,25 @@ public class BcryptHashingAlgorithm {
 		return NAME;
 	}
 
-	protected String generateSalt() {
+	public String generateSalt() {
 		return BCrypt.gensalt(SALT_ROUNDS);
 	}
+
+	/** Generates an initial password hash without external salt value. */
 	public String generateHash(String password) {
 		String salt = generateSalt();
 		return BCrypt.hashpw(password, salt);
 	}
-	
+
+	/** Generates a password hash with external salt value. */
+	public String generateHash(String password, String salt) {
+		return BCrypt.hashpw(password, salt);
+	}
+
+	/**
+	 * Validates a password candidate, returning true if the candidate matches the
+	 * provided hash.
+	 */
 	public boolean validateHash(String candidate, String hash) {
 		return BCrypt.checkpw(candidate, hash);
 	}

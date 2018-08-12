@@ -18,14 +18,31 @@ public class PasswordHashingTest {
 	private String[] passwords = { "123456789", "b0bbybr0wn", "short", "Q#RSTZBQT#$314tq5!!" };
 
 	/**
-	 * Verify that password hashing correctly validates both good and bad passwords
-	 * in no less than 50 milliseconds per operation.
+	 * Verify that internally salted password hashing correctly validates both good and bad passwords
+	 * in under 50 ms per cycle.
 	 */
 	@Test
 	public void testPasswordHashingAndValidation() throws Exception {
 		BcryptHashingAlgorithm algo = new BcryptHashingAlgorithm();
 		for (String pw : passwords) {
 			String hash = algo.generateHash(pw);
+			this.checkPw(algo, hash, pw, true, 50);
+			String badPw = pw + "x";
+			this.checkPw(algo, hash, badPw, false, 50);
+		}
+	}
+
+	/**
+	 * Verify that password hashing correctly validates both good and bad passwords
+	 * using an external salt value at under 50ms per cycle.
+	 */
+	@Test
+	public void testPasswordHashingAndValidation2() throws Exception {
+		BcryptHashingAlgorithm algo = new BcryptHashingAlgorithm();
+		String salt = algo.generateSalt();
+		logger.info("Generated salt value: " + salt);
+		for (String pw : passwords) {
+			String hash = algo.generateHash(pw, salt);
 			this.checkPw(algo, hash, pw, true, 50);
 			String badPw = pw + "x";
 			this.checkPw(algo, hash, badPw, false, 50);

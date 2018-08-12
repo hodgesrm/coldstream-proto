@@ -5,7 +5,9 @@ package io.goldfin.admin.managers;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,11 +47,15 @@ public class UserManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(UserManager.class);
 	private ManagementContext context;
 	private Randomizer randomizer = new Randomizer();
+	private Map<String, String> apiKeyTable = new HashMap<String, String>();
 
 	private static Pattern userAtTenantPattern = Pattern.compile("([a-zA-z0-9.]+)@([a-zA-z0-9.]+)");
 
 	/** A special ID that represents the currently logged in user. */
 	public static String CURRENT_USER_ID = "00000000-0000-0000-0000-000000000000";
+
+	/** Salt value for API keys. This value needs to stay constant. */
+	public static String SALT = "$2a$12$0NjdsCnknk9fnYcuybk.IO";
 
 	/** Session timeout (defaults to 30 minutes) */
 	private static long LOGIN_TIMEOUT_MILLIS = 1800 * 1000;
@@ -91,7 +97,7 @@ public class UserManager implements Manager {
 
 		// Hash password.
 		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
-		String passwordHash = hashPassword(algorithm, userParams.getInitialPassword());
+		String passwordHash = hashPassword(algorithm, userParams.getInitialPassword(), null);
 
 		// Create the user.
 		UserDataService userService = new UserDataService();
@@ -172,7 +178,7 @@ public class UserManager implements Manager {
 
 		// Generate new password hash.
 		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
-		String passwordHash = hashPassword(algorithm, passwordParams.getNewPassword());
+		String passwordHash = hashPassword(algorithm, passwordParams.getNewPassword(), null);
 
 		// Apply parameters to user record and update.
 		userRecord.setPasswordHash(passwordHash);
@@ -238,14 +244,14 @@ public class UserManager implements Manager {
 
 		// Create a random secret password, and test that it will be unique. We
 		// allow up to three tries though the chances that values will clash
-		// should be extremely small.
+		// should be vanishingly small.
 		ApiKeyService apiKeyService = new ApiKeyService();
 		String secret = null;
 		String secretHash = null;
 		BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
 		for (int i = 0; i < 3; i++) {
 			secret = randomizer.base64RandomBytes(20);
-			secretHash = hashPassword(algorithm, secret);
+			secretHash = hashPassword(algorithm, secret, SALT);
 
 			try (Session session = makeSession(apiKeyService)) {
 				ApiKeyData apiKeyData = apiKeyService.getBySecretHash(secretHash);
@@ -323,6 +329,7 @@ public class UserManager implements Manager {
 		apiKey.setUserId(apiKeyData.getUserId());
 		apiKey.setName(apiKeyData.getName());
 		apiKey.setSecret("********");
+		apiKey.setLastTouchedDate(apiKeyData.getLastTouchedDate());
 		return apiKey;
 	}
 
@@ -398,12 +405,21 @@ public class UserManager implements Manager {
 		}
 	}
 
-	/** Common code to check and hash password. */
-	private String hashPassword(BcryptHashingAlgorithm algorithm, String password) {
+	/**
+	 * Common code to check and hash password. Salt is optional: for user passwords
+	 * we let bcrypt generate salt automatically. API keys require an external salt
+	 * value as we recompute the hash when verifying, then look it up, hence do not
+	 * know the hash name.
+	 */
+	private String hashPassword(BcryptHashingAlgorithm algorithm, String password, String salt) {
 		if (password == null || password.length() < 8) {
 			throw new InvalidInputException("Password must be at least 8 characters");
 		} else {
-			return algorithm.generateHash(password);
+			if (salt == null) {
+				return algorithm.generateHash(password);
+			} else {
+				return algorithm.generateHash(password, salt);
+			}
 		}
 	}
 
@@ -414,13 +430,13 @@ public class UserManager implements Manager {
 	}
 
 	/**
-	 * Validates an incoming token and if successful returns the session data. This
-	 * updates the session timeout as a side effect.
+	 * Validates an incoming session token and if successful returns the session
+	 * data. This updates the session timeout as a side effect.
 	 * 
 	 * @throws UnauthorizedException
 	 *             Thrown if session does not exist or has timed out
 	 */
-	public SessionData validate(String token) {
+	public SessionData validateSessionKey(String token) {
 		// Generate a session and return the token.
 		SessionDataService sessionService = new SessionDataService();
 		try (Session session = makeSession(sessionService, false)) {
@@ -440,6 +456,46 @@ public class UserManager implements Manager {
 			sessionData.setLastTouched(new Timestamp(now));
 			sessionService.update(sessionData.getId().toString(), sessionData);
 			return sessionData;
+		}
+	}
+
+	/**
+	 * Validates an API key and if successful returns the user data. This updates
+	 * the API Key last touched date as a side effect.
+	 * 
+	 * @throws UnauthorizedException
+	 *             Thrown if API token does not exist
+	 */
+	public User validateApiKeySecret(String apiKeySecret) {
+		ApiKeyService apiKeyService = new ApiKeyService();
+		try (Session session = makeSession(apiKeyService, false)) {
+			// API keys are hashed so that evildoers cannot reverse-engineer
+			// keys by reading the DBMS. Hashing is by design slow so we
+			// use a cache to avoid hashing the secret more than once if
+			// the key is valid. Invalid keys are hashed anew each time.
+			String secretHash = this.apiKeyTable.get(apiKeySecret);
+			boolean newHash = false;
+			if (secretHash == null) {
+				BcryptHashingAlgorithm algorithm = new BcryptHashingAlgorithm();
+				secretHash = hashPassword(algorithm, apiKeySecret, SALT);
+				newHash = true;
+			}
+			ApiKeyData apiKeyData = apiKeyService.getBySecretHash(secretHash);
+			if (apiKeyData == null) {
+				logger.warn("API key validation failed");
+				throw new UnauthorizedException();
+			}
+			long now = System.currentTimeMillis();
+			apiKeyData.setLastTouchedDate(new Timestamp(now));
+			apiKeyService.update(apiKeyData.getId().toString(), apiKeyData);
+
+			User user = this.getUser(apiKeyData.getUserId().toString());
+			if (newHash) {
+				this.apiKeyTable.put(apiKeySecret, secretHash);
+				logger.info(String.format("Inserted hash for API Key: userId=%s, userName=%s, apiKeyName=%s", 
+						user.getId(), user.getUsername(), apiKeyData.getName()));
+			}
+			return user;
 		}
 	}
 

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS apikeys (
   user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   name varchar(250) NOT NULL, 
   secret_hash varchar(250) UNIQUE NOT NULL,
-  algorithm char(15),
+  algorithm char(15) NOT NULL,
   last_touched_date timestamp,
   creation_date timestamp DEFAULT current_timestamp,
   UNIQUE(user_id, name)

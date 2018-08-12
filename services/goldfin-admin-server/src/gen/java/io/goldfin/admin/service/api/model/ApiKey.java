@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import java.util.UUID;
 import javax.validation.constraints.*;
 
@@ -38,6 +39,9 @@ public class ApiKey   {
 
   @JsonProperty("secret")
   private String secret = null;
+
+  @JsonProperty("lastTouchedDate")
+  private Date lastTouchedDate = null;
 
   public ApiKey id(UUID id) {
     this.id = id;
@@ -115,6 +119,25 @@ public class ApiKey   {
     this.secret = secret;
   }
 
+  public ApiKey lastTouchedDate(Date lastTouchedDate) {
+    this.lastTouchedDate = lastTouchedDate;
+    return this;
+  }
+
+  /**
+   * Date of last use of key
+   * @return lastTouchedDate
+   **/
+  @JsonProperty("lastTouchedDate")
+  @ApiModelProperty(value = "Date of last use of key")
+  public Date getLastTouchedDate() {
+    return lastTouchedDate;
+  }
+
+  public void setLastTouchedDate(Date lastTouchedDate) {
+    this.lastTouchedDate = lastTouchedDate;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -128,12 +151,13 @@ public class ApiKey   {
     return Objects.equals(this.id, apiKey.id) &&
         Objects.equals(this.name, apiKey.name) &&
         Objects.equals(this.userId, apiKey.userId) &&
-        Objects.equals(this.secret, apiKey.secret);
+        Objects.equals(this.secret, apiKey.secret) &&
+        Objects.equals(this.lastTouchedDate, apiKey.lastTouchedDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, userId, secret);
+    return Objects.hash(id, name, userId, secret, lastTouchedDate);
   }
 
 
@@ -146,6 +170,7 @@ public class ApiKey   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
     sb.append("    secret: ").append(toIndentedString(secret)).append("\n");
+    sb.append("    lastTouchedDate: ").append(toIndentedString(lastTouchedDate)).append("\n");
     sb.append("}");
     return sb.toString();
   }

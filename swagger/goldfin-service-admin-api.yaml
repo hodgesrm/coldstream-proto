@@ -1120,6 +1120,10 @@ definitions:
         description: >-
           Secret password for the API key. This is only shown on initial
           creation; if lost a new API key must be created to replace it.
+      lastTouchedDate:
+        type: string
+        format: date-time
+        description: Date of last use of key
   ApiKeyParameters:
     description: Parameters to create a new API Key
     properties:

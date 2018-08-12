@@ -30,7 +30,7 @@ public class SessionApiServiceImpl extends SessionApiService {
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			String token = um.login(body);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK"))
-					.header(SecurityAuthenticator.API_KEY_HEADER, token).build();
+					.header(SecurityAuthenticator.SESSION_KEY_HEADER, token).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}
@@ -42,7 +42,7 @@ public class SessionApiServiceImpl extends SessionApiService {
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			um.logout(token);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK"))
-					.header(SecurityAuthenticator.API_KEY_HEADER, token).build();
+					.header(SecurityAuthenticator.SESSION_KEY_HEADER, token).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}

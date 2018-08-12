@@ -33,29 +33,38 @@ import io.goldfin.admin.managers.UserManager;
  */
 public class SecurityAuthenticator implements Authenticator {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityAuthenticator.class);
-	public static final String API_KEY_HEADER = "vnd.io.goldfin.session";
+	public static final String SESSION_KEY_HEADER = "vnd.io.goldfin.session";
+	public static final String API_KEY_HEADER = "vnd.io.goldfin.apikey";
 
 	@Override
 	public String getAuthMethod() {
-		logger.info("Returning auth method: " + this.getClass().getSimpleName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Returning auth method: " + this.getClass().getSimpleName());
+		}
 		return Constraint.ANY_AUTH;
 	}
 
 	@Override
 	public void prepareRequest(ServletRequest arg0) {
-		logger.info("Preparing request: " + this.getClass().getSimpleName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Preparing request: " + this.getClass().getSimpleName());
+		}
 	}
 
 	@Override
 	public boolean secureResponse(ServletRequest arg0, ServletResponse arg1, boolean arg2, User arg3)
 			throws ServerAuthException {
-		logger.info("Checking for secure response: " + this.getClass().getSimpleName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Checking for secure response: " + this.getClass().getSimpleName());
+		}
 		return false;
 	}
 
 	@Override
 	public void setConfiguration(AuthConfiguration arg0) {
-		logger.info("Setting auth configuration: " + this.getClass().getSimpleName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Setting auth configuration: " + this.getClass().getSimpleName());
+		}
 	}
 
 	@Override
@@ -68,12 +77,13 @@ public class SecurityAuthenticator implements Authenticator {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 
-		// Fetch API key value.
+		// Fetch auth headers.
+		String sessionKey = req.getHeader(SESSION_KEY_HEADER);
 		String apiKey = req.getHeader(API_KEY_HEADER);
 
-		String msg = String.format("Request validation: path=%s, header=%s, mandatory=%s", req.getPathInfo(),
-				req.getHeader(API_KEY_HEADER), mandatory);
 		if (logger.isDebugEnabled()) {
+			String msg = String.format("Request validation: path=%s, sessionKey=%s, apiKey=%s, mandatory=%s",
+					req.getPathInfo(), sessionKey, apiKey, mandatory);
 			logger.debug(msg);
 		}
 
@@ -85,19 +95,19 @@ public class SecurityAuthenticator implements Authenticator {
 			}
 			return Authentication.NOT_CHECKED;
 		}
-		
-		// If this is a CORS options request, we all it to go through so that 
-		// the browser can do a pre-flight check. 
+
+		// If this is a CORS options request, we all it to go through so that
+		// the browser can do a pre-flight check.
 		if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Letting content request through: " + req.getPathInfo());
 			}
 			return Authentication.NOT_CHECKED;
 		}
-		
+
 		// If this is a content request we similarly allow it to go through
 		// so we can serve up web content requests (e.g., to our Angular 2
-		// application). 
+		// application).
 		if (req.getPathInfo().startsWith("/content")) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Letting content request through: " + req.getPathInfo());
@@ -105,27 +115,16 @@ public class SecurityAuthenticator implements Authenticator {
 			return Authentication.NOT_CHECKED;
 		}
 
-		// If the apiKey is missing, we aren't authenticated.
-		if (apiKey == null) {
+		// Checks for supported authentication types in order.
+		UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
+		if (sessionKey != null) {
 			try {
-				res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-				return Authentication.SEND_FAILURE;
-			} catch (IOException e) {
-				throw new ServerAuthException(e);
-			}
-		} else {
-			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
-			try {
-				SessionData sessionData = um.validate(apiKey);
-				Subject subject = new Subject();
-				AbstractLoginService.UserPrincipal userPrincipal = new AbstractLoginService.UserPrincipal(
-						sessionData.getUserId().toString(), null);
-				subject.getPrincipals().add(userPrincipal);
-				subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
-				UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });
+				// If we have a session key, prefer that.
+				SessionData sessionData = um.validateSessionKey(sessionKey);
+				UserIdentity identity = createIdentity(sessionData.getUserId().toString());
 				return new UserAuthentication(Constraint.ANY_AUTH, identity);
 			} catch (UnauthorizedException e) {
-				logger.warn(String.format("No session available: token=%s, message=%s", apiKey, e.getMessage()));
+				logger.warn(String.format("No session available: token=%s, message=%s", sessionKey, e.getMessage()));
 				if (logger.isDebugEnabled()) {
 					logger.debug("Extended session failure information", e);
 				}
@@ -138,6 +137,41 @@ public class SecurityAuthenticator implements Authenticator {
 				}
 				return Authentication.SEND_FAILURE;
 			}
+		} else if (apiKey != null) {
+			try {
+				io.goldfin.admin.service.api.model.User user = um.validateApiKeySecret(apiKey);
+				UserIdentity identity = createIdentity(user.getId().toString());
+				return new UserAuthentication(Constraint.ANY_AUTH, identity);
+			} catch (UnauthorizedException e) {
+				logger.warn(String.format("No API key found: key=%s, message=%s", sessionKey, e.getMessage()));
+				if (logger.isDebugEnabled()) {
+					logger.debug("Extended session failure information", e);
+				}
+				try {
+					res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				} catch (IOException e2) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Unable to send error message", e2);
+					}
+				}
+				return Authentication.SEND_FAILURE;
+			}
+		} else {
+			try {
+				res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return Authentication.SEND_FAILURE;
+			} catch (IOException e) {
+				throw new ServerAuthException(e);
+			}
 		}
+	}
+
+	private UserIdentity createIdentity(String userId) {
+		Subject subject = new Subject();
+		AbstractLoginService.UserPrincipal userPrincipal = new AbstractLoginService.UserPrincipal(userId, null);
+		subject.getPrincipals().add(userPrincipal);
+		subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
+		UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });
+		return identity;
 	}
 }
