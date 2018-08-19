@@ -11,7 +11,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.data.TenantDataService;
+import io.goldfin.admin.data.svc.TenantDataService;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.Tenant;

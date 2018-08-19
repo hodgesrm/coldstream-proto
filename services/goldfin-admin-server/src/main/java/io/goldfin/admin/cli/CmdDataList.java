@@ -14,6 +14,7 @@ public class CmdDataList implements Command {
 	private OptionParser parser = new OptionParser();
 
 	public CmdDataList() {
+		parser.accepts("id", "Document ID (lists all if omitted)").withRequiredArg().ofType(String.class);
 	}
 
 	public String getName() {
@@ -21,7 +22,7 @@ public class CmdDataList implements Command {
 	}
 
 	public String getDescription() {
-		return "List datas";
+		return "List one or more data series";
 	}
 
 	public OptionParser getOptParser() {
@@ -29,11 +30,18 @@ public class CmdDataList implements Command {
 	}
 
 	public void exec(CliContext ctx) {
+		String id = (String) ctx.options().valueOf("id");
 		MinimalRestClient client = ctx.getRestClient();
 		try {
-			DataSeries[] datas = client.get("/data", new DataSeries[0].getClass());
-			String dataListing = JsonHelper.writeToString(datas);
-			System.out.println(dataListing);
+			if (id == null) {
+				DataSeries[] datas = client.get("/data", new DataSeries[0].getClass());
+				String dataListing = JsonHelper.writeToString(datas);
+				System.out.println(dataListing);
+			} else {
+				DataSeries data = client.get(String.format("/data/%s", id), DataSeries.class);
+				String dataListing = JsonHelper.writeToString(data);
+				System.out.println(dataListing);
+			}
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {

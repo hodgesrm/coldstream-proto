@@ -3,9 +3,9 @@
  */
 package io.goldfin.shared.extract;
 
+import io.goldfin.admin.data.tenant.InvoiceDataService;
 import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.shared.data.SqlSelect;
-import io.goldfin.tenant.data.InvoiceDataService;
 
 /**
  * Defines an extract to select invoice headers joined to matching invoice

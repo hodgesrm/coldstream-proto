@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
@@ -66,6 +67,9 @@ public class VendorParameters   {
 
   @JsonProperty("state")
   private StateEnum state = null;
+
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   public VendorParameters identifier(String identifier) {
     this.identifier = identifier;
@@ -124,6 +128,25 @@ public class VendorParameters   {
     this.state = state;
   }
 
+  public VendorParameters tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -136,12 +159,13 @@ public class VendorParameters   {
     VendorParameters vendorParameters = (VendorParameters) o;
     return Objects.equals(this.identifier, vendorParameters.identifier) &&
         Objects.equals(this.name, vendorParameters.name) &&
-        Objects.equals(this.state, vendorParameters.state);
+        Objects.equals(this.state, vendorParameters.state) &&
+        Objects.equals(this.tags, vendorParameters.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(identifier, name, state);
+    return Objects.hash(identifier, name, state, tags);
   }
 
 
@@ -153,6 +177,7 @@ public class VendorParameters   {
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("}");
     return sb.toString();
   }

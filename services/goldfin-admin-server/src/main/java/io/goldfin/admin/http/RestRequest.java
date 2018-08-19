@@ -40,6 +40,11 @@ public class RestRequest {
 		return this;
 	}
 
+	public RestRequest PUT() {
+		method(RestHttpMethod.PUT);
+		return this;
+	}
+
 	public RestRequest GET() {
 		method(RestHttpMethod.GET);
 		return this;

@@ -30,6 +30,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -147,6 +148,12 @@ public class MinimalRestClient {
 				((HttpPost) uriRequest).setEntity(restRequest.getHttpEntity());
 			}
 			break;
+		case PUT:
+			uriRequest = new HttpPut(url);
+			if (restRequest.hasHttpEntity()) {
+				((HttpPut) uriRequest).setEntity(restRequest.getHttpEntity());
+			}
+			break;
 		case DELETE:
 			uriRequest = new HttpDelete(url);
 			break;
@@ -260,7 +267,7 @@ public class MinimalRestClient {
 	}
 
 	/**
-	 * Post a JSON message and receive a single JSON message in response.
+	 * Get a single JSON message from a path.
 	 */
 	public <T> T get(String path, Class<T> responseEntityClass) throws RestException {
 		RestRequest restRequest = new RestRequest().GET().path(path);
@@ -272,6 +279,26 @@ public class MinimalRestClient {
 			} else {
 				return JsonHelper.readFromStream(new ByteArrayInputStream(restResponse.getContent()),
 						responseEntityClass);
+			}
+		} catch (SerializationException e) {
+			throw new RestRuntimeException("Serialization error", e);
+		}
+	}
+
+	/**
+	 * Update a resource with a JSON document at a specific path. 
+	 */
+	public void update(String path, Object requestEntity) throws RestException {
+		RestRequest restRequest = new RestRequest().method(RestHttpMethod.PUT).path(path);
+		try {
+			if (requestEntity != null) {
+				restRequest.content(requestEntity);
+			}
+			RestResponse restResponse = this.execute(restRequest);
+			if (restResponse.code >= 300) {
+				throw generateRestException(restResponse);
+			} else {
+				return;
 			}
 		} catch (SerializationException e) {
 			throw new RestRuntimeException("Serialization error", e);

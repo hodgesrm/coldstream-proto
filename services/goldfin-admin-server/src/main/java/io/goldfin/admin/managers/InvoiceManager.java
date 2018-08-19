@@ -7,6 +7,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.goldfin.admin.data.tenant.InvoiceDataService;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.managers.validation.InvoiceRuleSet;
 import io.goldfin.admin.managers.validation.Rule;
@@ -16,7 +17,6 @@ import io.goldfin.admin.service.api.model.InvoiceValidationResult;
 import io.goldfin.admin.service.api.model.InvoiceValidationResult.ValidationTypeEnum;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.shared.data.Session;
-import io.goldfin.tenant.data.InvoiceDataService;
 
 /**
  * Handles operations related to invoices.

@@ -5,10 +5,12 @@ package io.goldfin.admin.cli;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.tenant.ExtendedTagSet;
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
@@ -29,6 +31,8 @@ public class CmdDocumentCreate implements Command {
 		parser.accepts("description", "Document description").withRequiredArg().ofType(String.class);
 		parser.accepts("process", "If true automatically scan document").withRequiredArg().ofType(Boolean.class)
 				.defaultsTo(true);
+		parser.accepts("tags", "Tags in form key1:value1,key2:value2,...").withRequiredArg().ofType(String.class)
+				.withValuesSeparatedBy(",");
 	}
 
 	public String getName() {
@@ -48,10 +52,20 @@ public class CmdDocumentCreate implements Command {
 		File file = (File) CliUtils.requiredOption(ctx.options(), "file");
 		String description = (String) ctx.options().valueOf("description");
 		Boolean process = (Boolean) ctx.options().valueOf("process");
+		@SuppressWarnings("unchecked")
+		List<String> tagValueList = (List<String>) ctx.options().valuesOf("tags");
 
 		// Ensure file exists and is readable.
 		if (!file.canRead()) {
 			throw new CommandError(String.format("File is not readable or not found: %s", file.getAbsolutePath()));
+		}
+
+		// Convert tags to TagSet and serialize to JSON since this is form data and
+		// won't accept entities.
+		String serializedTags = null;
+		if (tagValueList != null) {
+			ExtendedTagSet tags = ExtendedTagSet.fromNameValueList(tagValueList);
+			serializedTags = JsonHelper.writeToStringOrNull(tags);
 		}
 
 		// Create the tenant and load file as form data.
@@ -60,6 +74,9 @@ public class CmdDocumentCreate implements Command {
 			RestRequest request = new RestRequest().POST().path("/document").multipart().addFile("file", file);
 			if (description != null) {
 				request.addText("description", description);
+			}
+			if (serializedTags != null) {
+				request.addText("tags", serializedTags);
 			}
 			if (process != null) {
 				request.addText("process", process.toString());

@@ -14,6 +14,7 @@ public class CmdDocumentList implements Command {
 	private OptionParser parser = new OptionParser();
 
 	public CmdDocumentList() {
+		parser.accepts("id", "Document ID (lists all if omitted)").withRequiredArg().ofType(String.class);
 	}
 
 	public String getName() {
@@ -21,7 +22,7 @@ public class CmdDocumentList implements Command {
 	}
 
 	public String getDescription() {
-		return "List documents";
+		return "List document(s)";
 	}
 
 	public OptionParser getOptParser() {
@@ -29,11 +30,19 @@ public class CmdDocumentList implements Command {
 	}
 
 	public void exec(CliContext ctx) {
+		String id = (String) ctx.options().valueOf("id");
+
 		MinimalRestClient client = ctx.getRestClient();
 		try {
-			Document[] documents = client.get("/document", new Document[0].getClass());
-			String documentListing = JsonHelper.writeToString(documents);
-			System.out.println(documentListing);
+			if (id == null) {
+				Document[] documents = client.get("/document", new Document[0].getClass());
+				String documentListing = JsonHelper.writeToString(documents);
+				System.out.println(documentListing);
+			} else {
+				Document document = client.get(String.format("/document/%s", id), Document.class);
+				String documentListing = JsonHelper.writeToString(document);
+				System.out.println(documentListing);
+			}
 		} catch (RestException e) {
 			throw new CommandError(e.getMessage(), e);
 		} finally {

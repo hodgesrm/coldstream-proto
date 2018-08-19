@@ -6,11 +6,11 @@ package io.goldfin.admin.managers;
 import java.security.Principal;
 import java.util.List;
 
+import io.goldfin.admin.data.tenant.HostDataService;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.service.api.model.Host;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.shared.data.Session;
-import io.goldfin.tenant.data.HostDataService;
 
 /**
  * Handles operations related to hosts.

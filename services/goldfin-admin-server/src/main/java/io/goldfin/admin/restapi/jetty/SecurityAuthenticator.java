@@ -23,7 +23,7 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.goldfin.admin.data.SessionData;
+import io.goldfin.admin.data.svc.SessionData;
 import io.goldfin.admin.exceptions.UnauthorizedException;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.UserManager;

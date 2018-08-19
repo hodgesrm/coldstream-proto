@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
@@ -121,6 +122,9 @@ public class DataSeries   {
 
   @JsonProperty("format")
   private FormatEnum format = null;
+
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   @JsonProperty("creationDate")
   private String creationDate = null;
@@ -296,6 +300,25 @@ public class DataSeries   {
     this.format = format;
   }
 
+  public DataSeries tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
   public DataSeries creationDate(String creationDate) {
     this.creationDate = creationDate;
     return this;
@@ -334,12 +357,13 @@ public class DataSeries   {
         Objects.equals(this.locator, dataSeries.locator) &&
         Objects.equals(this.state, dataSeries.state) &&
         Objects.equals(this.format, dataSeries.format) &&
+        Objects.equals(this.tags, dataSeries.tags) &&
         Objects.equals(this.creationDate, dataSeries.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, contentType, contentLength, thumbprint, locator, state, format, creationDate);
+    return Objects.hash(id, name, description, contentType, contentLength, thumbprint, locator, state, format, tags, creationDate);
   }
 
 
@@ -357,6 +381,7 @@ public class DataSeries   {
     sb.append("    locator: ").append(toIndentedString(locator)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    format: ").append(toIndentedString(format)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();

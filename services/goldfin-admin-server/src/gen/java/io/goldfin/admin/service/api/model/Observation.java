@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
@@ -33,6 +34,9 @@ public class Observation   {
 
   @JsonProperty("effectiveDate")
   private Date effectiveDate = null;
+
+  @JsonProperty("nonce")
+  private Long nonce = null;
 
   @JsonProperty("description")
   private String description = null;
@@ -75,6 +79,9 @@ public class Observation   {
   @JsonProperty("version")
   private String version = null;
 
+  @JsonProperty("tags")
+  private TagSet tags = null;
+
   public Observation vendorIdentifier(String vendorIdentifier) {
     this.vendorIdentifier = vendorIdentifier;
     return this;
@@ -111,6 +118,25 @@ public class Observation   {
 
   public void setEffectiveDate(Date effectiveDate) {
     this.effectiveDate = effectiveDate;
+  }
+
+  public Observation nonce(Long nonce) {
+    this.nonce = nonce;
+    return this;
+  }
+
+  /**
+   * A randomly generated integer to help ensure loading is idempotent (i.e., can be repeated without generating multiple copies of the same observation)
+   * @return nonce
+   **/
+  @JsonProperty("nonce")
+  @ApiModelProperty(value = "A randomly generated integer to help ensure loading is idempotent (i.e., can be repeated without generating multiple copies of the same observation)")
+  public Long getNonce() {
+    return nonce;
+  }
+
+  public void setNonce(Long nonce) {
+    this.nonce = nonce;
   }
 
   public Observation description(String description) {
@@ -189,6 +215,25 @@ public class Observation   {
     this.version = version;
   }
 
+  public Observation tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -201,15 +246,17 @@ public class Observation   {
     Observation observation = (Observation) o;
     return Objects.equals(this.vendorIdentifier, observation.vendorIdentifier) &&
         Objects.equals(this.effectiveDate, observation.effectiveDate) &&
+        Objects.equals(this.nonce, observation.nonce) &&
         Objects.equals(this.description, observation.description) &&
         Objects.equals(this.observationType, observation.observationType) &&
         Objects.equals(this.data, observation.data) &&
-        Objects.equals(this.version, observation.version);
+        Objects.equals(this.version, observation.version) &&
+        Objects.equals(this.tags, observation.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(vendorIdentifier, effectiveDate, description, observationType, data, version);
+    return Objects.hash(vendorIdentifier, effectiveDate, nonce, description, observationType, data, version, tags);
   }
 
 
@@ -220,10 +267,12 @@ public class Observation   {
     
     sb.append("    vendorIdentifier: ").append(toIndentedString(vendorIdentifier)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
+    sb.append("    nonce: ").append(toIndentedString(nonce)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    observationType: ").append(toIndentedString(observationType)).append("\n");
     sb.append("    data: ").append(toIndentedString(data)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("}");
     return sb.toString();
   }

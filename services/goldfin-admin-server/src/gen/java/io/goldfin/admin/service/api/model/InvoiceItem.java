@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.goldfin.admin.service.api.model.DocumentRegion;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
@@ -97,6 +98,9 @@ public class InvoiceItem   {
 
   @JsonProperty("inventoryType")
   private InventoryTypeEnum inventoryType = null;
+
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   public InvoiceItem itemId(String itemId) {
     this.itemId = itemId;
@@ -345,6 +349,25 @@ public class InvoiceItem   {
     this.inventoryType = inventoryType;
   }
 
+  public InvoiceItem tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -367,12 +390,13 @@ public class InvoiceItem   {
         Objects.equals(this.oneTimeCharge, invoiceItem.oneTimeCharge) &&
         Objects.equals(this.region, invoiceItem.region) &&
         Objects.equals(this.inventoryId, invoiceItem.inventoryId) &&
-        Objects.equals(this.inventoryType, invoiceItem.inventoryType);
+        Objects.equals(this.inventoryType, invoiceItem.inventoryType) &&
+        Objects.equals(this.tags, invoiceItem.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(itemId, resourceId, description, unitAmount, units, totalAmount, currency, startDate, endDate, oneTimeCharge, region, inventoryId, inventoryType);
+    return Objects.hash(itemId, resourceId, description, unitAmount, units, totalAmount, currency, startDate, endDate, oneTimeCharge, region, inventoryId, inventoryType, tags);
   }
 
 
@@ -394,6 +418,7 @@ public class InvoiceItem   {
     sb.append("    region: ").append(toIndentedString(region)).append("\n");
     sb.append("    inventoryId: ").append(toIndentedString(inventoryId)).append("\n");
     sb.append("    inventoryType: ").append(toIndentedString(inventoryType)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("}");
     return sb.toString();
   }

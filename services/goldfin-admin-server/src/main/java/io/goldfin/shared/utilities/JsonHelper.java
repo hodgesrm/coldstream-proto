@@ -20,7 +20,7 @@ public class JsonHelper {
 	/**
 	 * Deserialize from a JSON string to Java object.
 	 */
-	public static <T> T readFromString(String string, Class<T> outputType) {
+	public static <T> T readFromString(String string, Class<T> outputType) throws SerializationException {
 		try {
 			ObjectMapper mapper = new ObjectMapper(new JsonFactory());
 			return mapper.readValue(string, outputType);
@@ -30,9 +30,21 @@ public class JsonHelper {
 	}
 
 	/**
+	 * Deserialize from a JSON string that might also be null. If null, just return
+	 * that; otherwise, deserialize to Java object.
+	 */
+	public static <T> T readFromStringOrNull(String string, Class<T> outputType) throws SerializationException {
+		if (string == null) {
+			return null;
+		} else {
+			return readFromString(string, outputType);
+		}
+	}
+
+	/**
 	 * Deserialize from a binary stream to Java object.
 	 */
-	public static <T> T readFromStream(InputStream input, Class<T> outputType) {
+	public static <T> T readFromStream(InputStream input, Class<T> outputType) throws SerializationException {
 		try {
 			ObjectMapper mapper = new ObjectMapper(new JsonFactory());
 			return mapper.readValue(input, outputType);
@@ -44,7 +56,7 @@ public class JsonHelper {
 	/**
 	 * Deserialize from a JSON file to Java object.
 	 */
-	public static <T> T readFromFile(File file, Class<T> outputType) {
+	public static <T> T readFromFile(File file, Class<T> outputType) throws SerializationException {
 		try {
 			ObjectMapper mapper = new ObjectMapper(new JsonFactory());
 			return mapper.readValue(file, outputType);
@@ -56,7 +68,7 @@ public class JsonHelper {
 	/**
 	 * Deserialize from a JSON file on Java resource path to Java object.
 	 */
-	public static <T> T readFromClasspath(String path, Class<T> outputType) {
+	public static <T> T readFromClasspath(String path, Class<T> outputType) throws SerializationException {
 		ClassLoader classLoader = new JsonHelper().getClass().getClassLoader();
 		File file = new File(classLoader.getResource(path).getFile());
 		return readFromFile(file, outputType);
@@ -65,7 +77,7 @@ public class JsonHelper {
 	/**
 	 * Serialize from Java object to an output stream.
 	 */
-	public static void writeToStream(OutputStream stream, Object o) {
+	public static void writeToStream(OutputStream stream, Object o) throws SerializationException {
 		try {
 			ObjectMapper mapper = getObjectMapper();
 			mapper.writeValue(stream, o);
@@ -77,7 +89,7 @@ public class JsonHelper {
 	/**
 	 * Serialize from Java object to a JSON file.
 	 */
-	public static void writeToFile(File file, Object o) {
+	public static void writeToFile(File file, Object o) throws SerializationException {
 		try {
 			ObjectMapper mapper = getObjectMapper();
 			mapper.writeValue(file, o);
@@ -89,7 +101,7 @@ public class JsonHelper {
 	/**
 	 * Serialize from Java object to a JSON string.
 	 */
-	public static String writeToString(Object o) {
+	public static String writeToString(Object o) throws SerializationException {
 		try {
 			ObjectMapper mapper = getObjectMapper();
 			return mapper.writeValueAsString(o);
@@ -98,9 +110,21 @@ public class JsonHelper {
 		}
 	}
 
-	/** 
-	 * Returns an object mapper that uses custom date formatting so 
-	 * that classes like java.util.Date print consistently. 
+	/**
+	 * Serialize from Java object to a JSON string if the input argument is
+	 * non-null; otherwise emit a null.
+	 */
+	public static String writeToStringOrNull(Object o) throws SerializationException {
+		if (o == null) {
+			return null;
+		} else {
+			return writeToString(o);
+		}
+	}
+
+	/**
+	 * Returns an object mapper that uses custom date formatting so that classes
+	 * like java.util.Date print consistently.
 	 */
 	private static ObjectMapper getObjectMapper() {
 		ObjectMapper mapper = new ObjectMapper(new JsonFactory());

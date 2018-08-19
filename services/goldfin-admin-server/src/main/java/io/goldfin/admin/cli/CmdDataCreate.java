@@ -5,11 +5,13 @@ package io.goldfin.admin.cli;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.List;
 
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.tenant.ExtendedTagSet;
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
@@ -31,6 +33,8 @@ public class CmdDataCreate implements Command {
 		parser.accepts("description", "Data series description").withRequiredArg().ofType(String.class);
 		parser.accepts("process", "If true automatically process data series").withRequiredArg().ofType(Boolean.class)
 				.defaultsTo(true);
+		parser.accepts("tags", "Tags in form key1:value1,key2:value2,...").withRequiredArg().ofType(String.class)
+				.withValuesSeparatedBy(",");
 	}
 
 	public String getName() {
@@ -49,10 +53,20 @@ public class CmdDataCreate implements Command {
 		File file = (File) CliUtils.requiredOption(ctx.options(), "file");
 		String description = (String) ctx.options().valueOf("description");
 		Boolean process = (Boolean) ctx.options().valueOf("process");
+		@SuppressWarnings("unchecked")
+		List<String> tagValueList = (List<String>) ctx.options().valuesOf("tags");
 
 		// Ensure file exists and is readable.
 		if (!file.canRead()) {
 			throw new CommandError(String.format("File is not readable or not found: %s", file.getAbsolutePath()));
+		}
+
+		// Convert tags to TagSet and serialize to JSON since this is form data and
+		// won't accept entities.
+		String serializedTags = null;
+		if (tagValueList != null) {
+			ExtendedTagSet tags = ExtendedTagSet.fromNameValueList(tagValueList);
+			serializedTags = JsonHelper.writeToStringOrNull(tags);
 		}
 
 		// See if we can tell the file type from the suffix.
@@ -71,6 +85,9 @@ public class CmdDataCreate implements Command {
 			RestRequest request = new RestRequest().POST().path("/data").multipart().addFile("file", file, contentType);
 			if (description != null) {
 				request.addText("description", description);
+			}
+			if (serializedTags != null) {
+				request.addText("tags", serializedTags);
 			}
 			if (process != null) {
 				request.addText("process", process.toString());

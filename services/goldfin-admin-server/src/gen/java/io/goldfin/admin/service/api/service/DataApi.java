@@ -70,11 +70,12 @@ public class DataApi  {
     public Response dataCreate(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
-,@ApiParam(value = "A optional description of the data series")@FormDataParam("description")  String description
+,@ApiParam(value = "An optional description of the data series")@FormDataParam("description")  String description
+,@ApiParam(value = "Optional tags that apply to this entity passed as a JSON string containing name-value pairs.")@FormDataParam("tags")  String tags
 ,@ApiParam(value = "Optional flag to kick off processing automatically if true", defaultValue="true")@FormDataParam("process")  Boolean process
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.dataCreate(fileInputStream, fileDetail,description,process,securityContext);
+        return delegate.dataCreate(fileInputStream, fileDetail,description,tags,process,securityContext);
     }
     @DELETE
     @Path("/{id}")
@@ -157,5 +158,23 @@ public class DataApi  {
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.dataShowContent(id,securityContext);
+    }
+    @PUT
+    @Path("/{id}")
+    @Consumes({ "application/json" })
+    
+    @io.swagger.annotations.ApiOperation(value = "Update a data series", notes = "Update data series description and/or tags.  Other fields are ignored if included in the body.", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
+    }, tags={ "inventory", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+    public Response dataUpdate(@ApiParam(value = "Data series ID",required=true) @PathParam("id") String id
+,@ApiParam(value = "Data series parameters" ) DataSeries body
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.dataUpdate(id,body,securityContext);
     }
 }

@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import io.goldfin.admin.service.api.model.Document;
+import io.goldfin.admin.service.api.model.DocumentParameters;
 import java.io.File;
 import io.goldfin.admin.service.api.model.ModelApiResponse;
 
@@ -70,11 +71,12 @@ public class DocumentApi  {
     public Response documentCreate(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
-,@ApiParam(value = "A optional description of the document")@FormDataParam("description")  String description
+,@ApiParam(value = "An optional description of the document")@FormDataParam("description")  String description
+,@ApiParam(value = "Optional tags that apply to this document passed as a JSON string containing name-value pairs.")@FormDataParam("tags")  String tags
 ,@ApiParam(value = "Optional flag to kick off scanning automatically if true", defaultValue="true")@FormDataParam("process")  Boolean process
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.documentCreate(fileInputStream, fileDetail,description,process,securityContext);
+        return delegate.documentCreate(fileInputStream, fileDetail,description,tags,process,securityContext);
     }
     @DELETE
     @Path("/{id}")
@@ -157,5 +159,23 @@ public class DocumentApi  {
     public Response documentShowAll(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.documentShowAll(securityContext);
+    }
+    @PUT
+    @Path("/{id}")
+    @Consumes({ "application/json" })
+    
+    @io.swagger.annotations.ApiOperation(value = "Update a document", notes = "Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones.", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "ApiKey"),
+        @io.swagger.annotations.Authorization(value = "SessionKey")
+    }, tags={ "document", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+    public Response documentUpdate(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
+,@ApiParam(value = "Document parameters" ) DocumentParameters body
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.documentUpdate(id,body,securityContext);
     }
 }

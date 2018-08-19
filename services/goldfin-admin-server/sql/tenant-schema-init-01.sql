@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS documents (
   id uuid PRIMARY KEY,
   name varchar(250),
   description varchar(250),
-  tags varchar(500),
   content_type varchar(100),
   content_length bigint, 
   thumbprint varchar(100), 
@@ -13,6 +12,7 @@ CREATE TABLE IF NOT EXISTS documents (
   state varchar(20) CHECK (state IN ('CREATED', 'SCAN_REQUESTED', 'SCANNED', 'ERROR')),
   semantic_type varchar(10) CHECK (semantic_type IN ('INVOICE', 'UNKNOWN')),
   semantic_id uuid,
+  tags jsonb,
   creation_date timestamp DEFAULT current_timestamp
 )
 ;
@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS invoices (
   id uuid PRIMARY KEY, 
   document_id uuid REFERENCES documents(id) ON DELETE CASCADE,
   description varchar(250),
-  tags varchar(500),
   identifier varchar(100), 
   effective_date timestamp, 
   vendor varchar(100), 
@@ -32,6 +31,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   tax numeric(10,2), 
   total_amount numeric(10,2),
   currency char(3),
+  tags jsonb,
   creation_date timestamp DEFAULT current_timestamp
 )
 ;
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
   region text,
   inventory_id varchar(250), 
   inventory_type varchar(50), 
+  tags jsonb,
   creation_date timestamp DEFAULT current_timestamp,
   PRIMARY KEY (invoice_id, item_row_number)
 )
@@ -64,6 +65,7 @@ CREATE TABLE IF NOT EXISTS vendors (
   identifier varchar(250) UNIQUE, 
   name varchar(250) UNIQUE,
   state varchar(10) CHECK (state IN ('ACTIVE', 'INACTIVE')),
+  tags jsonb,
   creation_date timestamp DEFAULT current_timestamp
 )
 ;
@@ -79,6 +81,7 @@ CREATE TABLE IF NOT EXISTS data_series (
   locator varchar(250),
   state varchar(20) CHECK (state IN ('CREATED', 'PROCESS_REQUESTED', 'PROCESSED', 'ERROR')),
   format varchar(10) CHECK (format IN ('OBSERVATION', 'UNKNOWN')),
+  tags jsonb,
   creation_date timestamp DEFAULT current_timestamp
 )
 ;
@@ -107,7 +110,8 @@ CREATE TABLE IF NOT EXISTS hosts (
   ssd bigint,
   nic_count integer,
   network_traffic_limit bigint,
-  backup_enabled boolean
+  backup_enabled boolean,
+  tags jsonb
 )
 ;
 CREATE INDEX ON hosts(host_id)

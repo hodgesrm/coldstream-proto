@@ -6,11 +6,11 @@ package io.goldfin.admin.managers;
 import java.security.Principal;
 import java.util.List;
 
+import io.goldfin.admin.data.tenant.VendorDataService;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.service.api.model.Vendor;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.shared.data.Session;
-import io.goldfin.tenant.data.VendorDataService;
 
 /**
  * Handles operations related to vendors.

@@ -6,6 +6,8 @@ package io.goldfin.admin.managers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.tenant.DataSeriesDataService;
+import io.goldfin.admin.data.tenant.HostDataService;
 import io.goldfin.admin.service.api.model.DataSeries;
 import io.goldfin.admin.service.api.model.DataSeries.StateEnum;
 import io.goldfin.admin.service.api.model.Host;
@@ -16,8 +18,6 @@ import io.goldfin.shared.cloud.QueueConnection;
 import io.goldfin.shared.cloud.StructuredMessage;
 import io.goldfin.shared.data.Session;
 import io.goldfin.shared.utilities.JsonHelper;
-import io.goldfin.tenant.data.DataSeriesDataService;
-import io.goldfin.tenant.data.HostDataService;
 
 /**
  * Executes an endless loop to look for and process data series analysis

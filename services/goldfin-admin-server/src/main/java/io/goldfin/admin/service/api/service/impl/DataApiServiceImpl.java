@@ -5,6 +5,7 @@ package io.goldfin.admin.service.api.service.impl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -18,8 +19,10 @@ import org.slf4j.LoggerFactory;
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.managers.DataSeriesManager;
+import io.goldfin.admin.managers.DocumentManager;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.service.api.model.DataSeries;
+import io.goldfin.admin.service.api.model.DocumentParameters;
 import io.goldfin.admin.service.api.service.ApiResponseMessage;
 import io.goldfin.admin.service.api.service.DataApiService;
 import io.goldfin.admin.service.api.service.NotFoundException;
@@ -33,9 +36,9 @@ public class DataApiServiceImpl extends DataApiService {
 
 	@Override
 	public Response dataCreate(InputStream fileInputStream, FormDataContentDisposition fileDetail, String description,
-			Boolean process, SecurityContext securityContext) throws NotFoundException {
+			String tags, Boolean process, SecurityContext securityContext) throws NotFoundException {
 		try {
-			// Infer content type since we just see 'form-data' from Jax RS implementation. 
+			// Infer content type since we just see 'form-data' from Jax RS implementation.
 			File file = new File(fileDetail.getFileName());
 			ContentType contentType = null;
 			if (file.getName().toLowerCase().endsWith(".json")) {
@@ -43,12 +46,13 @@ public class DataApiServiceImpl extends DataApiService {
 			} else if (file.getName().toLowerCase().endsWith(".zip")) {
 				contentType = ContentType.create("application/zip");
 			} else {
-				throw new InvalidInputException(String.format("File must have .json or .zip suffix: %s", file.getAbsolutePath()));
+				throw new InvalidInputException(
+						String.format("File must have .json or .zip suffix: %s", file.getAbsolutePath()));
 			}
-			// Store file. 
+			// Store file.
 			DataSeriesManager dsm = ManagerRegistry.getInstance().getManager(DataSeriesManager.class);
 			DataSeries dm = dsm.createDataSeries(securityContext.getUserPrincipal(), fileInputStream,
-					fileDetail.getFileName(), description, contentType.toString(), process);
+					fileDetail.getFileName(), description, tags, contentType.toString(), process);
 			return Response.ok().entity(dm).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
@@ -85,8 +89,14 @@ public class DataApiServiceImpl extends DataApiService {
 
 	@Override
 	public Response dataShow(String id, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			DataSeriesManager dsm = ManagerRegistry.getInstance().getManager(DataSeriesManager.class);
+			Principal principal = securityContext.getUserPrincipal();
+			DataSeries ds = dsm.getDataSeries(principal, id);
+			return Response.ok().entity(ds).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
 	}
 
 	@Override
@@ -95,6 +105,18 @@ public class DataApiServiceImpl extends DataApiService {
 			DataSeriesManager dsm = ManagerRegistry.getInstance().getManager(DataSeriesManager.class);
 			List<DataSeries> series = dsm.getAllDataSeries(securityContext.getUserPrincipal());
 			return Response.ok().entity(series).build();
+		} catch (Exception e) {
+			return helper.toApiResponse(e);
+		}
+	}
+
+	@Override
+	public Response dataUpdate(String id, DataSeries body, SecurityContext securityContext)
+			throws NotFoundException {
+		try {
+			DataSeriesManager dsm = ManagerRegistry.getInstance().getManager(DataSeriesManager.class);
+			dsm.updateDataSeries(securityContext.getUserPrincipal(), id, body);
+			return Response.accepted().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
 		}

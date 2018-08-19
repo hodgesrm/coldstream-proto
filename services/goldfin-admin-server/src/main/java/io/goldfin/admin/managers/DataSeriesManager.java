@@ -18,6 +18,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.tenant.DataSeriesDataService;
+import io.goldfin.admin.data.tenant.ExtendedTagSet;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.DataSeries;
@@ -27,7 +29,8 @@ import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 import io.goldfin.shared.data.Session;
-import io.goldfin.tenant.data.DataSeriesDataService;
+import io.goldfin.shared.utilities.JsonHelper;
+import io.goldfin.shared.utilities.SerializationException;
 
 /**
  * Handles operations related to data series, which are uploads of observations.
@@ -52,9 +55,18 @@ public class DataSeriesManager implements Manager {
 	}
 
 	public DataSeries createDataSeries(Principal principal, InputStream content, String fileName, String description,
-			String contentType, Boolean scan) throws IOException {
+			String tags, String contentType, Boolean scan) throws IOException {
 		String tenantId = getTenantId(principal);
 		DataSeriesDataService dsdService = new DataSeriesDataService();
+
+		// Ensure we can convert the tag string to a TagSet.
+		ExtendedTagSet tagSet = null;
+		try {
+			tagSet = JsonHelper.readFromStringOrNull(tags, ExtendedTagSet.class);
+		} catch (SerializationException e) {
+			throw new InvalidInputException(String.format(
+					"Unable to read tags; perhaps they are not serialized to TagSet JSON representation: %s", tags));
+		}
 
 		// Download the dataSeries into a temporary file.
 		File tempFile = Files.createTempFile(tenantId, fileName, new FileAttribute<?>[0]).toFile();
@@ -103,6 +115,7 @@ public class DataSeriesManager implements Manager {
 		dataSeries.setThumbprint(sha256);
 		dataSeries.setLocator(locator);
 		dataSeries.setState(StateEnum.CREATED);
+		dataSeries.setTags(tagSet);
 
 		try (Session session = context.tenantSession(tenantId).enlist(dsdService)) {
 			String id = dsdService.create(dataSeries);
@@ -118,6 +131,32 @@ public class DataSeriesManager implements Manager {
 
 		// All done!
 		return this.getDataSeries(principal, dataSeries.getId().toString());
+	}
+
+	public void updateDataSeries(Principal principal, String id, DataSeries docParams) {
+		// Find the dataSeries to ensure it exists.
+		DataSeries dataSeries = getDataSeries(principal, id);
+		String tenantId = getTenantId(principal);
+
+		// Update with parameters.
+		if (docParams.getDescription() != null) {
+			dataSeries.setDescription(docParams.getDescription());
+		}
+		if (docParams.getTags() != null) {
+			dataSeries.setTags(docParams.getTags());
+		}
+
+		// Update the dataSeries.
+		DataSeriesDataService docService = new DataSeriesDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
+			int rows = docService.update(id, dataSeries);
+			session.commit();
+			if (rows == 0) {
+				// Could happen due to concurrent access.
+				throw new EntityNotFoundException(
+						String.format("DataSeries update failed: dataSeriesId=%s", dataSeries.getId().toString()));
+			}
+		}
 	}
 
 	public void processDataSeries(Principal principal, String id) {

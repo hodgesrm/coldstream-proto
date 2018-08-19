@@ -21,8 +21,9 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Tag
+ * A key-value pair used to add relevant descriptive information. Tags are not interpreted and may contain data like business unit IDs, contract names, or other information users find relevant to classify or associate the data to which they apply.
  */
+@ApiModel(description = "A key-value pair used to add relevant descriptive information. Tags are not interpreted and may contain data like business unit IDs, contract names, or other information users find relevant to classify or associate the data to which they apply.")
 
 public class Tag   {
   @JsonProperty("name")
@@ -37,11 +38,11 @@ public class Tag   {
   }
 
   /**
-   * Get name
+   * A user-defined name for the tag
    * @return name
    **/
   @JsonProperty("name")
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "A user-defined name for the tag")
   public String getName() {
     return name;
   }
@@ -56,11 +57,11 @@ public class Tag   {
   }
 
   /**
-   * Get value
+   * A user-defined value for the tag
    * @return value
    **/
   @JsonProperty("value")
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "A user-defined value for the tag")
   public String getValue() {
     return value;
   }

@@ -16,6 +16,7 @@ package io.goldfin.admin.service.api.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
@@ -26,30 +27,11 @@ import javax.validation.constraints.*;
 @ApiModel(description = "User settable document parameters")
 
 public class DocumentParameters   {
-  @JsonProperty("name")
-  private String name = null;
-
   @JsonProperty("description")
   private String description = null;
 
-  public DocumentParameters name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  /**
-   * Name of the document
-   * @return name
-   **/
-  @JsonProperty("name")
-  @ApiModelProperty(value = "Name of the document")
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   public DocumentParameters description(String description) {
     this.description = description;
@@ -70,6 +52,25 @@ public class DocumentParameters   {
     this.description = description;
   }
 
+  public DocumentParameters tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -80,13 +81,13 @@ public class DocumentParameters   {
       return false;
     }
     DocumentParameters documentParameters = (DocumentParameters) o;
-    return Objects.equals(this.name, documentParameters.name) &&
-        Objects.equals(this.description, documentParameters.description);
+    return Objects.equals(this.description, documentParameters.description) &&
+        Objects.equals(this.tags, documentParameters.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description);
+    return Objects.hash(description, tags);
   }
 
 
@@ -95,8 +96,8 @@ public class DocumentParameters   {
     StringBuilder sb = new StringBuilder();
     sb.append("class DocumentParameters {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("}");
     return sb.toString();
   }

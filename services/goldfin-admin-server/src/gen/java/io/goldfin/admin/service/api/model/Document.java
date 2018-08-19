@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
@@ -37,9 +38,6 @@ public class Document   {
 
   @JsonProperty("description")
   private String description = null;
-
-  @JsonProperty("tags")
-  private String tags = null;
 
   @JsonProperty("contentType")
   private String contentType = null;
@@ -128,6 +126,9 @@ public class Document   {
   @JsonProperty("semanticId")
   private UUID semanticId = null;
 
+  @JsonProperty("tags")
+  private TagSet tags = null;
+
   @JsonProperty("creationDate")
   private String creationDate = null;
 
@@ -186,25 +187,6 @@ public class Document   {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public Document tags(String tags) {
-    this.tags = tags;
-    return this;
-  }
-
-  /**
-   * A user-provided list of name-value pairs that describe the invoice
-   * @return tags
-   **/
-  @JsonProperty("tags")
-  @ApiModelProperty(value = "A user-provided list of name-value pairs that describe the invoice")
-  public String getTags() {
-    return tags;
-  }
-
-  public void setTags(String tags) {
-    this.tags = tags;
   }
 
   public Document contentType(String contentType) {
@@ -340,6 +322,25 @@ public class Document   {
     this.semanticId = semanticId;
   }
 
+  public Document tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
   public Document creationDate(String creationDate) {
     this.creationDate = creationDate;
     return this;
@@ -372,7 +373,6 @@ public class Document   {
     return Objects.equals(this.id, document.id) &&
         Objects.equals(this.name, document.name) &&
         Objects.equals(this.description, document.description) &&
-        Objects.equals(this.tags, document.tags) &&
         Objects.equals(this.contentType, document.contentType) &&
         Objects.equals(this.contentLength, document.contentLength) &&
         Objects.equals(this.thumbprint, document.thumbprint) &&
@@ -380,12 +380,13 @@ public class Document   {
         Objects.equals(this.state, document.state) &&
         Objects.equals(this.semanticType, document.semanticType) &&
         Objects.equals(this.semanticId, document.semanticId) &&
+        Objects.equals(this.tags, document.tags) &&
         Objects.equals(this.creationDate, document.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, tags, contentType, contentLength, thumbprint, locator, state, semanticType, semanticId, creationDate);
+    return Objects.hash(id, name, description, contentType, contentLength, thumbprint, locator, state, semanticType, semanticId, tags, creationDate);
   }
 
 
@@ -397,7 +398,6 @@ public class Document   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    contentType: ").append(toIndentedString(contentType)).append("\n");
     sb.append("    contentLength: ").append(toIndentedString(contentLength)).append("\n");
     sb.append("    thumbprint: ").append(toIndentedString(thumbprint)).append("\n");
@@ -405,6 +405,7 @@ public class Document   {
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    semanticType: ").append(toIndentedString(semanticType)).append("\n");
     sb.append("    semanticId: ").append(toIndentedString(semanticId)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();

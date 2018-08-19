@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.goldfin.admin.service.api.model.InvoiceItem;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
@@ -41,9 +42,6 @@ public class Invoice   {
   @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("tags")
-  private String tags = null;
-
   @JsonProperty("identifier")
   private String identifier = null;
 
@@ -67,6 +65,9 @@ public class Invoice   {
 
   @JsonProperty("items")
   private List<InvoiceItem> items = null;
+
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   @JsonProperty("creationDate")
   private String creationDate = null;
@@ -126,25 +127,6 @@ public class Invoice   {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public Invoice tags(String tags) {
-    this.tags = tags;
-    return this;
-  }
-
-  /**
-   * A user-provided list of name-value pairs that describe the invoice
-   * @return tags
-   **/
-  @JsonProperty("tags")
-  @ApiModelProperty(value = "A user-provided list of name-value pairs that describe the invoice")
-  public String getTags() {
-    return tags;
-  }
-
-  public void setTags(String tags) {
-    this.tags = tags;
   }
 
   public Invoice identifier(String identifier) {
@@ -307,6 +289,25 @@ public class Invoice   {
     this.items = items;
   }
 
+  public Invoice tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
   public Invoice creationDate(String creationDate) {
     this.creationDate = creationDate;
     return this;
@@ -339,7 +340,6 @@ public class Invoice   {
     return Objects.equals(this.id, invoice.id) &&
         Objects.equals(this.documentId, invoice.documentId) &&
         Objects.equals(this.description, invoice.description) &&
-        Objects.equals(this.tags, invoice.tags) &&
         Objects.equals(this.identifier, invoice.identifier) &&
         Objects.equals(this.effectiveDate, invoice.effectiveDate) &&
         Objects.equals(this.vendorIdentifier, invoice.vendorIdentifier) &&
@@ -348,12 +348,13 @@ public class Invoice   {
         Objects.equals(this.totalAmount, invoice.totalAmount) &&
         Objects.equals(this.currency, invoice.currency) &&
         Objects.equals(this.items, invoice.items) &&
+        Objects.equals(this.tags, invoice.tags) &&
         Objects.equals(this.creationDate, invoice.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, documentId, description, tags, identifier, effectiveDate, vendorIdentifier, subtotalAmount, tax, totalAmount, currency, items, creationDate);
+    return Objects.hash(id, documentId, description, identifier, effectiveDate, vendorIdentifier, subtotalAmount, tax, totalAmount, currency, items, tags, creationDate);
   }
 
 
@@ -365,7 +366,6 @@ public class Invoice   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    documentId: ").append(toIndentedString(documentId)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
     sb.append("    vendorIdentifier: ").append(toIndentedString(vendorIdentifier)).append("\n");
@@ -374,6 +374,7 @@ public class Invoice   {
     sb.append("    totalAmount: ").append(toIndentedString(totalAmount)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    items: ").append(toIndentedString(items)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();

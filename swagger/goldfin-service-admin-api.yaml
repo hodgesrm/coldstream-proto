@@ -341,7 +341,7 @@ paths:
           type: string
         - name: body
           in: body
-          description: API Key parameters, including name of key. 
+          description: 'API Key parameters, including name of key.'
           schema:
             $ref: '#/definitions/ApiKeyParameters'
       responses:
@@ -645,7 +645,11 @@ paths:
       parameters:
         - name: description
           in: formData
-          description: A optional description of the document
+          description: An optional description of the document
+          type: string
+        - name: tags
+          in: formData
+          description: Optional tags that apply to this document passed as a JSON string containing name-value pairs.
           type: string
         - name: process
           in: formData
@@ -701,6 +705,30 @@ paths:
           description: Successful
           schema:
             $ref: '#/definitions/Document'
+        '404':
+          description: Not Found
+    put:
+      tags:
+        - document
+      summary: Update a document
+      description: Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones. 
+      operationId: documentUpdate
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Document ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Document parameters
+          schema:
+            $ref: '#/definitions/DocumentParameters'
+      responses:
+        '200':
+          description: Successful
         '404':
           description: Not Found
     delete:
@@ -781,7 +809,11 @@ paths:
       parameters:
         - name: description
           in: formData
-          description: A optional description of the data series
+          description: An optional description of the data series
+          type: string
+        - name: tags
+          in: formData
+          description: Optional tags that apply to this entity passed as a JSON string containing name-value pairs.
           type: string
         - name: process
           in: formData
@@ -837,6 +869,30 @@ paths:
           description: Successful
           schema:
             $ref: '#/definitions/DataSeries'
+        '404':
+          description: Not Found
+    put:
+      tags:
+        - inventory
+      summary: Update a data series
+      description: Update data series description and/or tags.  Other fields are ignored if included in the body.
+      operationId: dataUpdate
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Data series ID
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Data series parameters
+          schema:
+            $ref: '#/definitions/DataSeries'
+      responses:
+        '200':
+          description: Successful
         '404':
           description: Not Found
     delete:
@@ -1150,6 +1206,8 @@ definitions:
         enum:
           - ACTIVE
           - INACTIVE
+      tags:
+        $ref: '#/definitions/TagSet'
       creationDate:
         type: string
         description: Date record was created
@@ -1169,6 +1227,8 @@ definitions:
         enum:
           - ACTIVE
           - INACTIVE
+      tags:
+        $ref: '#/definitions/TagSet'
   Document:
     description: 'A document, for example a PDF file containing an invoice'
     type: object
@@ -1183,9 +1243,6 @@ definitions:
       description:
         type: string
         description: Optional description of the document
-      tags:
-        type: string
-        description: A user-provided list of name-value pairs that describe the invoice
       contentType:
         type: string
         description: 'Internet media type (e.g., application/octet-stream)'
@@ -1218,6 +1275,8 @@ definitions:
         type: string
         description: 'ID of the document''s scanned content, e.g. an invoice ID'
         format: uuid
+      tags:
+        $ref: '#/definitions/TagSet'
       creationDate:
         type: string
         description: Date document was uploaded
@@ -1225,12 +1284,11 @@ definitions:
     description: User settable document parameters
     type: object
     properties:
-      name:
-        type: string
-        description: Name of the document
       description:
         type: string
         description: Optional description of the document
+      tags:
+        $ref: '#/definitions/TagSet'
   DocumentRegion:
     description: >-
       Location within a document page expressed in page number and pixel region
@@ -1275,9 +1333,6 @@ definitions:
       description:
         type: string
         description: A user-provided description of the invoice
-      tags:
-        type: string
-        description: A user-provided list of name-value pairs that describe the invoice
       identifier:
         type: string
         description: Invoice identifier
@@ -1305,6 +1360,8 @@ definitions:
         description: Invoice items
         items:
           $ref: '#/definitions/InvoiceItem'
+      tags:
+        $ref: '#/definitions/TagSet'
       creationDate:
         type: string
         description: Date user record was created
@@ -1355,6 +1412,8 @@ definitions:
         type: string
         enum:
           - HOST
+      tags:
+        $ref: '#/definitions/TagSet'
   InvoiceParameters:
     description: User settable invoice parameters
     properties:
@@ -1362,8 +1421,7 @@ definitions:
         type: string
         description: A user-provided description of the invoice
       tags:
-        type: string
-        description: A user-provided list of name-value pairs that describe the invoice
+        $ref: '#/definitions/TagSet'
   ValidationType:
     type: string
     description: Key describing a specific validation type
@@ -1449,6 +1507,8 @@ definitions:
         enum:
           - OBSERVATION
           - UNKNOWN
+      tags:
+        $ref: '#/definitions/TagSet'
       creationDate:
         type: string
         description: Date data was uploaded
@@ -1463,6 +1523,10 @@ definitions:
         type: string
         format: date-time
         description: Effective date when observation was made
+      nonce:
+        type: integer
+        format: int64
+        description: A randomly generated integer to help ensure loading is idempotent (i.e., can be repeated without generating multiple copies of the same observation)
       description:
         type: string
         description: Optional description of observation
@@ -1476,6 +1540,8 @@ definitions:
       version:
         type: string
         description: Data format version
+      tags:
+        $ref: '#/definitions/TagSet'
   Result:
     description: Generic result of processing observation data
     type: object
@@ -1568,13 +1634,21 @@ definitions:
       backupEnabled:
         type: boolean
         description: If true backup is enabled for this host
+  TagSet:
+    type: array
+    description: Collection of tags.  If keys are repeated in the array the last value in order takes precedences
+    items:
+      $ref: '#/definitions/Tag'
   Tag:
     type: object
+    description: A key-value pair used to add relevant descriptive information. Tags are not interpreted and may contain data like business unit IDs, contract names, or other information users find relevant to classify or associate the data to which they apply. 
     properties:
       name:
         type: string
+        description: A user-defined name for the tag
       value:
         type: string
+        description: A user-defined value for the tag
   ApiResponse:
     type: object
     properties:

@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.UUID;
@@ -70,6 +71,9 @@ public class Vendor   {
 
   @JsonProperty("state")
   private StateEnum state = null;
+
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   @JsonProperty("creationDate")
   private String creationDate = null;
@@ -150,6 +154,25 @@ public class Vendor   {
     this.state = state;
   }
 
+  public Vendor tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
   public Vendor creationDate(String creationDate) {
     this.creationDate = creationDate;
     return this;
@@ -183,12 +206,13 @@ public class Vendor   {
         Objects.equals(this.identifier, vendor.identifier) &&
         Objects.equals(this.name, vendor.name) &&
         Objects.equals(this.state, vendor.state) &&
+        Objects.equals(this.tags, vendor.tags) &&
         Objects.equals(this.creationDate, vendor.creationDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, identifier, name, state, creationDate);
+    return Objects.hash(id, identifier, name, state, tags, creationDate);
   }
 
 
@@ -201,6 +225,7 @@ public class Vendor   {
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("}");
     return sb.toString();

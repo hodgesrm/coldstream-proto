@@ -18,16 +18,20 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.tenant.DocumentDataService;
+import io.goldfin.admin.data.tenant.ExtendedTagSet;
 import io.goldfin.admin.exceptions.EntityNotFoundException;
 import io.goldfin.admin.exceptions.InvalidInputException;
 import io.goldfin.admin.service.api.model.Document;
 import io.goldfin.admin.service.api.model.Document.StateEnum;
+import io.goldfin.admin.service.api.model.DocumentParameters;
 import io.goldfin.admin.service.api.model.User;
 import io.goldfin.shared.cloud.CloudConnectionFactory;
 import io.goldfin.shared.cloud.StorageConnection;
 import io.goldfin.shared.crypto.Sha256HashingAlgorithm;
 import io.goldfin.shared.data.Session;
-import io.goldfin.tenant.data.DocumentDataService;
+import io.goldfin.shared.utilities.JsonHelper;
+import io.goldfin.shared.utilities.SerializationException;
 
 /**
  * Handles operations related to documents.
@@ -52,9 +56,18 @@ public class DocumentManager implements Manager {
 	}
 
 	public Document createDocument(Principal principal, InputStream content, String fileName, String description,
-			String contentType, Boolean scan) throws IOException {
+			String tags, String contentType, Boolean scan) throws IOException {
 		String tenantId = getTenantId(principal);
 		DocumentDataService docService = new DocumentDataService();
+
+		// Ensure we can convert the tag string to a TagSet.
+		ExtendedTagSet tagSet = null;
+		try {
+			tagSet = JsonHelper.readFromStringOrNull(tags, ExtendedTagSet.class);
+		} catch (SerializationException e) {
+			throw new InvalidInputException(String.format(
+					"Unable to read tags; perhaps they are not serialized to TagSet JSON representation: %s", tags));
+		}
 
 		// Download the document into a temporary file.
 		File tempFile = Files.createTempFile(tenantId, fileName, new FileAttribute<?>[0]).toFile();
@@ -104,6 +117,7 @@ public class DocumentManager implements Manager {
 		document.setThumbprint(sha256);
 		document.setLocator(locator);
 		document.setState(StateEnum.CREATED);
+		document.setTags(tagSet);
 
 		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
 			String id = docService.create(document);
@@ -119,6 +133,32 @@ public class DocumentManager implements Manager {
 
 		// All done!
 		return this.getDocument(principal, document.getId().toString());
+	}
+
+	public void updateDocument(Principal principal, String id, DocumentParameters docParams) {
+		// Find the document to ensure it exists.
+		Document document = getDocument(principal, id);
+		String tenantId = getTenantId(principal);
+
+		// Update with parameters.
+		if (docParams.getDescription() != null) {
+			document.setDescription(docParams.getDescription());
+		}
+		if (docParams.getTags() != null) {
+			document.setTags(docParams.getTags());
+		}
+
+		// Update the document.
+		DocumentDataService docService = new DocumentDataService();
+		try (Session session = context.tenantSession(tenantId).enlist(docService)) {
+			int rows = docService.update(id, document);
+			session.commit();
+			if (rows == 0) {
+				// Could happen due to concurrent access.
+				throw new EntityNotFoundException(
+						String.format("Document update failed: documentId=%s", document.getId().toString()));
+			}
+		}
 	}
 
 	public void scanDocument(Principal principal, String id) {

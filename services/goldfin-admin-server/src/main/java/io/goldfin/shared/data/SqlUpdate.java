@@ -5,10 +5,9 @@ package io.goldfin.shared.data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -21,8 +20,7 @@ public class SqlUpdate {
 	static final Logger logger = LoggerFactory.getLogger(SqlUpdate.class);
 
 	private String table;
-	private Map<String, Object> values = new HashMap<String, Object>();
-	private List<String> names = new LinkedList<String>();
+	private List<InsertValue> values = new LinkedList<InsertValue>();
 	private String where;
 	private Object[] whereParams;
 
@@ -30,7 +28,7 @@ public class SqlUpdate {
 	}
 
 	public int updatedColumnsSize() {
-		return names.size();
+		return values.size();
 	}
 
 	public SqlUpdate table(String table) {
@@ -39,10 +37,20 @@ public class SqlUpdate {
 	}
 
 	public SqlUpdate put(String name, Object value) {
-		if (values.get(name) == null) {
-			names.add(name);
+		return put(name, value, false);
+	}
+
+	public SqlUpdate put(String name, Object value, boolean json) {
+		// Fixup--convert java.util.Date to timestamp so PostgreSQL can work with it.
+		if (value != null && value instanceof java.util.Date) {
+			java.util.Date dateValue = (java.util.Date) value;
+			value = new Timestamp(dateValue.getTime());
 		}
-		values.put(name, value);
+		InsertValue iv = new InsertValue();
+		iv.name = name;
+		iv.value = value;
+		iv.json = json;
+		values.add(iv);
 		return this;
 	}
 
@@ -70,11 +78,16 @@ public class SqlUpdate {
 			// Generate insert SQL.
 			String format = "UPDATE %s SET %s WHERE %s";
 			StringBuffer updatePairs = new StringBuffer();
-			for (int i = 0; i < names.size(); i++) {
+			for (int i = 0; i < values.size(); i++) {
+				InsertValue value = values.get(i);
 				if (i > 0) {
 					updatePairs.append(", ");
 				}
-				updatePairs.append(names.get(i)).append(" = ?");
+				if (value.json) {
+					updatePairs.append(value.name).append(" = ?::JSON");
+				} else {
+					updatePairs.append(value.name).append(" = ?");
+				}
 			}
 			String sql = String.format(format, table, updatePairs, where);
 			if (logger.isDebugEnabled()) {
@@ -84,8 +97,8 @@ public class SqlUpdate {
 			// Allocate prepared statement and assign parameter values.
 			pstmt = session.getConnection().prepareStatement(sql);
 			int index = 1;
-			for (String name : names) {
-				pstmt.setObject(index++, values.get(name));
+			for (InsertValue iv : values) {
+				pstmt.setObject(index++, iv.value);
 			}
 			for (int i = 0; i < whereParams.length; i++) {
 				pstmt.setObject(index++, whereParams[i]);

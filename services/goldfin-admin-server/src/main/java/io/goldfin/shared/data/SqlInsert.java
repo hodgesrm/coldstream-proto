@@ -18,12 +18,6 @@ import org.slf4j.LoggerFactory;
 public class SqlInsert {
 	static final Logger logger = LoggerFactory.getLogger(SqlInsert.class);
 
-	class InsertValue {
-		String name;
-		Object value;
-		boolean json;
-	};
-
 	private String table;
 	private List<InsertValue> values = new LinkedList<InsertValue>();
 

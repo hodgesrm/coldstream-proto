@@ -16,6 +16,7 @@ package io.goldfin.admin.service.api.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
@@ -30,7 +31,7 @@ public class InvoiceParameters   {
   private String description = null;
 
   @JsonProperty("tags")
-  private String tags = null;
+  private TagSet tags = null;
 
   public InvoiceParameters description(String description) {
     this.description = description;
@@ -51,22 +52,22 @@ public class InvoiceParameters   {
     this.description = description;
   }
 
-  public InvoiceParameters tags(String tags) {
+  public InvoiceParameters tags(TagSet tags) {
     this.tags = tags;
     return this;
   }
 
   /**
-   * A user-provided list of name-value pairs that describe the invoice
+   * Get tags
    * @return tags
    **/
   @JsonProperty("tags")
-  @ApiModelProperty(value = "A user-provided list of name-value pairs that describe the invoice")
-  public String getTags() {
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
     return tags;
   }
 
-  public void setTags(String tags) {
+  public void setTags(TagSet tags) {
     this.tags = tags;
   }
 
