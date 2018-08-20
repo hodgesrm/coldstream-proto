@@ -4,13 +4,15 @@
 from .leaseweb_inventory import LeasewebProcessor
 
 
-def get_provider(collector, params):
-    """Finds a provider class for a particular collector name
+def get_provider(provider, params):
+    """Finds a provider class for a particular probe name
 
-    :param collector: Collector key
-    :type collector: str
+    :param provider: Provider key
+    :type provider: str
+    :param params: Provider parameters
+    :type params: dict
     """
-    if collector == "leaseweb":
+    if provider == "leaseweb":
         return LeasewebProcessor(**params)
     else:
-        raise Exception("Unknown collector")
+        raise Exception("Unknown provider: {0}".format(collector))

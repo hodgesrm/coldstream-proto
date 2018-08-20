@@ -30,6 +30,7 @@ from .login_credentials import LoginCredentials
 from .observation import Observation
 from .result import Result
 from .tag import Tag
+from .tag_set import TagSet
 from .tenant import Tenant
 from .tenant_parameters import TenantParameters
 from .user import User

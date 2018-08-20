@@ -20,7 +20,8 @@ setup(
     description="Goldfin Client Tools",
     install_requires=[
         'requests>=2.19.1',
-        'six>=1.11.0'
+        'six>=1.11.0',
+        'pyyaml==3.13'
     ],
     packages=find_packages(),
     include_package_data=True,

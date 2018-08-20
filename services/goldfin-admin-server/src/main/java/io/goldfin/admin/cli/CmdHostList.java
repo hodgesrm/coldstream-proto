@@ -6,7 +6,6 @@ package io.goldfin.admin.cli;
 import io.goldfin.admin.exceptions.CommandError;
 import io.goldfin.admin.http.MinimalRestClient;
 import io.goldfin.admin.http.RestException;
-import io.goldfin.admin.service.api.model.DataSeries;
 import io.goldfin.admin.service.api.model.Host;
 import io.goldfin.shared.utilities.JsonHelper;
 import joptsimple.OptionParser;

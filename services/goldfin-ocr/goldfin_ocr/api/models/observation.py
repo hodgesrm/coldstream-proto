@@ -33,37 +33,45 @@ class Observation(object):
     swagger_types = {
         'vendor_identifier': 'str',
         'effective_date': 'datetime',
+        'nonce': 'int',
         'description': 'str',
         'observation_type': 'str',
         'data': 'str',
-        'version': 'str'
+        'version': 'str',
+        'tags': 'TagSet'
     }
 
     attribute_map = {
         'vendor_identifier': 'vendorIdentifier',
         'effective_date': 'effectiveDate',
+        'nonce': 'nonce',
         'description': 'description',
         'observation_type': 'observationType',
         'data': 'data',
-        'version': 'version'
+        'version': 'version',
+        'tags': 'tags'
     }
 
-    def __init__(self, vendor_identifier=None, effective_date=None, description=None, observation_type=None, data=None, version=None):
+    def __init__(self, vendor_identifier=None, effective_date=None, nonce=None, description=None, observation_type=None, data=None, version=None, tags=None):
         """
         Observation - a model defined in Swagger
         """
 
         self._vendor_identifier = None
         self._effective_date = None
+        self._nonce = None
         self._description = None
         self._observation_type = None
         self._data = None
         self._version = None
+        self._tags = None
 
         if vendor_identifier is not None:
           self.vendor_identifier = vendor_identifier
         if effective_date is not None:
           self.effective_date = effective_date
+        if nonce is not None:
+          self.nonce = nonce
         if description is not None:
           self.description = description
         if observation_type is not None:
@@ -72,6 +80,8 @@ class Observation(object):
           self.data = data
         if version is not None:
           self.version = version
+        if tags is not None:
+          self.tags = tags
 
     @property
     def vendor_identifier(self):
@@ -118,6 +128,29 @@ class Observation(object):
         """
 
         self._effective_date = effective_date
+
+    @property
+    def nonce(self):
+        """
+        Gets the nonce of this Observation.
+        A randomly generated integer to help ensure loading is idempotent (i.e., can be repeated without generating multiple copies of the same observation)
+
+        :return: The nonce of this Observation.
+        :rtype: int
+        """
+        return self._nonce
+
+    @nonce.setter
+    def nonce(self, nonce):
+        """
+        Sets the nonce of this Observation.
+        A randomly generated integer to help ensure loading is idempotent (i.e., can be repeated without generating multiple copies of the same observation)
+
+        :param nonce: The nonce of this Observation.
+        :type: int
+        """
+
+        self._nonce = nonce
 
     @property
     def description(self):
@@ -216,6 +249,27 @@ class Observation(object):
         """
 
         self._version = version
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this Observation.
+
+        :return: The tags of this Observation.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this Observation.
+
+        :param tags: The tags of this Observation.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     def to_dict(self):
         """

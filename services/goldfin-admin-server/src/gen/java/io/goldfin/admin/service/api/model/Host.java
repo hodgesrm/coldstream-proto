@@ -17,6 +17,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.goldfin.admin.service.api.model.TagSet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
@@ -124,6 +125,9 @@ public class Host   {
 
   @JsonProperty("backupEnabled")
   private Boolean backupEnabled = null;
+
+  @JsonProperty("tags")
+  private TagSet tags = null;
 
   public Host id(UUID id) {
     this.id = id;
@@ -524,6 +528,25 @@ public class Host   {
     this.backupEnabled = backupEnabled;
   }
 
+  public Host tags(TagSet tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * Get tags
+   * @return tags
+   **/
+  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
+  public TagSet getTags() {
+    return tags;
+  }
+
+  public void setTags(TagSet tags) {
+    this.tags = tags;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -554,12 +577,13 @@ public class Host   {
         Objects.equals(this.ssd, host.ssd) &&
         Objects.equals(this.nicCount, host.nicCount) &&
         Objects.equals(this.networkTrafficLimit, host.networkTrafficLimit) &&
-        Objects.equals(this.backupEnabled, host.backupEnabled);
+        Objects.equals(this.backupEnabled, host.backupEnabled) &&
+        Objects.equals(this.tags, host.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, hostId, resourceId, effectiveDate, vendorIdentifier, dataSeriesId, hostType, hostModel, region, zone, datacenter, cpu, socketCount, coreCount, threadCount, ram, hdd, ssd, nicCount, networkTrafficLimit, backupEnabled);
+    return Objects.hash(id, hostId, resourceId, effectiveDate, vendorIdentifier, dataSeriesId, hostType, hostModel, region, zone, datacenter, cpu, socketCount, coreCount, threadCount, ram, hdd, ssd, nicCount, networkTrafficLimit, backupEnabled, tags);
   }
 
 
@@ -589,6 +613,7 @@ public class Host   {
     sb.append("    nicCount: ").append(toIndentedString(nicCount)).append("\n");
     sb.append("    networkTrafficLimit: ").append(toIndentedString(networkTrafficLimit)).append("\n");
     sb.append("    backupEnabled: ").append(toIndentedString(backupEnabled)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -40,6 +40,7 @@ class DataSeries(object):
         'locator': 'str',
         'state': 'str',
         'format': 'str',
+        'tags': 'TagSet',
         'creation_date': 'str'
     }
 
@@ -53,10 +54,11 @@ class DataSeries(object):
         'locator': 'locator',
         'state': 'state',
         'format': 'format',
+        'tags': 'tags',
         'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, name=None, description=None, content_type=None, content_length=None, thumbprint=None, locator=None, state=None, format=None, creation_date=None):
+    def __init__(self, id=None, name=None, description=None, content_type=None, content_length=None, thumbprint=None, locator=None, state=None, format=None, tags=None, creation_date=None):
         """
         DataSeries - a model defined in Swagger
         """
@@ -70,6 +72,7 @@ class DataSeries(object):
         self._locator = None
         self._state = None
         self._format = None
+        self._tags = None
         self._creation_date = None
 
         if id is not None:
@@ -90,6 +93,8 @@ class DataSeries(object):
           self.state = state
         if format is not None:
           self.format = format
+        if tags is not None:
+          self.tags = tags
         if creation_date is not None:
           self.creation_date = creation_date
 
@@ -311,6 +316,27 @@ class DataSeries(object):
             )
 
         self._format = format
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this DataSeries.
+
+        :return: The tags of this DataSeries.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this DataSeries.
+
+        :param tags: The tags of this DataSeries.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     @property
     def creation_date(self):

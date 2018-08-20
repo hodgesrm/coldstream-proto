@@ -1634,6 +1634,8 @@ definitions:
       backupEnabled:
         type: boolean
         description: If true backup is enabled for this host
+      tags:
+        $ref: '#/definitions/TagSet'
   TagSet:
     type: array
     description: Collection of tags.  If keys are repeated in the array the last value in order takes precedences

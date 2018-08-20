@@ -35,6 +35,7 @@ class Vendor(object):
         'identifier': 'str',
         'name': 'str',
         'state': 'str',
+        'tags': 'TagSet',
         'creation_date': 'str'
     }
 
@@ -43,10 +44,11 @@ class Vendor(object):
         'identifier': 'identifier',
         'name': 'name',
         'state': 'state',
+        'tags': 'tags',
         'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, identifier=None, name=None, state=None, creation_date=None):
+    def __init__(self, id=None, identifier=None, name=None, state=None, tags=None, creation_date=None):
         """
         Vendor - a model defined in Swagger
         """
@@ -55,6 +57,7 @@ class Vendor(object):
         self._identifier = None
         self._name = None
         self._state = None
+        self._tags = None
         self._creation_date = None
 
         if id is not None:
@@ -65,6 +68,8 @@ class Vendor(object):
           self.name = name
         if state is not None:
           self.state = state
+        if tags is not None:
+          self.tags = tags
         if creation_date is not None:
           self.creation_date = creation_date
 
@@ -165,6 +170,27 @@ class Vendor(object):
             )
 
         self._state = state
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this Vendor.
+
+        :return: The tags of this Vendor.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this Vendor.
+
+        :param tags: The tags of this Vendor.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     @property
     def creation_date(self):

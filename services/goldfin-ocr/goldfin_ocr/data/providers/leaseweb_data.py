@@ -39,8 +39,10 @@ class LeasewebDataProcessor:
         for server in server_list:
             #print("SERVER: {0}".format(server))
 
-            # Insert as much as possible into the host record.
+            # Starting with tags from observation, insert as much as possible 
+            # into the host record.
             host = Host()
+            host.tags = observation.tags
             host.vendor_identifier = vendors.LEASEWEB
             host.effective_date = observation.effective_date
             host.data_series_id = data_series_id

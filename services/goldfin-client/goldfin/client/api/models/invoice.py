@@ -34,7 +34,6 @@ class Invoice(object):
         'id': 'str',
         'document_id': 'str',
         'description': 'str',
-        'tags': 'str',
         'identifier': 'str',
         'effective_date': 'datetime',
         'vendor_identifier': 'str',
@@ -43,6 +42,7 @@ class Invoice(object):
         'total_amount': 'float',
         'currency': 'str',
         'items': 'list[InvoiceItem]',
+        'tags': 'TagSet',
         'creation_date': 'str'
     }
 
@@ -50,7 +50,6 @@ class Invoice(object):
         'id': 'id',
         'document_id': 'documentId',
         'description': 'description',
-        'tags': 'tags',
         'identifier': 'identifier',
         'effective_date': 'effectiveDate',
         'vendor_identifier': 'vendorIdentifier',
@@ -59,10 +58,11 @@ class Invoice(object):
         'total_amount': 'totalAmount',
         'currency': 'currency',
         'items': 'items',
+        'tags': 'tags',
         'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, document_id=None, description=None, tags=None, identifier=None, effective_date=None, vendor_identifier=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, items=None, creation_date=None):
+    def __init__(self, id=None, document_id=None, description=None, identifier=None, effective_date=None, vendor_identifier=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, items=None, tags=None, creation_date=None):
         """
         Invoice - a model defined in Swagger
         """
@@ -70,7 +70,6 @@ class Invoice(object):
         self._id = None
         self._document_id = None
         self._description = None
-        self._tags = None
         self._identifier = None
         self._effective_date = None
         self._vendor_identifier = None
@@ -79,6 +78,7 @@ class Invoice(object):
         self._total_amount = None
         self._currency = None
         self._items = None
+        self._tags = None
         self._creation_date = None
 
         if id is not None:
@@ -87,8 +87,6 @@ class Invoice(object):
           self.document_id = document_id
         if description is not None:
           self.description = description
-        if tags is not None:
-          self.tags = tags
         if identifier is not None:
           self.identifier = identifier
         if effective_date is not None:
@@ -105,6 +103,8 @@ class Invoice(object):
           self.currency = currency
         if items is not None:
           self.items = items
+        if tags is not None:
+          self.tags = tags
         if creation_date is not None:
           self.creation_date = creation_date
 
@@ -176,29 +176,6 @@ class Invoice(object):
         """
 
         self._description = description
-
-    @property
-    def tags(self):
-        """
-        Gets the tags of this Invoice.
-        A user-provided list of name-value pairs that describe the invoice
-
-        :return: The tags of this Invoice.
-        :rtype: str
-        """
-        return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        """
-        Sets the tags of this Invoice.
-        A user-provided list of name-value pairs that describe the invoice
-
-        :param tags: The tags of this Invoice.
-        :type: str
-        """
-
-        self._tags = tags
 
     @property
     def identifier(self):
@@ -383,6 +360,27 @@ class Invoice(object):
         """
 
         self._items = items
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this Invoice.
+
+        :return: The tags of this Invoice.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this Invoice.
+
+        :param tags: The tags of this Invoice.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     @property
     def creation_date(self):

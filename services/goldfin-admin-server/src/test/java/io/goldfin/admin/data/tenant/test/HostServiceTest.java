@@ -11,8 +11,10 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.data.tenant.ExtendedTagSet;
 import io.goldfin.admin.data.tenant.HostDataService;
 import io.goldfin.admin.service.api.model.Host;
+import io.goldfin.admin.service.api.model.Tag;
 import io.goldfin.admin.service.api.model.Host.HostTypeEnum;
 import io.goldfin.shared.data.TransactionalService;
 import io.goldfin.shared.testing.DbConnectionHelper;
@@ -62,6 +64,8 @@ public class HostServiceTest extends TransactionalTest<Host> {
 			host.setNicCount(2);
 			host.setNetworkTrafficLimit(10 * 1024 * 1024 * 1024L);
 			host.setBackupEnabled(true);
+			host.setTags(
+					new ExtendedTagSet().append(new Tag().name("a").value("1")).append(new Tag().name("b").value("2")));
 			
 			return host;
 		}

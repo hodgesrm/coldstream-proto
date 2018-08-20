@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import sys
+import yaml
 
 from goldfin.client.json_xlate import SwaggerJsonEncoder
 from goldfin.client.collectors.ifactory import get_provider
@@ -15,6 +16,8 @@ from goldfin.client.collectors.ifactory import get_provider
 import time
 import goldfin.client.api as api
 from goldfin.client.api.rest import ApiException
+from goldfin.client.api.models import TagSet
+from goldfin.client.api.models import Tag
 from pprint import pprint
 
 # Standard logging initialization.
@@ -59,66 +62,93 @@ def print_error(msg):
     print(msg)
 
 """Upload data series to API server."""
-def do_file_upload(file, goldfin_section):
+def make_tagset(tags_dict):
+    """Creates tag set from a dictionary"""
+    tagSet = []
+    for k,v in tags_dict.items():
+        tagSet.append(Tag(name=k, value=v))
+    return tagSet
+
+def do_file_upload(file, tags, host=None, port=443, secret_key=None, 
+                   verify_ssl=True):
     # Set client configuration variables. 
-    url = 'https://{0}:{1}/api/v1'.format(goldfin_section['api_host'],
-                                          goldfin_section['api_port'])
+    url = 'https://{0}:{1}/api/v1'.format(host, port)
     api.configuration.host = url
-    api.configuration.api_key['vnd.io.goldfin.apikey'] = goldfin_section['api_secret_key']
-    #api.configuration.verify_ssl = goldfin_section['verify_ssl']
-    api.configuration.verify_ssl = False
+    api.configuration.api_key['vnd.io.goldfin.apikey'] = secret_key
+    api.configuration.verify_ssl = verify_ssl
 
     try:
         # Upload document
         api_instance = api.InventoryApi()
         description = 'description_example' 
-        api_response = api_instance.data_create(file, 
-                                                description=description)
+        encoder = SwaggerJsonEncoder()
+        tagsAsJson = encoder.encode(tags)
+        api_response = api_instance.data_create(file,
+                                                description=description,
+                                                tags=tagsAsJson)
         pprint(api_response)
     except ApiException as e:
         print("Exception when calling DocumentApi->document_create: %s\n" % e)
 
-"""Perform a data scan and optional upload resulting data series file."""
-def scan(args):
-    # Ensure we have a collector type and can find implementation class. 
-    if args.type is None:
-        print_error("You must specify a collector type with --collector")
-        sys.exit(1)
+"""Perform a data probe and optional upload resulting data series file."""
+def run_probes(args):
+    # Load config file. 
+    if not os.path.exists(args.config):
+        print_error("Config file does not exist: {0}".format(args.config))
+        return 1
+    with open(args.config, "r") as config_file:
+        config = yaml.load(config_file)
 
-    # Ensure we have a writable output director
+    # Ensure we have a writable output directory
     if args.out_dir is None:
         print_error("You must specify an output directory --out-dir")
-        sys.exit(1)
+        return 1
     os.makedirs(args.out_dir, exist_ok=True)
     if not os.path.exists(args.out_dir) or not os.access(args.out_dir, os.W_OK):
         print_error("Output directory does not exist or is not writable: {0}".format(args.out_dir))
         return 1
 
-    # Load config for collector.
-    if not os.path.exists(args.config):
-        print_error("Config file does not exist: {0}".format(args.config))
-        return 1
+    # Pull out top-level sections of the configuration file. 
+    api_server = config['api_server']
+    general_tags = config['tags']
+    probes = config['data_probes']
 
-    config_parser = configparser.ConfigParser()
-    with open(args.config, "r") as config_file:
-        config_parser.read_file(config_file)
-    section = config_parser[args.type]
-    params = {}
-    for key in section:
-        params[key] = section[key]
-    provider = get_provider(args.type, params)
-    obs = provider.execute()
-    name = "{0}-{1}.json".format(obs.vendor_identifier, obs.effective_date.strftime("%Y-%m-%d_%H:%M:%S"))
-    output_file = os.path.join(args.out_dir, name)
-    with open(output_file, "w") as obs_file:
-        print_info("Writing observation to output file: {0}".format(output_file))
-        encoder = SwaggerJsonEncoder()
-        content = encoder.encode(obs)
-        obs_file.write(content)
+    # Decide which probes to run. 
+    if args.all_probes:
+        probe_list = probes
+    elif args.probes:
+        probe_list = []
+        for name in args.probes.split(","):
+            if probes.get(name) is None:
+                raise Exception("Unknown probe name: {0}".format(name))
+            probe_list.append(probes[name])
+    else:
+        raise Exception("No probes specified")
+    
+    # Now iterate over the probes and execute each in sequence. 
+    for probe in probe_list:
+        name = probe['name']
+        provider = probe['provider']
+        provider_params = probe['provider_params']
+        tags = probe['tags']
+        # Find and execute probe.
+        provider = get_provider(provider, provider_params)
+        obs = provider.execute()
+        # Construct and assign tag set. 
+        obs.tags = make_tagset(tags)
+ 
+        # Write the output.     
+        name = "{0}-{1}.json".format(obs.vendor_identifier, obs.effective_date.strftime("%Y-%m-%d_%H:%M:%S"))
+        output_file = os.path.join(args.out_dir, name)
+        with open(output_file, "w") as obs_file:
+            print_info("Writing observation to output file: {0}".format(output_file))
+            encoder = SwaggerJsonEncoder()
+            content = encoder.encode(obs)
+            obs_file.write(content)
 
-    # Optionally load file to Goldfin.
-    if args.upload:
-        do_file_upload(output_file, config_parser['goldfin'])
+        # Optionally load file to Goldfin.
+        if args.upload:
+            do_file_upload(output_file, make_tagset(general_tags), **api_server)
 
     return 0
     
@@ -129,7 +159,7 @@ def upload(args):
 # Define top-level command line parser with global options and sub-command
 # parsing enabled.
 parser = argparse.ArgumentParser(prog='data_collector.py',
-                                 description='Scan and upload inventory data',
+                                 description='Collect and upload observation data',
                                  usage="%(prog)s [options]")
 subparsers = parser.add_subparsers()
 parser.add_argument('--verbose', 
@@ -142,29 +172,35 @@ parser.add_argument("--log-file",
                     help="Name of log file (default: %(default)s)",
                     default=os.getenv("LOG_FILE", "data_collector.log"))
 
-# Define scan sub-parser.
-parser_scan = subparsers.add_parser('scan', help='Scan data')
-parser_scan.set_defaults(func=scan)
-parser_scan.add_argument("--type",
-                         help="Type of scan to run")
-parser_scan.add_argument('--upload', 
-                         action='store_true', 
-                         help='If present upload scan file automatically')
-parser_scan.add_argument("--config",
-                         help="API credential file (default %(default)s)",
-                         default="data_collector.ini")
-parser_scan.add_argument("--out-dir",
-                         help="Output directory (default: %(default)s)", 
-                         default="data")
+# Define run command sub-parser.
+parser_run = subparsers.add_parser('run', help='Execute data probes')
+parser_run.set_defaults(func=run_probes)
+parser_run.add_argument("--probes",
+                        help="Comma-separated list of one or more probe names")
+parser_run.add_argument("--all-probes",
+                        action='store_true', 
+                        help="If present execute all probes")
+parser_run.add_argument('--upload', 
+                        action='store_true', 
+                        help='If present upload observation files automatically')
+parser_run.add_argument("--config",
+                        help="Configuration file (default %(default)s)",
+                        default="data_config.yaml")
+parser_run.add_argument("--out-dir",
+                        help="Observation output directory (default: %(default)s)", 
+                        default="data")
 
 # Define upload sub-parser.
 parser_upload = subparsers.add_parser('upload', 
-                         help='Upload previously collected files')
+                         help='Upload previously collected observation files')
 parser_upload.set_defaults(func=upload)
 parser_upload.add_argument('file', 
                            type=str, 
                            nargs='+', 
                            help='One or more files to upload')
+parser_upload.add_argument("--config",
+                           help="Configuration file (default %(default)s)",
+                           default="data_config.yaml")
 
 # Parse arguments and execute subcommand.
 args = parser.parse_args()

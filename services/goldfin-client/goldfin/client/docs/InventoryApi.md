@@ -10,13 +10,14 @@ Method | HTTP request | Description
 [**data_show**](InventoryApi.md#data_show) | **GET** /data/{id} | Return data series metadata
 [**data_show_all**](InventoryApi.md#data_show_all) | **GET** /data | List data serties
 [**data_show_content**](InventoryApi.md#data_show_content) | **GET** /data/{id}/content | Return data series content
+[**data_update**](InventoryApi.md#data_update) | **PUT** /data/{id} | Update a data series
 [**host_delete**](InventoryApi.md#host_delete) | **DELETE** /host/{id} | Delete host record
 [**host_show**](InventoryApi.md#host_show) | **GET** /host/{id} | Show single host inventory record
 [**host_show_all**](InventoryApi.md#host_show_all) | **GET** /host | List current host inventory records
 
 
 # **data_create**
-> DataSeries data_create(file, description=description, process=process)
+> DataSeries data_create(file, description=description, tags=tags, process=process)
 
 Upload data series
 
@@ -42,12 +43,13 @@ api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # create an instance of the API class
 api_instance = api.InventoryApi()
 file = '/path/to/file.txt' # file | Data series content
-description = 'description_example' # str | A optional description of the data series (optional)
+description = 'description_example' # str | An optional description of the data series (optional)
+tags = 'tags_example' # str | Optional tags that apply to this entity passed as a JSON string containing name-value pairs. (optional)
 process = true # bool | Optional flag to kick off processing automatically if true (optional) (default to true)
 
 try: 
     # Upload data series
-    api_response = api_instance.data_create(file, description=description, process=process)
+    api_response = api_instance.data_create(file, description=description, tags=tags, process=process)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling InventoryApi->data_create: %s\n" % e)
@@ -58,7 +60,8 @@ except ApiException as e:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **file** | **file**| Data series content | 
- **description** | **str**| A optional description of the data series | [optional] 
+ **description** | **str**| An optional description of the data series | [optional] 
+ **tags** | **str**| Optional tags that apply to this entity passed as a JSON string containing name-value pairs. | [optional] 
  **process** | **bool**| Optional flag to kick off processing automatically if true | [optional] [default to true]
 
 ### Return type
@@ -351,6 +354,64 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: application/octet-stream
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **data_update**
+> data_update(id, body=body)
+
+Update a data series
+
+Update data series description and/or tags.  Other fields are ignored if included in the body.
+
+### Example 
+```python
+from __future__ import print_function
+import time
+import api
+from api.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
+api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = api.InventoryApi()
+id = 'id_example' # str | Data series ID
+body = api.DataSeries() # DataSeries | Data series parameters (optional)
+
+try: 
+    # Update a data series
+    api_instance.data_update(id, body=body)
+except ApiException as e:
+    print("Exception when calling InventoryApi->data_update: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **str**| Data series ID | 
+ **body** | [**DataSeries**](DataSeries.md)| Data series parameters | [optional] 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

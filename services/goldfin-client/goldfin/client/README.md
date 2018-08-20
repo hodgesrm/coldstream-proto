@@ -62,12 +62,13 @@ api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # create an instance of the API class
 api_instance = api.DocumentApi()
 file = '/path/to/file.txt' # file | Document file
-description = 'description_example' # str | A optional description of the document (optional)
+description = 'description_example' # str | An optional description of the document (optional)
+tags = 'tags_example' # str | Optional tags that apply to this document passed as a JSON string containing name-value pairs. (optional)
 process = true # bool | Optional flag to kick off scanning automatically if true (optional) (default to true)
 
 try:
     # Upload document
-    api_response = api_instance.document_create(file, description=description, process=process)
+    api_response = api_instance.document_create(file, description=description, tags=tags, process=process)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DocumentApi->document_create: %s\n" % e)
@@ -86,6 +87,7 @@ Class | Method | HTTP request | Description
 *DocumentApi* | [**document_process**](docs/DocumentApi.md#document_process) | **POST** /document/{id}/process | Kick off document analysis
 *DocumentApi* | [**document_show**](docs/DocumentApi.md#document_show) | **GET** /document/{id} | Return document metadata
 *DocumentApi* | [**document_show_all**](docs/DocumentApi.md#document_show_all) | **GET** /document | List documents
+*DocumentApi* | [**document_update**](docs/DocumentApi.md#document_update) | **PUT** /document/{id} | Update a document
 *ExtractApi* | [**extract_download**](docs/ExtractApi.md#extract_download) | **GET** /extract/download | Download a data extract
 *ExtractApi* | [**extract_types**](docs/ExtractApi.md#extract_types) | **GET** /extract/types | List available extract types
 *InventoryApi* | [**data_create**](docs/InventoryApi.md#data_create) | **POST** /data | Upload data series
@@ -94,6 +96,7 @@ Class | Method | HTTP request | Description
 *InventoryApi* | [**data_show**](docs/InventoryApi.md#data_show) | **GET** /data/{id} | Return data series metadata
 *InventoryApi* | [**data_show_all**](docs/InventoryApi.md#data_show_all) | **GET** /data | List data serties
 *InventoryApi* | [**data_show_content**](docs/InventoryApi.md#data_show_content) | **GET** /data/{id}/content | Return data series content
+*InventoryApi* | [**data_update**](docs/InventoryApi.md#data_update) | **PUT** /data/{id} | Update a data series
 *InventoryApi* | [**host_delete**](docs/InventoryApi.md#host_delete) | **DELETE** /host/{id} | Delete host record
 *InventoryApi* | [**host_show**](docs/InventoryApi.md#host_show) | **GET** /host/{id} | Show single host inventory record
 *InventoryApi* | [**host_show_all**](docs/InventoryApi.md#host_show_all) | **GET** /host | List current host inventory records
@@ -143,6 +146,7 @@ Class | Method | HTTP request | Description
  - [Observation](docs/Observation.md)
  - [Result](docs/Result.md)
  - [Tag](docs/Tag.md)
+ - [TagSet](docs/TagSet.md)
  - [Tenant](docs/Tenant.md)
  - [TenantParameters](docs/TenantParameters.md)
  - [User](docs/User.md)

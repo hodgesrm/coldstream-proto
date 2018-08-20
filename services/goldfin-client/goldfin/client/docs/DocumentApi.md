@@ -10,10 +10,11 @@ Method | HTTP request | Description
 [**document_process**](DocumentApi.md#document_process) | **POST** /document/{id}/process | Kick off document analysis
 [**document_show**](DocumentApi.md#document_show) | **GET** /document/{id} | Return document metadata
 [**document_show_all**](DocumentApi.md#document_show_all) | **GET** /document | List documents
+[**document_update**](DocumentApi.md#document_update) | **PUT** /document/{id} | Update a document
 
 
 # **document_create**
-> Document document_create(file, description=description, process=process)
+> Document document_create(file, description=description, tags=tags, process=process)
 
 Upload document
 
@@ -39,12 +40,13 @@ api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # create an instance of the API class
 api_instance = api.DocumentApi()
 file = '/path/to/file.txt' # file | Document file
-description = 'description_example' # str | A optional description of the document (optional)
+description = 'description_example' # str | An optional description of the document (optional)
+tags = 'tags_example' # str | Optional tags that apply to this document passed as a JSON string containing name-value pairs. (optional)
 process = true # bool | Optional flag to kick off scanning automatically if true (optional) (default to true)
 
 try: 
     # Upload document
-    api_response = api_instance.document_create(file, description=description, process=process)
+    api_response = api_instance.document_create(file, description=description, tags=tags, process=process)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DocumentApi->document_create: %s\n" % e)
@@ -55,7 +57,8 @@ except ApiException as e:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **file** | **file**| Document file | 
- **description** | **str**| A optional description of the document | [optional] 
+ **description** | **str**| An optional description of the document | [optional] 
+ **tags** | **str**| Optional tags that apply to this document passed as a JSON string containing name-value pairs. | [optional] 
  **process** | **bool**| Optional flag to kick off scanning automatically if true | [optional] [default to true]
 
 ### Return type
@@ -349,6 +352,64 @@ This endpoint does not need any parameter.
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **document_update**
+> document_update(id, body=body)
+
+Update a document
+
+Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones.
+
+### Example 
+```python
+from __future__ import print_function
+import time
+import api
+from api.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: ApiKey
+api.configuration.api_key['vnd.io.goldfin.apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.apikey'] = 'Bearer'
+# Configure API key authorization: SessionKey
+api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = api.DocumentApi()
+id = 'id_example' # str | Document ID
+body = api.DocumentParameters() # DocumentParameters | Document parameters (optional)
+
+try: 
+    # Update a document
+    api_instance.document_update(id, body=body)
+except ApiException as e:
+    print("Exception when calling DocumentApi->document_update: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **str**| Document ID | 
+ **body** | [**DocumentParameters**](DocumentParameters.md)| Document parameters | [optional] 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[ApiKey](../README.md#ApiKey), [SessionKey](../README.md#SessionKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

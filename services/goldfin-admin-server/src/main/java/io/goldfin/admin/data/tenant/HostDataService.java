@@ -17,8 +17,10 @@ import io.goldfin.shared.data.Session;
 import io.goldfin.shared.data.SqlDelete;
 import io.goldfin.shared.data.SqlInsert;
 import io.goldfin.shared.data.SqlSelect;
+import io.goldfin.shared.data.SqlUpdate;
 import io.goldfin.shared.data.TabularResultSet;
 import io.goldfin.shared.data.TransactionalService;
+import io.goldfin.shared.utilities.JsonHelper;
 
 /**
  * Service methods for working with hosts.
@@ -26,10 +28,10 @@ import io.goldfin.shared.data.TransactionalService;
 public class HostDataService implements TransactionalService<Host> {
 	static private final Logger logger = LoggerFactory.getLogger(HostDataService.class);
 
-	public static final String[] COLUMN_NAMES = { "id", "host_id", "resource_id", "effective_date",
-			"vendor_identifier", "data_series_id", "host_type", "host_model", "region", "zone", "datacenter", "cpu",
-			"socket_count", "core_count", "thread_count", "ram", "hdd", "ssd", "nic_count", "network_traffic_limit",
-			"backup_enabled" };
+	public static final String[] COLUMN_NAMES = { "id", "host_id", "resource_id", "effective_date", "vendor_identifier",
+			"data_series_id", "host_type", "host_model", "region", "zone", "datacenter", "cpu", "socket_count",
+			"core_count", "thread_count", "ram", "hdd", "ssd", "nic_count", "network_traffic_limit", "backup_enabled",
+			"tags" };
 
 	private Session session;
 
@@ -65,7 +67,8 @@ public class HostDataService implements TransactionalService<Host> {
 				.put("core_count", model.getCoreCount()).put("thread_count", model.getThreadCount())
 				.put("ram", model.getRam()).put("hdd", model.getHdd()).put("ssd", model.getSsd())
 				.put("nic_count", model.getNicCount()).put("network_traffic_limit", model.getNetworkTrafficLimit())
-				.put("backup_enabled", model.getBackupEnabled()).run(session);
+				.put("backup_enabled", model.getBackupEnabled())
+				.put("tags", JsonHelper.writeToStringOrNull(model.getTags()), true).run(session);
 
 		return id.toString();
 	}
@@ -82,7 +85,11 @@ public class HostDataService implements TransactionalService<Host> {
 	 * Update the host, which includes only a limited number of fields.
 	 */
 	public int update(String id, Host model) {
-		throw new UnsupportedOperationException("Host entity is immutable");
+		SqlUpdate update = new SqlUpdate().table("hosts").id(UUID.fromString(id));
+		if (model.getTags() != null) {
+			update.put("tags", JsonHelper.writeToStringOrNull(model.getTags()), true);
+		}
+		return update.run(session);
 	}
 
 	/** Delete a host. */
@@ -133,8 +140,8 @@ public class HostDataService implements TransactionalService<Host> {
 		SqlSelect windowQuery = new SqlSelect().from("hosts").project(COLUMN_NAMES)
 				.projectWindow("row_number", "row_number()", "rn").window("row_number").partition("vendor_identifier")
 				.partition("resource_id").orderByDescending("effective_date").done();
-		TabularResultSet result = new SqlSelect().from(windowQuery, "r1").project(COLUMN_NAMES)
-				.where("r1.rn = ?", 1).run(session);
+		TabularResultSet result = new SqlSelect().from(windowQuery, "r1").project(COLUMN_NAMES).where("r1.rn = ?", 1)
+				.run(session);
 		List<Host> hosts = new ArrayList<Host>(result.rowCount());
 		for (Row row : result.rows()) {
 			hosts.add(toHost(row));
@@ -165,6 +172,7 @@ public class HostDataService implements TransactionalService<Host> {
 		host.setNicCount(row.getAsInt("nic_count"));
 		host.setNetworkTrafficLimit(row.getAsLong("network_traffic_limit"));
 		host.setBackupEnabled(row.getAsBoolean("backup_enabled"));
+		host.setTags(JsonHelper.readFromStringOrNull(row.getAsString("tags"), ExtendedTagSet.class));
 		return host;
 	}
 

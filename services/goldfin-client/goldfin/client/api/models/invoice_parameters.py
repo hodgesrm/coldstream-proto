@@ -32,7 +32,7 @@ class InvoiceParameters(object):
     """
     swagger_types = {
         'description': 'str',
-        'tags': 'str'
+        'tags': 'TagSet'
     }
 
     attribute_map = {
@@ -80,10 +80,9 @@ class InvoiceParameters(object):
     def tags(self):
         """
         Gets the tags of this InvoiceParameters.
-        A user-provided list of name-value pairs that describe the invoice
 
         :return: The tags of this InvoiceParameters.
-        :rtype: str
+        :rtype: TagSet
         """
         return self._tags
 
@@ -91,10 +90,9 @@ class InvoiceParameters(object):
     def tags(self, tags):
         """
         Sets the tags of this InvoiceParameters.
-        A user-provided list of name-value pairs that describe the invoice
 
         :param tags: The tags of this InvoiceParameters.
-        :type: str
+        :type: TagSet
         """
 
         self._tags = tags

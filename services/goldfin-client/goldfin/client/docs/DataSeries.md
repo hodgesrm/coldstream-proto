@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **locator** | **str** | Storage locator for content | [optional] 
 **state** | **str** | The current processing state of the content.   | [optional] 
 **format** | **str** | Kind of data series, e.g., observation | [optional] 
+**tags** | [**TagSet**](TagSet.md) |  | [optional] 
 **creation_date** | **str** | Date data was uploaded | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

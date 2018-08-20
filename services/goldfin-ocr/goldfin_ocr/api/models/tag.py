@@ -57,6 +57,7 @@ class Tag(object):
     def name(self):
         """
         Gets the name of this Tag.
+        A user-defined name for the tag
 
         :return: The name of this Tag.
         :rtype: str
@@ -67,6 +68,7 @@ class Tag(object):
     def name(self, name):
         """
         Sets the name of this Tag.
+        A user-defined name for the tag
 
         :param name: The name of this Tag.
         :type: str
@@ -78,6 +80,7 @@ class Tag(object):
     def value(self):
         """
         Gets the value of this Tag.
+        A user-defined value for the tag
 
         :return: The value of this Tag.
         :rtype: str
@@ -88,6 +91,7 @@ class Tag(object):
     def value(self, value):
         """
         Sets the value of this Tag.
+        A user-defined value for the tag
 
         :param value: The value of this Tag.
         :type: str

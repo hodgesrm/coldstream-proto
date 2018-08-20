@@ -43,7 +43,8 @@ class InvoiceItem(object):
         'one_time_charge': 'bool',
         'region': 'DocumentRegion',
         'inventory_id': 'str',
-        'inventory_type': 'str'
+        'inventory_type': 'str',
+        'tags': 'TagSet'
     }
 
     attribute_map = {
@@ -59,10 +60,11 @@ class InvoiceItem(object):
         'one_time_charge': 'oneTimeCharge',
         'region': 'region',
         'inventory_id': 'inventoryId',
-        'inventory_type': 'inventoryType'
+        'inventory_type': 'inventoryType',
+        'tags': 'tags'
     }
 
-    def __init__(self, item_id=None, resource_id=None, description=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, one_time_charge=None, region=None, inventory_id=None, inventory_type=None):
+    def __init__(self, item_id=None, resource_id=None, description=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, one_time_charge=None, region=None, inventory_id=None, inventory_type=None, tags=None):
         """
         InvoiceItem - a model defined in Swagger
         """
@@ -80,6 +82,7 @@ class InvoiceItem(object):
         self._region = None
         self._inventory_id = None
         self._inventory_type = None
+        self._tags = None
 
         if item_id is not None:
           self.item_id = item_id
@@ -107,6 +110,8 @@ class InvoiceItem(object):
           self.inventory_id = inventory_id
         if inventory_type is not None:
           self.inventory_type = inventory_type
+        if tags is not None:
+          self.tags = tags
 
     @property
     def item_id(self):
@@ -408,6 +413,27 @@ class InvoiceItem(object):
             )
 
         self._inventory_type = inventory_type
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this InvoiceItem.
+
+        :return: The tags of this InvoiceItem.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this InvoiceItem.
+
+        :param tags: The tags of this InvoiceItem.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     def to_dict(self):
         """

@@ -34,7 +34,6 @@ class Document(object):
         'id': 'str',
         'name': 'str',
         'description': 'str',
-        'tags': 'str',
         'content_type': 'str',
         'content_length': 'float',
         'thumbprint': 'str',
@@ -42,6 +41,7 @@ class Document(object):
         'state': 'str',
         'semantic_type': 'str',
         'semantic_id': 'str',
+        'tags': 'TagSet',
         'creation_date': 'str'
     }
 
@@ -49,7 +49,6 @@ class Document(object):
         'id': 'id',
         'name': 'name',
         'description': 'description',
-        'tags': 'tags',
         'content_type': 'contentType',
         'content_length': 'contentLength',
         'thumbprint': 'thumbprint',
@@ -57,10 +56,11 @@ class Document(object):
         'state': 'state',
         'semantic_type': 'semanticType',
         'semantic_id': 'semanticId',
+        'tags': 'tags',
         'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, name=None, description=None, tags=None, content_type=None, content_length=None, thumbprint=None, locator=None, state=None, semantic_type=None, semantic_id=None, creation_date=None):
+    def __init__(self, id=None, name=None, description=None, content_type=None, content_length=None, thumbprint=None, locator=None, state=None, semantic_type=None, semantic_id=None, tags=None, creation_date=None):
         """
         Document - a model defined in Swagger
         """
@@ -68,7 +68,6 @@ class Document(object):
         self._id = None
         self._name = None
         self._description = None
-        self._tags = None
         self._content_type = None
         self._content_length = None
         self._thumbprint = None
@@ -76,6 +75,7 @@ class Document(object):
         self._state = None
         self._semantic_type = None
         self._semantic_id = None
+        self._tags = None
         self._creation_date = None
 
         if id is not None:
@@ -84,8 +84,6 @@ class Document(object):
           self.name = name
         if description is not None:
           self.description = description
-        if tags is not None:
-          self.tags = tags
         if content_type is not None:
           self.content_type = content_type
         if content_length is not None:
@@ -100,6 +98,8 @@ class Document(object):
           self.semantic_type = semantic_type
         if semantic_id is not None:
           self.semantic_id = semantic_id
+        if tags is not None:
+          self.tags = tags
         if creation_date is not None:
           self.creation_date = creation_date
 
@@ -171,29 +171,6 @@ class Document(object):
         """
 
         self._description = description
-
-    @property
-    def tags(self):
-        """
-        Gets the tags of this Document.
-        A user-provided list of name-value pairs that describe the invoice
-
-        :return: The tags of this Document.
-        :rtype: str
-        """
-        return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        """
-        Sets the tags of this Document.
-        A user-provided list of name-value pairs that describe the invoice
-
-        :param tags: The tags of this Document.
-        :type: str
-        """
-
-        self._tags = tags
 
     @property
     def content_type(self):
@@ -367,6 +344,27 @@ class Document(object):
         """
 
         self._semantic_id = semantic_id
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this Document.
+
+        :return: The tags of this Document.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this Document.
+
+        :param tags: The tags of this Document.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     @property
     def creation_date(self):

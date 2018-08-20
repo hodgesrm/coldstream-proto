@@ -55,7 +55,8 @@ class DocumentApi(object):
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param file file: Document file (required)
-        :param str description: A optional description of the document
+        :param str description: An optional description of the document
+        :param str tags: Optional tags that apply to this document passed as a JSON string containing name-value pairs.
         :param bool process: Optional flag to kick off scanning automatically if true
         :return: Document
                  If the method is called asynchronously,
@@ -83,14 +84,15 @@ class DocumentApi(object):
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param file file: Document file (required)
-        :param str description: A optional description of the document
+        :param str description: An optional description of the document
+        :param str tags: Optional tags that apply to this document passed as a JSON string containing name-value pairs.
         :param bool process: Optional flag to kick off scanning automatically if true
         :return: Document
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['file', 'description', 'process']
+        all_params = ['file', 'description', 'tags', 'process']
         all_params.append('callback')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -122,6 +124,8 @@ class DocumentApi(object):
         local_var_files = {}
         if 'description' in params:
             form_params.append(('description', params['description']))
+        if 'tags' in params:
+            form_params.append(('tags', params['tags']))
         if 'process' in params:
             form_params.append(('process', params['process']))
         if 'file' in params:
@@ -649,6 +653,112 @@ class DocumentApi(object):
                                         post_params=form_params,
                                         files=local_var_files,
                                         response_type='list[Document]',
+                                        auth_settings=auth_settings,
+                                        callback=params.get('callback'),
+                                        _return_http_data_only=params.get('_return_http_data_only'),
+                                        _preload_content=params.get('_preload_content', True),
+                                        _request_timeout=params.get('_request_timeout'),
+                                        collection_formats=collection_formats)
+
+    def document_update(self, id, **kwargs):
+        """
+        Update a document
+        Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.document_update(id, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: Document ID (required)
+        :param DocumentParameters body: Document parameters
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('callback'):
+            return self.document_update_with_http_info(id, **kwargs)
+        else:
+            (data) = self.document_update_with_http_info(id, **kwargs)
+            return data
+
+    def document_update_with_http_info(self, id, **kwargs):
+        """
+        Update a document
+        Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones.
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.document_update_with_http_info(id, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str id: Document ID (required)
+        :param DocumentParameters body: Document parameters
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id', 'body']
+        all_params.append('callback')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method document_update" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params) or (params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `document_update`")
+
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.\
+            select_header_content_type(['application/json'])
+
+        # Authentication setting
+        auth_settings = ['ApiKey', 'SessionKey']
+
+        return self.api_client.call_api('/document/{id}', 'PUT',
+                                        path_params,
+                                        query_params,
+                                        header_params,
+                                        body=body_params,
+                                        post_params=form_params,
+                                        files=local_var_files,
+                                        response_type=None,
                                         auth_settings=auth_settings,
                                         callback=params.get('callback'),
                                         _return_http_data_only=params.get('_return_http_data_only'),

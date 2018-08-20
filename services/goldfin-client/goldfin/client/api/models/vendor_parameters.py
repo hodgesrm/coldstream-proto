@@ -33,16 +33,18 @@ class VendorParameters(object):
     swagger_types = {
         'identifier': 'str',
         'name': 'str',
-        'state': 'str'
+        'state': 'str',
+        'tags': 'TagSet'
     }
 
     attribute_map = {
         'identifier': 'identifier',
         'name': 'name',
-        'state': 'state'
+        'state': 'state',
+        'tags': 'tags'
     }
 
-    def __init__(self, identifier=None, name=None, state=None):
+    def __init__(self, identifier=None, name=None, state=None, tags=None):
         """
         VendorParameters - a model defined in Swagger
         """
@@ -50,6 +52,7 @@ class VendorParameters(object):
         self._identifier = None
         self._name = None
         self._state = None
+        self._tags = None
 
         if identifier is not None:
           self.identifier = identifier
@@ -57,6 +60,8 @@ class VendorParameters(object):
           self.name = name
         if state is not None:
           self.state = state
+        if tags is not None:
+          self.tags = tags
 
     @property
     def identifier(self):
@@ -132,6 +137,27 @@ class VendorParameters(object):
             )
 
         self._state = state
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this VendorParameters.
+
+        :return: The tags of this VendorParameters.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this VendorParameters.
+
+        :param tags: The tags of this VendorParameters.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     def to_dict(self):
         """

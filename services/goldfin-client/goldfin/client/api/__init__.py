@@ -30,6 +30,7 @@ from .models.login_credentials import LoginCredentials
 from .models.observation import Observation
 from .models.result import Result
 from .models.tag import Tag
+from .models.tag_set import TagSet
 from .models.tenant import Tenant
 from .models.tenant_parameters import TenantParameters
 from .models.user import User

@@ -31,50 +31,27 @@ class DocumentParameters(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'name': 'str',
-        'description': 'str'
+        'description': 'str',
+        'tags': 'TagSet'
     }
 
     attribute_map = {
-        'name': 'name',
-        'description': 'description'
+        'description': 'description',
+        'tags': 'tags'
     }
 
-    def __init__(self, name=None, description=None):
+    def __init__(self, description=None, tags=None):
         """
         DocumentParameters - a model defined in Swagger
         """
 
-        self._name = None
         self._description = None
+        self._tags = None
 
-        if name is not None:
-          self.name = name
         if description is not None:
           self.description = description
-
-    @property
-    def name(self):
-        """
-        Gets the name of this DocumentParameters.
-        Name of the document
-
-        :return: The name of this DocumentParameters.
-        :rtype: str
-        """
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        """
-        Sets the name of this DocumentParameters.
-        Name of the document
-
-        :param name: The name of this DocumentParameters.
-        :type: str
-        """
-
-        self._name = name
+        if tags is not None:
+          self.tags = tags
 
     @property
     def description(self):
@@ -98,6 +75,27 @@ class DocumentParameters(object):
         """
 
         self._description = description
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this DocumentParameters.
+
+        :return: The tags of this DocumentParameters.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this DocumentParameters.
+
+        :param tags: The tags of this DocumentParameters.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     def to_dict(self):
         """
