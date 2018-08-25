@@ -13,12 +13,20 @@ tags:
     description: Session login and logout
   - name: tenant
     description: Tenant management
+  - name: user
+    description: User management
+  - name: document
+    description: Source documents that feed to invoice OCR
+  - name: data
+    description: Observed data that feed to inventory generation
   - name: vendor
-    description: Per-tenant vendor management
+    description: Vendor management and analysis
   - name: invoice
-    description: Per-tenant invoice management
+    description: Invoice management and analysis
   - name: inventory
-    description: Per-tenant inventory data
+    description: Inventory management and anaysis
+  - name: extract
+    description: Tabular reports that can be downloaded as CSV
 schemes:
   - https
 securityDefinitions:
@@ -193,7 +201,7 @@ paths:
   /user:
     post:
       tags:
-        - tenant
+        - user
       summary: Create a new user for a tenant
       description: Upload a new user registration request.
       operationId: userCreate
@@ -219,7 +227,7 @@ paths:
             $ref: '#/definitions/ApiResponse'
     get:
       tags:
-        - tenant
+        - user
       summary: List users
       description: Return a list of all users visible to current user
       operationId: userShowall
@@ -235,7 +243,7 @@ paths:
   '/user/{id}':
     get:
       tags:
-        - tenant
+        - user
       summary: Show a single user
       description: Return all information relative to a single user
       operationId: userShow
@@ -256,7 +264,7 @@ paths:
           description: Not Found
     put:
       tags:
-        - tenant
+        - user
       summary: Update a user
       description: Update user description
       operationId: userUpdate
@@ -280,7 +288,7 @@ paths:
           description: Not Found
     delete:
       tags:
-        - tenant
+        - user
       summary: Delete a user
       description: Delete a user
       operationId: userDelete
@@ -300,7 +308,7 @@ paths:
   '/user/{id}/password':
     put:
       tags:
-        - tenant
+        - user
       summary: Update user password
       description: Sets a new user password
       operationId: userUpdatePassword
@@ -325,7 +333,7 @@ paths:
   '/user/{id}/apikey':
     post:
       tags:
-        - tenant
+        - user
       summary: Create a new API key
       description: Create a new API key that can be used for application access.
       operationId: apikeyCreate
@@ -351,7 +359,7 @@ paths:
             $ref: '#/definitions/ApiKey'
     get:
       tags:
-        - tenant
+        - user
       summary: Return list of API keys
       description: Return a list of API keys.  Secrets are not shown.
       operationId: apikeyShowAll
@@ -373,7 +381,7 @@ paths:
   '/user/{id}/apikey/{keyid}':
     delete:
       tags:
-        - tenant
+        - user
       summary: Delete an API key
       description: >-
         Deletes API key.  Any applications using the key will no longer
@@ -649,7 +657,9 @@ paths:
           type: string
         - name: tags
           in: formData
-          description: Optional tags that apply to this document passed as a JSON string containing name-value pairs.
+          description: >-
+            Optional tags that apply to this document passed as a JSON string
+            containing name-value pairs.
           type: string
         - name: process
           in: formData
@@ -711,7 +721,9 @@ paths:
       tags:
         - document
       summary: Update a document
-      description: Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones. 
+      description: >-
+        Update document description and/or tags. Tags do not propagate to
+        already scanned invoices but will apply to new ones.
       operationId: documentUpdate
       consumes:
         - application/json
@@ -798,7 +810,7 @@ paths:
   /data:
     post:
       tags:
-        - inventory
+        - data
       summary: Upload data series
       description: Upload data series in a file for analysis
       operationId: dataCreate
@@ -813,7 +825,9 @@ paths:
           type: string
         - name: tags
           in: formData
-          description: Optional tags that apply to this entity passed as a JSON string containing name-value pairs.
+          description: >-
+            Optional tags that apply to this entity passed as a JSON string
+            containing name-value pairs.
           type: string
         - name: process
           in: formData
@@ -836,7 +850,7 @@ paths:
             $ref: '#/definitions/ApiResponse'
     get:
       tags:
-        - inventory
+        - data
       summary: List data serties
       description: Return a list of metadata entries for all data series
       operationId: dataShowAll
@@ -852,7 +866,7 @@ paths:
   '/data/{id}':
     get:
       tags:
-        - inventory
+        - data
       summary: Return data series metadata
       description: Download data series metadata without content
       operationId: dataShow
@@ -873,9 +887,11 @@ paths:
           description: Not Found
     put:
       tags:
-        - inventory
+        - data
       summary: Update a data series
-      description: Update data series description and/or tags.  Other fields are ignored if included in the body.
+      description: >-
+        Update data series description and/or tags.  Other fields are ignored if
+        included in the body.
       operationId: dataUpdate
       consumes:
         - application/json
@@ -897,7 +913,7 @@ paths:
           description: Not Found
     delete:
       tags:
-        - inventory
+        - data
       summary: Delete a data series
       description: Delete a data series and any derived information
       operationId: dataDelete
@@ -917,7 +933,7 @@ paths:
   '/data/{id}/content':
     get:
       tags:
-        - inventory
+        - data
       summary: Return data series content
       description: Download data series content
       operationId: dataShowContent
@@ -937,7 +953,7 @@ paths:
   '/data/{id}/process':
     post:
       tags:
-        - inventory
+        - data
       summary: Kick off background processing of data series
       description: >-
         Run background processing of data series, which may generate one or more
@@ -1526,7 +1542,10 @@ definitions:
       nonce:
         type: integer
         format: int64
-        description: A randomly generated integer to help ensure loading is idempotent (i.e., can be repeated without generating multiple copies of the same observation)
+        description: >-
+          A randomly generated integer to help ensure loading is idempotent
+          (i.e., can be repeated without generating multiple copies of the same
+          observation)
       description:
         type: string
         description: Optional description of observation
@@ -1638,12 +1657,18 @@ definitions:
         $ref: '#/definitions/TagSet'
   TagSet:
     type: array
-    description: Collection of tags.  If keys are repeated in the array the last value in order takes precedences
+    description: >-
+      Collection of tags.  If keys are repeated in the array the last value in
+      order takes precedences
     items:
       $ref: '#/definitions/Tag'
   Tag:
     type: object
-    description: A key-value pair used to add relevant descriptive information. Tags are not interpreted and may contain data like business unit IDs, contract names, or other information users find relevant to classify or associate the data to which they apply. 
+    description: >-
+      A key-value pair used to add relevant descriptive information. Tags are
+      not interpreted and may contain data like business unit IDs, contract
+      names, or other information users find relevant to classify or associate
+      the data to which they apply.
     properties:
       name:
         type: string
