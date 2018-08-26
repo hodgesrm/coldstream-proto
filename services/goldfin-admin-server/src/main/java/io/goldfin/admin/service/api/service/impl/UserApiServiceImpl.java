@@ -11,6 +11,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.auth.AuthorizationChecks;
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.UserManager;
@@ -33,6 +34,7 @@ public class UserApiServiceImpl extends UserApiService {
 	@Override
 	public Response userCreate(UserParameters body, SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyUser(securityContext);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			User user = um.createUser(body);
 			return Response.ok().entity(user).build();
@@ -44,6 +46,7 @@ public class UserApiServiceImpl extends UserApiService {
 	@Override
 	public Response userDelete(String id, SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyUser(securityContext);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			um.deleteUser(id);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
@@ -55,8 +58,10 @@ public class UserApiServiceImpl extends UserApiService {
 	@Override
 	public Response userShow(String id, SecurityContext securityContext) throws NotFoundException {
 		try {
+			String userId = convertToRealUserId(id, securityContext);
+			AuthorizationChecks.assertCanManageThisUser(securityContext, userId);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
-			User user = um.getUser(id);
+			User user = um.getUser(userId);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(user).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
@@ -66,6 +71,7 @@ public class UserApiServiceImpl extends UserApiService {
 	@Override
 	public Response userShowall(SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyUser(securityContext);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			List<User> users = um.getAllUsers();
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(users).build();
@@ -78,8 +84,10 @@ public class UserApiServiceImpl extends UserApiService {
 	public Response userUpdate(String id, UserParameters body, SecurityContext securityContext)
 			throws NotFoundException {
 		try {
+			String userId = convertToRealUserId(id, securityContext);
+			AuthorizationChecks.assertCanManageThisUser(securityContext, userId);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
-			um.updateUser(id, body);
+			um.updateUser(userId, body);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
@@ -90,8 +98,10 @@ public class UserApiServiceImpl extends UserApiService {
 	public Response userUpdatePassword(String id, UserPasswordParameters body, SecurityContext securityContext)
 			throws NotFoundException {
 		try {
+			String userId = convertToRealUserId(id, securityContext);
+			AuthorizationChecks.assertCanManageThisUser(securityContext, userId);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
-			um.updateUserPassword(id, body);
+			um.updateUserPassword(userId, body);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
 		} catch (Exception e) {
 			return helper.toApiResponse(e);
@@ -116,6 +126,7 @@ public class UserApiServiceImpl extends UserApiService {
 			throws NotFoundException {
 		try {
 			userId = convertToRealUserId(userId, securityContext);
+			AuthorizationChecks.assertCanManageThisUser(securityContext, userId);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			um.deleteApiKey(userId, keyId);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
@@ -128,6 +139,7 @@ public class UserApiServiceImpl extends UserApiService {
 	public Response apikeyShowAll(String userId, SecurityContext securityContext) throws NotFoundException {
 		try {
 			userId = convertToRealUserId(userId, securityContext);
+			AuthorizationChecks.assertCanManageThisUser(securityContext, userId);
 			UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 			List<ApiKey> apiKeys = um.getAllApiKeys(userId);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(apiKeys).build();

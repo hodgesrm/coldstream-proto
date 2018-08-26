@@ -11,6 +11,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.auth.AuthorizationChecks;
 import io.goldfin.admin.exceptions.ExceptionHelper;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.TenantManager;
@@ -30,6 +31,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 	@Override
 	public Response tenantCreate(TenantParameters body, SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyTenant(securityContext);
 			TenantManager tm = ManagerRegistry.getInstance().getManager(TenantManager.class);
 			Tenant tenant = tm.createTenant(body);
 			return Response.ok().entity(tenant).build();
@@ -41,6 +43,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 	@Override
 	public Response tenantDelete(String id, SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyTenant(securityContext);
 			TenantManager tm = ManagerRegistry.getInstance().getManager(TenantManager.class);
 			tm.deleteTenant(id);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).build();
@@ -52,6 +55,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 	@Override
 	public Response tenantShow(String id, SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyTenant(securityContext);
 			TenantManager tm = ManagerRegistry.getInstance().getManager(TenantManager.class);
 			Tenant tenant = tm.getTenant(id);
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(tenant).build();
@@ -63,6 +67,7 @@ public class TenantApiServiceImpl extends TenantApiService {
 	@Override
 	public Response tenantShowall(SecurityContext securityContext) throws NotFoundException {
 		try {
+			AuthorizationChecks.assertCanManageAnyTenant(securityContext);
 			TenantManager tm = ManagerRegistry.getInstance().getManager(TenantManager.class);
 			List<Tenant> tenants = tm.getAllTenants();
 			return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "OK")).entity(tenants).build();

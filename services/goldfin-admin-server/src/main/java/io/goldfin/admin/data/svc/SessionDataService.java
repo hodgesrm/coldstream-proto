@@ -25,7 +25,8 @@ import io.goldfin.shared.data.TransactionalService;
 public class SessionDataService implements TransactionalService<SessionData> {
 	static private final Logger logger = LoggerFactory.getLogger(SessionDataService.class);
 
-	private static final String[] COLUMN_NAMES = { "id", "user_id", "token", "last_touched_date", "creation_date" };
+	private static final String[] COLUMN_NAMES = { "id", "user_id", "tenant_id", "effective_tenant_id", "roles",
+			"token", "last_touched_date", "creation_date" };
 	private Session session;
 
 	@Override
@@ -43,13 +44,15 @@ public class SessionDataService implements TransactionalService<SessionData> {
 			logger.debug("Adding new session: " + model.toString());
 		}
 		UUID id = UUID.randomUUID();
-		new SqlInsert().table("sessions").put("id", id).put("user_id", model.getUserId()).put("token", model.getToken())
-				.run(session);
+		new SqlInsert().table("sessions").put("id", id).put("user_id", model.getUserId())
+				.put("tenant_id", model.getTenantId()).put("effective_tenant_id", model.getEffectiveTenantId())
+				.put("roles", model.getRoles()).put("token", model.getToken()).run(session);
 		return id.toString();
 	}
 
 	public int update(String id, SessionData model) {
 		SqlUpdate update = new SqlUpdate().table("sessions").id(UUID.fromString(id));
+		update.put("effective_tenant_id", model.getEffectiveTenantId());
 		update.put("last_touched_date", model.getLastTouched());
 		return update.run(session);
 	}
@@ -69,8 +72,8 @@ public class SessionDataService implements TransactionalService<SessionData> {
 	}
 
 	public SessionData getByToken(String token) {
-		TabularResultSet result = new SqlSelect().from("sessions").project(COLUMN_NAMES)
-				.where("token = ?", token).run(session);
+		TabularResultSet result = new SqlSelect().from("sessions").project(COLUMN_NAMES).where("token = ?", token)
+				.run(session);
 		if (result.rowCount() == 0) {
 			return null;
 		} else {
@@ -91,6 +94,9 @@ public class SessionDataService implements TransactionalService<SessionData> {
 		SessionData session = new SessionData();
 		session.setId(row.getAsUUID("id"));
 		session.setUserId(row.getAsUUID("user_id"));
+		session.setTenantId(row.getAsUUID("tenant_id"));
+		session.setEffectiveTenantId(row.getAsUUID("effective_tenant_id"));
+		session.setRoles(row.getAsString("roles"));
 		session.setToken(row.getAsString("token"));
 		session.setLastTouched(row.getAsTimestamp("last_touched_date"));
 		session.setCreationDate(row.getAsTimestamp("creation_date"));

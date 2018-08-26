@@ -49,6 +49,9 @@ public class SessionServiceTest extends TransactionalTest<SessionData> {
 			SessionData ur = new SessionData();
 			ur.setId(UUID.randomUUID());
 			ur.setUserId(userId);
+			ur.setTenantId(tenantId);
+			ur.setEffectiveTenantId(tenantId);
+			ur.setRoles("role");
 			ur.setToken(UUID.randomUUID().toString());
 			return ur;
 		}
@@ -58,6 +61,9 @@ public class SessionServiceTest extends TransactionalTest<SessionData> {
 			SessionData sd = new SessionData();
 			sd.setId(old.getId());
 			sd.setUserId(old.getUserId());
+			sd.setTenantId(old.getTenantId());
+			sd.setEffectiveTenantId(old.getEffectiveTenantId());
+			sd.setRoles(old.getRoles());
 			sd.setToken(old.getToken());
 			sd.setLastTouched(new Timestamp(System.currentTimeMillis()));
 			sd.setCreationDate(old.getCreationDate());

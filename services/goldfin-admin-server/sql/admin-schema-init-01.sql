@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS apikeys (
 CREATE TABLE IF NOT EXISTS sessions (
   id uuid PRIMARY KEY, 
   user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  tenant_id uuid REFERENCES tenants(id) ON DELETE CASCADE NOT NULL,
+  effective_tenant_id uuid REFERENCES tenants(id) ON DELETE CASCADE NOT NULL,
+  roles varchar(250), 
   token varchar(250), 
   last_touched_date timestamp DEFAULT current_timestamp, 
   creation_date timestamp DEFAULT current_timestamp

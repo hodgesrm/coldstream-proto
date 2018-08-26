@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.auth.StandardRoles;
 import io.goldfin.admin.managers.ManagerRegistry;
 import io.goldfin.admin.managers.TenantManager;
 import io.goldfin.admin.managers.UserManager;
@@ -84,7 +85,7 @@ public class ServiceCreateTask extends AbstractTaskAdapter {
 			UserParameters userParams = new UserParameters();
 			userParams.setUser(initParams.getSysUser() + "@system");
 			userParams.setInitialPassword(initParams.getSysPassword());
-			userParams.setRoles("admin");
+			userParams.setRoles(StandardRoles.SUPERUSER.toString());
 			userManager.createUser(userParams);
 			progressReporter.progress(String.format("Set up sysadmin user: username=%s", userParams.getUser()), 100.0);
 

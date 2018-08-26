@@ -39,7 +39,7 @@ Here are the steps to create a new service.
 ```shell
 # Must run in dist location for relative directory references to work. 
 cd target/goldfin-admin-server-0.0.1-distribution/goldfin-admin-server-0.0.1
-bin/svc-init create --init-params=$GOLDFIN_CONFIG_DIR/init-params.sample.yaml \
+svc-init create --init-params=$GOLDFIN_CONFIG_DIR/init-params.yaml \
      --service-config=$GOLDFIN_CONFIG_DIR/service.yaml
 ```
 The service-config.yaml file defines parameters used across all services. 
@@ -70,7 +70,8 @@ svc-client user-create --initialPassword=secret12 \
 
 ### Load invoice for client. 
 ```shell
-svc-client login --host localhost --user=test@skylineresearch.com --password=secret12
+svc-client login --host localhost --user=test@skylineresearch.com \
+--password=secret12
 svc-client document-create --description='Test invoice' \
 --file /home/rhodges/coldstream/invoices/ovh/invoice_WE666184.pdf
 svc-client document-list

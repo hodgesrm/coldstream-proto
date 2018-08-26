@@ -13,6 +13,9 @@ import java.util.UUID;
 public class SessionData {
 	private UUID id;
 	private UUID userId;
+	private UUID tenantId;
+	private UUID effectiveTenantId;
+	private String roles;
 	private String token;
 	private Timestamp lastTouched;
 	private Timestamp creationDate;
@@ -31,6 +34,30 @@ public class SessionData {
 
 	public void setUserId(UUID userId) {
 		this.userId = userId;
+	}
+
+	public UUID getTenantId() {
+		return tenantId;
+	}
+
+	public void setTenantId(UUID tenantId) {
+		this.tenantId = tenantId;
+	}
+
+	public UUID getEffectiveTenantId() {
+		return effectiveTenantId;
+	}
+
+	public void setEffectiveTenantId(UUID effectiveTenantId) {
+		this.effectiveTenantId = effectiveTenantId;
+	}
+
+	public String getRoles() {
+		return roles;
+	}
+
+	public void setRoles(String roles) {
+		this.roles = roles;
 	}
 
 	public String getToken() {

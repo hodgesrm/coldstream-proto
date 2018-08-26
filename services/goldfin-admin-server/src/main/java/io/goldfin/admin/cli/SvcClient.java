@@ -112,6 +112,7 @@ public class SvcClient implements CliContext {
 	/** Print program commands with nice formatting. */
 	private void programUsage() {
 		println("Usage: svc-client command [options]");
+		println("Authenticate using login command or by setting GOLDFIN_API_SECRET_KEY to an api key");
 		println("Commands:");
 		// Format the command short names to match the max name length.
 		int maxLen = 0;

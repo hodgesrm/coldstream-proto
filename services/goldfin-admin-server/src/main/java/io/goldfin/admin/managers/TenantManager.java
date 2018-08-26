@@ -28,7 +28,8 @@ public class TenantManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(TenantManager.class);
 	private ManagementContext context;
 
-	private static UUID SYSTEM_TENANT = UUID.fromString("00000000-0000-0000-0000-000000000000");
+	public static UUID SYSTEM_TENANT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+	public static String SYSTEM_TENANT_NAME = "system";
 
 	@Override
 	public void setContext(ManagementContext context) {
@@ -50,10 +51,10 @@ public class TenantManager implements Manager {
 	 * users.
 	 */
 	public Tenant createSystemTenant() {
-		// No schema suffix as this tenant is a dummy. 
+		// No schema suffix as this tenant is a dummy.
 		Tenant model = new Tenant();
-		model.setId(SYSTEM_TENANT);
-		model.setName("system");
+		model.setId(SYSTEM_TENANT_ID);
+		model.setName(SYSTEM_TENANT_NAME);
 		model.setDescription("System tenant");
 		model.setState(Tenant.StateEnum.ENABLED);
 		String tenantId;

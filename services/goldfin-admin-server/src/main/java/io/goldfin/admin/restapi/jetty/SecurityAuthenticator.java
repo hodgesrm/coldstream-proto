@@ -4,6 +4,7 @@
 package io.goldfin.admin.restapi.jetty;
 
 import java.io.IOException;
+import java.security.Principal;
 
 import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
@@ -23,6 +24,7 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.auth.TenantUserPrincipal;
 import io.goldfin.admin.data.svc.SessionData;
 import io.goldfin.admin.exceptions.UnauthorizedException;
 import io.goldfin.admin.managers.ManagerRegistry;
@@ -96,7 +98,7 @@ public class SecurityAuthenticator implements Authenticator {
 			return Authentication.NOT_CHECKED;
 		}
 
-		// If this is a CORS options request, we all it to go through so that
+		// If this is a CORS options request, we allow it to go through so that
 		// the browser can do a pre-flight check.
 		if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
 			if (logger.isDebugEnabled()) {
@@ -106,8 +108,8 @@ public class SecurityAuthenticator implements Authenticator {
 		}
 
 		// If this is a content request we similarly allow it to go through
-		// so we can serve up web content requests (e.g., to our Angular 2
-		// application).
+		// so we can serve up web content requests, e.g., for files of the Angular
+		// user interface.
 		if (req.getPathInfo().startsWith("/content")) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Letting content request through: " + req.getPathInfo());
@@ -121,7 +123,7 @@ public class SecurityAuthenticator implements Authenticator {
 			try {
 				// If we have a session key, prefer that.
 				SessionData sessionData = um.validateSessionKey(sessionKey);
-				UserIdentity identity = createIdentity(sessionData.getUserId().toString());
+				UserIdentity identity = createIdentityFromSession(sessionData);
 				return new UserAuthentication(Constraint.ANY_AUTH, identity);
 			} catch (UnauthorizedException e) {
 				logger.warn(String.format("No session available: token=%s, message=%s", sessionKey, e.getMessage()));
@@ -140,7 +142,7 @@ public class SecurityAuthenticator implements Authenticator {
 		} else if (apiKey != null) {
 			try {
 				io.goldfin.admin.service.api.model.User user = um.validateApiKeySecret(apiKey);
-				UserIdentity identity = createIdentity(user.getId().toString());
+				UserIdentity identity = createIdentityFromUser(user);
 				return new UserAuthentication(Constraint.ANY_AUTH, identity);
 			} catch (UnauthorizedException e) {
 				logger.warn(String.format("No API key found: key=%s, message=%s", sessionKey, e.getMessage()));
@@ -166,9 +168,31 @@ public class SecurityAuthenticator implements Authenticator {
 		}
 	}
 
-	private UserIdentity createIdentity(String userId) {
+	/**
+	 * Create identity from session. Sessions allow authorized users to pose-as
+	 * another tenant.
+	 */
+	private UserIdentity createIdentityFromSession(SessionData sessionData) {
+		TenantUserPrincipal userPrincipal = new TenantUserPrincipal(sessionData.getUserId().toString(),
+				sessionData.getTenantId().toString(), sessionData.getEffectiveTenantId().toString(),
+				sessionData.getRoles());
+		return createIdentity(userPrincipal);
+	}
+
+	/**
+	 * Create identity from user (i.e., from an API key). Users have only a single
+	 * tenant.
+	 */
+	private UserIdentity createIdentityFromUser(io.goldfin.admin.service.api.model.User user) {
+		TenantUserPrincipal userPrincipal = new TenantUserPrincipal(user.getId().toString(),
+				user.getTenantId().toString(), user.getTenantId().toString(), user.getRoles());
+		return createIdentity(userPrincipal);
+	}
+
+	private UserIdentity createIdentity(Principal userPrincipal) {
 		Subject subject = new Subject();
-		AbstractLoginService.UserPrincipal userPrincipal = new AbstractLoginService.UserPrincipal(userId, null);
+		// AbstractLoginService.UserPrincipal userPrincipal = new
+		// AbstractLoginService.UserPrincipal(userId, null);
 		subject.getPrincipals().add(userPrincipal);
 		subject.getPrincipals().add(new AbstractLoginService.RolePrincipal("user"));
 		UserIdentity identity = new DefaultUserIdentity(subject, userPrincipal, new String[] { "user" });

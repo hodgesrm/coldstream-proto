@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goldfin.admin.auth.StandardRoles;
 import io.goldfin.admin.data.svc.ApiKeyData;
 import io.goldfin.admin.data.svc.ApiKeyService;
 import io.goldfin.admin.data.svc.SessionData;
@@ -54,7 +55,10 @@ public class UserManager implements Manager {
 	/** A special ID that represents the currently logged in user. */
 	public static String CURRENT_USER_ID = "00000000-0000-0000-0000-000000000000";
 
-	/** Salt value for API keys. This value needs to stay constant. */
+	/**
+	 * Salt value for API keys. This value needs to stay constant or existing API
+	 * keys will be unusable.
+	 */
 	public static String SALT = "$2a$12$0NjdsCnknk9fnYcuybk.IO";
 
 	/** Session timeout (defaults to 30 minutes) */
@@ -82,8 +86,8 @@ public class UserManager implements Manager {
 			logger.warn(String.format("Invalid user name format: user=%s", userParams.getUser()));
 			throw new InvalidInputException("User name must be 'user@tenant'");
 		}
-		String userName = userTenant[0];
-		String tenantName = userTenant[1];
+		String userName = userTenant[0].trim();
+		String tenantName = userTenant[1].trim();
 
 		// Find the tenant.
 		Tenant tenant = null;
@@ -106,7 +110,11 @@ public class UserManager implements Manager {
 		model.setTenantId(tenant.getId());
 		model.setPasswordHash(passwordHash);
 		model.setAlgorithm(algorithm.getName());
-		model.setRoles(userParams.getRoles());
+		if (tenant.getId().equals(TenantManager.SYSTEM_TENANT_ID)) {
+			model.setRoles(StandardRoles.SUPERUSER.toString());
+		} else {
+			model.setRoles(StandardRoles.USER.toString());
+		}
 
 		try (Session session = makeSession(userService)) {
 			String id = userService.create(model);
@@ -345,8 +353,8 @@ public class UserManager implements Manager {
 						String.format("Login failed due to invalid user name format: user=%s", credentials.getUser()));
 				throw new UnauthorizedException();
 			}
-			String userName = userTenant[0];
-			String tenantName = userTenant[1];
+			String userName = userTenant[0].trim();
+			String tenantName = userTenant[1].trim();
 
 			Tenant tenant = tenantService.getByName(tenantName);
 			if (tenant == null) {
@@ -374,6 +382,9 @@ public class UserManager implements Manager {
 		SessionDataService sessionService = new SessionDataService();
 		SessionData model = new SessionData();
 		model.setUserId(user.getId());
+		model.setTenantId(user.getTenantId());
+		model.setEffectiveTenantId(user.getTenantId());
+		model.setRoles(user.getRoles());
 		model.setToken(randomizer.base64RandomBytes(20));
 		try (Session session = makeSession(sessionService)) {
 			String id = sessionService.create(model);
@@ -492,7 +503,7 @@ public class UserManager implements Manager {
 			User user = this.getUser(apiKeyData.getUserId().toString());
 			if (newHash) {
 				this.apiKeyTable.put(apiKeySecret, secretHash);
-				logger.info(String.format("Inserted hash for API Key: userId=%s, userName=%s, apiKeyName=%s", 
+				logger.info(String.format("Inserted hash for API Key: userId=%s, userName=%s, apiKeyName=%s",
 						user.getId(), user.getUsername(), apiKeyData.getName()));
 			}
 			return user;
