@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goldfin</groupId>
 	<artifactId>goldfin-admin-server</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<name>goldfin-admin-server</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
