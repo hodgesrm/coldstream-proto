@@ -3,7 +3,11 @@
 ## Setup
 
 ```shell
-python3 setup.py develop
+[tar -xf goldfin-client.tar.gz]
+[cd goldfin-client]
+python3 -m venv venv
+. venv/bin/activate
+python3 setup.py install
 ```
 
 ## Configuration 
@@ -17,7 +21,7 @@ string names or values you desire.
 # observations to Goldfin server. 
 api_server:
   host: localhost
-  port: 8443
+  port: 443
   secret_key: "<Goldfin AI key goes here>"
   verify_ssl: false
 
@@ -43,8 +47,9 @@ data_probes:
 Run data_collector at daily intervals.  The following command executes
 all data probes and uploads to the API server. 
 ```shell
+. venv/bin/activate
 data_collector run --all-probes \
---config ~/coldstream/inventory/data_config.yaml \
+--config data_config.yaml \
 --out /tmp/collector --upload
 ```
 The data_collector generates one or more observation files, which are write
@@ -54,6 +59,7 @@ You can also run individual probes and upload later (e.g., through the UI) as
 shown in the following example. 
 
 ```shell
-data_collector run --probes leaseweb --out /tmp/collector
+# Does not work yet!
+data_collector upload --probes leaseweb --out /tmp/collector
 --config ~/coldstream/inventory/data_config.yaml 
 ```
