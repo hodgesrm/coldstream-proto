@@ -1,18 +1,19 @@
 /*
  * Copyright (c) 2017 Goldfin.io. All Rights Reserved.
  */
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
 import { User } from '../services/user';
+import { Configuration } from '../client/configuration';
 
 @Component({
     selector: 'login', 
     styleUrls: ['./login.component.scss'],
     templateUrl: './login.component.html'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   open: Boolean = false;
   error_message: String;
   title: string = 'Goldfin';
@@ -22,11 +23,16 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private configuration: Configuration,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.user = {name: null, password: null};
+  }
+
+  ngAfterViewInit(): void {
+    this.configuration.username = "";
   }
 
   login(): void {

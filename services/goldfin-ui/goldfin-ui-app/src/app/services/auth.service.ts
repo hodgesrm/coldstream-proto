@@ -52,6 +52,7 @@ export class AuthService {
           // Set apiKey in the configuration where it will be used by 
           // later calls. 
           this.configuration.apiKey = apiKey;
+          this.configuration.username = name;
           session = { userName: name, apiKey: apiKey };
         }
         return session;

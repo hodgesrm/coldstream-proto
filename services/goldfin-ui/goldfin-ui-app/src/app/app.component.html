@@ -6,7 +6,7 @@
         </a>
       </div>
       <div *ngIf="router.url == '/login'" class="header-nav" [clr-nav-level]="1">
-          <a class="nav-link" href="#" [routerLink]="['/login']" routerLinkActive="active"><span class="nav-text">Login</span></a>
+          <a class="nav-link" href="#" [routerLink]="['/login']" routerLinkActive="active"></a>
       </div>
       <div *ngIf="router.url != '/login'" class="header-nav" [clr-nav-level]="1">
           <a class="nav-link" href="#" [routerLink]="['/home']" routerLinkActive="active"><span class="nav-text">Home</span></a>
@@ -15,6 +15,9 @@
           <a class="nav-link" href="#" [routerLink]="['/vendors']" routerLinkActive="active"><span class="nav-text">Vendors</span></a>
           <a class="nav-link" href="#" [routerLink]="['/inventory']" routerLinkActive="active"><span class="nav-text">Inventory</span></a>
           <a class="nav-link" href="#" [routerLink]="['/prices']" routerLinkActive="active"><span class="nav-text">Market Prices</span></a>
+      </div>
+      <div *ngIf="router.url != '/login'" class="branding">
+        <span class="title">{{configuration.username}}</span>
       </div>
       <div *ngIf="router.url != '/login'" class="header-actions">
         <clr-dropdown>
