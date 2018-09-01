@@ -1,6 +1,22 @@
 # Client Guide
 
-## Setup
+## Before Getting Started...
+
+You'll need Python version 3.5 or higher to use Goldfin.  Type `python3
+--version` in a command window to see which version you have.  If it's
+less than 3.5, install a new version from the following website:
+
+  https://www.python.org/downloads/
+
+After the installation type `python3 --version` again to ensure you have
+the new version.  If not, try logging out and logging back in again.
+
+## Installation
+
+The following steps unpack the Goldfin data collector and create a Python
+virtual environment to hold it.  A virtual environment is a private set
+of Python libraries that can be installed and upgraded without affecting
+Python use elsewhere on your host.
 
 ```shell
 [tar -xf goldfin-client.tar.gz]
@@ -13,7 +29,9 @@ python3 setup.py install
 ## Configuration 
 
 Set up data_config.yaml with the following data. Tags can have any
-string names or values you desire.
+string names or values you desire. Important note: tab characters are
+not allowed in configuration errors and will cause errors.
+
 ```
 # Configuration file for data loading. 
 
@@ -52,7 +70,7 @@ data_collector run --all-probes \
 --config data_config.yaml \
 --out /tmp/collector --upload
 ```
-The data_collector generates one or more observation files, which are write
+The data_collector generates one or more observation files, which are written
 to the directory selected by the --out option. 
 
 You can also run individual probes and upload later (e.g., through the UI) as 
@@ -63,3 +81,6 @@ shown in the following example.
 data_collector upload --probes leaseweb --out /tmp/collector
 --config ~/coldstream/inventory/data_config.yaml 
 ```
+
+Important note: You can clear the Python virtual environment by typing `deactivate`.  
+Run the venv/bin/activate command before you try to invoke data_collector. 
