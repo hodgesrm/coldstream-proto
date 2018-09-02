@@ -53,6 +53,9 @@ export class AuthService {
           // later calls. 
           this.configuration.apiKey = apiKey;
           this.configuration.username = name;
+          // Storage the same information in session storage so we can 
+          // survive a page refresh. 
+          this.storeSession();
           session = { userName: name, apiKey: apiKey };
         }
         return session;
@@ -68,5 +71,43 @@ export class AuthService {
         }
       });
     return request;
+  }
+
+  // Terminates the session. 
+  logout(): void {
+    // Destroy the server session, ignoring result.
+    if (this.configuration.apiKey != null) {
+      this.securityApi.logout(this.configuration.apiKey)
+    }
+    this.clearSession();
+    this.configuration.apiKey = null;
+    this.configuration.username = "";
+  }
+  
+  // Attempts to load auth info from session store to client configuration,
+  // returning true if successful.
+  loadSession(): boolean {
+    var apiKey = window.sessionStorage.getItem('apiKey');
+    var username = window.sessionStorage.getItem('username');
+    if (apiKey != null && username != null) {
+      this.configuration.apiKey = apiKey;
+      this.configuration.username = username;
+      return true;
+    } else {
+      return false;
+    }
+  } 
+
+  // Stores auth info form client configuration auth info in session store, 
+  // wiping out any existing information. 
+  storeSession(): void {
+    window.sessionStorage.setItem('apiKey', this.configuration.apiKey);
+    window.sessionStorage.setItem('username', this.configuration.username);
+  }
+
+  // Clears auth info in session store. 
+  clearSession(): void {
+    window.sessionStorage.removeItem('apiKey');
+    window.sessionStorage.removeItem('username');
   }
 }

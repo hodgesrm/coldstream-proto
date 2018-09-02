@@ -31,8 +31,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.user = {name: null, password: null};
   }
 
+  // Clear all auth information when the login screen displays.
   ngAfterViewInit(): void {
     this.configuration.username = "";
+    this.configuration.apiKey = "";
+    this.authService.clearSession();
   }
 
   login(): void {
