@@ -3,7 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ClarityModule } from 'clarity-angular';
+import { Router } from '@angular/router';
+
 import { AppComponent } from './app.component';
 import { ROUTING } from "./app.routing";
 import { HomeComponent } from "./home/home.component";
@@ -29,6 +32,7 @@ import { ChartsModule } from 'ng2-charts';
 // Services. 
 import { AuthGuardService } from "./services/auth.guard.service";
 import { AuthService } from "./services/auth.service";
+import { AuthInterceptor } from "./services/auth.interceptor";
 import { ConfigurationService } from "./services/config.service";
 import { DocumentService } from "./services/document.service";
 import { DataSeriesService } from "./services/data-series.service";
@@ -39,8 +43,8 @@ import { HostService } from "./services/host.service";
 import { VendorService } from "./services/vendor.service";
 
 // Provider factories. 
-import { baseUrlFactory } from "./services/location.factory";
-
+import { baseUrlFactory } from "./services/provider.factories";
+import { httpInterceptorFactory } from "./services/provider.factories";
 
 // Generated REST API.
 import { BASE_PATH } from "./client/variables";
@@ -86,6 +90,12 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
     ],
     providers: [
       { provide: BASE_PATH, useFactory: baseUrlFactory },
+      {
+         provide: HTTP_INTERCEPTORS,
+         useFactory: httpInterceptorFactory, 
+         multi: true,
+         deps: [Router]
+      },
       AuthGuardService,
       AuthService,
       ConfigurationService,

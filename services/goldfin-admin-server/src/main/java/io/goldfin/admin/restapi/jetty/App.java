@@ -22,9 +22,8 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -68,14 +67,14 @@ public class App {
 		setupHttpsConnector(jettyServer, serviceConfig.getGateway());
 
 		// Create handlers.
-		ServletContextHandler servletHandler = configureServletHandler();
+		ServletContextHandler servletHandler = configureConvergedServletHandler();
 		ConstraintSecurityHandler securityHandler = configureSecurityHandler();
-		ContextHandler resourceContextHandler = configureResourceHandler();
 
 		// Add security handler to server and chain servlet handler to it.
 		securityHandler.setHandler(servletHandler);
+		// ContextHandlerCollection handlers = new ContextHandlerCollection();
 		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { resourceContextHandler, securityHandler });
+		handlers.setHandlers(new Handler[] { securityHandler });
 		jettyServer.setHandler(handlers);
 
 		try {
@@ -197,24 +196,37 @@ public class App {
 	 * correct package names for the API implementation classes or you will get 404s
 	 * on all requests.
 	 */
-	private static ServletContextHandler configureServletHandler() {
-		ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		servletHandler.setContextPath("/");
+	private static ServletContextHandler configureConvergedServletHandler() {
+		// Setup the basic application "context" for this application at "/"
+		// This is also known as the handler tree (in jetty speak)
+		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		//context.setResourceBase(pwdPath);
+		context.setContextPath("/");
+		
+		// Set up error handling so that we can display single page apps in ui directory. 
+		context.setErrorHandler(new UiRedirectHandler("Test server", "/ui", "/ui"));
 
-		ServletHolder jerseyServlet = servletHandler.addServlet(ServletContainer.class, "/api/v1/*");
-		jerseyServlet.setInitOrder(0);
+		// Add special pathspec of "/ui/" content mapped to the UI location. 
+		ServletHolder holderHome = new ServletHolder("static-home", DefaultServlet.class);
+		File uiDir = new File(System.getProperty("admin.server.home.dir", "ui"));
+		holderHome.setInitParameter("resourceBase", uiDir.getAbsolutePath());
+		context.addServlet(holderHome, "/ui/*");
+
+		// Register REST API servlet.
+		ServletHolder restApiServlet = context.addServlet(ServletContainer.class, "/api/v1/*");
+		restApiServlet.setInitOrder(0);
 
 		// Find packages that have controllers.
-		jerseyServlet.setInitParameter("jersey.config.server.provider.packages",
+		restApiServlet.setInitParameter("jersey.config.server.provider.packages",
 				"io.goldfin.admin.service.api.service");
 
 		// Register provider for multi-part requests.
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", MultiPartFeature.class.getName());
+		restApiServlet.setInitParameter("jersey.config.server.provider.classnames", MultiPartFeature.class.getName());
 
 		// Add CORS filter, and then use the provided FilterHolder to configure it.
 		// (Original example from StackOverflow:
 		// https://stackoverflow.com/questions/28190198/cross-origin-filter-with-embedded-jetty)
-		FilterHolder cors = servletHandler.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		FilterHolder cors = context.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
 		cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD,UPDATE,DELETE");
@@ -225,19 +237,10 @@ public class App {
 		String exposedResponseHeaders = String.format("Content-Length,%s", SecurityAuthenticator.SESSION_KEY_HEADER);
 		cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, exposedResponseHeaders);
 
-		return servletHandler;
-	}
-
-	/** Create a resource handler to serve up files. */
-	private static ContextHandler configureResourceHandler() {
-		ResourceHandler resourceHandler = new ResourceHandler();
-		resourceHandler.setDirectoriesListed(true);
-		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
-		resourceHandler.setResourceBase("ui");
-
-		ContextHandler contextHandler = new ContextHandler();
-		contextHandler.setContextPath("/ui");
-		contextHandler.setHandler(resourceHandler);
-		return contextHandler;
+		// Finally here is a default servlet for the tail of the chain. 
+		ServletHolder defaultServlet = new ServletHolder("default", DefaultServlet.class);
+		context.addServlet(defaultServlet, "/");
+		
+		return context;
 	}
 }

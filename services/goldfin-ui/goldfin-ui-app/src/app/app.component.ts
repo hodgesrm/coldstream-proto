@@ -21,6 +21,11 @@ export class AppComponent implements OnInit {
     ngOnInit(): void {
       if (this.authService.loadSession()) {
         console.log("Restored session for user: " + this.configuration.username);
+        var url: string = window.sessionStorage.getItem('url');
+        if (url != null) {
+            console.log("Restoring previous route: " + url);
+            this.router.navigate([url]);
+        }
       } else {
         console.log("No session found, routing to login")
         this.router.navigate(['/login']);

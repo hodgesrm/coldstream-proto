@@ -2,7 +2,9 @@
  * Copyright (c) 2018 Goldfin.io. All Rights Reserved.
  */
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { AuthInterceptor } from './auth.interceptor';
 
 // Define factory method to return API base URL. 
 export let baseUrlFactory = () => {
@@ -18,4 +20,9 @@ export let baseUrlFactory = () => {
   }    
   console.log("Base API URL: " + baseUrl);
   return baseUrl;
+};
+
+// Define factory method to return HTTP interceptor
+export let httpInterceptorFactory = (router: Router) => {
+  return new AuthInterceptor(router);
 };

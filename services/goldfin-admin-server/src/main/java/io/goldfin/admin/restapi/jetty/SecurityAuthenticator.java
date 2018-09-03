@@ -110,7 +110,7 @@ public class SecurityAuthenticator implements Authenticator {
 		// If this is a content request we similarly allow it to go through
 		// so we can serve up web content requests, e.g., for files of the Angular
 		// user interface.
-		if (req.getPathInfo().startsWith("/content")) {
+		if (req.getPathInfo().startsWith("/ui")) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Letting content request through: " + req.getPathInfo());
 			}
@@ -160,6 +160,7 @@ public class SecurityAuthenticator implements Authenticator {
 			}
 		} else {
 			try {
+				logger.warn(String.format("Unauthorized request: path=%s, host=%s", req.getPathInfo(), req.getRemoteHost()));
 				res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return Authentication.SEND_FAILURE;
 			} catch (IOException e) {

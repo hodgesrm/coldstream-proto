@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Goldfin.io. All Rights Reserved.
  */
 import { Injectable, OnInit } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot } from '@angular/router';
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { AuthService } from './auth.service';
 
@@ -14,8 +14,10 @@ export class AuthGuardService implements CanActivate {
   ) {}
 
   // Send to login if not authorized. 
-  canActivate(route: ActivatedRouteSnapshot): boolean {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (this.auth.isAuthorized()) {
+      //var url: string = state.url.join('/');
+      window.sessionStorage.setItem('url', state.url);
       return true;
     } else {
       this.router.navigate(['login']);
