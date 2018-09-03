@@ -2,7 +2,7 @@
 
 # Upload observations efficiently.
 SCRIPT_DIR=`dirname $0`
-CLI="$SCRIPT_DIR/../../../goldfin-admin-server/target/goldfin-admin-server-0.9.0-distribution/goldfin-admin-server-0.9.0/bin/svc-client"
+CLI="$SCRIPT_DIR/../../../goldfin-admin-server/target/goldfin-admin-server-0.9.1-distribution/goldfin-admin-server-0.9.1/bin/svc-client"
 if [ ! -x $CLI ]; then
   echo "Can't find client: $CLI"
   exit 1 
@@ -10,9 +10,16 @@ else
   echo "Using CLI: [${CLI}]"
 fi
 
+if [ -z "$HOST" ]; then
+  HOST=localhost
+fi
+
 set -e
-echo "Executing login..."
-$CLI login --host localhost --user=test@skylineresearch.com --password=secret12
+echo "Executing login to $HOST..."
+#$CLI login --host $HOST --port 8443 --user=admin@goldfin.io \
+#--password=secret12 --verbose
+$CLI login --host $HOST --port 8443 --user=test@skylineresearch.com \
+--password=secret12 --verbose
 
 if [ "$1" = "all" ]; then
   echo "Getting all observations!"

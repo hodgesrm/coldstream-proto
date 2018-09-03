@@ -32,7 +32,9 @@ docker login -u goldfin -p '<password>'
 
 ## Start on Amazon Host
 
-Push current docker-compose.yml to host, login, and start cluster. 
+Push current docker-compose.yml to host (if new settings are required),
+login, and start cluster.
+
 ```
 scp -i ~/eng/amazon/us-west-2-preprod.pem docker-compose.yml \
  ubuntu@52.39.53.10:docker-compose.yml.new
@@ -41,10 +43,21 @@ ssh -i ~/eng/amazon/us-west-2-preprod.pem ubuntu@52.39.53.10
 # Stop existing cluster.
 docker login -u goldfin -p '<password>'
 docker-compose -p goldfin down
-# Start new cluster.
-mv docker-compose.new docker-compose
-docker-compose -p goldfin up
+# Start new cluster.  (Update docker-compose.yml settings to new version.)
+docker-compose -p goldfin up -d
 ```
+
+## DBMS Access
+
+Login to AWS using goldfin-admin account.  Find RDS instance and 
+enable public access. 
+
+Turn off after use. 
+
+## Preprod Service Initialization
+
+cd $HOME/goldfin/preprod-conf
+svc-init create --init-params $HOME/goldfin/preprod-conf/init-params.yaml --service-config $HOME/goldfin/preprod-conf/service.yaml 
 
 ## Debug and Inspection Commands
 

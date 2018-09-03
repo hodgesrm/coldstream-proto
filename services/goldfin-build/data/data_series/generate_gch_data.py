@@ -223,11 +223,14 @@ while effective_date <= end_date:
         host.network_traffic_limit = hw['network_traffic_limit']
         host.backup_enabled = hw['backup_enabled']
 
+        # We encode to JSON to force translation of names from snake to
+        # camel case.  We then reload as a map and add to the array. 
         host_encoder = SwaggerJsonEncoder(sort_keys=True)
         host_content = host_encoder.encode(host)
+        host_content_reloaded = json.loads(host_content)
         if verbose:
-            print(host_content)
-        data.append(host_content)
+            print(host_content_reloaded)
+        data.append(host_content_reloaded)
 
     # Create observation, serialize to JSON string, and add to data array.
     obs = Observation()

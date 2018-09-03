@@ -177,7 +177,7 @@ parser.add_argument("--request",
                     type=str, choices=['process'], default='process')
 parser.add_argument("--body", help="Data series request body")
 parser.add_argument("--preserve-work-files",
-                    help="Keep all work files even if scan is successful",
+                    help="Keep all work files even if processing is successful",
                     action="store_true", default=False)
 parser.add_argument("--service-cfg",
                     help="Service configuration file (default: %(default)s)",

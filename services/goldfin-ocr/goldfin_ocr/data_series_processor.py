@@ -12,6 +12,7 @@ from .data.pfactory import get_provider
 from .api.models.observation import Observation
 from .api.models.data_series import DataSeries
 from .json_xlate import json_dict_to_model, SwaggerJsonEncoder
+from .data.data_series_context import DataSeriesContext
 
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
@@ -36,7 +37,8 @@ class DataProcessor:
         os.makedirs(self._data_work_dir, exist_ok=True)
         if not os.path.exists(self._data_work_dir):
             raise AssertionError(
-                "Cannot create work directory: {0}".format(self._data_work_dir))
+                "Cannot create work directory: {0}".format(
+                    self._data_work_dir))
 
     def process(self, tenant_id, data_series, preserve_work_files=False):
         """Process a data series and return inventory data. 
@@ -55,11 +57,11 @@ class DataProcessor:
         # We only support application/json for now. 
         if data_series.content_type.rfind("application/json") >= 0:
             logger.debug("Content type is supported: {0}".format(
-                         data_series.content_type))
+                data_series.content_type))
         else:
             raise Exception(
-                      "Unsupported data series content type: {0}".format(
-                           data_series.content_type))
+                "Unsupported data series content type: {0}".format(
+                    data_series.content_type))
 
         # Create a work directory.  This will hold all files and will
         # be cleared on success (if desired).  Start by recording the data
@@ -70,18 +72,20 @@ class DataProcessor:
             ds_file.write(self._dump_to_json(data_series, external=True))
 
         # Download observation data from S3.
-        logger.info("Fetching data series file: ref={0}".format(data_series.locator))
-        ds_input_path = self._fetch_from_s3(data_series.locator, 
-                                            data_series.thumbprint, 
+        logger.info(
+            "Fetching data series file: ref={0}".format(data_series.locator))
+        ds_input_path = self._fetch_from_s3(data_series.locator,
+                                            data_series.thumbprint,
                                             ds_work_dir, data_series.name)
-        logger.info("Path location of data series data: {0}".format(ds_input_path))
+        logger.info(
+            "Path location of data series data: {0}".format(ds_input_path))
 
         with open(ds_input_path, "r") as ds_file:
             ds = ds_file.read()
         observation = json_dict_to_model(json.loads(ds), Observation)
         observation_path = ds_input_path + "-observation.json"
         logger.info(
-            "Storing observation to file: {0}".format( observation_path))
+            "Storing observation to file: {0}".format(observation_path))
         with open(observation_path, "w") as observation_file:
             observation_file.write(self._dump_to_json(observation))
 
@@ -89,15 +93,17 @@ class DataProcessor:
         provider = get_provider(observation)
         if provider is None:
             message = "Can't find a provider!!! data_series={0}, vendor={1}".format(
-                    data_series.id, observation.vendor_identifier)
+                data_series.id, observation.vendor_identifier)
             logger.error(message)
             logger.info("Preserving work files: {0}".format(ds_work_dir))
             print(message)
             raise Exception("Unable to find provider for data series content")
         else:
+            # Create context for processing and invoke provider.
+            context = DataSeriesContext(data_series_id=data_series.id,
+                                        work_dir_path=ds_work_dir, )
+            results = provider.get_results(observation, context)
             # Remove work files on success unless client wants to keep.
-            results = provider.get_results(observation, data_series.id)
-            print(type(results))
             if preserve_work_files:
                 # Dump the invoice to file.
                 results_path = os.path.join(ds_work_dir, 'results.json')
@@ -105,10 +111,12 @@ class DataProcessor:
                     "Storing results to file: {0}".format(
                         results_path))
                 with open(results_path, "w") as results_file:
-                    results_file.write(self._dump_to_json(results, external=True))
+                    results_file.write(
+                        self._dump_to_json(results, external=True))
                 logger.info("Preserving doc files: {0}".format(ds_work_dir))
             else:
-                logger.info("Removing doc work files on success: {0}".format(ds_work_dir))
+                logger.info("Removing doc work files on success: {0}".format(
+                    ds_work_dir))
                 shutil.rmtree(ds_work_dir, ignore_errors=True)
                 if os.path.exists(ds_work_dir):
                     logger.warning("Unable to delete doc work files!")
@@ -146,7 +154,8 @@ class DataProcessor:
         # Download the content..
         temp_ds_path = os.path.join(ds_work_dir, ds_name)
         logger.info(
-            "Fetching data series for analysis: ref={0}, file={1}".format(locator, temp_ds_path))
+            "Fetching data series for analysis: ref={0}, file={1}".format(
+                locator, temp_ds_path))
         with open(temp_ds_path, "wb") as temp_ds_file:
             cached_ds_stream = s3.fetch_to_stream(s3_ref.key)
             temp_ds_file.write(cached_ds_stream.read())
@@ -189,5 +198,7 @@ class DataProcessor:
             encoder = SwaggerJsonEncoder()
             return encoder.encode(obj)
         else:
-            converter_fn = lambda unserializable_obj: unserializable_obj.__dict__
-            return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
+            converter_fn = lambda \
+                unserializable_obj: unserializable_obj.__dict__
+            return json.dumps(obj, indent=2, sort_keys=True,
+                              default=converter_fn)

@@ -71,8 +71,8 @@ def extract_date(date_string):
     matcher = re.match(mmm_dd_yyyy, date_string.upper())
     if matcher:
         clean_date = "{m} {d}, {y}".format(m=matcher.group(1),
-                                              d=matcher.group(2),
-                                              y=matcher.group(3))
+                                           d=matcher.group(2),
+                                           y=matcher.group(3))
         return datetime.strptime(clean_date, '%b %d, %Y').strftime('%Y-%m-%d')
 
     # DD MMM YYYY format.
@@ -80,8 +80,8 @@ def extract_date(date_string):
     matcher = re.match(dd_mmm_yyyy, date_string.upper())
     if matcher:
         clean_date = "{d} {m} {y}".format(d=matcher.group(1),
-                                              m=matcher.group(2),
-                                              y=matcher.group(3))
+                                          m=matcher.group(2),
+                                          y=matcher.group(3))
         return datetime.strptime(clean_date, '%d %b %Y').strftime('%Y-%m-%d')
 
     # DD MMM YYYY format but with full month names.
@@ -89,8 +89,8 @@ def extract_date(date_string):
     matcher = re.match(dd_fullmonth_yyyy, date_string.upper())
     if matcher:
         clean_date = "{d} {m} {y}".format(d=matcher.group(1),
-                                              m=matcher.group(2),
-                                              y=matcher.group(3))
+                                          m=matcher.group(2),
+                                          y=matcher.group(3))
         return datetime.strptime(clean_date, '%d %B %Y').strftime('%Y-%m-%d')
 
     # DD-MM-YYYY format.
@@ -98,8 +98,8 @@ def extract_date(date_string):
     matcher = re.match(dd_dash_mm_dash_yyyy, date_string)
     if matcher:
         clean_date = "{d}-{m}-{y}".format(d=matcher.group(1),
-                                              m=matcher.group(2),
-                                              y=matcher.group(3))
+                                          m=matcher.group(2),
+                                          y=matcher.group(3))
         return datetime.strptime(clean_date, '%d-%m-%Y').strftime('%Y-%m-%d')
 
     # MM/DD/YYYY format.
@@ -107,8 +107,8 @@ def extract_date(date_string):
     matcher = re.match(dd_slash_mm_slash_yyyy, date_string)
     if matcher:
         clean_date = "{d}-{m}-{y}".format(d=matcher.group(2),
-                                              m=matcher.group(1),
-                                              y=matcher.group(3))
+                                          m=matcher.group(1),
+                                          y=matcher.group(3))
         return datetime.strptime(clean_date, '%d-%m-%Y').strftime('%Y-%m-%d')
 
     # MM/DD/YY format.
@@ -116,12 +116,13 @@ def extract_date(date_string):
     matcher = re.match(dd_slash_mm_slash_yy, date_string)
     if matcher:
         clean_date = "{d}-{m}-{y}".format(d=matcher.group(2),
-                                              m=matcher.group(1),
-                                              y=matcher.group(3))
+                                          m=matcher.group(1),
+                                          y=matcher.group(3))
         return datetime.strptime(clean_date, '%d-%m-%y').strftime('%Y-%m-%d')
 
     # Other formats
     return None
+
 
 def extract_currency(currency_string):
     """Extracts a date value from a string
@@ -160,13 +161,18 @@ def extract_currency(currency_string):
     else:
         return None
 
+
 def extract_integer(integer_string):
     """Extracts an integer, filtering out common erroneous transformations
 
     :param integer_string: Candidate integer string
     :type integer_string: str
-    :return: int value or None
+    :return: int value or None if value is missing or unintelligible
     """
+    # If value is None, return that immediately. 
+    if integer_string is None:
+        return None
+
     # Strip whitespace.
     integer_string = integer_string.strip()
 
@@ -180,3 +186,15 @@ def extract_integer(integer_string):
         return int(integer_string)
     else:
         return None
+
+def int_or_null(integer_value):
+    """Transforms a value to integer or returns None if value is absent
+
+    :param integer_value: Candidate integer value
+    :return: int value or None if value is missing
+    """
+    # If value is None, return that immediately.
+    if integer_value is None:
+        return None
+    else:
+        return int(integer_value)

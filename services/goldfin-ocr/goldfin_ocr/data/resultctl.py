@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2017 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2017-2018 Robert Hodges.  All rights reserved.
 
 """Observation to result processing command line interface (CLI)"""
 
