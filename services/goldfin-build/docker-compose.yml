@@ -2,7 +2,7 @@
 version: '3.6'
 services:
    api:
-       image: goldfin/admin-server:0.9.1
+       image: goldfin/admin-server:${VERSION}
        network_mode: host
        volumes:
          - type: bind
@@ -11,13 +11,13 @@ services:
        #ports:
        # - "443:8443"
    ocr:
-       image: goldfin/scanctl:0.9.1
+       image: goldfin/scanctl:${VERSION}
        volumes:
          - type: bind
            source: /home/rhodges/goldfin/conf
            target: /var/lib/goldfin/conf
    data:
-       image: goldfin/datactl:0.9.1
+       image: goldfin/datactl:${VERSION}
        volumes:
          - type: bind
            source: /home/rhodges/goldfin/conf

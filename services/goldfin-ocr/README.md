@@ -7,6 +7,19 @@
 python3 setup.py 
 ```
 
+## Run Tests
+```shell
+# Start venv
+python3 setup.py develop
+```
+
+## Run Tests
+
+```shell
+# Start venv
+python3 -m unittest tests/test_*.py -v
+```
+
 ## Build Docker Images
 ```shell
 # OCR service container.

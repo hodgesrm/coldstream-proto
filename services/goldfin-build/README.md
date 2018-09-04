@@ -33,46 +33,48 @@ Run docker build in all service directory to update images.
 
 ## Starting and Stopping Services
 
-Starting the cluster.   First command shows logs in foreground.  Second 
-command runs in background, so you can't see the logs. 
+Starting the cluster.  This command runs in background, so you can't see 
+the logs. 
 ```
-docker-compose -p goldfin up
-docker-compose -p goldfin up -d
+./docker-up.sh <version>
 ```
 
 Stopping the cluster. 
 ```
-docker-compose -p goldfin down
+./docker-down.sh <version>
 ```
 
 ## Debug and Inspection Commands
 
 Attach to running container with bash shell.
 ```
-docker exec -i -t goldfin_api_1 /bin/bash
+docker exec -it goldfin_api_1 /bin/bash
 ```
 
 View logs for a container. (-f to follow.)
 ```
-docker logs goldfin_api_1 -f
+docker logs -f goldfin_api_1
 ```
+
+Image IDs also work fine as identifiers. 
 
 ## Image cleanup
 
 Clean up old docker images.
 ```
-docker image rm $(docker images -f dangling=true -q)
+./docker-clean.sh
 ```
 
-## Using build docker images. 
+## Using built docker images. 
 Login to Docker Hub and upload built images. 
 ```
 docker login -u goldfin -p '<password>'
-./docker-push-all.sh
+./docker-push-all.sh <version>
 ```
 
 Start built images on another host. 
 ```
 docker login -u goldfin -p '<password>'
+export VERSION=<version you want to start>
 docker-compose -p goldfin up -d
 ```

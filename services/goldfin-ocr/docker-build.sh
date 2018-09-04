@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export GOLDFIN_VERSION=0.9.1
+export GOLDFIN_VERSION=0.9.2
 
 # Build file for Docker services. 
 cd `dirname $0`

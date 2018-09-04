@@ -27,13 +27,12 @@ You should see exactly three images tagged with the expected version number
 Login to Docker Hub and upload built images. 
 ```bash
 docker login -u goldfin -p '<password>'
-./docker-push-all.sh
+./docker-push-all.sh <version>
 ```
 
 ## Start on Amazon Host
 
-Push current docker-compose.yml to host (if new settings are required),
-login, and start cluster.
+Push current docker-compose.yml to host, login, and start cluster.
 
 ```
 scp -i ~/eng/amazon/us-west-2-preprod.pem docker-compose.yml \
@@ -42,8 +41,10 @@ ssh -i ~/eng/amazon/us-west-2-preprod.pem ubuntu@52.39.53.10
 (On the host)
 # Stop existing cluster.
 docker login -u goldfin -p '<password>'
+export VERSION=<old version>
 docker-compose -p goldfin down
-# Start new cluster.  (Update docker-compose.yml settings to new version.)
+# Start new cluster.  
+export VERSION=<new version>
 docker-compose -p goldfin up -d
 ```
 
