@@ -5,9 +5,10 @@
 Update versions to new release version in the following files.  Example: 
 change 0.9.0 to 0.9.1. 
 
-* goldfin-admin-server/Dockerfile
+* ../VERSION
 * goldfin-admin-server/pom.xml
-* goldfin-ocr/docker-build.sh
+
+No other versions need to be changed. 
 
 ## Build
 
@@ -16,6 +17,8 @@ Clean old docker images and build.
 ./docker-clean.sh
 ./docker-build-all.sh
 ```
+The build uses the version string in the VERSION file. 
+
 After the build completes ensure expected docker images are available. 
 ```bash
 docker images |grep goldfin

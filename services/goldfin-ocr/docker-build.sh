@@ -1,11 +1,12 @@
 #!/bin/bash
 
-export GOLDFIN_VERSION=0.9.2
-
 # Build file for Docker services. 
 cd `dirname $0`
+if [ "$VERSION" = "" ]; then
+  export VERSION=$(cat ../VERSION)
+fi
 
 # OCR service container.
-docker build -f Dockerfile.ocr -t goldfin/scanctl:${GOLDFIN_VERSION} .
+docker build -f Dockerfile.ocr -t goldfin/scanctl:${VERSION} .
 # Data service container.
-docker build -f Dockerfile.data -t goldfin/datactl:${GOLDFIN_VERSION} .
+docker build -f Dockerfile.data -t goldfin/datactl:${VERSION} .

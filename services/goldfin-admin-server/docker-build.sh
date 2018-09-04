@@ -4,9 +4,12 @@ set -e
 
 # Build file for Docker services. 
 cd `dirname $0`
+if [ "$VERSION" = "" ]; then
+  export VERSION=$(cat ../VERSION)
+fi
 
 # Clean the build to ensure we don't pick up obsolete libraries. 
-mvn clean
+mvn clean install -DskipTests
 
 # Build the UI distribution.  It's required by the docker file and must be
 # in-tree for the docker build to work. 
@@ -17,4 +20,5 @@ rsync -avr ../goldfin-ui/goldfin-ui-app/dist/ target/ui
 
 # Run 'mvn install' which generates the Docker file for us. (No need to invoke
 # docker directly.)
-mvn install -DskipTests
+docker build -f Dockerfile -t goldfin/admin-server:${VERSION} .
+
