@@ -1,0 +1,21 @@
+# Configuration file for data loading. 
+
+# Connection information to API server.  This is used to upload
+# observations to Goldfin server. 
+api_server:
+  host: localhost
+  port: 8443
+  secret_key: Fyj1W5oJL62hEClyclEsE8+oLQ=s
+
+# General tags that should be assigned to any data series selected using
+# this configuration file
+#tags:
+#  account: test@skylineresearch.com
+
+# Probe definitions including provider type, parameters (largely credentials), 
+# and tags that should be assigned to observations from each probe.
+data_probes:
+  - name: leaseweb
+    provider: leaseweb
+    provider_params:
+      api_key: "00000000-0001-0001-0001-000000000003"

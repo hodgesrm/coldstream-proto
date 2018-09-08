@@ -11,19 +11,26 @@ less than 3.5, install a new version from the following website:
 After the installation type `python3 --version` again to ensure you have
 the new version.  If not, try logging out and logging back in again.
 
-## Installation
+## Installation and Upgrade
 
-The following steps unpack the Goldfin data collector and create a Python
-virtual environment to hold it.  A virtual environment is a private set
-of Python libraries that can be installed and upgraded without affecting
-Python use elsewhere on your host.
+Goldfin data collectors are written in Python and distributed in a tar.gz
+file with a name like goldfin_client-1.0.1.tar.gz. 
+
+The following steps install the Goldfin data collector in a Python
+virtual environment.  A virtual environment is a private set of Python
+libraries that can be installed and upgraded without affecting Python
+use elsewhere on your machine.
 
 ```shell
-[tar -xf goldfin-client.tar.gz]
-[cd goldfin-client]
 python3 -m venv venv
 . venv/bin/activate
-python3 setup.py install
+pip3 install releases/goldfin_client-1.0.1.tar.gz 
+```
+
+If a new version of the collector is released, you can upgrade as follows.
+```shell
+. venv/bin/activate
+pip3 install --upgrade releases/goldfin_client-1.0.2.tar.gz 
 ```
 
 ## Configuration 

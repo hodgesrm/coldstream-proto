@@ -51,7 +51,8 @@ class Host(object):
         'ssd': 'int',
         'nic_count': 'int',
         'network_traffic_limit': 'int',
-        'backup_enabled': 'bool'
+        'backup_enabled': 'bool',
+        'tags': 'TagSet'
     }
 
     attribute_map = {
@@ -75,10 +76,11 @@ class Host(object):
         'ssd': 'ssd',
         'nic_count': 'nicCount',
         'network_traffic_limit': 'networkTrafficLimit',
-        'backup_enabled': 'backupEnabled'
+        'backup_enabled': 'backupEnabled',
+        'tags': 'tags'
     }
 
-    def __init__(self, id=None, host_id=None, resource_id=None, effective_date=None, vendor_identifier=None, data_series_id=None, host_type=None, host_model=None, region=None, zone=None, datacenter=None, cpu=None, socket_count=None, core_count=None, thread_count=None, ram=None, hdd=None, ssd=None, nic_count=None, network_traffic_limit=None, backup_enabled=None):
+    def __init__(self, id=None, host_id=None, resource_id=None, effective_date=None, vendor_identifier=None, data_series_id=None, host_type=None, host_model=None, region=None, zone=None, datacenter=None, cpu=None, socket_count=None, core_count=None, thread_count=None, ram=None, hdd=None, ssd=None, nic_count=None, network_traffic_limit=None, backup_enabled=None, tags=None):
         """
         Host - a model defined in Swagger
         """
@@ -104,6 +106,7 @@ class Host(object):
         self._nic_count = None
         self._network_traffic_limit = None
         self._backup_enabled = None
+        self._tags = None
 
         if id is not None:
           self.id = id
@@ -147,6 +150,8 @@ class Host(object):
           self.network_traffic_limit = network_traffic_limit
         if backup_enabled is not None:
           self.backup_enabled = backup_enabled
+        if tags is not None:
+          self.tags = tags
 
     @property
     def id(self):
@@ -636,6 +641,27 @@ class Host(object):
         """
 
         self._backup_enabled = backup_enabled
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this Host.
+
+        :return: The tags of this Host.
+        :rtype: TagSet
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this Host.
+
+        :param tags: The tags of this Host.
+        :type: TagSet
+        """
+
+        self._tags = tags
 
     def to_dict(self):
         """

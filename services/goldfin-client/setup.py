@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="goldfin_client",
-    version="1.0.0",
+    version="1.0.2",
     description="Goldfin Client Tools",
     install_requires=[
         'requests>=2.19.1',

@@ -60,18 +60,18 @@ api.configuration.api_key['vnd.io.goldfin.session'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # api.configuration.api_key_prefix['vnd.io.goldfin.session'] = 'Bearer'
 # create an instance of the API class
-api_instance = api.DocumentApi()
-file = '/path/to/file.txt' # file | Document file
-description = 'description_example' # str | An optional description of the document (optional)
-tags = 'tags_example' # str | Optional tags that apply to this document passed as a JSON string containing name-value pairs. (optional)
-process = true # bool | Optional flag to kick off scanning automatically if true (optional) (default to true)
+api_instance = api.DataApi()
+file = '/path/to/file.txt' # file | Data series content
+description = 'description_example' # str | An optional description of the data series (optional)
+tags = 'tags_example' # str | Optional tags that apply to this entity passed as a JSON string containing name-value pairs. (optional)
+process = true # bool | Optional flag to kick off processing automatically if true (optional) (default to true)
 
 try:
-    # Upload document
-    api_response = api_instance.document_create(file, description=description, tags=tags, process=process)
+    # Upload data series
+    api_response = api_instance.data_create(file, description=description, tags=tags, process=process)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DocumentApi->document_create: %s\n" % e)
+    print("Exception when calling DataApi->data_create: %s\n" % e)
 
 ```
 
@@ -81,6 +81,13 @@ All URIs are relative to *https://api.goldfin.io/api/v1*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*DataApi* | [**data_create**](docs/DataApi.md#data_create) | **POST** /data | Upload data series
+*DataApi* | [**data_delete**](docs/DataApi.md#data_delete) | **DELETE** /data/{id} | Delete a data series
+*DataApi* | [**data_process**](docs/DataApi.md#data_process) | **POST** /data/{id}/process | Kick off background processing of data series
+*DataApi* | [**data_show**](docs/DataApi.md#data_show) | **GET** /data/{id} | Return data series metadata
+*DataApi* | [**data_show_all**](docs/DataApi.md#data_show_all) | **GET** /data | List data serties
+*DataApi* | [**data_show_content**](docs/DataApi.md#data_show_content) | **GET** /data/{id}/content | Return data series content
+*DataApi* | [**data_update**](docs/DataApi.md#data_update) | **PUT** /data/{id} | Update a data series
 *DocumentApi* | [**document_create**](docs/DocumentApi.md#document_create) | **POST** /document | Upload document
 *DocumentApi* | [**document_delete**](docs/DocumentApi.md#document_delete) | **DELETE** /document/{id} | Delete a invoice
 *DocumentApi* | [**document_download**](docs/DocumentApi.md#document_download) | **GET** /document/{id}/download | Download content
@@ -90,13 +97,6 @@ Class | Method | HTTP request | Description
 *DocumentApi* | [**document_update**](docs/DocumentApi.md#document_update) | **PUT** /document/{id} | Update a document
 *ExtractApi* | [**extract_download**](docs/ExtractApi.md#extract_download) | **GET** /extract/download | Download a data extract
 *ExtractApi* | [**extract_types**](docs/ExtractApi.md#extract_types) | **GET** /extract/types | List available extract types
-*InventoryApi* | [**data_create**](docs/InventoryApi.md#data_create) | **POST** /data | Upload data series
-*InventoryApi* | [**data_delete**](docs/InventoryApi.md#data_delete) | **DELETE** /data/{id} | Delete a data series
-*InventoryApi* | [**data_process**](docs/InventoryApi.md#data_process) | **POST** /data/{id}/process | Kick off background processing of data series
-*InventoryApi* | [**data_show**](docs/InventoryApi.md#data_show) | **GET** /data/{id} | Return data series metadata
-*InventoryApi* | [**data_show_all**](docs/InventoryApi.md#data_show_all) | **GET** /data | List data serties
-*InventoryApi* | [**data_show_content**](docs/InventoryApi.md#data_show_content) | **GET** /data/{id}/content | Return data series content
-*InventoryApi* | [**data_update**](docs/InventoryApi.md#data_update) | **PUT** /data/{id} | Update a data series
 *InventoryApi* | [**host_delete**](docs/InventoryApi.md#host_delete) | **DELETE** /host/{id} | Delete host record
 *InventoryApi* | [**host_show**](docs/InventoryApi.md#host_show) | **GET** /host/{id} | Show single host inventory record
 *InventoryApi* | [**host_show_all**](docs/InventoryApi.md#host_show_all) | **GET** /host | List current host inventory records
@@ -107,20 +107,20 @@ Class | Method | HTTP request | Description
 *InvoiceApi* | [**invoice_validate**](docs/InvoiceApi.md#invoice_validate) | **POST** /invoice/{id}/validate | Start invoice validations
 *SecurityApi* | [**login_by_credentials**](docs/SecurityApi.md#login_by_credentials) | **POST** /session | Login to system
 *SecurityApi* | [**logout**](docs/SecurityApi.md#logout) | **DELETE** /session/{token} | Logout from system
-*TenantApi* | [**apikey_create**](docs/TenantApi.md#apikey_create) | **POST** /user/{id}/apikey | Create a new API key
-*TenantApi* | [**apikey_delete**](docs/TenantApi.md#apikey_delete) | **DELETE** /user/{id}/apikey/{keyid} | Delete an API key
-*TenantApi* | [**apikey_show_all**](docs/TenantApi.md#apikey_show_all) | **GET** /user/{id}/apikey | Return list of API keys
 *TenantApi* | [**tenant_create**](docs/TenantApi.md#tenant_create) | **POST** /tenant | Create a new tenant
 *TenantApi* | [**tenant_delete**](docs/TenantApi.md#tenant_delete) | **DELETE** /tenant/{id} | Delete a tenant
 *TenantApi* | [**tenant_show**](docs/TenantApi.md#tenant_show) | **GET** /tenant/{id} | Show a single tenant
 *TenantApi* | [**tenant_showall**](docs/TenantApi.md#tenant_showall) | **GET** /tenant | List tenants
 *TenantApi* | [**tenant_update**](docs/TenantApi.md#tenant_update) | **PUT** /tenant/{id} | Update a tenant
-*TenantApi* | [**user_create**](docs/TenantApi.md#user_create) | **POST** /user | Create a new user for a tenant
-*TenantApi* | [**user_delete**](docs/TenantApi.md#user_delete) | **DELETE** /user/{id} | Delete a user
-*TenantApi* | [**user_show**](docs/TenantApi.md#user_show) | **GET** /user/{id} | Show a single user
-*TenantApi* | [**user_showall**](docs/TenantApi.md#user_showall) | **GET** /user | List users
-*TenantApi* | [**user_update**](docs/TenantApi.md#user_update) | **PUT** /user/{id} | Update a user
-*TenantApi* | [**user_update_password**](docs/TenantApi.md#user_update_password) | **PUT** /user/{id}/password | Update user password
+*UserApi* | [**apikey_create**](docs/UserApi.md#apikey_create) | **POST** /user/{id}/apikey | Create a new API key
+*UserApi* | [**apikey_delete**](docs/UserApi.md#apikey_delete) | **DELETE** /user/{id}/apikey/{keyid} | Delete an API key
+*UserApi* | [**apikey_show_all**](docs/UserApi.md#apikey_show_all) | **GET** /user/{id}/apikey | Return list of API keys
+*UserApi* | [**user_create**](docs/UserApi.md#user_create) | **POST** /user | Create a new user for a tenant
+*UserApi* | [**user_delete**](docs/UserApi.md#user_delete) | **DELETE** /user/{id} | Delete a user
+*UserApi* | [**user_show**](docs/UserApi.md#user_show) | **GET** /user/{id} | Show a single user
+*UserApi* | [**user_showall**](docs/UserApi.md#user_showall) | **GET** /user | List users
+*UserApi* | [**user_update**](docs/UserApi.md#user_update) | **PUT** /user/{id} | Update a user
+*UserApi* | [**user_update_password**](docs/UserApi.md#user_update_password) | **PUT** /user/{id}/password | Update user password
 *VendorApi* | [**vendor_create**](docs/VendorApi.md#vendor_create) | **POST** /vendor | Create a new vendor
 *VendorApi* | [**vendor_delete**](docs/VendorApi.md#vendor_delete) | **DELETE** /vendor/{id} | Delete a vendor
 *VendorApi* | [**vendor_show**](docs/VendorApi.md#vendor_show) | **GET** /vendor/{id} | Show a single vendor

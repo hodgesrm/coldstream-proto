@@ -41,12 +41,14 @@ from .models.vendor import Vendor
 from .models.vendor_parameters import VendorParameters
 
 # import apis into sdk package
+from .apis.data_api import DataApi
 from .apis.document_api import DocumentApi
 from .apis.extract_api import ExtractApi
 from .apis.inventory_api import InventoryApi
 from .apis.invoice_api import InvoiceApi
 from .apis.security_api import SecurityApi
 from .apis.tenant_api import TenantApi
+from .apis.user_api import UserApi
 from .apis.vendor_api import VendorApi
 
 # import ApiClient

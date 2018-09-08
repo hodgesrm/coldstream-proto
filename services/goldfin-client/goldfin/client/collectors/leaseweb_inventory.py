@@ -16,17 +16,23 @@ VENDOR = "LeaseWeb"
 
 class LeasewebProcessor():
     """Processing class for leaseweb inventory"""
-    def __init__(self, api_key):
+    def __init__(self, api_key=None, api_url=None):
         """Create processor
 
         :param api_key: API key used to login to LeaseWeb REST API
         :type api_key: str
+        :param api_url: Base URL for API server
+        :type api_url: str
         """
         if api_key is None:
             message = "No api_key value provided, required to login"
             logger.fatal(message)
             raise Exception(message)
         self._api_key = api_key
+        if api_url is None:
+            self._api_url = "https://api.leaseweb.com"
+        else:
+            self._api_url = api_url
 
     def execute(self):
         """Observe current inventory and return Observation result
@@ -34,7 +40,7 @@ class LeasewebProcessor():
 		:return: observation content containing current inventory
         :rtype: Observation
         """
-        servers_url = "https://api.leaseweb.com/bareMetals/v2/servers"
+        servers_url = self._api_url + "/bareMetals/v2/servers"
         logger.info("Checking inventory: url={0}".format(servers_url))
         headers = {'X-Lsw-Auth': self._api_key}
         r = requests.get(servers_url, headers=headers)
@@ -61,5 +67,6 @@ class LeasewebProcessor():
         obs.effective_date = datetime.datetime.now()
         obs.observation_type = "HOST_INVENTORY"
         obs.data = json.dumps(server_details, sort_keys=True)
+        obs.version = "1.0"
 
         return obs

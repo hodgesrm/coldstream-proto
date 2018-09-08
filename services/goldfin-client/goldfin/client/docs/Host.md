@@ -24,6 +24,7 @@ Name | Type | Description | Notes
 **nic_count** | **int** | Number of network interface cards (NICs) | [optional] 
 **network_traffic_limit** | **int** | Number of bytes of network traffer per billing period if there is a hard limit | [optional] 
 **backup_enabled** | **bool** | If true backup is enabled for this host | [optional] 
+**tags** | [**TagSet**](TagSet.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

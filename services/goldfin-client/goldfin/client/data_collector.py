@@ -1,19 +1,21 @@
 # Copyright (c) 2018 Goldfin.  All rights reserved.
 
-"""Inventory analysis client"""
+"""Data collection and upload client"""
 
 import argparse
 import configparser
 import json
 import logging
+import pkg_resources
 import os
 import sys
+import time
 import yaml
 
-from goldfin.client.json_xlate import SwaggerJsonEncoder
-from goldfin.client.collectors.ifactory import get_provider
+from .json_xlate import SwaggerJsonEncoder
+from .collectors.ifactory import get_provider
+from .yaml_config_loader import load_yaml, YamlValidationError
 
-import time
 import goldfin.client.api as api
 from goldfin.client.api.rest import ApiException
 from goldfin.client.api.models import TagSet
@@ -64,10 +66,13 @@ def print_error(msg):
 """Upload data series to API server."""
 def make_tagset(tags_dict):
     """Creates tag set from a dictionary"""
-    tagSet = []
-    for k,v in tags_dict.items():
-        tagSet.append(Tag(name=k, value=v))
-    return tagSet
+    if tags_dict is None:
+        return {}
+    else:
+        tagSet = []
+        for k,v in tags_dict.items():
+            tagSet.append(Tag(name=k, value=v))
+        return tagSet
 
 def do_file_upload(file, tags, host=None, port=443, secret_key=None, 
                    verify_ssl=True):
@@ -79,7 +84,7 @@ def do_file_upload(file, tags, host=None, port=443, secret_key=None,
 
     try:
         # Upload document
-        api_instance = api.InventoryApi()
+        api_instance = api.DataApi()
         description = 'description_example' 
         encoder = SwaggerJsonEncoder()
         tagsAsJson = encoder.encode(tags)
@@ -93,11 +98,12 @@ def do_file_upload(file, tags, host=None, port=443, secret_key=None,
 """Perform a data probe and optional upload resulting data series file."""
 def run_probes(args):
     # Load config file. 
-    if not os.path.exists(args.config):
-        print_error("Config file does not exist: {0}".format(args.config))
+    try:
+        config = load_yaml(args.config)
+    except YamlValidationError as e:
+        print("Error: {0}".format(e.msg))
+        print("Config file: {0}".format(e.config_path))
         return 1
-    with open(args.config, "r") as config_file:
-        config = yaml.load(config_file)
 
     # Ensure we have a writable output directory
     if args.out_dir is None:
@@ -110,7 +116,7 @@ def run_probes(args):
 
     # Pull out top-level sections of the configuration file. 
     api_server = config['api_server']
-    general_tags = config['tags']
+    general_tagset = make_tagset(config.get('tags'))
     probes = config['data_probes']
 
     # Decide which probes to run. 
@@ -125,6 +131,11 @@ def run_probes(args):
     else:
         raise Exception("No probes specified")
     
+    # If this is a dry run, stop now. 
+    if args.dry_run:
+        print("Dry run...skipping execution")
+        return 0
+
     # Now iterate over the probes and execute each in sequence. 
     for probe in probe_list:
         name = probe['name']
@@ -132,6 +143,7 @@ def run_probes(args):
         provider_params = probe['provider_params']
         tags = probe['tags']
         # Find and execute probe.
+        print("Executing probe: {0}".format(name))
         provider = get_provider(provider, provider_params)
         obs = provider.execute()
         # Construct and assign tag set. 
@@ -148,13 +160,19 @@ def run_probes(args):
 
         # Optionally load file to Goldfin.
         if args.upload:
-            do_file_upload(output_file, make_tagset(general_tags), **api_server)
+            do_file_upload(output_file, general_tagset, **api_server)
 
+    print("All probes processed")
     return 0
     
 """Upload a data series file."""
 def upload(args):
    raise Exception('Upload is not implemented yet')
+
+"""Print the version"""
+def version(args):
+    version = pkg_resources.get_distribution('goldfin-client').version
+    print("Version: {0}".format(version))
 
 # Define top-level command line parser with global options and sub-command
 # parsing enabled.
@@ -183,6 +201,9 @@ parser_run.add_argument("--all-probes",
 parser_run.add_argument('--upload', 
                         action='store_true', 
                         help='If present upload observation files automatically')
+parser_run.add_argument('--dry-run', 
+                        action='store_true', 
+                        help='Validate arguments and config but do not execute')
 parser_run.add_argument("--config",
                         help="Configuration file (default %(default)s)",
                         default="data_config.yaml")
@@ -201,6 +222,10 @@ parser_upload.add_argument('file',
 parser_upload.add_argument("--config",
                            help="Configuration file (default %(default)s)",
                            default="data_config.yaml")
+
+# Define version sub-parser.
+parser_version = subparsers.add_parser('version', help='Print client version')
+parser_version.set_defaults(func=version)
 
 # Parse arguments and execute subcommand.
 args = parser.parse_args()
