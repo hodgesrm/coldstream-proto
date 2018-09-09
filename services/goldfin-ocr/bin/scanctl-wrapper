@@ -1,0 +1,24 @@
+#!/bin/bash
+# Wrapper for Goldfin OCR scanning commands
+# Copyright (C) 2017-2018 All rights reserved
+
+# Redirect STDOUT/STDERR to /var/log/goldfin if it exists.
+LOG_DIR=/var/log/goldfin
+if [ -w $LOG_DIR ]; then
+  echo "Redirecting stdout/stderr to $LOG_DIR/ocr.out"
+  touch $LOG_DIR/ocr.out
+  exec >$LOG_DIR/ocr.out
+  exec 2>&1
+fi
+
+# Ensure cupsd is running.
+pidof cupsd >/dev/null
+if [ $? -ne 0 ]; then
+  echo "Starting cupsd"
+  /usr/sbin/cupsd -f &
+else
+  echo "No need to start cupsd; it's already running"
+fi
+
+# Run Python process. 
+scanctl "$@"

@@ -74,3 +74,13 @@ View logs for a container. (-f to follow.)
 ```
 docker logs goldfin_api_1 -f
 ```
+
+## Configuration for Service Log Files
+
+The /var/log/goldfin directory must now exist on the Docker host to hold 
+service logs.
+```shell
+mkdir -p /var/log/goldfin
+```
+
+

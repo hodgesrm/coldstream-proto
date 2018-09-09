@@ -1,0 +1,15 @@
+#!/bin/bash
+# Wrapper for Goldfin data series processing command.
+# Copyright (C) 2017-2018 All rights reserved
+
+# Redirect STDOUT/STDERR to /var/log/goldfin if it exists.
+LOG_DIR=/var/log/goldfin
+if [ -w $LOG_DIR ]; then
+  echo "Redirecting stdout/stderr to $LOG_DIR/data.out"
+  touch $LOG_DIR/data.out
+  exec >$LOG_DIR/data.out
+  exec 2>&1
+fi
+
+# Run Python process. 
+datactl "$@"

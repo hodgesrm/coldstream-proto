@@ -20,12 +20,19 @@ REQUIRES = ["boto3", "urllib3 >= 1.15", "six >= 1.10", "certifi", "python-dateut
 
 setup(
     name="goldfin_ocr",
-    version="0.1",
-    description="Goldfin OCR logic",
+    version="1.0.1",
+    description="Goldfin Backend Services",
     install_requires=REQUIRES,
     packages=find_packages(),
     include_package_data=True,
     long_description="""\
-    Public REST API for managing IT service invoices and inventory
-    """
+    Python services for OCR and data series processing
+    """,
+    entry_points = {
+        'console_scripts': [
+            'datactl=goldfin_ocr.datactl', 
+            'scanctl=goldfin_ocr.scanctl',
+            'invoicectl=goldfin_ocr.table.invoicectl'
+         ]
+    }
 )

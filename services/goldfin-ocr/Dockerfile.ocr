@@ -15,5 +15,4 @@ RUN pip3 install -r requirements.txt
 # Install pycups separately to avoid polluting datactl docker container build.
 RUN pip3 install pycups
 RUN python3 setup.py install
-ENTRYPOINT ["python3"]
-CMD ["./goldfin_ocr/scanctl.py", "--daemon", "--log-level=INFO", "--log-file=/var/log/goldfin/ocr.log"]
+ENTRYPOINT ["/ocr/bin/scanctl-wrapper", "--daemon", "--log-level=INFO", "--log-file=/var/log/goldfin/ocr.log"]
