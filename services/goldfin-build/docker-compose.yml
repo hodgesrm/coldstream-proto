@@ -8,6 +8,9 @@ services:
          - type: bind
            source: /home/rhodges/goldfin/conf
            target: /var/lib/goldfin/conf
+         - type: bind
+           source: /var/log/goldfin
+           target: /var/log/goldfin
        #ports:
        # - "443:8443"
    ocr:
@@ -16,12 +19,18 @@ services:
          - type: bind
            source: /home/rhodges/goldfin/conf
            target: /var/lib/goldfin/conf
+         - type: bind
+           source: /var/log/goldfin
+           target: /var/log/goldfin
    data:
        image: goldfin/datactl:${VERSION}
        volumes:
          - type: bind
            source: /home/rhodges/goldfin/conf
            target: /var/lib/goldfin/conf
+         - type: bind
+           source: /var/log/goldfin
+           target: /var/log/goldfin
 #   dbms:
 #       image: postgres:10
 #       environment:

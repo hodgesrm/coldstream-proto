@@ -1,5 +1,11 @@
 # Server Operation Guide
 
+## Prerequisites
+
+```shell
+sudo apt install libcups2-dev
+```
+
 ## Setup
 
 ```shell

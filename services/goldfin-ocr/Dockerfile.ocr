@@ -1,11 +1,19 @@
 # Dockerfile for OCR service
-FROM ubuntu:latest
+# Use latest xenial (16.04) as base.
+FROM ubuntu:xenial-20180808
 RUN apt-get update -y
 RUN apt-get install -y python3-pip python3-dev
+# Packages and config required for PDF printing.
+RUN apt-get install -y cups cups-pdf libcups2-dev
+COPY ./conf/cups/printers.conf /etc/cups
+COPY ./conf/cups/PDF.ppd /etc/cups/ppd
+# Install OCR code and dependencies.
 COPY . /ocr
 WORKDIR /ocr
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
+# Install pycups separately to avoid polluting datactl docker container build.
+RUN pip3 install pycups
 RUN python3 setup.py install
 ENTRYPOINT ["python3"]
-CMD ["./goldfin_ocr/scanctl.py", "--daemon", "--log-level=INFO"]
+CMD ["./goldfin_ocr/scanctl.py", "--daemon", "--log-level=INFO", "--log-file=/var/log/goldfin/ocr.log"]

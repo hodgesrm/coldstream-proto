@@ -6,6 +6,9 @@ if [ "$VERSION" = "" ]; then
   export VERSION=$(cat ../VERSION)
 fi
 
+# Remove all logs. 
+rm *.log
+
 # OCR service container.
 docker build -f Dockerfile.ocr -t goldfin/scanctl:${VERSION} .
 # Data service container.

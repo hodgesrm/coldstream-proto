@@ -15,6 +15,7 @@ from .table.tablebuilder import build_model
 from .table.pfactory import get_provider
 from .api.models.document import Document
 from .json_xlate import SwaggerJsonEncoder
+from .printing import pdf_printer
 
 # Standard logging initialization.
 logger = logging.getLogger(__name__)
@@ -230,6 +231,36 @@ class OcrProcessor:
 
     def _run_ocr(self, path):
         """Dispatches file-like object to OCR, returns XML file path if successful"""
+        logger.info("Invoking OCR with original document")
+        result = self._invoke_ocr_processing(path)
+        if len(result.keys()) == 0:
+            # Apparently password protected documents cannot be processed. 
+            # Reprinting seems to solve this problem. Let's first see if 
+            # we can print PDF documents.
+            printer = pdf_printer()
+            if printer is None:
+                raise Exception("Direct OCR failed and PDF printing is not available")
+            logger.info("OCR invocation failed, reprinting PDF")
+            printed_output_path = path + "-PRINTED"
+            printer.print(path, printed_output_path)
+
+            logger.info("Invoking OCR on reprinted doc: path={0}".format(printed_output_path))
+            result = self._invoke_ocr_processing(printed_output_path)
+            if len(result.keys()) == 0:
+                raise Exception("OCR failed on document, no output returned")
+ 
+        # At this point we have a valid printing result. 
+        logger.debug("Output result: {0}".format(result))
+        logger.debug("Output bytes: {0}".format(result.get("xml")))
+        result_bytes = result.get("xml")
+        result_path = path + ".xml"
+        with open(result_path, mode="wb") as output:
+            output.write(result_bytes.read())
+            output.flush()
+        return result_path
+
+    def _invoke_ocr_processing(self, path):
+        """Invoke OCR service."""
         with open(path, 'rb') as ocr_file:
             ocr_engine = CloudOCR(
                 application_id=self._service_config['ocr']['abbyy']['appid'],
@@ -238,15 +269,7 @@ class OcrProcessor:
             result = ocr_engine.process_and_download(scan_file,
                                                      exportFormat='xml',
                                                      language='English')
-
-            logger.info("Output result: {0}".format(result))
-            logger.info("Output bytes: {0}".format(result.get("xml")))
-            result_bytes = result.get("xml")
-            result_path = path + ".xml"
-            with open(result_path, mode="wb") as output:
-                output.write(result_bytes.read())
-                output.flush()
-            return result_path
+            return result
 
     def _get_cache_s3_connection(self):
         """Allocate connection to S3 from configuration file"""
