@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2018 Goldfin Systems LLC.  All rights reserved. 
 
 """Query processing for tabular data"""
 
@@ -18,16 +18,25 @@ class QueryEngine:
     def __init__(self, model):
         """Load a tabular model into the engine"""
         self._model = model
-        self._build_index()
+        self._build_page_index()
+        self._build_cell_index()
 
-    def _build_index(self):
-        """Builds page index by running query over each page"""
-        self._page_index = PageLocationIndex()
+    def _build_page_index(self):
+        """Builds page index by running query over entities in each page"""
+        self._page_index = PageIndex()
         page_query = self.tabular_query().matches_type(
             tm.Page).cut().generate()
         for page in page_query:
             for entity in self.tabular_query(root=page).generate():
                 self._page_index.add(entity)
+
+    def _build_cell_index(self):
+        """Builds cell index by fetching cells from each page"""
+        self._cell_index = CellIndex()
+        page_query = self.tabular_query().matches_type(
+            tm.Cell).cut().generate()
+        for cell in page_query:
+            self._cell_index.add_cell(cell)
 
     @property
     def model(self):
@@ -56,13 +65,17 @@ class QueryEngine:
     def indexed_query(self):
         """Creates a query that uses a page index to return values"""
         return IndexedQuery(index=self._page_index)
+ 
+    def find_enclosing_cell(self, line):
+        """Returns the Cell instance that encloses a Line if it exists"""
+        return self._cell_index.get_cell(line)
 
 
-class PageLocationIndex:
-    """Implements an index of entities by page and cell where cells are
-    defined by a region and point to all entities that overlap the region.
+class PageIndex:
+    """Implements an index of entities by page and rectangle where 
+    rectangles are defined by a region and point to all entities that 
+    overlap the region.
     """
-
     def __init__(self, x_step=200, y_step=100):
         """Construct page index
 
@@ -94,11 +107,15 @@ class PageLocationIndex:
             page_node.add(entity)
 
     def page_left_right_accessor(self, page_number, left, right):
+        """Return iterator over page rectangle defined by left:right coordinates
+        """
         if page_number is None or self._page_nodes.get(page_number):
             yield from self._page_nodes[page_number].generate_x_range(left,
                                                                       right)
 
     def page_top_bottom_accessor(self, page_number, top, bottom):
+        """Return iterator over page rectangle defined by top:bottom coordinates
+        """
         if page_number is None or self._page_nodes.get(page_number):
             yield from self._page_nodes[page_number].generate_y_range(top,
                                                                       bottom)
@@ -177,6 +194,34 @@ class PageNode:
         for entity in found:
             yield entity
 
+class CellIndex:
+    """Implements a table lookup of the cell (if any) to which Line belongs.
+    """
+    def __init__(self):
+        """Construct cell index.
+        """
+        self._line_to_cell_map = {}
+
+    def pages(self):
+        return sorted(self._page_nodes.keys())
+
+    def add_cell(self, cell):
+        """Adds all lines in the cell to the index
+
+        :param cell: A cell containing 0 or more lines
+        :type cell: Cell
+        """
+        for line in cell.lines:
+            self._line_to_cell_map[line] = cell
+
+    def get_cell(self, line):
+        """Looks up the cell to which a line belongs
+
+        :param line: A line that may or may not belong to a cell
+        :type line: Line
+        :returns: The enclosing cell or None if the line is not in a cell
+        """
+        return self._line_to_cell_map.get(line)
 
 # Cut functions for queries.  These control recursion on entities that pass
 # predicate filters.
@@ -402,7 +447,7 @@ class IndexedQuery(AbstractQuery):
     def __init__(self, index):
         """Creates a new query
         :param index: Index used by query
-        :type index: PageLocationIndex
+        :type index: PageIndex
         """
         super().__init__()
         self._index = index

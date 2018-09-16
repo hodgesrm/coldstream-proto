@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2017 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2017 Goldfin Systems LLC.  All rights reserved. 
 
 """Functions to transform scanned PDF invoice to a generic tabular model"""
 import io
@@ -15,8 +15,10 @@ logger = logging.getLogger(__name__)
 
 def _create_region(source_tag):
     """Return region that contains pixel coordinates of a resource"""
-    return tm.Region(int(source_tag.get("l")), int(source_tag.get("t")),
-                     int(source_tag.get("r")), int(source_tag.get("b")))
+    return tm.Region(left=int(source_tag.get("l")), 
+                     top=int(source_tag.get("t")),
+                     right=int(source_tag.get("r")), 
+                     bottom=int(source_tag.get("b")))
 
 
 def build_model(xml):

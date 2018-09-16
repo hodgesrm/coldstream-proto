@@ -32,7 +32,7 @@ setup(
         'console_scripts': [
             'datactl=goldfin_ocr.datactl', 
             'scanctl=goldfin_ocr.scanctl',
-            'invoicectl=goldfin_ocr.table.invoicectl'
+            'invoicectl=goldfin_ocr.table.invoicectl:exec_cmd'
          ]
     }
 )

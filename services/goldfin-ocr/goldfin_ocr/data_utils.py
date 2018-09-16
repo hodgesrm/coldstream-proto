@@ -64,7 +64,9 @@ def extract_date(date_string):
     yyyy_dash_mm_dash_dd = r'^.*?\s*([0-9]{4})-([0-9]{2})-([0-9]{2})'
     matcher = re.match(yyyy_dash_mm_dash_dd, date_string)
     if matcher:
-        return date_string
+        return "{y}-{m}-{d}".format(y=matcher.group(1),
+                                    m=matcher.group(2),
+                                    d=matcher.group(3))
 
     # MMM DD, YYYY format.
     mmm_dd_yyyy = r'^.*?\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*([0-9]+)\s*,\s*([0-9]+).*$'

@@ -15,12 +15,12 @@ import goldfin_ocr.table.tabularquery as tq
 logger = logging.getLogger(__name__)
 
 
-class PageLocationIndexTest(unittest.TestCase):
+class PageIndexTest(unittest.TestCase):
     def test_page_addition(self):
         """Adding an entity spawns a page node if it is missing
         """
         # Index starts with no pages.
-        index = tq.PageLocationIndex()
+        index = tq.PageIndex()
         self.assertEqual(0, len(index.pages()))
 
         # Has 2 pages after adding test data.
@@ -80,7 +80,7 @@ class PageLocationIndexTest(unittest.TestCase):
         """Validates that we can find entries in the same row"""
 
     def _create_indexed_query(self):
-        index = tq.PageLocationIndex()
+        index = tq.PageIndex()
         for line in self._create_data():
             index.add(line)
         return tq.IndexedQuery(index)

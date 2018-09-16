@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2017 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2017-2018 Goldfin Systems LLC.  All rights reserved. 
 
 """Factory class to pick a provider translator class"""
 from .providers.grandcoulee import GrandCouleeProcessor

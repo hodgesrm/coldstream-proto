@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Robert Hodges.  All rights reserved.
+# Copyright (c) 2018 Goldfin Systems LLC.  All rights reserved.
 
 """Leaseweb invoice analyzer"""
 

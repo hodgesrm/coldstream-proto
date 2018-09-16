@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2017 Goldfin Systems LLC.  All rights reserved. 
 
 """Model of tabular documents"""
 
@@ -107,7 +107,12 @@ class Region:
     """Defines an area within a scanned document page using
     pixel coordinates.  Regions can be thought of as a set for pixels"""
 
-    def __init__(self, left, top, right, bottom):
+    def __init__(self, left=0, top=0, right=99999, bottom=99999):
+        """Initializes the region
+
+        Any argument that is not set defaults to the corresponding edge. 
+        For example, omitting left means the region extends to the left edge.
+        """
         self._left = left
         self._top = top
         self._right = right
@@ -155,10 +160,10 @@ class Region:
     def merge(self, other):
         """Returns a region set that contains both this and the other region or None if
         the regions are on different pages and therefore not able to merge"""
-        return Region(min(self.left, other.left),
-                          min(self.top, other.top),
-                          max(self.right, other.right),
-                          max(self.bottom, other.bottom))
+        return Region(left=min(self.left, other.left),
+                          top=min(self.top, other.top),
+                          right=max(self.right, other.right),
+                          bottom=max(self.bottom, other.bottom))
 
     def intersect(self, other):
         """Returns returns a region that is the intersection of this and the
@@ -168,7 +173,7 @@ class Region:
         right = min(self.right, other.right)
         bottom = min(self.bottom, other.bottom)
         if left < right and top < bottom:
-            return Region(left, top, right, bottom)
+            return Region(left=left, top=top, right=right, bottom=bottom)
         else:
             return None
 
