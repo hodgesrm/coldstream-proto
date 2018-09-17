@@ -3,8 +3,8 @@
  */
 package io.goldfin.shared.extract;
 
-import io.goldfin.admin.data.tenant.InvoiceDataService;
-import io.goldfin.admin.service.api.model.Invoice;
+import java.util.ArrayList;
+
 import io.goldfin.shared.data.SqlSelect;
 
 /**
@@ -14,13 +14,14 @@ import io.goldfin.shared.data.SqlSelect;
 public class InvoiceItemExtract extends ExtractDefinition {
 
 	public InvoiceItemExtract() {
-		super("invoice", Invoice.class);
+		super("invoice_item", new ArrayList<String>());
 	}
 
 	/** Return the base query. */
 	public SqlSelect baseQuery() {
-		// Needs a join...
-		return new SqlSelect().from("invoice_items").project(InvoiceDataService.COLUMN_NAMES_ITEMS)
-				.orderByAscending("invoice_id").orderByAscending("item_row_number");
+		return new SqlSelect().from("invoices", "invoice")
+				.innerJoin("invoice_items", "item", "invoice.id", "item.invoice_id").project("*")
+				.orderByAscending("invoice.identifier").orderByAscending("invoice.effective_date")
+				.orderByAscending("item.item_row_number").orderByAscending("item_row_number");
 	}
 }

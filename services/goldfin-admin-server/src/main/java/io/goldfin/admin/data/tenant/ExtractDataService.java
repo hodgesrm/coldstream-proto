@@ -15,6 +15,7 @@ import io.goldfin.shared.data.SqlSelect;
 import io.goldfin.shared.data.TabularResultSet;
 import io.goldfin.shared.extract.ExtractDefinition;
 import io.goldfin.shared.extract.InvoiceExtract;
+import io.goldfin.shared.extract.InvoiceItemExtract;
 
 /**
  * Processes generation of requests from the DBMS. 
@@ -28,6 +29,7 @@ public class ExtractDataService {
 	private static final Map<String, ExtractDefinition> extracts = new HashMap<String, ExtractDefinition>();
 	{
 		addExtract(new InvoiceExtract());
+		addExtract(new InvoiceItemExtract());
 	}
 
 	private static void addExtract(ExtractDefinition extract) {

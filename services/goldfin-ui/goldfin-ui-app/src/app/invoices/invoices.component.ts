@@ -237,20 +237,26 @@ export class InvoicesComponent implements OnInit {
     }
   }
 
-  onExport(): void {
-    console.log("onExport invoked " + this.selected);
-    if (this.selected == null || this.selected.length == 0) {
-      this.errorReporter.error_message = "Please select one or more invoices";
-      this.errorReporter.error_open = true;
-    } else {
-      this.extractService.fetchInvoiceCsv()
-        .subscribe(response => {
-          var text = response.text();
-          console.log(text);
-          var blob = new Blob([text], { type: 'text/csv' });
-          saveAs(blob, 'extract.csv');
-        });
-    }
+  onExportHeaders(): void {
+    console.log("onExportHeaders invoked " + this.selected);
+    this.extractService.fetchInvoiceCsv()
+      .subscribe(response => {
+        var text = response.text();
+        console.log(text);
+        var blob = new Blob([text], { type: 'text/csv' });
+        saveAs(blob, 'extract.csv');
+      });
+  }
+
+  onExportDetails(): void {
+    console.log("onExportDetails invoked " + this.selected);
+    this.extractService.fetchInvoiceItemCsv()
+      .subscribe(response => {
+        var text = response.text();
+        console.log(text);
+        var blob = new Blob([text], { type: 'text/csv' });
+        saveAs(blob, 'extract_item.csv');
+      });
   }
 
   onDelete(): void {

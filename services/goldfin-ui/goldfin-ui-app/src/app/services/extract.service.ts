@@ -24,4 +24,15 @@ export class ExtractService {
         }
       });
   }
+
+  fetchInvoiceItemCsv(): Observable<Response> {
+    return this.extractApi.extractDownloadWithHttpInfo("invoice_item", "", "csv")
+      .map((response: Response) => {
+        if (response.status === 200) {
+          return response;
+        } else {
+          return undefined;
+        }
+      });
+  }
 }

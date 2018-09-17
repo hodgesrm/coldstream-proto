@@ -22,12 +22,12 @@ import io.goldfin.shared.extract.CsvBuilder;
 public class ExtractManager implements Manager {
 	static private final Logger logger = LoggerFactory.getLogger(ExtractManager.class);
 	private ManagementContext context;
-	
-	// Extract names. 
+
+	// Extract names.
 	private static String INVOICE = "invoice";
-	//private static String INVOICE_DETAIL = "invoice_detail";
-	//private static String HOST = "host";
-	
+	private static String INVOICE_ITEM = "invoice_item";
+	// private static String HOST = "host";
+
 	// Output types.
 	public enum OutputTypes {
 		CSV
@@ -45,15 +45,21 @@ public class ExtractManager implements Manager {
 
 	@Override
 	public void release() {
-		
+
 	}
 
 	/** Return extract in form ready for download. */
-	public String getExtract(Principal principal, String extractType, String filter, OutputTypes output) throws Exception {
+	public String getExtract(Principal principal, String extractType, String filter, OutputTypes output)
+			throws Exception {
 		String tenantId = getTenantId(principal);
 		SqlSelect select = null;
 		if (INVOICE.equals(extractType.toLowerCase())) {
 			select = new SqlSelect().from("invoices", "i").project("i.*");
+		} else if (INVOICE_ITEM.equals(extractType.toLowerCase())) {
+			select = new SqlSelect().from("invoices", "invoice")
+					.innerJoin("invoice_items", "item", "invoice.id", "item.invoice_id").project("*")
+					.orderByAscending("invoice.identifier").orderByAscending("invoice.effective_date")
+					.orderByAscending("item.item_row_number").orderByAscending("item_row_number");
 		} else {
 			throw new InvalidInputException("Unknown extract type: " + extractType);
 		}
