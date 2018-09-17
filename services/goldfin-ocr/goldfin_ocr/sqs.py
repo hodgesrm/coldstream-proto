@@ -2,9 +2,11 @@
 
 import boto3
 import botocore
+import json
 from pprint import pformat
 
-from .json_xlate import json_dict_to_model, model_to_json_dict
+from goldfin_ocr.json_xlate import json_dict_to_model, model_to_json_dict
+import goldfin_ocr.util as util
 
 # Our logger.
 import logging
@@ -13,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class StructuredMessage(object):
-    """Implements a message with headers and content"""
+    """Implements a message with headers and content
+    """
 
     def __init__(self, operation=None, type=None, xact_tag=None,
                  tenant_id=None, content_locator=None, content=None,
@@ -62,7 +65,10 @@ class StructuredMessage(object):
 
 
 class SqsConnection(object):
-    """Implements a server that manages tenant files in a single SQS bucket.
+    """Implements a server that handles messages in a single SQS queue.
+
+    See Javadoc comments in io.goldfin.shared.cloud.QueueConnection for 
+    a description of the message transmission protocol. 
     """
 
     def __init__(self, queue_handle, group=None, access_key_id=None, 
@@ -144,7 +150,6 @@ class SqsConnection(object):
         queue = self._sqs.get_queue_by_name(QueueName=self._name)
 
         # Load attributes to dictionary and convert to SQS attribute format.
-        # For now we don't use content locator.
         metadata = {
             'operation': message.operation,
             'type': message.type,
@@ -154,9 +159,23 @@ class SqsConnection(object):
         }
         attributes = self._to_message_attributes(metadata)
 
+        # Convert the message to gzipped UTF bytes and add to attributes. 
+        content_bytes = util.string_to_gzipped_utf8(message.content)
+        attributes['_content'] = {
+            'DataType': 'Binary', 'BinaryValue': content_bytes
+        }
+
+        # Prepare a message body that describes the content.
+        body = json.dumps({
+            "transmissionFormat": "UTF8BYTES;GZIP",
+			"contentLocation": "HEADER"
+        })
+
         # Send the content and attributes as an SQS message.
-        queue.send_message(MessageBody=message.content,
-                           MessageAttributes=attributes)
+        logger.info(
+            "Sending to SQS: queue={0}, content_length={1}".format(
+            self._name, len(content_bytes)))
+        queue.send_message(MessageBody=body, MessageAttributes=attributes)
 
     def receive(self):
         """Receive a message encoded as JSON
@@ -167,18 +186,17 @@ class SqsConnection(object):
         for message in queue.receive_messages(
                 MessageAttributeNames=['All'], AttributeNames=['All']):
 
-            # Convert attributes to dictionary.
-            if message.message_attributes is not None:
-                metadata = self._from_message_attributes(
-                    message.message_attributes)
-            else:
-                metadata = {}
-
-            # Fetch the body and convert.
-            body = message.body
+            # Fetch content from the '_content' message attribute.
+            logger.debug("Message body: {0}".format(message.body))
+            content_attribute = message.message_attributes.pop('_content')
+            content_bytes = content_attribute['BinaryValue']
+            body = util.gzipped_utf8_to_string(content_bytes)
+            
+            # Convert remaining attributes to dictionary.
+            metadata = self._from_message_attributes(message.message_attributes)
 
             # Return a message response.
-            return StructuredMessage(content=message.body,
+            return StructuredMessage(content=body,
                                      operation=metadata.get('operation'),
                                      type=metadata.get('type'),
                                      xact_tag=metadata.get('xact_tag'),

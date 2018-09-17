@@ -3,10 +3,13 @@
  */
 package io.goldfin.shared.cloud;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +28,22 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 
+import io.goldfin.shared.utilities.JsonHelper;
+import io.goldfin.shared.utilities.SerializationHelper;
+
 /**
- * Implements encapsulated operations on a single SQS queue.
+ * Implements encapsulated operations on a single SQS queue. <em>Important!</em>
+ * The message format follows the conventions shown below.
+ * <ol>
+ * <li>Headers from the client application are loaded into message
+ * attributes.</li>
+ * <li>The message content is passed as a binary object in the _content
+ * attribute. The transmission format is gzipped UTF-bytes. To serialize convert
+ * string to UTF-8, then gzip. Deserialization is the opposite.</li>
+ * <li>The message body is a required part of the SQS message. We pass a dummy
+ * value.</li>
+ * </ol>
+ * All participates on queues must obey this transmission format.
  */
 public class QueueConnection {
 	static final Logger logger = LoggerFactory.getLogger(QueueConnection.class);
@@ -143,18 +160,36 @@ public class QueueConnection {
 		try (SqsClientWrapper wrapper = new SqsClientWrapper(connectionParams)) {
 			final AmazonSQS sqs = wrapper.getConnection();
 			try {
+				// Add binary content to headers.
+				Map<String, MessageAttributeValue> attributes = toMessageAttributes(message.getHeaders());
+
+				ByteBuffer binaryContent = SerializationHelper.serializeToGzipBytes(message.getContent());
+				MessageAttributeValue attr = new MessageAttributeValue();
+				attr.setDataType("Binary");
+				attr.setBinaryValue(binaryContent);
+				attributes.put("_content", attr);
+
+				// Describe the message in the body. 
+				Properties props = new Properties();
+				props.setProperty("transmissionFormat", "UTF8BYTES;GZIP");
+				props.setProperty("contentLocation", "HEADER");
+				props.setProperty("bytes", new Integer(binaryContent.capacity()).toString());
+				String body = JsonHelper.writeToString(props);
+				
+				// Send the message.
 				String queueUrl = sqs.getQueueUrl(queue).getQueueUrl();
 				SendMessageRequest send_msg_request = new SendMessageRequest().withQueueUrl(queueUrl)
-						.withMessageAttributes(toMessageAttributes(message.getHeaders()))
-						.withMessageBody(message.getContent()).withDelaySeconds(0);
+						.withMessageAttributes(attributes).withMessageBody(body).withDelaySeconds(0);
 				if (logger.isDebugEnabled()) {
 					logger.debug(toDebugSendMessageRequest(send_msg_request));
 				}
 				sqs.sendMessage(send_msg_request);
-			} catch (AmazonServiceException e) {
-				this.handleException(String.format("Queue creation failed: name=%s, message=%s", queue, e.getMessage()),
-						e);
+			} catch (IOException e) {
+				this.handleException(
+						String.format("Unable to serialize message: name=%s, message=%s", queue, e.getMessage()), e);
 			}
+		} catch (AmazonServiceException e) {
+			this.handleException(String.format("Queue creation failed: name=%s, message=%s", queue, e.getMessage()), e);
 		}
 	}
 
@@ -179,15 +214,22 @@ public class QueueConnection {
 					if (logger.isDebugEnabled()) {
 						logger.debug(toDebugMessage(m1));
 					}
+					// Remove content from attributes and deserialize.
+					Map<String, MessageAttributeValue> attributes = m1.getMessageAttributes();
+					ByteBuffer byteBuffer = attributes.remove("_content").getBinaryValue();
+					String content = SerializationHelper.deserializefromGzipBytes(byteBuffer);
+
 					message = new StructuredMessage().setHeaders(fromMessageAttributes(m1.getMessageAttributes()))
-							.setContent(m1.getBody()).setReceiptHandle(m1.getReceiptHandle());
+							.setContent(content).setReceiptHandle(m1.getReceiptHandle());
 					if (deleteOnReceipt) {
 						sqs.deleteMessage(queueUrl, message.getReceiptHandle());
 					}
 				}
-			} catch (AmazonServiceException e) {
-				handleException(String.format("Message receive failed: name=%s, message=%s", queue, e.getMessage()), e);
+			} catch (IOException e) {
+				this.handleException(String.format("Unable to deserialize message: name=%s", e.getMessage()), e);
 			}
+		} catch (AmazonServiceException e) {
+			handleException(String.format("Message receive failed: name=%s, message=%s", queue, e.getMessage()), e);
 		}
 		return message;
 	}
@@ -280,6 +322,12 @@ public class QueueConnection {
 		logger.error("AWS Error Code: " + e.getErrorCode());
 		logger.error("Error Type: " + e.getErrorType());
 		logger.error("Request ID: " + e.getRequestId());
+		throw new RuntimeException(message, e);
+	}
+
+	private void handleException(String message, IOException e) {
+		logger.error(message, e);
+		logger.error("Error Message: " + e.getMessage());
 		throw new RuntimeException(message, e);
 	}
 }

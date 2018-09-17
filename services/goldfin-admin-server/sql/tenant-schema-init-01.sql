@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
   item_row_number integer NOT NULL,
   item_id varchar(250), 
   resource_id varchar(250), 
-  description varchar(500), 
+  description varchar(1000), 
   unit_amount numeric(10,2), 
   units integer, 
   total_amount numeric(10,2), 

@@ -53,21 +53,22 @@ class InapProcessor:
         invoice.items = []
 
         # Find invoice identifier field.  Strip out 'Invoice Number:' tag to 
-        # get the actual invoice identifier. 
+        # get the actual invoice identifier.  Note: depending on how the table
+        # comes back the text may be split into multiple Line objects, so 
+        # we search for text to the right of the identifier tag as well.  
         identifier_regex = r'^\s*Invoice\s*Number:\s*'
-        identifier_line = self._engine.tabular_line_query(
-            root=self._page1).matches_regex(identifier_regex).first()
-        identifier = identifier_line.text.strip()
-        invoice.identifier = re.sub(identifier_regex, '', identifier)
+        identifier_text = self._find_regex_right(identifier_regex)
+        logger.debug("Located invoice identifier: {0}".format(identifier_text))
+        invoice.identifier = re.sub(identifier_regex, '', identifier_text).strip()
  
         # Find effective date.
         eff_date_regex = r'^\s*Invoice\s*Date:\s*'
-        eff_date_line = self._engine.tabular_line_query(
-            root=self._page1).matches_regex(eff_date_regex).first()
-        eff_date = re.sub(eff_date_regex, '', eff_date_line.text.strip())
+        eff_date_text = self._find_regex_right(eff_date_regex)
+        logger.debug("Located effective date: {0}".format(eff_date_text))
+        eff_date = re.sub(eff_date_regex, '', eff_date_text).strip()
         invoice.effective_date = data_utils.extract_date(eff_date)
         if invoice.effective_date is None:
-            logger.warning("Unable to extract date: {0}".format(eff_date_line))
+            logger.warning("Unable to extract date: {0}".format(eff_date))
 
         # Find the subtotal, taxes, and total, which follow similar patterns
         # on the left hand side of the first page. 
@@ -243,6 +244,19 @@ class InapProcessor:
 
         # If we get here the match failed.
         return None
+
+    def _find_regex_right(self, regex):
+        """Find page 1 text matching regex as well as anything to right"""
+        line1 = self._engine.tabular_line_query(
+            root=self._page1).matches_regex(regex).first()
+        if line1 is None:
+            return ""
+        line2plus = self._engine.tabular_line_query(
+            root=self._page1).is_to_right_of(line1.region).generate()
+        text = line1.text.strip()
+        for line in line2plus:
+            text += " " + line.text.strip()
+        return text
 
     def _get_resource(self, text):
         """Split service item text into resource ID and description"""

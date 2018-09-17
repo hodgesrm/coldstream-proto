@@ -1,8 +1,10 @@
-# Copyright (c) 2018 Robert Hodges.  All rights reserved. 
+# Copyright (c) 2018 Goldfin Systems LLC.  All rights reserved. 
 
 """Public API for invoice processing"""
 
+import gzip
 import hashlib
+import io
 import json
 import logging
 import os.path
@@ -39,6 +41,22 @@ def dump_to_json(obj, indent=2, sort_keys=True):
     converter_fn = lambda unserializable_obj: unserializable_obj.__dict__
     return json.dumps(obj, indent=2, sort_keys=True, default=converter_fn)
 
+def string_to_gzipped_utf8(string_value):
+    """Serialize string value to gzip'ed UTF8 bytes"""
+    out = io.BytesIO()
+    with gzip.GzipFile(fileobj=out, mode='w') as fo:
+        fo.write(string_value.encode())
+    bytes_obj = out.getvalue()
+    return bytes_obj
+
+def gzipped_utf8_to_string(byte_array):
+    """Deserialize gzip'ed UTF8 bytes to a Python string"""
+    bytes_obj = io.BytesIO()
+    bytes_obj.write(byte_array)
+    bytes_obj.seek(0)
+    with gzip.GzipFile(fileobj=bytes_obj, mode='r') as fo:
+        unzipped_bytes = fo.read()
+    return unzipped_bytes.decode()
 
 def init_logging(log_level, log_file=None):
     """Validates log level and starts logging
