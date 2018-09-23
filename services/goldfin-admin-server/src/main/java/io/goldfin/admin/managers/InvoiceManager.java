@@ -111,6 +111,8 @@ public class InvoiceManager implements Manager {
 		ValidationTypeEnum validationEnum = ValidationTypeEnum.fromValue(result.getValidationType().name());
 		invResult.setValidationType(validationEnum);
 		invResult.setDetails(result.getDetails());
+		invResult.setInvoiceItemId(result.getItemId());
+		invResult.setInvoiceItemResourceId(result.getResourceId());
 		invResult.setInvoiceId(invoice.getId());
 		invResult.setIdentifier(invoice.getIdentifier());
 		invResult.setEffectiveDate(invoice.getEffectiveDate());

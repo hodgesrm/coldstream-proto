@@ -42,6 +42,16 @@ export class InvoiceJoinedToItem {
   inventoryType?: InvoiceItem.InventoryTypeEnum;
 }
 
+export class ResourceGroup {
+  // Summary values for a single resource
+  resourceId: string;
+  totalAmount: number;
+  currency: string;
+  startDate: Date;
+  endDate: Date;
+  items: InvoiceJoinedToItem[] = [];
+}
+
 @Component({
     selector: 'invoices', 
     templateUrl: './invoices.component.html', 
@@ -51,6 +61,7 @@ export class InvoicesComponent implements OnInit {
   // Model controls. 
   delete_open: boolean = false;
   invoice_detail_open: boolean = false;
+  resource_view_open: boolean = false;
   invoice_validations_open: boolean = false;
 
   // Error reporter sub-component. 
@@ -60,8 +71,11 @@ export class InvoicesComponent implements OnInit {
   selected: Invoice[] = [];
   invoices: Invoice[] = [];
 
-  // Invoice item listing.
+  // Invoice view listing.
   invoice_items: InvoiceJoinedToItem[] = [];
+
+  // Invoice item listing.
+  resource_items: ResourceGroup[] = [];
 
   // Invoice validation listing.  The first value is the full 
   // set of validations.  We refine this to the filtered
@@ -91,38 +105,79 @@ export class InvoicesComponent implements OnInit {
 
   populateInvoiceItems(): void {
     this.invoice_items = [];
+    this.resource_items = [];
+    var resource_map = {};
 
+    // Create the materialized list of invoice line items. 
     for (let invoice of this.selected) {
       for (let item of invoice.items) {
         var joined = new InvoiceJoinedToItem();
-          // Values from invoice header.
-          joined.invoice_documentId = invoice.documentId;
-          joined.invoice_description = invoice.description;
-          joined.invoice_identifier = invoice.identifier;
-          joined.invoice_effectiveDate = invoice.effectiveDate;
-          joined.invoice_vendorIdentifier = invoice.vendorIdentifier;
-          joined.invoice_subtotalAmount = invoice.subtotalAmount;
-          joined.invoice_tax = invoice.tax;
-          joined.invoice_totalAmount = invoice.totalAmount;
-          joined.invoice_currency = invoice.currency;
+        // Values from invoice header.
+        joined.invoice_documentId = invoice.documentId;
+        joined.invoice_description = invoice.description;
+        joined.invoice_identifier = invoice.identifier;
+        joined.invoice_effectiveDate = invoice.effectiveDate;
+        joined.invoice_vendorIdentifier = invoice.vendorIdentifier;
+        joined.invoice_subtotalAmount = invoice.subtotalAmount;
+        joined.invoice_tax = invoice.tax;
+        joined.invoice_totalAmount = invoice.totalAmount;
+        joined.invoice_currency = invoice.currency;
 
-          // Values from invoice item. 
-          joined.itemId = item.itemId;
-          joined.resourceId = item.resourceId;
-          joined.description = item.description;
-          joined.unitAmount = item.unitAmount;
-          joined.units = item.units;
-          joined.totalAmount = item.totalAmount;
-          joined.currency = item.currency;
-          joined.startDate = item.startDate;
-          joined.endDate = item.endDate;
-          joined.oneTimeCharge = item.oneTimeCharge;
-          joined.inventoryId = item.inventoryId;
-          joined.inventoryType = item.inventoryType;
+        // Values from invoice item. 
+        joined.itemId = item.itemId;
+        joined.resourceId = item.resourceId;
+        joined.description = item.description;
+        joined.unitAmount = item.unitAmount;
+        joined.units = item.units;
+        joined.totalAmount = item.totalAmount;
+        joined.currency = item.currency;
+        joined.startDate = item.startDate;
+        joined.endDate = item.endDate;
+        joined.oneTimeCharge = item.oneTimeCharge;
+        joined.inventoryId = item.inventoryId;
+        joined.inventoryType = item.inventoryType;
 
-          this.invoice_items.push(joined);
+        this.invoice_items.push(joined);
+
+        // Now that we have the joined object, add it to the resource 
+        // map. 
+        var searchId: string;
+        if (joined.resourceId == null) {
+          searchId = "[No Resource ID]";
+        } else {
+          searchId = joined.resourceId;
+        }
+        var resourceGroup: ResourceGroup = resource_map[searchId];
+        if (resourceGroup == null) {
+          resourceGroup = new ResourceGroup();
+          resourceGroup.resourceId = searchId;
+          resourceGroup.totalAmount = 0.0;
+          resource_map[searchId] = resourceGroup;
+        }
+        // Add invoice item total amount if present. 
+        if (joined.totalAmount != null) {
+          resourceGroup.totalAmount += joined.totalAmount;
+        }
+        // Add the invoice itself to the list. 
+        resourceGroup.items.push(joined);
       }
     }
+
+    // Get the keys of the resource map and create a list of resource
+    // groups. 
+    for (var key in resource_map) {
+      var resourceGroup: ResourceGroup = resource_map[key];
+      this.resource_items.push(resourceGroup);
+    }
+  }
+
+  // Truncates input value to number of characters requested.
+  truncateDisplayValue(value: string, length: number): string {
+      if (value.length <= length) {
+          return value;
+      } else {
+          return value.substring(0, length - 1) + "...";
+      }
   }
 
   onRefresh(): void {
@@ -138,6 +193,17 @@ export class InvoicesComponent implements OnInit {
     } else {
       this.populateInvoiceItems();
       this.invoice_detail_open = true;
+    }
+  }
+
+  onResourceView(): void {
+    console.log("onResourceView invoked");
+    if (this.selected == null || this.selected.length == 0) {
+      this.errorReporter.error_message = "Please select one or more invoices";
+      this.errorReporter.error_open = true;
+    } else {
+      this.populateInvoiceItems();
+      this.resource_view_open = true;
     }
   }
 
@@ -253,7 +319,7 @@ export class InvoicesComponent implements OnInit {
     this.extractService.fetchInvoiceItemCsv()
       .subscribe(response => {
         var text = response.text();
-        console.log(text);
+        //console.log(text);
         var blob = new Blob([text], { type: 'text/csv' });
         saveAs(blob, 'extract_item.csv');
       });

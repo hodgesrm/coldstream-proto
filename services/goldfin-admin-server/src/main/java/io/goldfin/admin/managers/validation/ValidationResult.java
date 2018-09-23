@@ -6,7 +6,7 @@ package io.goldfin.admin.managers.validation;
 import io.goldfin.admin.service.api.model.ValidationType;
 
 /**
- * Contains the result of a validation check.
+ * Contains the result of a validation check on an invoice.
  */
 public class ValidationResult {
 	private String key;
@@ -14,6 +14,8 @@ public class ValidationResult {
 	private ValidationType validationType;
 	private boolean passed;
 	private String details;
+	private String itemId;
+	private String resourceId = null;
 
 	public String getKey() {
 		return key;
@@ -58,5 +60,21 @@ public class ValidationResult {
 	public ValidationResult setDetails(String details) {
 		this.details = details;
 		return this;
+	}
+
+	public String getItemId() {
+		return itemId;
+	}
+
+	public void setItemId(String itemId) {
+		this.itemId = itemId;
+	}
+
+	public String getResourceId() {
+		return resourceId;
+	}
+
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
 	}
 }

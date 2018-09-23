@@ -161,6 +161,12 @@ class InapProcessor:
         logger.info("Scanning data")
         count = 0
 
+        # Resource IDs pop up in ways that are hard to detect using an 
+        # a priori test based on regular expressions.  We therefore keep a 
+        # list of previously discovered resource IDs that we can iterate
+        # over to find resource IDs embedded in random text. 
+        resource_id_list = []
+
         for line in self._engine.tabular_line_query().intersects_vertical_edge(
                 invoice_item_left_edge).predicate(data_window).generate():
             logger.info("LINE: {0}".format(line))
@@ -190,13 +196,13 @@ class InapProcessor:
                 # the resource ID from the rest of the description. 
                 service_item_cell = self._engine.find_enclosing_cell(row_item_list[0])
                 if service_item_cell is None:
-                    resource_id, desc = self._get_resource(row_item_list[0].text)
+                    desc = row_item_list[0].text
                 else:
-                    service_item_text = ""
+                    desc = ""
                     for line in service_item_cell.lines:
-                        service_item_text += " " + line.text
-                    resource_id, desc = self._get_resource(service_item_text.strip())
-                item.resource_id = resource_id
+                        desc += " " + line.text
+
+                item.resource_id = self._get_resource(desc, resource_id_list)
                 item.description = desc
 
                 # Extract the start date, then get the end date from the 
@@ -258,13 +264,32 @@ class InapProcessor:
             text += " " + line.text.strip()
         return text
 
-    def _get_resource(self, text):
-        """Split service item text into resource ID and description"""
+    def _get_resource(self, text, resource_id_list):
+        """Extract the resource ID from an invoice item description.
+
+           Search first using regular expression and then 
+           by checking for previously found resource IDs most recently
+           found first.
+        """
         resource_search = re.search(r'^([a-z0-9_ .-]+) \(', text)
         if resource_search is not None:
+            # The ID we found is "raw" and may contain spaces.  
+            # Add it to the list of IDs and return the cleaned up
+            # version. 
             raw_id = resource_search.group(1)
-            description = text[len(raw_id):]
-            resource_id = raw_id.replace(' ', '')
-            return resource_id, description.strip()
+            resource_id_list.append(raw_id)
+            return raw_id.replace(' ', '')
         else:
-            return None, text.strip()
+            # Search the list in reverse order. If we find a match, 
+            # clean it up and return the value. This algorithm favors
+            # the most recently found ID in the event of ambiguity.
+            for raw_id in reversed(resource_id_list):
+                if text.find(raw_id) > -1:
+                    return raw_id.replace(' ', '')
+                else:
+                    clean_id = raw_id.replace(' ', '')
+                    if text.find(clean_id) > -1:
+                        return clean_id
+
+        # If we get here we didn't find anything. 
+        return None

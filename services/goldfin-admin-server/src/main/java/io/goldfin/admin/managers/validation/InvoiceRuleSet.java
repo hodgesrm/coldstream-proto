@@ -24,6 +24,7 @@ public class InvoiceRuleSet {
 	static {
 		addInvoiceRule(new InvoiceTotalRule());
 		addInvoiceRule(new InvoiceSubtotalRule());
+		addInvoiceRule(new InvoiceItemResourceIdRule());
 		addInvoiceRule(new InvoiceToHostInventoryRule());
 	}
 
