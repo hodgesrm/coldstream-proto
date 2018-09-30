@@ -4,7 +4,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DataSeriesService }   from '../services/data-series.service';
 
-import { DataSeries } from '../client/model/DataSeries';
+import { DataSeries } from '../client/model/models';
 
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';

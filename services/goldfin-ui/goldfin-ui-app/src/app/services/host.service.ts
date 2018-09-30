@@ -4,8 +4,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { InventoryApi } from '../client/api/InventoryApi';
-import { Host } from '../client/model/Host';
+import { InventoryService as InventoryApi } from '../client/api/api';
+import { Host } from '../client/model/models';
 
 @Injectable()
 export class HostService {
@@ -14,7 +14,7 @@ export class HostService {
   ) {}
 
   loadHosts(): Observable<Array<Host>> {
-    return this.inventoryApi.hostShowAll(true);
+    return this.inventoryApi.hostShowAll();
   }
 
   deleteHosts(invoices: Host[]): Promise<{}> {

@@ -18,7 +18,7 @@ elif [ "$OPT" = "generate" ]; then
   shift
   mkdir -p $UI_CODEGEN_DIR
   #args="generate -t $CODEGEN/modules/swagger-codegen/src/main/resources/python -i $UI_HOME/../../swagger/goldfin-service-admin-api.yaml -l typescript-angular2 -o $UI_CODEGEN_DIR -DpackageName=api -Dservice $@"
-  args="generate -i $UI_HOME/../../swagger/goldfin-service-admin-api.yaml -l typescript-angular2 -o $UI_CODEGEN_DIR -DpackageName=api -Dservice $@"
+  args="generate -i $UI_HOME/../../swagger/goldfin-service-admin-api.yaml -l typescript-angular --additional-properties ngVersion=5.1 -o $UI_CODEGEN_DIR -DpackageName=api -Dservice $@"
 else
   echo "If you meant to generate code..."
   echo "Usage ${SCRIPT} { generate | clean | <code-gen command> } [ options ]"

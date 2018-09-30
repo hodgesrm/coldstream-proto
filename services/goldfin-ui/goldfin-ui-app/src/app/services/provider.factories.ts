@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AuthInterceptor } from './auth.interceptor';
+import { Configuration } from '../client/configuration';
 
 // Define factory method to return API base URL. 
 export let baseUrlFactory = () => {
@@ -25,4 +26,13 @@ export let baseUrlFactory = () => {
 // Define factory method to return HTTP interceptor
 export let httpInterceptorFactory = (router: Router) => {
   return new AuthInterceptor(router);
+};
+
+// Define factory method to return initial configuration object. 
+export let configurationFactory = () => {
+  console.log("Initializing configuration values");
+  var defaultConfig = {
+    apiKeys: {}
+  }
+  return new Configuration(defaultConfig);
 };

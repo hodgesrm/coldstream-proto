@@ -8,9 +8,9 @@ import { saveAs } from 'file-saver/FileSaver';
 
 import { ExtractService }   from '../services/extract.service';
 import { InvoiceService }   from '../services/invoice.service';
-import { Invoice } from '../client/model/Invoice';
-import { InvoiceItem } from '../client/model/InvoiceItem';
-import { InvoiceValidationResult } from '../client/model/InvoiceValidationResult';
+import { Invoice } from '../client/model/models';
+import { InvoiceItem } from '../client/model/models';
+import { InvoiceValidationResult } from '../client/model/models';
 
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';
@@ -307,10 +307,8 @@ export class InvoicesComponent implements OnInit {
     console.log("onExportHeaders invoked " + this.selected);
     this.extractService.fetchInvoiceCsv()
       .subscribe(response => {
-        var text = response.text();
-        console.log(text);
-        var blob = new Blob([text], { type: 'text/csv' });
-        saveAs(blob, 'extract.csv');
+        console.log("Saving export headers CSV output");
+        saveAs(response.body, 'extract.csv');
       });
   }
 
@@ -318,10 +316,8 @@ export class InvoicesComponent implements OnInit {
     console.log("onExportDetails invoked " + this.selected);
     this.extractService.fetchInvoiceItemCsv()
       .subscribe(response => {
-        var text = response.text();
-        //console.log(text);
-        var blob = new Blob([text], { type: 'text/csv' });
-        saveAs(blob, 'extract_item.csv');
+        console.log("Saving export details CSV output");
+        saveAs(response.body, 'extract_item.csv');
       });
   }
 

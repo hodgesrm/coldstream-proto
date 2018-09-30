@@ -4,8 +4,8 @@
 import { Injectable, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { VendorApi } from '../client/api/VendorApi';
-import { Vendor } from '../client/model/Vendor';
+import { VendorService as VendorApi } from '../client/api/api';
+import { Vendor } from '../client/model/models';
 
 @Injectable()
 export class VendorService {

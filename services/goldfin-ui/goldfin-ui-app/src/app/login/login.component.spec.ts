@@ -2,7 +2,7 @@
  * Copyright (c) 2016 VMware, Inc. All Rights Reserved.
  */
 import { async, TestBed, ComponentFixture } from "@angular/core/testing";
-import { ClarityModule } from 'clarity-angular';
+import { ClarityModule } from '@clr/angular';
 import { LoginComponent } from './login.component';
 
 
@@ -19,7 +19,7 @@ describe('LoginComponent', () => {
                 LoginComponent
             ],
             imports: [
-                ClarityModule.forRoot()
+                //ClarityModule.forRoot()
             ]
         });
 

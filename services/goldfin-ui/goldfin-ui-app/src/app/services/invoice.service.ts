@@ -5,9 +5,9 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { ResponseContentType } from '@angular/http';
 
-import { InvoiceApi } from '../client/api/InvoiceApi';
-import { Invoice } from '../client/model/Invoice';
-import { InvoiceValidationResult } from '../client/model/InvoiceValidationResult';
+import { InvoiceService as InvoiceApi } from '../client/api/api';
+import { Invoice } from '../client/model/models';
+import { InvoiceValidationResult } from '../client/model/models';
 
 export class FakeInvoice {
   identifier: string;
@@ -37,8 +37,9 @@ export class InvoiceService {
     let extraHttpOptions = {responseType: ResponseContentType.Blob};
 
     for (let invoiceId of invoiceIds) {
-      var observable = this.invoiceApi.invoiceDownloadWithHttpInfo(
-        invoiceId, extraHttpOptions);
+      // var observable = this.invoiceApi.invoiceDownloadWithHttpInfo(
+      //   invoiceId, extraHttpOptions);
+      var observable = this.invoiceApi.invoiceDownload(invoiceId);
       observables.push(observable);
     }
     return observables;

@@ -2,7 +2,7 @@
  * Copyright (c) 2017 Goldfin.io. All Rights Reserved.
  */
 import { async, TestBed, ComponentFixture } from "@angular/core/testing";
-import { ClarityModule } from 'clarity-angular';
+import { ClarityModule } from '@clr/angular';
 import { HomeComponent } from './home.component';
 
 
@@ -19,7 +19,7 @@ describe('HomeComponent', () => {
                 HomeComponent
             ],
             imports: [
-                ClarityModule.forRoot()
+                //ClarityModule.forRoot()
             ]
         });
 

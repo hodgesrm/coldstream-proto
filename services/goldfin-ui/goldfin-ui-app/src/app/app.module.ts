@@ -2,9 +2,9 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { ClarityModule } from 'clarity-angular';
+import { ClarityModule } from '@clr/angular';
 import { Router } from '@angular/router';
 
 import { AppComponent } from './app.component';
@@ -32,8 +32,8 @@ import { ChartsModule } from 'ng2-charts';
 // Services. 
 import { AuthGuardService } from "./services/auth.guard.service";
 import { AuthService } from "./services/auth.service";
-import { AuthInterceptor } from "./services/auth.interceptor";
-import { ConfigurationService } from "./services/config.service";
+// Commenting out until code works.
+// import { AuthInterceptor } from "./services/auth.interceptor";
 import { DocumentService } from "./services/document.service";
 import { DataSeriesService } from "./services/data-series.service";
 import { ExtractService } from "./services/extract.service";
@@ -43,21 +43,21 @@ import { HostService } from "./services/host.service";
 import { VendorService } from "./services/vendor.service";
 
 // Provider factories. 
+import { configurationFactory } from "./services/provider.factories";
 import { baseUrlFactory } from "./services/provider.factories";
-import { httpInterceptorFactory } from "./services/provider.factories";
+// Commenting out until code works.
+// import { httpInterceptorFactory } from "./services/provider.factories";
 
 // Generated REST API.
 import { BASE_PATH } from "./client/variables";
 import { Configuration } from "./client/configuration";
-import { SecurityApi } from "./client/api/SecurityApi";
-import { ExtractApi } from "./client/api/ExtractApi";
-import { InventoryApi } from "./client/api/InventoryApi";
-import { InvoiceApi } from "./client/api/InvoiceApi";
-import { VendorApi } from "./client/api/VendorApi";
-
-// Subclassed from generated code. 
-import { DocumentApiExtended } from "./services/DocumentApiExtended";
-import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
+import { DataService as DataApi } from "./client/api/api";
+import { DocumentService as DocumentApi } from "./client/api/api";
+import { ExtractService as ExtractApi } from "./client/api/api";
+import { InventoryService as InventoryApi } from "./client/api/api";
+import { InvoiceService as InvoiceApi } from "./client/api/api";
+import { SecurityService as SecurityApi } from "./client/api/api";
+import { VendorService as VendorApi } from "./client/api/api";
 
 @NgModule({
     declarations: [
@@ -83,22 +83,23 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
         BrowserAnimationsModule,
         BrowserModule,
         FormsModule,
-        HttpModule,
+        HttpClientModule,
         ClarityModule,
         ChartsModule,
         ROUTING
     ],
     providers: [
+      { provide: Configuration, useFactory: configurationFactory },
       { provide: BASE_PATH, useFactory: baseUrlFactory },
-      {
-         provide: HTTP_INTERCEPTORS,
-         useFactory: httpInterceptorFactory, 
-         multi: true,
-         deps: [Router]
-      },
+//      {
+//         provide: HTTP_INTERCEPTORS,
+//         useFactory: httpInterceptorFactory, 
+//         multi: true,
+//         deps: [Router]
+//      },
+      // Local application services.
       AuthGuardService,
       AuthService,
-      ConfigurationService,
       DocumentService,
       DataSeriesService,
       ExtractService,
@@ -106,13 +107,13 @@ import { DataSeriesApiExtended } from "./services/DataSeriesApiExtended";
       HostService,
       HostPriceService,
       VendorService, 
-      Configuration,
-      SecurityApi,
-      DocumentApiExtended,
-      DataSeriesApiExtended,
+      // Generated client services.
+      DataApi,      
+      DocumentApi,
       ExtractApi,
       InventoryApi,
       InvoiceApi,
+      SecurityApi,
       VendorApi
     ],
     bootstrap: [AppComponent]

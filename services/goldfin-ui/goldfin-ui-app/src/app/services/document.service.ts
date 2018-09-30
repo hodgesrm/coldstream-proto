@@ -5,13 +5,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { ResponseContentType } from '@angular/http';
 
-import { DocumentApiExtended } from './DocumentApiExtended';
-import { Document } from '../client/model/Document';
+import { DocumentService as DocumentApi } from '../client/api/api';
+import { Document } from '../client/model/models';
 
 @Injectable()
 export class DocumentService {
   constructor(
-    private documentApi: DocumentApiExtended
+    private documentApi: DocumentApi
   ) {}
 
   createDocument(file: File, description: string): Observable<Document> {
@@ -19,7 +19,7 @@ export class DocumentService {
   }
 
   loadDocuments(): Observable<Array<Document>> {
-    return this.documentApi.documentShowAll(false);
+    return this.documentApi.documentShowAll();
   }
 
   getBase64(file: File): Promise<{}> {
@@ -37,8 +37,8 @@ export class DocumentService {
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
       console.log("Upload scheduled: " + file.name);
-      var next = component.documentApi.documentCreateWithHttpInfo(
-                 file, description, true);
+      var next = component.documentApi.documentCreate(
+                 file, description, null, true);
       next.subscribe(
         data => {console.log(data);},
         error => {console.log(error);}
@@ -52,8 +52,9 @@ export class DocumentService {
     let extraHttpOptions = {responseType: ResponseContentType.Blob};
   
     for (let documentId of documentIds) {
-      var observable = this.documentApi.documentDownloadWithHttpInfo(
-        documentId, extraHttpOptions);
+      //var observable = this.documentApi.documentDownloadWithHttpInfo(
+      //  documentId, extraHttpOptions);
+      var observable = this.documentApi.documentDownload(documentId);
       observables.push(observable);
     }
     return observables;

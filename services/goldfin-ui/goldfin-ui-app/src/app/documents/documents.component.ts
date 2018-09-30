@@ -6,7 +6,7 @@ import { DocumentService }   from '../services/document.service';
 
 import { saveAs } from 'file-saver/FileSaver';
 
-import { Document } from '../client/model/Document';
+import { Document } from '../client/model/models';
 
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';

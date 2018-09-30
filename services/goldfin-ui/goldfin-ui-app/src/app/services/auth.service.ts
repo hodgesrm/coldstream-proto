@@ -2,15 +2,16 @@
  * Copyright (c) 2017-2018 Goldfin.io. All Rights Reserved.
  */
 import { Injectable, OnInit } from '@angular/core';
-import { Response } from '@angular/http';
+import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 
 import { User } from './user';
 
 import { Configuration } from '../client/configuration';
-import { SecurityApi } from '../client/api/SecurityApi';
-import { LoginCredentials } from '../client/model/LoginCredentials';
+import { SecurityService as SecurityApi } from '../client/api/api';
+import { LoginCredentials } from '../client/model/models';
 
 class Session {
   userName: string;
@@ -29,7 +30,11 @@ export class AuthService {
 
   // Return true if we are authorized.   
   isAuthorized(): boolean {
-    return (this.configuration.apiKey != null);
+    if (this.configuration.apiKeys) {
+      return (this.configuration.apiKeys["vnd.io.goldfin.session"] != null);
+    } else {
+      return false;
+    }
   }
 
   // Look up user/password on server.
@@ -38,9 +43,8 @@ export class AuthService {
     const loginCredential = {
       user: name, password: password
     };
-    var request: Observable<{}>;
-    request = this.securityApi.loginByCredentialsWithHttpInfo(loginCredential)
-      .map((response: Response) => {
+    var request = this.securityApi.loginByCredentials(loginCredential, 'response', false)
+      .map((response: HttpResponse<any>) => {
         // Map 200 response to a session. 
         var apiKey = response.headers.get("vnd.io.goldfin.session");
         console.log("Status: " + response.status);
@@ -50,7 +54,7 @@ export class AuthService {
         } else {
           // Set apiKey in the configuration where it will be used by 
           // later calls. 
-          this.configuration.apiKey = apiKey;
+          this.configuration.apiKeys["vnd.io.goldfin.session"] = apiKey;
           this.configuration.username = name;
           // Storage the same information in session storage so we can 
           // survive a page refresh. 
@@ -75,11 +79,12 @@ export class AuthService {
   // Terminates the session. 
   logout(): void {
     // Destroy the server session, ignoring result.
-    if (this.configuration.apiKey != null) {
-      this.securityApi.logout(this.configuration.apiKey)
+    var apiKey = this.configuration.apiKeys["vnd.io.goldfin.session"];
+    if (apiKey != null) {
+      this.securityApi.logout(apiKey)
     }
     this.clearSession();
-    this.configuration.apiKey = null;
+    this.configuration.apiKeys = {};
     this.configuration.username = "";
   }
   
@@ -89,7 +94,7 @@ export class AuthService {
     var apiKey = window.sessionStorage.getItem('apiKey');
     var username = window.sessionStorage.getItem('username');
     if (apiKey != null && username != null) {
-      this.configuration.apiKey = apiKey;
+      this.configuration.apiKeys["vnd.io.goldfin.session"] = apiKey;
       this.configuration.username = username;
       return true;
     } else {
@@ -100,7 +105,7 @@ export class AuthService {
   // Stores auth info form client configuration auth info in session store, 
   // wiping out any existing information. 
   storeSession(): void {
-    window.sessionStorage.setItem('apiKey', this.configuration.apiKey);
+    window.sessionStorage.setItem('apiKey', this.configuration.apiKeys["vnd.io.goldfin.session"]);
     window.sessionStorage.setItem('username', this.configuration.username);
   }
 

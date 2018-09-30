@@ -4,13 +4,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { DataSeriesApiExtended } from './DataSeriesApiExtended';
-import { DataSeries } from '../client/model/DataSeries';
+import { DataService as DataApi } from '../client/api/api';
+import { DataSeries } from '../client/model/models';
 
 @Injectable()
 export class DataSeriesService {
   constructor(
-    private inventoryApi: DataSeriesApiExtended
+    private inventoryApi: DataApi
   ) {}
 
   createDataSeries(file: File, description: string): Observable<DataSeries> {
@@ -18,7 +18,7 @@ export class DataSeriesService {
   }
 
   loadDataSeries(): Observable<Array<DataSeries>> {
-    return this.inventoryApi.dataShowAll(false);
+    return this.inventoryApi.dataShowAll();
   }
 
   getBase64(file: File): Promise<{}> {
@@ -36,8 +36,8 @@ export class DataSeriesService {
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
       console.log("Upload scheduled: " + file.name);
-      var next = component.inventoryApi.dataCreateWithHttpInfo(
-                 file, description, true);
+      var next = component.inventoryApi.dataCreate(
+                 file, description, null, true);
       next.subscribe(
         data => {console.log(data);},
         error => {console.log(error);}

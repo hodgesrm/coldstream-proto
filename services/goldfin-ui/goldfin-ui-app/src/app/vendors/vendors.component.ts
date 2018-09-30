@@ -5,7 +5,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router }   from '@angular/router'
 
 import { VendorService }   from '../services/vendor.service';
-import { Vendor }   from '../client/model/Vendor';
+import { Vendor }   from '../client/model/models';
 
 import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';
