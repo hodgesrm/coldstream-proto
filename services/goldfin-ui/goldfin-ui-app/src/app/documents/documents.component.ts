@@ -3,6 +3,7 @@
  */
 import { Component, OnInit } from '@angular/core';
 import { DocumentService }   from '../services/document.service';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 
 import { saveAs } from 'file-saver/FileSaver';
 
@@ -12,6 +13,9 @@ import { ErrorReporter } from '../utility/error-reporter';
 import { ErrorModalComponent } from '../utility/error-modal.component';
 
 import { UploadRequest } from '../utility/file-upload-modal.component';
+
+import { FileProgressReporter } from '../utility/file-progress-reporter';
+import { FileProgressModalComponent } from '../utility/file-progress-modal.component';
 
 @Component({
     selector: 'documents', 
@@ -25,6 +29,9 @@ export class DocumentsComponent implements OnInit {
 
   // Error reporter sub-component.
   errorReporter: ErrorReporter = new ErrorReporter();
+
+  // File progress reporter sub-component. 
+  progressReporter: FileProgressReporter = new FileProgressReporter();
 
   // Document listing.
   selected: Document[] = [];
@@ -73,12 +80,35 @@ export class DocumentsComponent implements OnInit {
   uploadFile(request: UploadRequest): void {
     console.log("Upload file: " + request.files);
     console.log("Upload description: " + request.description);
-    var component = this;
-    this.documentService.uploadDocuments(request.files, request.description)
-      .then(function() {
-        console.log("Submitted");
-        component.getDocuments();
-    });
+    this.file_upload_open = false;
+    var observables = this.documentService.uploadDocuments(request.files, request.description);
+    for (var i = 0; i < observables.length; i++) {
+      this.progressReporter.reset();
+      this.progressReporter.progress_open = true;
+      observables[i].subscribe(
+        (event: HttpEvent<any>) => {
+          switch (event.type) {
+            case HttpEventType.UploadProgress:
+              const pct = Math.round(100.0 * event.loaded / event.total);
+              this.progressReporter.progress_pct = pct;
+              console.log(`Upload progress: ${pct}% loaded`);
+              break;
+            case HttpEventType.Response:
+              console.log('Upload complete', event.body);
+              this.progressReporter.succeeded('Upload complete');
+              this.getDocuments();
+          }
+        },
+        err => {
+          console.log(err);
+          if (err.error.message) {
+            this.progressReporter.failed(err.error.message);
+          } else {
+            this.progressReporter.failed('Upload failed');
+          }
+        }
+      );
+    }
   }
 
   onDownload(): void {

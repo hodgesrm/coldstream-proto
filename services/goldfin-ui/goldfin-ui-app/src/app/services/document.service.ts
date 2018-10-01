@@ -4,6 +4,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { ResponseContentType } from '@angular/http';
+import { HttpResponse, HttpEvent } from '@angular/common/http';
 
 import { DocumentService as DocumentApi } from '../client/api/api';
 import { Document } from '../client/model/models';
@@ -31,25 +32,23 @@ export class DocumentService {
     });
   }
 
-  uploadDocuments(files: File[], description): Promise<{}> {
-    var promises = [];
+  uploadDocuments(files: File[], description): Array<Observable<HttpEvent<Document>>> {
+    var observables = [];
     var component = this;
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
-      console.log("Upload scheduled: " + file.name);
+      console.log("Upload queued: " + file.name);
       var next = component.documentApi.documentCreate(
-                 file, description, null, true);
-      next.subscribe(
-        data => {console.log(data);},
-        error => {console.log(error);}
-      );
-      return Promise.all(promises);
+                 file, description, null, true, 'events', 
+                 true);
+      observables.push(next);
     }
+    return observables;
   }
 
   downloadDocuments(documentIds: string[]): Array<Observable<Response>> {
     var observables = [];
-    let extraHttpOptions = {responseType: ResponseContentType.Blob};
+    //let extraHttpOptions = {responseType: ResponseContentType.Blob};
   
     for (let documentId of documentIds) {
       //var observable = this.documentApi.documentDownloadWithHttpInfo(

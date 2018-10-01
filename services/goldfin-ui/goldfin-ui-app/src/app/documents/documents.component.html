@@ -56,4 +56,6 @@
 
 <file-upload-modal (uploadRequest)="uploadFile($event)" [(show)]="file_upload_open" ></file-upload-modal>
 
+<file-progress-modal [reporter]="progressReporter"></file-progress-modal>
+
 <error-modal [reporter]="errorReporter"></error-modal>

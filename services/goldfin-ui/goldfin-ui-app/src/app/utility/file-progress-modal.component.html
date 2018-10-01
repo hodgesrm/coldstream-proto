@@ -1,0 +1,38 @@
+<!--
+  ~ Copyright (c) 2018 Goldfin.io. All Rights Reserved.
+  -->
+<div *ngIf="reporter">
+  <clr-modal [(clrModalOpen)]="reporter.progress_open">
+    <h3 class="modal-title">Progress</h3>
+    <div class="modal-body">
+      <div class="progress labeled">
+        <progress value="{{reporter.progress_pct}}" max="100" 
+          [attr.data-displayval]="reporter.progress_pct + '%'"></progress>
+        <span>{{reporter.progress_pct}}%</span>
+      </div>
+      <div class="alert alert-success" *ngIf="reporter.termination == 'succeeded'">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+            </div>
+            <span class="alert-text">{{reporter.message}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-danger" *ngIf="reporter.termination == 'failed'">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+            </div>
+            <span class="alert-text">{{reporter.message}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="reporter.progress_open = false">OK</button>
+    </div>
+  </clr-modal>
+</div>
