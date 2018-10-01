@@ -16,7 +16,6 @@ export class AuthGuardService implements CanActivate {
   // Send to login if not authorized. 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (this.auth.isAuthorized()) {
-      //var url: string = state.url.join('/');
       window.sessionStorage.setItem('url', state.url);
       return true;
     } else {

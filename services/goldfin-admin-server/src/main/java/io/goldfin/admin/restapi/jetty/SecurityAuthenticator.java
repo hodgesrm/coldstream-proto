@@ -37,6 +37,7 @@ public class SecurityAuthenticator implements Authenticator {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityAuthenticator.class);
 	public static final String SESSION_KEY_HEADER = "vnd.io.goldfin.session";
 	public static final String API_KEY_HEADER = "vnd.io.goldfin.apikey";
+	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 
 	@Override
 	public String getAuthMethod() {
@@ -117,7 +118,9 @@ public class SecurityAuthenticator implements Authenticator {
 			return Authentication.NOT_CHECKED;
 		}
 
-		// Checks for supported authentication types in order.
+		// Checks for supported authentication types in order. In the event of
+		// failure we add CORS access control header as the normal CORS filter
+		// does not seem to run, which can confuse browsers.
 		UserManager um = ManagerRegistry.getInstance().getManager(UserManager.class);
 		if (sessionKey != null) {
 			try {
@@ -131,11 +134,10 @@ public class SecurityAuthenticator implements Authenticator {
 					logger.debug("Extended session failure information", e);
 				}
 				try {
+					res.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 					res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				} catch (IOException e2) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Unable to send error message", e2);
-					}
+					logger.warn("Unable to send error message", e2);
 				}
 				return Authentication.SEND_FAILURE;
 			}
@@ -150,17 +152,17 @@ public class SecurityAuthenticator implements Authenticator {
 					logger.debug("Extended session failure information", e);
 				}
 				try {
+					res.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 					res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				} catch (IOException e2) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Unable to send error message", e2);
-					}
+					logger.warn("Unable to send error message", e2);
 				}
 				return Authentication.SEND_FAILURE;
 			}
 		} else {
 			try {
-				logger.warn(String.format("Unauthorized request: path=%s, host=%s", req.getPathInfo(), req.getRemoteHost()));
+				logger.warn(String.format("Unauthorized request: path=%s, host=%s", req.getPathInfo(),
+						req.getRemoteHost()));
 				res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return Authentication.SEND_FAILURE;
 			} catch (IOException e) {

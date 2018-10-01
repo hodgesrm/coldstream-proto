@@ -33,7 +33,7 @@ import { ChartsModule } from 'ng2-charts';
 import { AuthGuardService } from "./services/auth.guard.service";
 import { AuthService } from "./services/auth.service";
 // Commenting out until code works.
-// import { AuthInterceptor } from "./services/auth.interceptor";
+import { AuthInterceptor } from "./services/auth.interceptor";
 import { DocumentService } from "./services/document.service";
 import { DataSeriesService } from "./services/data-series.service";
 import { ExtractService } from "./services/extract.service";
@@ -46,7 +46,7 @@ import { VendorService } from "./services/vendor.service";
 import { configurationFactory } from "./services/provider.factories";
 import { baseUrlFactory } from "./services/provider.factories";
 // Commenting out until code works.
-// import { httpInterceptorFactory } from "./services/provider.factories";
+import { httpInterceptorFactory } from "./services/provider.factories";
 
 // Generated REST API.
 import { BASE_PATH } from "./client/variables";
@@ -91,12 +91,12 @@ import { VendorService as VendorApi } from "./client/api/api";
     providers: [
       { provide: Configuration, useFactory: configurationFactory },
       { provide: BASE_PATH, useFactory: baseUrlFactory },
-//      {
-//         provide: HTTP_INTERCEPTORS,
-//         useFactory: httpInterceptorFactory, 
-//         multi: true,
-//         deps: [Router]
-//      },
+      {
+         provide: HTTP_INTERCEPTORS,
+         useFactory: httpInterceptorFactory, 
+         multi: true,
+         deps: [Router]
+      },
       // Local application services.
       AuthGuardService,
       AuthService,
