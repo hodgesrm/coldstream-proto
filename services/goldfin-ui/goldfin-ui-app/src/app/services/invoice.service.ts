@@ -3,7 +3,8 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { ResponseContentType } from '@angular/http';
+import { map, catchError } from 'rxjs/operators';
+import { HttpResponse } from '@angular/common/http';
 
 import { InvoiceService as InvoiceApi } from '../client/api/api';
 import { Invoice } from '../client/model/models';
@@ -32,15 +33,32 @@ export class InvoiceService {
     return this.invoiceApi.invoiceShowAll(true);
   }
 
-  downloadInvoices(invoiceIds: string[]): Array<Observable<Response>> {
+  downloadInvoices(invoiceIds: string[]): Array<Observable<any>> {
     var observables = [];
-    let extraHttpOptions = {responseType: ResponseContentType.Blob};
 
     for (let invoiceId of invoiceIds) {
-      // var observable = this.invoiceApi.invoiceDownloadWithHttpInfo(
-      //   invoiceId, extraHttpOptions);
-      var observable = this.invoiceApi.invoiceDownload(invoiceId);
-      observables.push(observable);
+      // Map the response to a tuple consisting of the blob + file name.
+      var download = this.invoiceApi.invoiceDownload(invoiceId,
+          'response').pipe(
+        map<HttpResponse<Blob>, any>(response => {
+          console.log("Processing response");
+          var contentMap = {};
+          contentMap['blob'] = response.body;
+          // Find the file name, which is in a header of the following form:
+          // Content-Disposition: attachment; filename="<name>"
+          var fileName = 'document.pdf';
+          var contentDisposition: string = response.headers.get('Content-Disposition');
+          var quotedName = contentDisposition.split(';')[1].trim().split('=')[1];
+          fileName = quotedName.replace(/"/g, '');
+          contentMap['name'] = fileName;
+          return contentMap;
+        }),
+        catchError(error => {
+          console.log("Error: " + error);
+          return error;
+        })
+      );
+      observables.push(download);
     }
     return observables;
   }

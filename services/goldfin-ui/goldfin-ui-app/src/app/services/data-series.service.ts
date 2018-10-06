@@ -3,6 +3,7 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { HttpEvent } from '@angular/common/http';
 
 import { DataService as DataApi } from '../client/api/api';
 import { DataSeries } from '../client/model/models';
@@ -30,20 +31,17 @@ export class DataSeriesService {
     });
   }
 
-  uploadDataSeries(files: File[], description): Promise<{}> {
-    var promises = [];
-    var component = this;
+  uploadDataSeries(files: File[], description): Array<Observable<HttpEvent<Document>>> {
+    var observables = [];
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
       console.log("Upload scheduled: " + file.name);
-      var next = component.inventoryApi.dataCreate(
-                 file, description, null, true);
-      next.subscribe(
-        data => {console.log(data);},
-        error => {console.log(error);}
-      );
-      return Promise.all(promises);
+      var next = this.inventoryApi.dataCreate(
+                 file, description, null, true, 'events', 
+                 true);
+      observables.push(next);
     }
+    return observables;
   }
 
   processDataSeries(dataSeries: DataSeries[]): Promise<{}> {

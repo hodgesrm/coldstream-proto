@@ -3,8 +3,9 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { map, catchError } from 'rxjs/operators';
 import { ResponseContentType } from '@angular/http';
-import { HttpResponse, HttpEvent } from '@angular/common/http';
+import { HttpResponse, HttpErrorResponse, HttpEvent } from '@angular/common/http';
 
 import { DocumentService as DocumentApi } from '../client/api/api';
 import { Document } from '../client/model/models';
@@ -46,15 +47,31 @@ export class DocumentService {
     return observables;
   }
 
-  downloadDocuments(documentIds: string[]): Array<Observable<Response>> {
+  downloadDocuments(documentIds: string[]): Array<Observable<any>> {
     var observables = [];
-    //let extraHttpOptions = {responseType: ResponseContentType.Blob};
-  
     for (let documentId of documentIds) {
-      //var observable = this.documentApi.documentDownloadWithHttpInfo(
-      //  documentId, extraHttpOptions);
-      var observable = this.documentApi.documentDownload(documentId);
-      observables.push(observable);
+      // Map the response to a tuple consisting of the blob + file name. 
+      var download = this.documentApi.documentDownload(documentId, 
+          'response').pipe(
+        map<HttpResponse<Blob>, any>(response => {
+          console.log("Processing response");
+          var contentMap = {};
+          contentMap['blob'] = response.body;
+          // Find the file name, which is in a header of the following form:
+          // Content-Disposition: attachment; filename="<name>"
+          var fileName = 'document.pdf';
+          var contentDisposition: string = response.headers.get('Content-Disposition');
+          var quotedName = contentDisposition.split(';')[1].trim().split('=')[1];
+          fileName = quotedName.replace(/"/g, '');
+          contentMap['name'] = fileName;
+          return contentMap;
+        }),
+        catchError(error => {
+          console.log("Error: " + error);
+          return error;
+        })
+      );
+      observables.push(download);
     }
     return observables;
   }

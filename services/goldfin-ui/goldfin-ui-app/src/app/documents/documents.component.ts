@@ -126,16 +126,18 @@ export class DocumentsComponent implements OnInit {
       var observables = this.documentService.downloadDocuments(documentIds);
       for (let observable of observables) {
         observable
-          .subscribe(response => {
-            console.log("Got download response");
-            var blob = new Blob([response.blob()], { type: 'application/octet-stream' });
-            // Find the file name. 
-            var fileName = 'document.pdf';
-            var contentDisposition: string = response.headers.get('Content-Disposition');
-            var quotedName = contentDisposition.split(';')[1].trim().split('=')[1];
-            fileName = quotedName.replace(/"/g, '');
-            saveAs(blob, fileName);
-          });
+          .subscribe(
+            response => {
+              if (response) {
+                console.log("Got download response: " + response.name);
+                saveAs(response.blob, response.name);
+              }
+            },
+            error => {
+              this.errorReporter.error_message = error.message;
+              this.errorReporter.error_open = true;
+            }
+          );
       }
     }
   }
