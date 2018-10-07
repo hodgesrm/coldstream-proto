@@ -15,6 +15,7 @@ import io.goldfin.admin.service.api.model.User;
 import io.goldfin.admin.service.api.model.UserParameters;
 import io.goldfin.admin.service.api.model.UserPasswordParameters;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -79,14 +80,14 @@ public class UserApi  {
     @Path("/{id}/apikey/{keyid}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete an API key", notes = "Deletes API key.  Any applications using the key will no longer function.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete an API key", notes = "Deletes API key.  Any applications using the key will no longer function.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "user", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response apikeyDelete(@ApiParam(value = "User ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "API Key ID",required=true) @PathParam("keyid") String keyid
 ,@Context SecurityContext securityContext)
@@ -119,7 +120,7 @@ public class UserApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = User.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "User creation failed", response = User.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "User creation failed", response = ModelApiResponse.class) })
     public Response userCreate(@ApiParam(value = "User registration request parameters" ,required=true) UserParameters body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -129,14 +130,14 @@ public class UserApi  {
     @Path("/{id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a user", notes = "Delete a user", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete a user", notes = "Delete a user", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "user", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response userDelete(@ApiParam(value = "User ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -153,7 +154,7 @@ public class UserApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Tenant.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Tenant.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response userShow(@ApiParam(value = "User ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -177,14 +178,14 @@ public class UserApi  {
     @Path("/{id}")
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Update a user", notes = "Update user description", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update a user", notes = "Update user description", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "user", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response userUpdate(@ApiParam(value = "User ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "User parameters" ) UserParameters body
 ,@Context SecurityContext securityContext)
@@ -195,14 +196,14 @@ public class UserApi  {
     @Path("/{id}/password")
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Update user password", notes = "Sets a new user password", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update user password", notes = "Sets a new user password", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "user", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response userUpdatePassword(@ApiParam(value = "User ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Password change parameters" ) UserPasswordParameters body
 ,@Context SecurityContext securityContext)

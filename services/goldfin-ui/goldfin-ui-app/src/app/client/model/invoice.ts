@@ -34,6 +34,10 @@ export interface Invoice {
      */
     identifier?: string;
     /**
+     * Account to which invoice applies
+     */
+    account?: string;
+    /**
      * Invoice effective date
      */
     effectiveDate?: Date;
@@ -45,6 +49,10 @@ export interface Invoice {
      * Invoice subtotal amount
      */
     subtotalAmount?: number;
+    /**
+     * Invoice total credits
+     */
+    credit?: number;
     /**
      * Invoice tax amount
      */

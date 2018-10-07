@@ -2,7 +2,7 @@
 # Generate python code for Swagger model.
 # (Source for this script: $CODEGEN/bin/python-petstore.sh)
 
-CODEGEN=$HOME/git/swagger-codegen
+CODEGEN=$HOME/git/swagger-codegen-v2.2.x
 SCRIPT="$0"
 SCRIPT_DIR=`dirname $SCRIPT`
 CLIENT_HOME=`cd $SCRIPT_DIR/..;pwd`

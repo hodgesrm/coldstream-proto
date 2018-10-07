@@ -46,9 +46,11 @@ public class InvoiceServiceTest extends TransactionalTest<Invoice> {
 			env.setId(UUID.randomUUID());
 			// env.setDocumentId(UUID.randomUUID());
 			env.setDescription("X");
+			env.setAccount("my account #");
 			env.setEffectiveDate(Date.valueOf("2016-12-01"));
 			env.setVendorIdentifier("X");
 			env.setSubtotalAmount(BigDecimal.valueOf(2000.0));
+			env.setCredit(BigDecimal.valueOf(50.0));
 			env.setTax(BigDecimal.valueOf(100.0));
 			env.setTotalAmount(BigDecimal.valueOf(210000, 2));
 			env.setCurrency("USD");

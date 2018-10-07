@@ -25,9 +25,11 @@ CREATE TABLE IF NOT EXISTS invoices (
   document_id uuid REFERENCES documents(id) ON DELETE CASCADE,
   description varchar(250),
   identifier varchar(100), 
+  account varchar(100), 
   effective_date timestamp, 
   vendor varchar(100), 
   subtotal_amount numeric(10,2), 
+  credit numeric(10,2), 
   tax numeric(10,2), 
   total_amount numeric(10,2),
   currency char(3),
@@ -39,23 +41,29 @@ CREATE TABLE IF NOT EXISTS invoices (
 // Create the invoice items table. 
 CREATE TABLE IF NOT EXISTS invoice_items (
   invoice_id uuid REFERENCES invoices(id) ON DELETE CASCADE NOT NULL,
-  item_row_number integer NOT NULL,
+  rid integer NOT NULL,
+  parent_rid integer,
+  item_row_type varchar(10) default 'DETAIL',
   item_id varchar(250), 
   resource_id varchar(250), 
   description varchar(1000), 
+  charge_type varchar(10) default 'RECURRING',
   unit_amount numeric(10,2), 
   units integer, 
+  unit_type varchar(10),
+  subtotal_amount numeric(10,2), 
+  credit numeric(10,2), 
+  tax numeric(10,2), 
   total_amount numeric(10,2), 
   currency char(3),
   start_date timestamp, 
   end_date timestamp,
-  one_time_charge boolean,
   region text,
   inventory_id varchar(250), 
   inventory_type varchar(50), 
   tags jsonb,
   creation_date timestamp DEFAULT current_timestamp,
-  PRIMARY KEY (invoice_id, item_row_number)
+  PRIMARY KEY (invoice_id, rid)
 )
 ;
 

@@ -35,9 +35,11 @@ class Invoice(object):
         'document_id': 'str',
         'description': 'str',
         'identifier': 'str',
+        'account': 'str',
         'effective_date': 'datetime',
         'vendor_identifier': 'str',
         'subtotal_amount': 'float',
+        'credit': 'float',
         'tax': 'float',
         'total_amount': 'float',
         'currency': 'str',
@@ -51,9 +53,11 @@ class Invoice(object):
         'document_id': 'documentId',
         'description': 'description',
         'identifier': 'identifier',
+        'account': 'account',
         'effective_date': 'effectiveDate',
         'vendor_identifier': 'vendorIdentifier',
         'subtotal_amount': 'subtotalAmount',
+        'credit': 'credit',
         'tax': 'tax',
         'total_amount': 'totalAmount',
         'currency': 'currency',
@@ -62,7 +66,7 @@ class Invoice(object):
         'creation_date': 'creationDate'
     }
 
-    def __init__(self, id=None, document_id=None, description=None, identifier=None, effective_date=None, vendor_identifier=None, subtotal_amount=None, tax=None, total_amount=None, currency=None, items=None, tags=None, creation_date=None):
+    def __init__(self, id=None, document_id=None, description=None, identifier=None, account=None, effective_date=None, vendor_identifier=None, subtotal_amount=None, credit=None, tax=None, total_amount=None, currency=None, items=None, tags=None, creation_date=None):
         """
         Invoice - a model defined in Swagger
         """
@@ -71,9 +75,11 @@ class Invoice(object):
         self._document_id = None
         self._description = None
         self._identifier = None
+        self._account = None
         self._effective_date = None
         self._vendor_identifier = None
         self._subtotal_amount = None
+        self._credit = None
         self._tax = None
         self._total_amount = None
         self._currency = None
@@ -89,12 +95,16 @@ class Invoice(object):
           self.description = description
         if identifier is not None:
           self.identifier = identifier
+        if account is not None:
+          self.account = account
         if effective_date is not None:
           self.effective_date = effective_date
         if vendor_identifier is not None:
           self.vendor_identifier = vendor_identifier
         if subtotal_amount is not None:
           self.subtotal_amount = subtotal_amount
+        if credit is not None:
+          self.credit = credit
         if tax is not None:
           self.tax = tax
         if total_amount is not None:
@@ -201,6 +211,29 @@ class Invoice(object):
         self._identifier = identifier
 
     @property
+    def account(self):
+        """
+        Gets the account of this Invoice.
+        Account to which invoice applies
+
+        :return: The account of this Invoice.
+        :rtype: str
+        """
+        return self._account
+
+    @account.setter
+    def account(self, account):
+        """
+        Sets the account of this Invoice.
+        Account to which invoice applies
+
+        :param account: The account of this Invoice.
+        :type: str
+        """
+
+        self._account = account
+
+    @property
     def effective_date(self):
         """
         Gets the effective_date of this Invoice.
@@ -268,6 +301,29 @@ class Invoice(object):
         """
 
         self._subtotal_amount = subtotal_amount
+
+    @property
+    def credit(self):
+        """
+        Gets the credit of this Invoice.
+        Invoice total credits
+
+        :return: The credit of this Invoice.
+        :rtype: float
+        """
+        return self._credit
+
+    @credit.setter
+    def credit(self, credit):
+        """
+        Sets the credit of this Invoice.
+        Invoice total credits
+
+        :param credit: The credit of this Invoice.
+        :type: float
+        """
+
+        self._credit = credit
 
     @property
     def tax(self):

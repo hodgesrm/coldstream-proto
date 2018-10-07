@@ -180,11 +180,11 @@ public class Tenant   {
   }
 
   /**
-   * Date invoice record was created
+   * Date record was created
    * @return creationDate
    **/
   @JsonProperty("creationDate")
-  @ApiModelProperty(value = "Date invoice record was created")
+  @ApiModelProperty(value = "Date record was created")
   public String getCreationDate() {
     return creationDate;
   }

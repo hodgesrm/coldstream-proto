@@ -203,7 +203,9 @@ class GrandCouleeProcessor:
         item_resource_id = None
         item_start_date = None
         item_end_date = None
-        item_one_time_charge = None
+        item_row_type = 'DETAIL'
+        item_unit_type = 'MONTH'
+        item_charge_type = 'RECURRING'
 
         for line in self._engine.tabular_line_query().intersects_vertical_edge(
                 invoice_item_left_edge).predicate(data_window).generate():
@@ -245,13 +247,13 @@ class GrandCouleeProcessor:
                     candidate_end_date = data_utils.extract_date(item_list[1].text)
                     if candidate_end_date is not None:
                         item_end_date = candidate_end_date
-                        item_one_time_charge = False
+                        item_charge_type = 'RECURRING'
                     else:
                         onetime_regex = r'^\s*One Time'
                         if re.match(onetime_regex, item_list[1].text):
-                            item_one_time_charge = True
+                            item_charge_type = 'ONE-TIME'
                         else:
-                            item_one_time_charge = False
+                            item_charge_type = 'RECURRING'
 
                 # Scan backwards to get the total and unit (actually monthly
                 # price).
@@ -269,7 +271,9 @@ class GrandCouleeProcessor:
                 invoice_item.currency = invoice.currency
                 invoice_item.start_date = item_start_date
                 invoice_item.end_date = item_end_date
-                invoice_item.one_time_charge = item_one_time_charge
+                invoice_item.charge_type = item_charge_type
+                invoice_item.unit_type = item_unit_type
+                invoice_item.item_row_type = item_row_type
 
                 invoice.items.append(invoice_item)
             else:

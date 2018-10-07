@@ -1119,7 +1119,7 @@ definitions:
           - DISABLED
       creationDate:
         type: string
-        description: Date invoice record was created
+        description: Date record was created
   TenantParameters:
     description: Parameters for creating or updating a tenant
     properties:
@@ -1352,6 +1352,9 @@ definitions:
       identifier:
         type: string
         description: Invoice identifier
+      account:
+        type: string
+        description: Account to which invoice applies
       effectiveDate:
         type: string
         format: date-time
@@ -1362,6 +1365,9 @@ definitions:
       subtotalAmount:
         type: number
         description: Invoice subtotal amount
+      credit:
+        type: number
+        description: Invoice total credits
       tax:
         type: number
         description: Invoice tax amount
@@ -1385,6 +1391,21 @@ definitions:
     description: Common fields for all invoice line items
     type: object
     properties:
+      rid:
+        type: integer
+        description: Row number of line item starting at 1. 
+      parentRid:
+        type: integer
+        description: Row ID of a summary invoice item to which this item belongs
+      itemRowType:
+        type: string
+        enum:
+          - DETAIL
+          - SUMMARY
+        description: |
+          Type of invoice row item
+           * DETAIL - A payable item
+           * SUMMARY - A sub-total or total line
       itemId:
         type: string
         description: Invoice item ID if specified
@@ -1400,9 +1421,33 @@ definitions:
       units:
         type: integer
         description: Number of units
+      unitType:
+        type: string
+        enum:
+          - MONTH
+          - HOUR
+          - USER
+          - GB
+          - OTHER
+        description: |
+          Type of multiplier for computing invoice item total
+           * MONTH - Monthly subscription (may be prorated depending on vendor)
+           * HOUR - Hours in use
+           * USER - Number of users
+           * GB - Gigabytes (for example as a unit of storage or transfer)
+           * OTHER - Some other unit of consumption
+      subtotalAmount:
+        type: number
+        description: Item cost for all units without credits or taxes
+      credit:
+        type: number
+        description: Credit applied to line item
+      tax:
+        type: number
+        description: Tax on line item
       totalAmount:
         type: number
-        description: Total cost for all units
+        description: Total cost for all units including taxes and credits
       currency:
         type: string
         description: Item currency
@@ -1414,11 +1459,16 @@ definitions:
         type: string
         format: date-time
         description: End of the time range
-      oneTimeCharge:
-        type: boolean
-        description: >-
-          If true, this is a one-time charge and the starting date provides the
-          date
+      chargeType:
+        type: string
+        enum:
+          - RECURRING
+          - ONE-TIME
+        description: |
+          Type of charge
+           * RECURRING - Recurs every interval e.g. monthly
+           * ONE_TIME - A one-time charge delivered on starting date
+        default: RECURRING
       region:
         $ref: '#/definitions/DocumentRegion'
       inventoryId:

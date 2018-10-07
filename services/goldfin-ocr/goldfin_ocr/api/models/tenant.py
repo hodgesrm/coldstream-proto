@@ -198,7 +198,7 @@ class Tenant(object):
     def creation_date(self):
         """
         Gets the creation_date of this Tenant.
-        Date invoice record was created
+        Date record was created
 
         :return: The creation_date of this Tenant.
         :rtype: str
@@ -209,7 +209,7 @@ class Tenant(object):
     def creation_date(self, creation_date):
         """
         Sets the creation_date of this Tenant.
-        Date invoice record was created
+        Date record was created
 
         :param creation_date: The creation_date of this Tenant.
         :type: str

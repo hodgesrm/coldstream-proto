@@ -11,6 +11,7 @@ import java.io.File;
 import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.admin.service.api.model.InvoiceValidationResult;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -59,14 +60,14 @@ public class InvoiceApi  {
     @Path("/{id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete an invoice", notes = "Delete an invoice.  It can be recreated by rescanning the corresponding document", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete an invoice", notes = "Delete an invoice.  It can be recreated by rescanning the corresponding document", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "invoice", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response invoiceDelete(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -83,7 +84,7 @@ public class InvoiceApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = File.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response invoiceDownload(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -100,7 +101,7 @@ public class InvoiceApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Invoice.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Invoice.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response invoiceShow(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "If true, return full invoices with all line items") @QueryParam("full") Boolean full
 ,@Context SecurityContext securityContext)
@@ -133,7 +134,7 @@ public class InvoiceApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = InvoiceValidationResult.class, responseContainer = "List"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = InvoiceValidationResult.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response invoiceValidate(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "If true, return only failing checks. Otherwise return all results including checks that succeed", defaultValue="false") @DefaultValue("false") @QueryParam("onlyFailing") Boolean onlyFailing
 ,@Context SecurityContext securityContext)

@@ -2,6 +2,7 @@
 # Copyright (c) 2017-2018 Goldfin Systems LLC.  All rights reserved. 
 
 """Factory class to pick a provider translator class"""
+from .providers.amazon import AmazonProcessor
 from .providers.grandcoulee import GrandCouleeProcessor
 from .providers.inap import InapProcessor
 from .providers.leaseweb import LeasewebProcessor
@@ -18,5 +19,7 @@ def get_provider(tabular_model):
         return LeasewebProcessor(tabular_model)
     elif OvhProcessor.conforms(tabular_model):
         return OvhProcessor(tabular_model)
+    elif AmazonProcessor.conforms(tabular_model):
+        return AmazonProcessor(tabular_model)
     else:
         return None

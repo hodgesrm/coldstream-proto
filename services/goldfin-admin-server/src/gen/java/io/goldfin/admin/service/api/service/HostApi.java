@@ -9,6 +9,7 @@ import io.swagger.jaxrs.*;
 
 import io.goldfin.admin.service.api.model.Host;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -57,14 +58,14 @@ public class HostApi  {
     @Path("/{id}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "Delete host record", notes = "Delete a host record.  It can be recreated by rescanning the corresponding document", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete host record", notes = "Delete a host record.  It can be recreated by rescanning the corresponding document", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "inventory", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response hostDelete(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -81,7 +82,7 @@ public class HostApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Host.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Host.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response hostShow(@ApiParam(value = "Host resource ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {

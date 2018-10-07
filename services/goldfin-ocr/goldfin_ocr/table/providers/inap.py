@@ -214,7 +214,10 @@ class InapProcessor:
                     date_range_lines = date_range_cell.lines
                     if len(date_range_lines) > 1:
                         item.end_date = data_utils.extract_date(date_range_lines[1].text)
-                item.one_time_charge = item.end_date is None
+                if item.end_date is None:
+                     item.charge_type = 'ONE-TIME'
+                else:
+                     item.charge_type = 'RECURRING'
 
                 # Remaining fields can be read out of their fields. 
                 item.unit_amount = data_utils.extract_currency(row_item_list[2].text) 

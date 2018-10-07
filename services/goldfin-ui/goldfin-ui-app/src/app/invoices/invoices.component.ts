@@ -18,26 +18,33 @@ import { ErrorModalComponent } from '../utility/error-modal.component';
 export class InvoiceJoinedToItem {
   // Values derived from invoice.
   invoice_documentId?: string;
+  invoice_account?: string;
   invoice_description?: string;
   invoice_identifier?: string;
   invoice_effectiveDate?: Date;
   invoice_vendorIdentifier?: string;
   invoice_subtotalAmount?: number;
+  invoice_credit?: number;
   invoice_tax?: number;
   invoice_totalAmount?: number;
   invoice_currency?: string;
 
   // Values derived from item. 
   itemId?: string;
+  itemRowType?: string;
   resourceId?: string;
   description?: string;
+  chargeType?: string;
   unitAmount?: number;
   units?: number;
+  unitType?: string;
+  subtotalAmount?: number;
+  credit?: number;
+  tax?: number;
   totalAmount?: number;
   currency?: string;
   startDate?: Date;
   endDate?: Date;
-  oneTimeCharge?: boolean;
   inventoryId?: string;
   inventoryType?: InvoiceItem.InventoryTypeEnum;
 }
@@ -116,24 +123,31 @@ export class InvoicesComponent implements OnInit {
         joined.invoice_documentId = invoice.documentId;
         joined.invoice_description = invoice.description;
         joined.invoice_identifier = invoice.identifier;
+        joined.invoice_account = invoice.account;
         joined.invoice_effectiveDate = invoice.effectiveDate;
         joined.invoice_vendorIdentifier = invoice.vendorIdentifier;
         joined.invoice_subtotalAmount = invoice.subtotalAmount;
+        joined.invoice_credit = invoice.credit;
         joined.invoice_tax = invoice.tax;
         joined.invoice_totalAmount = invoice.totalAmount;
         joined.invoice_currency = invoice.currency;
 
         // Values from invoice item. 
+        joined.itemRowType = item.itemRowType;
         joined.itemId = item.itemId;
         joined.resourceId = item.resourceId;
         joined.description = item.description;
+        joined.chargeType = item.chargeType;
         joined.unitAmount = item.unitAmount;
         joined.units = item.units;
+        joined.unitType = item.unitType;
+        joined.subtotalAmount = item.subtotalAmount;
+        joined.credit = item.credit;
+        joined.tax = item.tax;
         joined.totalAmount = item.totalAmount;
         joined.currency = item.currency;
         joined.startDate = item.startDate;
         joined.endDate = item.endDate;
-        joined.oneTimeCharge = item.oneTimeCharge;
         joined.inventoryId = item.inventoryId;
         joined.inventoryType = item.inventoryType;
 

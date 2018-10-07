@@ -45,6 +45,9 @@ public class Invoice   {
   @JsonProperty("identifier")
   private String identifier = null;
 
+  @JsonProperty("account")
+  private String account = null;
+
   @JsonProperty("effectiveDate")
   private Date effectiveDate = null;
 
@@ -53,6 +56,9 @@ public class Invoice   {
 
   @JsonProperty("subtotalAmount")
   private BigDecimal subtotalAmount = null;
+
+  @JsonProperty("credit")
+  private BigDecimal credit = null;
 
   @JsonProperty("tax")
   private BigDecimal tax = null;
@@ -148,6 +154,25 @@ public class Invoice   {
     this.identifier = identifier;
   }
 
+  public Invoice account(String account) {
+    this.account = account;
+    return this;
+  }
+
+  /**
+   * Account to which invoice applies
+   * @return account
+   **/
+  @JsonProperty("account")
+  @ApiModelProperty(value = "Account to which invoice applies")
+  public String getAccount() {
+    return account;
+  }
+
+  public void setAccount(String account) {
+    this.account = account;
+  }
+
   public Invoice effectiveDate(Date effectiveDate) {
     this.effectiveDate = effectiveDate;
     return this;
@@ -203,6 +228,25 @@ public class Invoice   {
 
   public void setSubtotalAmount(BigDecimal subtotalAmount) {
     this.subtotalAmount = subtotalAmount;
+  }
+
+  public Invoice credit(BigDecimal credit) {
+    this.credit = credit;
+    return this;
+  }
+
+  /**
+   * Invoice total credits
+   * @return credit
+   **/
+  @JsonProperty("credit")
+  @ApiModelProperty(value = "Invoice total credits")
+  public BigDecimal getCredit() {
+    return credit;
+  }
+
+  public void setCredit(BigDecimal credit) {
+    this.credit = credit;
   }
 
   public Invoice tax(BigDecimal tax) {
@@ -341,9 +385,11 @@ public class Invoice   {
         Objects.equals(this.documentId, invoice.documentId) &&
         Objects.equals(this.description, invoice.description) &&
         Objects.equals(this.identifier, invoice.identifier) &&
+        Objects.equals(this.account, invoice.account) &&
         Objects.equals(this.effectiveDate, invoice.effectiveDate) &&
         Objects.equals(this.vendorIdentifier, invoice.vendorIdentifier) &&
         Objects.equals(this.subtotalAmount, invoice.subtotalAmount) &&
+        Objects.equals(this.credit, invoice.credit) &&
         Objects.equals(this.tax, invoice.tax) &&
         Objects.equals(this.totalAmount, invoice.totalAmount) &&
         Objects.equals(this.currency, invoice.currency) &&
@@ -354,7 +400,7 @@ public class Invoice   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, documentId, description, identifier, effectiveDate, vendorIdentifier, subtotalAmount, tax, totalAmount, currency, items, tags, creationDate);
+    return Objects.hash(id, documentId, description, identifier, account, effectiveDate, vendorIdentifier, subtotalAmount, credit, tax, totalAmount, currency, items, tags, creationDate);
   }
 
 
@@ -367,9 +413,11 @@ public class Invoice   {
     sb.append("    documentId: ").append(toIndentedString(documentId)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
+    sb.append("    account: ").append(toIndentedString(account)).append("\n");
     sb.append("    effectiveDate: ").append(toIndentedString(effectiveDate)).append("\n");
     sb.append("    vendorIdentifier: ").append(toIndentedString(vendorIdentifier)).append("\n");
     sb.append("    subtotalAmount: ").append(toIndentedString(subtotalAmount)).append("\n");
+    sb.append("    credit: ").append(toIndentedString(credit)).append("\n");
     sb.append("    tax: ").append(toIndentedString(tax)).append("\n");
     sb.append("    totalAmount: ").append(toIndentedString(totalAmount)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");

@@ -11,6 +11,7 @@ import io.goldfin.admin.service.api.model.DataSeries;
 import java.io.File;
 import io.goldfin.admin.service.api.model.ModelApiResponse;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -66,7 +67,7 @@ public class DataApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = DataSeries.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Creation failed", response = DataSeries.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Creation failed", response = ModelApiResponse.class) })
     public Response dataCreate(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
@@ -81,14 +82,14 @@ public class DataApi  {
     @Path("/{id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a data series", notes = "Delete a data series and any derived information", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete a data series", notes = "Delete a data series and any derived information", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "data", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response dataDelete(@ApiParam(value = "Series ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -98,14 +99,14 @@ public class DataApi  {
     @Path("/{id}/process")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Kick off background processing of data series", notes = "Run background processing of data series, which may generate one or more inventory records.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Kick off background processing of data series", notes = "Run background processing of data series, which may generate one or more inventory records.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "data", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response dataProcess(@ApiParam(value = "Series ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -122,7 +123,7 @@ public class DataApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = DataSeries.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = DataSeries.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response dataShow(@ApiParam(value = "Series ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -146,14 +147,14 @@ public class DataApi  {
     @Path("/{id}/content")
     
     @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Return data series content", notes = "Download data series content", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Return data series content", notes = "Download data series content", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "data", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response dataShowContent(@ApiParam(value = "Series ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -163,14 +164,14 @@ public class DataApi  {
     @Path("/{id}")
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Update a data series", notes = "Update data series description and/or tags.  Other fields are ignored if included in the body.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update a data series", notes = "Update data series description and/or tags.  Other fields are ignored if included in the body.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "data", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response dataUpdate(@ApiParam(value = "Data series ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Data series parameters" ) DataSeries body
 ,@Context SecurityContext securityContext)

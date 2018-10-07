@@ -31,6 +31,46 @@ import javax.validation.constraints.*;
 @ApiModel(description = "Common fields for all invoice line items")
 
 public class InvoiceItem   {
+  @JsonProperty("rid")
+  private Integer rid = null;
+
+  @JsonProperty("parentRid")
+  private Integer parentRid = null;
+
+  /**
+   * Type of invoice row item  * DETAIL - A payable item  * SUMMARY - A sub-total or total line 
+   */
+  public enum ItemRowTypeEnum {
+    DETAIL("DETAIL"),
+    
+    SUMMARY("SUMMARY");
+
+    private String value;
+
+    ItemRowTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static ItemRowTypeEnum fromValue(String text) {
+      for (ItemRowTypeEnum b : ItemRowTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("itemRowType")
+  private ItemRowTypeEnum itemRowType = null;
+
   @JsonProperty("itemId")
   private String itemId = null;
 
@@ -46,6 +86,55 @@ public class InvoiceItem   {
   @JsonProperty("units")
   private Integer units = null;
 
+  /**
+   * Type of multiplier for computing invoice item total  * MONTH - Monthly subscription (may be prorated depending on vendor)  * HOUR - Hours in use  * USER - Number of users  * GB - Gigabytes (for example as a unit of storage or transfer)  * OTHER - Some other unit of consumption 
+   */
+  public enum UnitTypeEnum {
+    MONTH("MONTH"),
+    
+    HOUR("HOUR"),
+    
+    USER("USER"),
+    
+    GB("GB"),
+    
+    OTHER("OTHER");
+
+    private String value;
+
+    UnitTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static UnitTypeEnum fromValue(String text) {
+      for (UnitTypeEnum b : UnitTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("unitType")
+  private UnitTypeEnum unitType = null;
+
+  @JsonProperty("subtotalAmount")
+  private BigDecimal subtotalAmount = null;
+
+  @JsonProperty("credit")
+  private BigDecimal credit = null;
+
+  @JsonProperty("tax")
+  private BigDecimal tax = null;
+
   @JsonProperty("totalAmount")
   private BigDecimal totalAmount = null;
 
@@ -58,8 +147,39 @@ public class InvoiceItem   {
   @JsonProperty("endDate")
   private Date endDate = null;
 
-  @JsonProperty("oneTimeCharge")
-  private Boolean oneTimeCharge = null;
+  /**
+   * Type of charge  * RECURRING - Recurs every interval e.g. monthly  * ONE_TIME - A one-time charge delivered on starting date 
+   */
+  public enum ChargeTypeEnum {
+    RECURRING("RECURRING"),
+    
+    ONE_TIME("ONE-TIME");
+
+    private String value;
+
+    ChargeTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static ChargeTypeEnum fromValue(String text) {
+      for (ChargeTypeEnum b : ChargeTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("chargeType")
+  private ChargeTypeEnum chargeType = ChargeTypeEnum.RECURRING;
 
   @JsonProperty("region")
   private DocumentRegion region = null;
@@ -101,6 +221,63 @@ public class InvoiceItem   {
 
   @JsonProperty("tags")
   private TagSet tags = null;
+
+  public InvoiceItem rid(Integer rid) {
+    this.rid = rid;
+    return this;
+  }
+
+  /**
+   * Row number of line item starting at 1.
+   * @return rid
+   **/
+  @JsonProperty("rid")
+  @ApiModelProperty(value = "Row number of line item starting at 1.")
+  public Integer getRid() {
+    return rid;
+  }
+
+  public void setRid(Integer rid) {
+    this.rid = rid;
+  }
+
+  public InvoiceItem parentRid(Integer parentRid) {
+    this.parentRid = parentRid;
+    return this;
+  }
+
+  /**
+   * Row ID of a summary invoice item to which this item belongs
+   * @return parentRid
+   **/
+  @JsonProperty("parentRid")
+  @ApiModelProperty(value = "Row ID of a summary invoice item to which this item belongs")
+  public Integer getParentRid() {
+    return parentRid;
+  }
+
+  public void setParentRid(Integer parentRid) {
+    this.parentRid = parentRid;
+  }
+
+  public InvoiceItem itemRowType(ItemRowTypeEnum itemRowType) {
+    this.itemRowType = itemRowType;
+    return this;
+  }
+
+  /**
+   * Type of invoice row item  * DETAIL - A payable item  * SUMMARY - A sub-total or total line 
+   * @return itemRowType
+   **/
+  @JsonProperty("itemRowType")
+  @ApiModelProperty(value = "Type of invoice row item  * DETAIL - A payable item  * SUMMARY - A sub-total or total line ")
+  public ItemRowTypeEnum getItemRowType() {
+    return itemRowType;
+  }
+
+  public void setItemRowType(ItemRowTypeEnum itemRowType) {
+    this.itemRowType = itemRowType;
+  }
 
   public InvoiceItem itemId(String itemId) {
     this.itemId = itemId;
@@ -197,17 +374,93 @@ public class InvoiceItem   {
     this.units = units;
   }
 
+  public InvoiceItem unitType(UnitTypeEnum unitType) {
+    this.unitType = unitType;
+    return this;
+  }
+
+  /**
+   * Type of multiplier for computing invoice item total  * MONTH - Monthly subscription (may be prorated depending on vendor)  * HOUR - Hours in use  * USER - Number of users  * GB - Gigabytes (for example as a unit of storage or transfer)  * OTHER - Some other unit of consumption 
+   * @return unitType
+   **/
+  @JsonProperty("unitType")
+  @ApiModelProperty(value = "Type of multiplier for computing invoice item total  * MONTH - Monthly subscription (may be prorated depending on vendor)  * HOUR - Hours in use  * USER - Number of users  * GB - Gigabytes (for example as a unit of storage or transfer)  * OTHER - Some other unit of consumption ")
+  public UnitTypeEnum getUnitType() {
+    return unitType;
+  }
+
+  public void setUnitType(UnitTypeEnum unitType) {
+    this.unitType = unitType;
+  }
+
+  public InvoiceItem subtotalAmount(BigDecimal subtotalAmount) {
+    this.subtotalAmount = subtotalAmount;
+    return this;
+  }
+
+  /**
+   * Item cost for all units without credits or taxes
+   * @return subtotalAmount
+   **/
+  @JsonProperty("subtotalAmount")
+  @ApiModelProperty(value = "Item cost for all units without credits or taxes")
+  public BigDecimal getSubtotalAmount() {
+    return subtotalAmount;
+  }
+
+  public void setSubtotalAmount(BigDecimal subtotalAmount) {
+    this.subtotalAmount = subtotalAmount;
+  }
+
+  public InvoiceItem credit(BigDecimal credit) {
+    this.credit = credit;
+    return this;
+  }
+
+  /**
+   * Credit applied to line item
+   * @return credit
+   **/
+  @JsonProperty("credit")
+  @ApiModelProperty(value = "Credit applied to line item")
+  public BigDecimal getCredit() {
+    return credit;
+  }
+
+  public void setCredit(BigDecimal credit) {
+    this.credit = credit;
+  }
+
+  public InvoiceItem tax(BigDecimal tax) {
+    this.tax = tax;
+    return this;
+  }
+
+  /**
+   * Tax on line item
+   * @return tax
+   **/
+  @JsonProperty("tax")
+  @ApiModelProperty(value = "Tax on line item")
+  public BigDecimal getTax() {
+    return tax;
+  }
+
+  public void setTax(BigDecimal tax) {
+    this.tax = tax;
+  }
+
   public InvoiceItem totalAmount(BigDecimal totalAmount) {
     this.totalAmount = totalAmount;
     return this;
   }
 
   /**
-   * Total cost for all units
+   * Total cost for all units including taxes and credits
    * @return totalAmount
    **/
   @JsonProperty("totalAmount")
-  @ApiModelProperty(value = "Total cost for all units")
+  @ApiModelProperty(value = "Total cost for all units including taxes and credits")
   public BigDecimal getTotalAmount() {
     return totalAmount;
   }
@@ -273,23 +526,23 @@ public class InvoiceItem   {
     this.endDate = endDate;
   }
 
-  public InvoiceItem oneTimeCharge(Boolean oneTimeCharge) {
-    this.oneTimeCharge = oneTimeCharge;
+  public InvoiceItem chargeType(ChargeTypeEnum chargeType) {
+    this.chargeType = chargeType;
     return this;
   }
 
   /**
-   * If true, this is a one-time charge and the starting date provides the date
-   * @return oneTimeCharge
+   * Type of charge  * RECURRING - Recurs every interval e.g. monthly  * ONE_TIME - A one-time charge delivered on starting date 
+   * @return chargeType
    **/
-  @JsonProperty("oneTimeCharge")
-  @ApiModelProperty(value = "If true, this is a one-time charge and the starting date provides the date")
-  public Boolean getOneTimeCharge() {
-    return oneTimeCharge;
+  @JsonProperty("chargeType")
+  @ApiModelProperty(value = "Type of charge  * RECURRING - Recurs every interval e.g. monthly  * ONE_TIME - A one-time charge delivered on starting date ")
+  public ChargeTypeEnum getChargeType() {
+    return chargeType;
   }
 
-  public void setOneTimeCharge(Boolean oneTimeCharge) {
-    this.oneTimeCharge = oneTimeCharge;
+  public void setChargeType(ChargeTypeEnum chargeType) {
+    this.chargeType = chargeType;
   }
 
   public InvoiceItem region(DocumentRegion region) {
@@ -378,16 +631,23 @@ public class InvoiceItem   {
       return false;
     }
     InvoiceItem invoiceItem = (InvoiceItem) o;
-    return Objects.equals(this.itemId, invoiceItem.itemId) &&
+    return Objects.equals(this.rid, invoiceItem.rid) &&
+        Objects.equals(this.parentRid, invoiceItem.parentRid) &&
+        Objects.equals(this.itemRowType, invoiceItem.itemRowType) &&
+        Objects.equals(this.itemId, invoiceItem.itemId) &&
         Objects.equals(this.resourceId, invoiceItem.resourceId) &&
         Objects.equals(this.description, invoiceItem.description) &&
         Objects.equals(this.unitAmount, invoiceItem.unitAmount) &&
         Objects.equals(this.units, invoiceItem.units) &&
+        Objects.equals(this.unitType, invoiceItem.unitType) &&
+        Objects.equals(this.subtotalAmount, invoiceItem.subtotalAmount) &&
+        Objects.equals(this.credit, invoiceItem.credit) &&
+        Objects.equals(this.tax, invoiceItem.tax) &&
         Objects.equals(this.totalAmount, invoiceItem.totalAmount) &&
         Objects.equals(this.currency, invoiceItem.currency) &&
         Objects.equals(this.startDate, invoiceItem.startDate) &&
         Objects.equals(this.endDate, invoiceItem.endDate) &&
-        Objects.equals(this.oneTimeCharge, invoiceItem.oneTimeCharge) &&
+        Objects.equals(this.chargeType, invoiceItem.chargeType) &&
         Objects.equals(this.region, invoiceItem.region) &&
         Objects.equals(this.inventoryId, invoiceItem.inventoryId) &&
         Objects.equals(this.inventoryType, invoiceItem.inventoryType) &&
@@ -396,7 +656,7 @@ public class InvoiceItem   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(itemId, resourceId, description, unitAmount, units, totalAmount, currency, startDate, endDate, oneTimeCharge, region, inventoryId, inventoryType, tags);
+    return Objects.hash(rid, parentRid, itemRowType, itemId, resourceId, description, unitAmount, units, unitType, subtotalAmount, credit, tax, totalAmount, currency, startDate, endDate, chargeType, region, inventoryId, inventoryType, tags);
   }
 
 
@@ -405,16 +665,23 @@ public class InvoiceItem   {
     StringBuilder sb = new StringBuilder();
     sb.append("class InvoiceItem {\n");
     
+    sb.append("    rid: ").append(toIndentedString(rid)).append("\n");
+    sb.append("    parentRid: ").append(toIndentedString(parentRid)).append("\n");
+    sb.append("    itemRowType: ").append(toIndentedString(itemRowType)).append("\n");
     sb.append("    itemId: ").append(toIndentedString(itemId)).append("\n");
     sb.append("    resourceId: ").append(toIndentedString(resourceId)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    unitAmount: ").append(toIndentedString(unitAmount)).append("\n");
     sb.append("    units: ").append(toIndentedString(units)).append("\n");
+    sb.append("    unitType: ").append(toIndentedString(unitType)).append("\n");
+    sb.append("    subtotalAmount: ").append(toIndentedString(subtotalAmount)).append("\n");
+    sb.append("    credit: ").append(toIndentedString(credit)).append("\n");
+    sb.append("    tax: ").append(toIndentedString(tax)).append("\n");
     sb.append("    totalAmount: ").append(toIndentedString(totalAmount)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
     sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
-    sb.append("    oneTimeCharge: ").append(toIndentedString(oneTimeCharge)).append("\n");
+    sb.append("    chargeType: ").append(toIndentedString(chargeType)).append("\n");
     sb.append("    region: ").append(toIndentedString(region)).append("\n");
     sb.append("    inventoryId: ").append(toIndentedString(inventoryId)).append("\n");
     sb.append("    inventoryType: ").append(toIndentedString(inventoryType)).append("\n");

@@ -67,7 +67,7 @@ public class HostDataService implements TransactionalService<Host> {
 				.put("core_count", model.getCoreCount()).put("thread_count", model.getThreadCount())
 				.put("ram", model.getRam()).put("hdd", model.getHdd()).put("ssd", model.getSsd())
 				.put("nic_count", model.getNicCount()).put("network_traffic_limit", model.getNetworkTrafficLimit())
-				.put("backup_enabled", model.getBackupEnabled())
+				.put("backup_enabled", model.isBackupEnabled())
 				.put("tags", JsonHelper.writeToStringOrNull(model.getTags()), true).run(session);
 
 		return id.toString();

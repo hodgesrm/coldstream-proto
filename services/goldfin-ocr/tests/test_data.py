@@ -55,6 +55,16 @@ class DataTest(unittest.TestCase):
             converted_date = data.extract_date(raw)
             self.assertEqual(normalized, converted_date, raw)
 
+    def test_dates_fullmonth_DD_YYYY(self):
+        """fullmonth_DD_YYYY converts to YYYY-MM-DD format"""
+        raw_dates = ["JANUARY 30, 2018", "March 1 , 2018", " August 08,2017 ",
+                     "Effective date: December 15, 2019"]
+        normalized_dates = ["2018-01-30", "2018-03-01", "2017-08-08",
+                            "2019-12-15"]
+        for raw, normalized in zip(raw_dates, normalized_dates):
+            converted_date = data.extract_date(raw)
+            self.assertEqual(normalized, converted_date, raw)
+
     def test_dates_DD_dash_MM_dash_YYYY(self):
         """DD-MM-YYYY converts to YYYY-MM-DD format"""
         raw_dates = ["30-1-2018", "1-3-2018", "08-08-2017 ",

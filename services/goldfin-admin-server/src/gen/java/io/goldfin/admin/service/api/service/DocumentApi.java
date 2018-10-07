@@ -12,6 +12,7 @@ import io.goldfin.admin.service.api.model.DocumentParameters;
 import java.io.File;
 import io.goldfin.admin.service.api.model.ModelApiResponse;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -67,7 +68,7 @@ public class DocumentApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Document.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Invoice creation failed", response = Document.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Invoice creation failed", response = ModelApiResponse.class) })
     public Response documentCreate(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
@@ -82,14 +83,14 @@ public class DocumentApi  {
     @Path("/{id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a invoice", notes = "Delete a single document and associated semantic content", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete a invoice", notes = "Delete a single document and associated semantic content", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response documentDelete(@ApiParam(value = "Invoice ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -106,7 +107,7 @@ public class DocumentApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = File.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response documentDownload(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -116,14 +117,14 @@ public class DocumentApi  {
     @Path("/{id}/process")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Kick off document analysis", notes = "Run background scanning on document.  The document state and semantic information will be updated when finished.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Kick off document analysis", notes = "Run background scanning on document.  The document state and semantic information will be updated when finished.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response documentProcess(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -140,7 +141,7 @@ public class DocumentApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Document.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Document.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response documentShow(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -164,14 +165,14 @@ public class DocumentApi  {
     @Path("/{id}")
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Update a document", notes = "Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update a document", notes = "Update document description and/or tags. Tags do not propagate to already scanned invoices but will apply to new ones.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "document", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response documentUpdate(@ApiParam(value = "Document ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Document parameters" ) DocumentParameters body
 ,@Context SecurityContext securityContext)

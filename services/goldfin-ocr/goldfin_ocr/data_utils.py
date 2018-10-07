@@ -86,12 +86,21 @@ def extract_date(date_string):
                                           y=matcher.group(3))
         return datetime.strptime(clean_date, '%d %b %Y').strftime('%Y-%m-%d')
 
-    # DD MMM YYYY format but with full month names.
+    # DD MMM YYYY format with full month names.
     dd_fullmonth_yyyy = r'^.*?\s*([0-9]+)\s*(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)\s*([0-9]+).*$'
     matcher = re.match(dd_fullmonth_yyyy, date_string.upper())
     if matcher:
         clean_date = "{d} {m} {y}".format(d=matcher.group(1),
                                           m=matcher.group(2),
+                                          y=matcher.group(3))
+        return datetime.strptime(clean_date, '%d %B %Y').strftime('%Y-%m-%d')
+
+    # MMM DD, YYYY format with full month names.
+    fullmonth_dd_yyyy = r'^.*?\s*(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)\s*([0-9]+)\s*,\s*([0-9]+).*$'
+    matcher = re.match(fullmonth_dd_yyyy, date_string.upper())
+    if matcher:
+        clean_date = "{d} {m} {y}".format(d=matcher.group(2),
+                                          m=matcher.group(1),
                                           y=matcher.group(3))
         return datetime.strptime(clean_date, '%d %B %Y').strftime('%Y-%m-%d')
 

@@ -36,7 +36,7 @@ export interface Tenant {
      */
     state?: Tenant.StateEnum;
     /**
-     * Date invoice record was created
+     * Date record was created
      */
     creationDate?: string;
 }

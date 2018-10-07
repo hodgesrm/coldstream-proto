@@ -31,16 +31,23 @@ class InvoiceItem(object):
                             and the value is json key in definition.
     """
     swagger_types = {
+        'rid': 'int',
+        'parent_rid': 'int',
+        'item_row_type': 'str',
         'item_id': 'str',
         'resource_id': 'str',
         'description': 'str',
         'unit_amount': 'float',
         'units': 'int',
+        'unit_type': 'str',
+        'subtotal_amount': 'float',
+        'credit': 'float',
+        'tax': 'float',
         'total_amount': 'float',
         'currency': 'str',
         'start_date': 'datetime',
         'end_date': 'datetime',
-        'one_time_charge': 'bool',
+        'charge_type': 'str',
         'region': 'DocumentRegion',
         'inventory_id': 'str',
         'inventory_type': 'str',
@@ -48,42 +55,62 @@ class InvoiceItem(object):
     }
 
     attribute_map = {
+        'rid': 'rid',
+        'parent_rid': 'parentRid',
+        'item_row_type': 'itemRowType',
         'item_id': 'itemId',
         'resource_id': 'resourceId',
         'description': 'description',
         'unit_amount': 'unitAmount',
         'units': 'units',
+        'unit_type': 'unitType',
+        'subtotal_amount': 'subtotalAmount',
+        'credit': 'credit',
+        'tax': 'tax',
         'total_amount': 'totalAmount',
         'currency': 'currency',
         'start_date': 'startDate',
         'end_date': 'endDate',
-        'one_time_charge': 'oneTimeCharge',
+        'charge_type': 'chargeType',
         'region': 'region',
         'inventory_id': 'inventoryId',
         'inventory_type': 'inventoryType',
         'tags': 'tags'
     }
 
-    def __init__(self, item_id=None, resource_id=None, description=None, unit_amount=None, units=None, total_amount=None, currency=None, start_date=None, end_date=None, one_time_charge=None, region=None, inventory_id=None, inventory_type=None, tags=None):
+    def __init__(self, rid=None, parent_rid=None, item_row_type=None, item_id=None, resource_id=None, description=None, unit_amount=None, units=None, unit_type=None, subtotal_amount=None, credit=None, tax=None, total_amount=None, currency=None, start_date=None, end_date=None, charge_type='RECURRING', region=None, inventory_id=None, inventory_type=None, tags=None):
         """
         InvoiceItem - a model defined in Swagger
         """
 
+        self._rid = None
+        self._parent_rid = None
+        self._item_row_type = None
         self._item_id = None
         self._resource_id = None
         self._description = None
         self._unit_amount = None
         self._units = None
+        self._unit_type = None
+        self._subtotal_amount = None
+        self._credit = None
+        self._tax = None
         self._total_amount = None
         self._currency = None
         self._start_date = None
         self._end_date = None
-        self._one_time_charge = None
+        self._charge_type = None
         self._region = None
         self._inventory_id = None
         self._inventory_type = None
         self._tags = None
 
+        if rid is not None:
+          self.rid = rid
+        if parent_rid is not None:
+          self.parent_rid = parent_rid
+        if item_row_type is not None:
+          self.item_row_type = item_row_type
         if item_id is not None:
           self.item_id = item_id
         if resource_id is not None:
@@ -94,6 +121,14 @@ class InvoiceItem(object):
           self.unit_amount = unit_amount
         if units is not None:
           self.units = units
+        if unit_type is not None:
+          self.unit_type = unit_type
+        if subtotal_amount is not None:
+          self.subtotal_amount = subtotal_amount
+        if credit is not None:
+          self.credit = credit
+        if tax is not None:
+          self.tax = tax
         if total_amount is not None:
           self.total_amount = total_amount
         if currency is not None:
@@ -102,8 +137,8 @@ class InvoiceItem(object):
           self.start_date = start_date
         if end_date is not None:
           self.end_date = end_date
-        if one_time_charge is not None:
-          self.one_time_charge = one_time_charge
+        if charge_type is not None:
+          self.charge_type = charge_type
         if region is not None:
           self.region = region
         if inventory_id is not None:
@@ -112,6 +147,81 @@ class InvoiceItem(object):
           self.inventory_type = inventory_type
         if tags is not None:
           self.tags = tags
+
+    @property
+    def rid(self):
+        """
+        Gets the rid of this InvoiceItem.
+        Row number of line item starting at 1.
+
+        :return: The rid of this InvoiceItem.
+        :rtype: int
+        """
+        return self._rid
+
+    @rid.setter
+    def rid(self, rid):
+        """
+        Sets the rid of this InvoiceItem.
+        Row number of line item starting at 1.
+
+        :param rid: The rid of this InvoiceItem.
+        :type: int
+        """
+
+        self._rid = rid
+
+    @property
+    def parent_rid(self):
+        """
+        Gets the parent_rid of this InvoiceItem.
+        Row ID of a summary invoice item to which this item belongs
+
+        :return: The parent_rid of this InvoiceItem.
+        :rtype: int
+        """
+        return self._parent_rid
+
+    @parent_rid.setter
+    def parent_rid(self, parent_rid):
+        """
+        Sets the parent_rid of this InvoiceItem.
+        Row ID of a summary invoice item to which this item belongs
+
+        :param parent_rid: The parent_rid of this InvoiceItem.
+        :type: int
+        """
+
+        self._parent_rid = parent_rid
+
+    @property
+    def item_row_type(self):
+        """
+        Gets the item_row_type of this InvoiceItem.
+        Type of invoice row item  * DETAIL - A payable item  * SUMMARY - A sub-total or total line 
+
+        :return: The item_row_type of this InvoiceItem.
+        :rtype: str
+        """
+        return self._item_row_type
+
+    @item_row_type.setter
+    def item_row_type(self, item_row_type):
+        """
+        Sets the item_row_type of this InvoiceItem.
+        Type of invoice row item  * DETAIL - A payable item  * SUMMARY - A sub-total or total line 
+
+        :param item_row_type: The item_row_type of this InvoiceItem.
+        :type: str
+        """
+        allowed_values = ["DETAIL", "SUMMARY"]
+        if item_row_type not in allowed_values:
+            raise ValueError(
+                "Invalid value for `item_row_type` ({0}), must be one of {1}"
+                .format(item_row_type, allowed_values)
+            )
+
+        self._item_row_type = item_row_type
 
     @property
     def item_id(self):
@@ -229,10 +339,108 @@ class InvoiceItem(object):
         self._units = units
 
     @property
+    def unit_type(self):
+        """
+        Gets the unit_type of this InvoiceItem.
+        Type of multiplier for computing invoice item total  * MONTH - Monthly subscription (may be prorated depending on vendor)  * HOUR - Hours in use  * USER - Number of users  * GB - Gigabytes (for example as a unit of storage or transfer)  * OTHER - Some other unit of consumption 
+
+        :return: The unit_type of this InvoiceItem.
+        :rtype: str
+        """
+        return self._unit_type
+
+    @unit_type.setter
+    def unit_type(self, unit_type):
+        """
+        Sets the unit_type of this InvoiceItem.
+        Type of multiplier for computing invoice item total  * MONTH - Monthly subscription (may be prorated depending on vendor)  * HOUR - Hours in use  * USER - Number of users  * GB - Gigabytes (for example as a unit of storage or transfer)  * OTHER - Some other unit of consumption 
+
+        :param unit_type: The unit_type of this InvoiceItem.
+        :type: str
+        """
+        allowed_values = ["MONTH", "HOUR", "USER", "GB", "OTHER"]
+        if unit_type not in allowed_values:
+            raise ValueError(
+                "Invalid value for `unit_type` ({0}), must be one of {1}"
+                .format(unit_type, allowed_values)
+            )
+
+        self._unit_type = unit_type
+
+    @property
+    def subtotal_amount(self):
+        """
+        Gets the subtotal_amount of this InvoiceItem.
+        Item cost for all units without credits or taxes
+
+        :return: The subtotal_amount of this InvoiceItem.
+        :rtype: float
+        """
+        return self._subtotal_amount
+
+    @subtotal_amount.setter
+    def subtotal_amount(self, subtotal_amount):
+        """
+        Sets the subtotal_amount of this InvoiceItem.
+        Item cost for all units without credits or taxes
+
+        :param subtotal_amount: The subtotal_amount of this InvoiceItem.
+        :type: float
+        """
+
+        self._subtotal_amount = subtotal_amount
+
+    @property
+    def credit(self):
+        """
+        Gets the credit of this InvoiceItem.
+        Credit applied to line item
+
+        :return: The credit of this InvoiceItem.
+        :rtype: float
+        """
+        return self._credit
+
+    @credit.setter
+    def credit(self, credit):
+        """
+        Sets the credit of this InvoiceItem.
+        Credit applied to line item
+
+        :param credit: The credit of this InvoiceItem.
+        :type: float
+        """
+
+        self._credit = credit
+
+    @property
+    def tax(self):
+        """
+        Gets the tax of this InvoiceItem.
+        Tax on line item
+
+        :return: The tax of this InvoiceItem.
+        :rtype: float
+        """
+        return self._tax
+
+    @tax.setter
+    def tax(self, tax):
+        """
+        Sets the tax of this InvoiceItem.
+        Tax on line item
+
+        :param tax: The tax of this InvoiceItem.
+        :type: float
+        """
+
+        self._tax = tax
+
+    @property
     def total_amount(self):
         """
         Gets the total_amount of this InvoiceItem.
-        Total cost for all units
+        Total cost for all units including taxes and credits
 
         :return: The total_amount of this InvoiceItem.
         :rtype: float
@@ -243,7 +451,7 @@ class InvoiceItem(object):
     def total_amount(self, total_amount):
         """
         Sets the total_amount of this InvoiceItem.
-        Total cost for all units
+        Total cost for all units including taxes and credits
 
         :param total_amount: The total_amount of this InvoiceItem.
         :type: float
@@ -321,27 +529,33 @@ class InvoiceItem(object):
         self._end_date = end_date
 
     @property
-    def one_time_charge(self):
+    def charge_type(self):
         """
-        Gets the one_time_charge of this InvoiceItem.
-        If true, this is a one-time charge and the starting date provides the date
+        Gets the charge_type of this InvoiceItem.
+        Type of charge  * RECURRING - Recurs every interval e.g. monthly  * ONE_TIME - A one-time charge delivered on starting date 
 
-        :return: The one_time_charge of this InvoiceItem.
-        :rtype: bool
+        :return: The charge_type of this InvoiceItem.
+        :rtype: str
         """
-        return self._one_time_charge
+        return self._charge_type
 
-    @one_time_charge.setter
-    def one_time_charge(self, one_time_charge):
+    @charge_type.setter
+    def charge_type(self, charge_type):
         """
-        Sets the one_time_charge of this InvoiceItem.
-        If true, this is a one-time charge and the starting date provides the date
+        Sets the charge_type of this InvoiceItem.
+        Type of charge  * RECURRING - Recurs every interval e.g. monthly  * ONE_TIME - A one-time charge delivered on starting date 
 
-        :param one_time_charge: The one_time_charge of this InvoiceItem.
-        :type: bool
+        :param charge_type: The charge_type of this InvoiceItem.
+        :type: str
         """
+        allowed_values = ["RECURRING", "ONE-TIME"]
+        if charge_type not in allowed_values:
+            raise ValueError(
+                "Invalid value for `charge_type` ({0}), must be one of {1}"
+                .format(charge_type, allowed_values)
+            )
 
-        self._one_time_charge = one_time_charge
+        self._charge_type = charge_type
 
     @property
     def region(self):

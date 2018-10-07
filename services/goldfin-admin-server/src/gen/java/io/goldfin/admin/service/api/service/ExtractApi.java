@@ -9,6 +9,7 @@ import io.swagger.jaxrs.*;
 
 import java.io.File;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -64,7 +65,7 @@ public class ExtractApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = File.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Input error", response = File.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Input error", response = Void.class) })
     public Response extractDownload(@ApiParam(value = "Name of the extract type",required=true) @QueryParam("extractType") String extractType
 ,@ApiParam(value = "A query string that specifies extract content.  If omitted all entities are selected.") @QueryParam("filter") String filter
 ,@ApiParam(value = "Selects the extract output type. Currently only CSV is supported.") @QueryParam("output") String output

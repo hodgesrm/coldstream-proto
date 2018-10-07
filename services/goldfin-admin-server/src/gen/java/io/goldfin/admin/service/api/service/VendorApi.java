@@ -11,6 +11,7 @@ import io.goldfin.admin.service.api.model.ModelApiResponse;
 import io.goldfin.admin.service.api.model.Vendor;
 import io.goldfin.admin.service.api.model.VendorParameters;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -66,7 +67,7 @@ public class VendorApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Vendor.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Vendor creation failed", response = Vendor.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Vendor creation failed", response = ModelApiResponse.class) })
     public Response vendorCreate(@ApiParam(value = "Vendor registration request parameters" ,required=true) VendorParameters body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -76,16 +77,16 @@ public class VendorApi  {
     @Path("/{id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a vendor", notes = "Delete a single vendor.  This can only be done if the vendor is not attached to invoices or existing inventory.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete a vendor", notes = "Delete a single vendor.  This can only be done if the vendor is not attached to invoices or existing inventory.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Invalid Request", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Invalid Request", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response vendorDelete(@ApiParam(value = "vendor ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -102,7 +103,7 @@ public class VendorApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Vendor.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Vendor.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response vendorShow(@ApiParam(value = "Vendor ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -112,12 +113,12 @@ public class VendorApi  {
     
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "List vendors", notes = "Return a list of all vendors", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "List vendors", notes = "Return a list of all vendors", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Void.class) })
     public Response vendorShowall(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.vendorShowall(securityContext);
@@ -126,14 +127,14 @@ public class VendorApi  {
     @Path("/{id}")
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Update a vendor", notes = "Update vendor description.", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update a vendor", notes = "Update vendor description.", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "vendor", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response vendorUpdate(@ApiParam(value = "Vendor ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Vendor parameters" ) VendorParameters body
 ,@Context SecurityContext securityContext)

@@ -520,7 +520,7 @@ public class Host   {
    **/
   @JsonProperty("backupEnabled")
   @ApiModelProperty(value = "If true backup is enabled for this host")
-  public Boolean getBackupEnabled() {
+  public Boolean isBackupEnabled() {
     return backupEnabled;
   }
 

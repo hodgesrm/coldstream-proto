@@ -11,6 +11,7 @@ import io.goldfin.admin.service.api.model.ModelApiResponse;
 import io.goldfin.admin.service.api.model.Tenant;
 import io.goldfin.admin.service.api.model.TenantParameters;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -66,7 +67,7 @@ public class TenantApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created", response = Tenant.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Tenant creation failed", response = Tenant.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Tenant creation failed", response = ModelApiResponse.class) })
     public Response tenantCreate(@ApiParam(value = "Tenant creation parameters" ,required=true) TenantParameters body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -76,14 +77,14 @@ public class TenantApi  {
     @Path("/{id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a tenant", notes = "Delete a single tenant", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete a tenant", notes = "Delete a single tenant", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response tenantDelete(@ApiParam(value = "Tenant ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -100,7 +101,7 @@ public class TenantApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Tenant.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Tenant.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response tenantShow(@ApiParam(value = "Tenant ID",required=true) @PathParam("id") String id
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -110,12 +111,12 @@ public class TenantApi  {
     
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "List tenants", notes = "Return a list of all tenants", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "List tenants", notes = "Return a list of all tenants", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful query", response = Void.class) })
     public Response tenantShowall(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.tenantShowall(securityContext);
@@ -124,14 +125,14 @@ public class TenantApi  {
     @Path("/{id}")
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Update a tenant", notes = "Update invoice description and tags. Changes to other fields are ignored", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update a tenant", notes = "Update invoice description and tags. Changes to other fields are ignored", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "tenant", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response tenantUpdate(@ApiParam(value = "Tenant ID",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Tenant parameters" ) TenantParameters body
 ,@Context SecurityContext securityContext)

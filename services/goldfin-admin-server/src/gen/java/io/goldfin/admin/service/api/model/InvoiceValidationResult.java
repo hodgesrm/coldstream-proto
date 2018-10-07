@@ -120,7 +120,7 @@ public class InvoiceValidationResult   {
    **/
   @JsonProperty("passed")
   @ApiModelProperty(value = "If true the check passed")
-  public Boolean getPassed() {
+  public Boolean isPassed() {
     return passed;
   }
 

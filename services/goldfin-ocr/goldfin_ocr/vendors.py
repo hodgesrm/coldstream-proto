@@ -2,6 +2,7 @@
 
 """Holds vendor identifiers."""
 
+AMAZON = "Amazon"
 GRAND_COULEE = "GrandCoulee"
 INTERNAP = "Internap"
 LEASEWEB = "LeaseWeb"

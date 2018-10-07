@@ -10,6 +10,7 @@ import io.swagger.jaxrs.*;
 import io.goldfin.admin.service.api.model.LoginCredentials;
 import io.goldfin.admin.service.api.model.ModelApiResponse;
 
+import java.util.Map;
 import java.util.List;
 import io.goldfin.admin.service.api.service.NotFoundException;
 
@@ -58,11 +59,11 @@ public class SessionApi  {
     
     @Consumes({ "application/json" })
     
-    @io.swagger.annotations.ApiOperation(value = "Login to system", notes = "Obtain API key using login credentials", response = void.class, tags={ "security", })
+    @io.swagger.annotations.ApiOperation(value = "Login to system", notes = "Obtain API key using login credentials", response = Void.class, tags={ "security", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad input", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad input", response = ModelApiResponse.class) })
     public Response loginByCredentials(@ApiParam(value = "Login credentials" ,required=true) LoginCredentials body
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -72,14 +73,14 @@ public class SessionApi  {
     @Path("/{token}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Logout from system", notes = "Delete session, which is no longer usable after this call", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Logout from system", notes = "Delete session, which is no longer usable after this call", response = Void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "ApiKey"),
         @io.swagger.annotations.Authorization(value = "SessionKey")
     }, tags={ "security", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Successful", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = void.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found", response = Void.class) })
     public Response logout(@ApiParam(value = "Session ID token",required=true) @PathParam("token") String token
 ,@Context SecurityContext securityContext)
     throws NotFoundException {

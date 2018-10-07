@@ -32,18 +32,28 @@
     </clr-dg-action-bar>
 
     <clr-dg-column [clrDgField]="'identifier'">Identifier</clr-dg-column>
+    <clr-dg-column [clrDgField]="'description'">
+      <ng-container *clrDgHideableColumn="{hidden: true}">
+        Description
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'account'">Account</clr-dg-column>
     <clr-dg-column [clrDgField]="'effectiveDate'">Effective Date</clr-dg-column>
     <clr-dg-column [clrDgField]="'vendorIdentifier'">Vendor</clr-dg-column>
     <clr-dg-column [clrDgField]="'subtotalAmount'">Subtotal</clr-dg-column>
+    <clr-dg-column [clrDgField]="'credit'">Credit</clr-dg-column>
     <clr-dg-column [clrDgField]="'tax'">Tax</clr-dg-column>
     <clr-dg-column [clrDgField]="'totalAmount'">Total</clr-dg-column>
     <clr-dg-column [clrDgField]="'currency'">Currency</clr-dg-column>
 
     <clr-dg-row *clrDgItems="let invoice of invoices" [clrDgItem]="invoice">
         <clr-dg-cell>{{invoice.identifier}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.description}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.account}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.effectiveDate}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.vendorIdentifier}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.subtotalAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{invoice.credit}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.tax}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.totalAmount}}</clr-dg-cell>
         <clr-dg-cell>{{invoice.currency}}</clr-dg-cell>
@@ -66,6 +76,11 @@
           Inv Identifier
         </ng-container>
       </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_account'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Account
+        </ng-container>
+      </clr-dg-column>
       <clr-dg-column [clrDgField]="'invoice_effectiveDate'">
         <ng-container *clrDgHideableColumn="{hidden: true}">
           Inv Effective Date
@@ -79,6 +94,11 @@
       <clr-dg-column [clrDgField]="'invoice_subtotalAmount'">
         <ng-container *clrDgHideableColumn="{hidden: true}">
           Inv Subtotal
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'invoice_credit'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Inv Credit
         </ng-container>
       </clr-dg-column>
       <clr-dg-column [clrDgField]="'invoice_tax'">
@@ -96,6 +116,11 @@
           Inv Currency
         </ng-container>
       </clr-dg-column>
+      <clr-dg-column [clrDgField]="'itemRowType'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Item Type
+        </ng-container>
+      </clr-dg-column>
       <clr-dg-column [clrDgField]="'itemId'">
         <ng-container *clrDgHideableColumn="{hidden: false}">
           Item ID
@@ -111,6 +136,11 @@
           Description
         </ng-container>
       </clr-dg-column>
+      <clr-dg-column [clrDgField]="'chargeType'">
+        <ng-container *clrDgHideableColumn="{hidden: true}">
+          Charge Type
+        </ng-container>
+      </clr-dg-column>
       <clr-dg-column [clrDgField]="'unitAmount'">
         <ng-container *clrDgHideableColumn="{hidden: false}">
           Unit Amount
@@ -119,6 +149,26 @@
       <clr-dg-column [clrDgField]="'units'">
         <ng-container *clrDgHideableColumn="{hidden: false}">
           Units
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'unitType'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Unit Type
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'subtotalAmount'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Subtotal
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'credit'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Credit
+        </ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'tax'">
+        <ng-container *clrDgHideableColumn="{hidden: false}">
+          Tax
         </ng-container>
       </clr-dg-column>
       <clr-dg-column [clrDgField]="'totalAmount'">
@@ -141,11 +191,6 @@
           End Date
         </ng-container>
       </clr-dg-column>
-      <clr-dg-column [clrDgField]="'oneTimeCharge'">
-        <ng-container *clrDgHideableColumn="{hidden: false}">
-          One Time Charge
-        </ng-container>
-      </clr-dg-column>
       <clr-dg-column [clrDgField]="'inventoryId'">
         <ng-container *clrDgHideableColumn="{hidden: false}">
           Inventory ID
@@ -160,22 +205,29 @@
       <clr-dg-row *clrDgItems="let item of invoice_items" [clrDgItem]="invoice_item">
         <clr-dg-cell>{{item.invoice_description}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_identifier}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_account}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_effectiveDate}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_vendorIdentifier}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_subtotalAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{item.invoice_credit}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_tax}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_totalAmount}}</clr-dg-cell>
         <clr-dg-cell>{{item.invoice_currency}}</clr-dg-cell>
+        <clr-dg-cell>{{item.itemRowType}}</clr-dg-cell>
         <clr-dg-cell>{{item.itemId}}</clr-dg-cell>
         <clr-dg-cell>{{item.resourceId}}</clr-dg-cell>
         <clr-dg-cell>{{truncateDisplayValue(item.description, 50)}}</clr-dg-cell>
+        <clr-dg-cell>{{item.chargeType}}</clr-dg-cell>
         <clr-dg-cell>{{item.unitAmount}}</clr-dg-cell>
         <clr-dg-cell>{{item.units}}</clr-dg-cell>
+        <clr-dg-cell>{{item.unitType}}</clr-dg-cell>
+        <clr-dg-cell>{{item.subtotalAmount}}</clr-dg-cell>
+        <clr-dg-cell>{{item.credit}}</clr-dg-cell>
+        <clr-dg-cell>{{item.tax}}</clr-dg-cell>
         <clr-dg-cell>{{item.totalAmount}}</clr-dg-cell>
         <clr-dg-cell>{{item.currency}}</clr-dg-cell>
         <clr-dg-cell>{{item.startDate}}</clr-dg-cell>
         <clr-dg-cell>{{item.endDate}}</clr-dg-cell>
-        <clr-dg-cell>{{item.oneTimeCharge}}</clr-dg-cell>
         <clr-dg-cell>{{item.inventoryId}}</clr-dg-cell>
         <clr-dg-cell>{{item.inventoryType}}</clr-dg-cell>
         <ng-container ngProjectAs="clr-dg-row-detail" 
