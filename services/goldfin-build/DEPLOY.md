@@ -58,6 +58,18 @@ enable public access.
 
 Turn off after use. 
 
+## DBMS Upgrade
+
+Connect using psql to account.  Set search path to each tenant in succession
+and run upgrade script. 
+
+```
+psql -Upreprod -hpreprod.cz45mj2vq6oo.us-west-2.rds.amazonaws.com
+set search_path=tenant_skyline;
+\i /home/rhodges/git/coldstream/coldstream-proto/services/goldfin-admin-server/sql/tenant-schema-upgrade-01.sql
+```
+Repeat the last two commands for all tenants. 
+
 ## Preprod Service Initialization
 
 cd $HOME/goldfin/preprod-conf
