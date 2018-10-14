@@ -17,6 +17,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
 
 public abstract class ExtractApiService {
-    public abstract Response extractDownload( @NotNull String extractType, String filter, String output,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response extractDownload( @NotNull String extractType, String filter, Integer limit, String order, String output,SecurityContext securityContext) throws NotFoundException;
     public abstract Response extractTypes(SecurityContext securityContext) throws NotFoundException;
 }

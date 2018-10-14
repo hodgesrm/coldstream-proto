@@ -3,7 +3,6 @@
  */
 package io.goldfin.admin.service.api.service.impl;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -29,12 +28,15 @@ public class ExtractApiServiceImpl extends ExtractApiService {
 	ExceptionHelper helper = new ExceptionHelper(logger);
 
 	@Override
-	public Response extractDownload(@NotNull String extractType, String filter, String output,
+
+	public Response extractDownload(String extractType, String filter, Integer limit, String order, String output,
 			SecurityContext securityContext) throws NotFoundException {
 		try {
+			// Limit must be converted to proper int to avoid null pointer exceptions. 
+			int limitAsInt = (limit == null) ? 0 : limit.intValue();
 			ExtractManager em = ManagerRegistry.getInstance().getManager(ExtractManager.class);
 			if ("csv".equals(output.toLowerCase())) {
-				String csv = em.getExtract(securityContext.getUserPrincipal(), extractType, filter, OutputTypes.CSV);
+				String csv = em.getExtract(securityContext.getUserPrincipal(), extractType, filter, limitAsInt, order, OutputTypes.CSV);
 				Response.ResponseBuilder builder = Response.ok(csv, TEXT_CSV);
 				builder.header("Content-Disposition", "inline; filename=extract.csv");
 				return builder.build();

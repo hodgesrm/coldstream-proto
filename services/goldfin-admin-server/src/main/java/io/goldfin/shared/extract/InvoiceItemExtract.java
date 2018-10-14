@@ -3,18 +3,16 @@
  */
 package io.goldfin.shared.extract;
 
-import java.util.ArrayList;
-
 import io.goldfin.shared.data.SqlSelect;
 
 /**
  * Defines an extract to select invoice headers joined to matching invoice
  * items.
  */
-public class InvoiceItemExtract extends ExtractDefinition {
+public class InvoiceItemExtract implements Extract {
 
-	public InvoiceItemExtract() {
-		super("invoice_item", new ArrayList<String>());
+	public String name() {
+		return "invoice_item";
 	}
 
 	/** Return the base query. */
@@ -22,6 +20,6 @@ public class InvoiceItemExtract extends ExtractDefinition {
 		return new SqlSelect().from("invoices", "invoice")
 				.innerJoin("invoice_items", "item", "invoice.id", "item.invoice_id").project("*")
 				.orderByAscending("invoice.identifier").orderByAscending("invoice.effective_date")
-				.orderByAscending("item.item_row_number").orderByAscending("item_row_number");
+				.orderByAscending("item.rid");
 	}
 }

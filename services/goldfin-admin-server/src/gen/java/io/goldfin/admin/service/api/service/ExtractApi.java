@@ -68,10 +68,12 @@ public class ExtractApi  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Input error", response = Void.class) })
     public Response extractDownload(@ApiParam(value = "Name of the extract type",required=true) @QueryParam("extractType") String extractType
 ,@ApiParam(value = "A query string that specifies extract content.  If omitted all entities are selected.") @QueryParam("filter") String filter
+,@ApiParam(value = "Maximum number of entities to return") @QueryParam("limit") Integer limit
+,@ApiParam(value = "A comma-separated list of order by columns of the form name1[:asc|desc],name2[:asc|desc],...  If sort order is omitted it defaults to asc (ascending).") @QueryParam("order") String order
 ,@ApiParam(value = "Selects the extract output type. Currently only CSV is supported.") @QueryParam("output") String output
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.extractDownload(extractType,filter,output,securityContext);
+        return delegate.extractDownload(extractType,filter,limit,order,output,securityContext);
     }
     @GET
     @Path("/types")

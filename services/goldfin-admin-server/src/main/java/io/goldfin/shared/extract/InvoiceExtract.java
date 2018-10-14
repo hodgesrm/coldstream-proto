@@ -3,20 +3,19 @@
  */
 package io.goldfin.shared.extract;
 
-import io.goldfin.admin.service.api.model.Invoice;
 import io.goldfin.shared.data.SqlSelect;
 
 /**
- * Defines an extract to select invoice headers. 
+ * Defines an extract to select invoice headers.
  */
-public class InvoiceExtract extends ExtractDefinition {
+public class InvoiceExtract implements Extract {
 
-	public InvoiceExtract() {
-		super("invoice", Invoice.class);
+	public String name() {
+		return "invoice";
 	}
 
-	/** Return the base query. */
 	public SqlSelect baseQuery() {
-		return new SqlSelect().from("invoices", "i").project("i.*");
+		return new SqlSelect().from("invoices", "i").project("i.*").orderByAscending("effective_date")
+				.orderByAscending("vendor");
 	}
 }

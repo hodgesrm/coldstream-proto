@@ -1058,6 +1058,16 @@ paths:
             A query string that specifies extract content.  If omitted all
             entities are selected.
           type: string
+        - name: limit
+          in: query
+          description: >-
+            Maximum number of entities to return
+          type: integer
+        - name: order
+          in: query
+          description: >-
+            A comma-separated list of order by columns of the form name1[:asc|desc],name2[:asc|desc],...  If sort order is omitted it defaults to asc (ascending).
+          type: string
         - name: output
           in: query
           description: Selects the extract output type. Currently only CSV is supported.
@@ -1393,7 +1403,7 @@ definitions:
     properties:
       rid:
         type: integer
-        description: Row number of line item starting at 1. 
+        description: Row number of line item starting at 1.
       parentRid:
         type: integer
         description: Row ID of a summary invoice item to which this item belongs

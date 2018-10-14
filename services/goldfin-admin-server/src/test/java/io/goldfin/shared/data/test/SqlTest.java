@@ -96,6 +96,28 @@ public class SqlTest {
 	}
 
 	/**
+	 * Verify that we can apply use limit to reduce the number of rows returned.
+	 */
+	@Test
+	public void testLimit() {
+		String table = "limits";
+		globalDbHelper.createSimpleTestTable(table);
+		try (Session s = globalDbHelper.createSession(false)) {
+			// Ensure we get 10 rows if limit is not set.
+			TabularResultSet result = new SqlSelect().from(table).project("id").project(table, "value", "v1").run(s);
+			Assert.assertEquals(10, result.rowCount());
+
+			// Now reduce the number to 5 followed by 1.
+			TabularResultSet result5 = new SqlSelect().from(table).project("id").project(table, "value", "v1").limit(5)
+					.run(s);
+			Assert.assertEquals(5, result5.rowCount());
+			TabularResultSet result1 = new SqlSelect().from(table).project("id").project(table, "value", "v1").limit(1)
+					.run(s);
+			Assert.assertEquals(1, result1.rowCount());
+		}
+	}
+
+	/**
 	 * Verify that we can select from a subquery.
 	 */
 	@Test

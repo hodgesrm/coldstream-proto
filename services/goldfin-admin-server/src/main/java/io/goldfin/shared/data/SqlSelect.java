@@ -31,13 +31,8 @@ import org.slf4j.LoggerFactory;
 public class SqlSelect {
 	static final Logger logger = LoggerFactory.getLogger(SqlSelect.class);
 
-	/** Specifies an ascending or descending sort. */
-	public enum Ordering {
-		ASC, DESC
-	};
-
 	/** Stores the definition of a column in a SQL projection. */
-	class ColumnExpression {
+	public class ColumnExpression {
 		String tableAlias;
 		String windowAlias;
 		String expression;
@@ -45,7 +40,7 @@ public class SqlSelect {
 	}
 
 	/** Stores definition of a FROM-entity: a table or subquery. */
-	class FromExpression {
+	public class FromExpression {
 		String alias;
 		String name;
 		SqlSelect subQuery;
@@ -71,7 +66,7 @@ public class SqlSelect {
 	 * Adds a from clause with a join expression. Keys must include alias if
 	 * required to eliminate ambiguity.
 	 */
-	class JoinExpression extends FromExpression {
+	public class JoinExpression extends FromExpression {
 		JoinType joinType = JoinType.INNER;
 		String leftKey;
 		String rightKey;
@@ -115,11 +110,6 @@ public class SqlSelect {
 		}
 	}
 
-	class OrderByExpression {
-		String name;
-		Ordering order;
-	}
-
 	// Properties of the query.
 	private List<FromExpression> froms = new ArrayList<FromExpression>();
 	private List<ColumnExpression> columns = new ArrayList<ColumnExpression>();
@@ -128,6 +118,7 @@ public class SqlSelect {
 	private List<Object> whereParams = new ArrayList<Object>();
 	private List<String> groupByExpressions = new ArrayList<String>();
 	private List<OrderByExpression> sorts = new ArrayList<OrderByExpression>();
+	private int limit;
 
 	public SqlSelect() {
 	}
@@ -279,11 +270,21 @@ public class SqlSelect {
 		return orderBy(name, Ordering.DESC);
 	}
 
-	private SqlSelect orderBy(String name, Ordering order) {
+	public SqlSelect orderBy(String name, Ordering order) {
 		OrderByExpression expression = new OrderByExpression();
 		expression.name = name;
 		expression.order = order;
 		sorts.add(expression);
+		return this;
+	}
+
+	public SqlSelect clearOrderBy() {
+		sorts.clear();
+		return this;
+	}
+
+	public SqlSelect limit(int limit) {
+		this.limit = limit;
 		return this;
 	}
 
@@ -298,6 +299,7 @@ public class SqlSelect {
 		queryBuf.append(this.groupByClause());
 		queryBuf.append(this.windowClause());
 		queryBuf.append(this.orderByClause());
+		queryBuf.append(this.limitClause());
 		return queryBuf.toString();
 	}
 
@@ -535,6 +537,18 @@ public class SqlSelect {
 				orderByClause.append(String.format(" %s %s", expression.name, expression.order.toString()));
 			}
 			return orderByClause.toString();
+		}
+	}
+
+	/**
+	 * Generate the LIMIT clause, which is optional in the current implementation.
+	 */
+	private String limitClause() {
+		if (this.limit > 0) {
+			StringBuffer limitClause = new StringBuffer(" LIMIT ").append(this.limit);
+			return limitClause.toString();
+		} else {
+			return "";
 		}
 	}
 }
