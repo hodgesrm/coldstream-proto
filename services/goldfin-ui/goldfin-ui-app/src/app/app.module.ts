@@ -25,7 +25,6 @@ import { PricesComponent } from "./prices/prices.component";
 import { PricesHostsComponent } from "./prices/prices_hosts.component";
 import { VendorsComponent } from "./vendors/vendors.component";
 import { ErrorModalComponent } from "./utility/error-modal.component";
-import { AboutComponent } from "./about/about.component";
 
 // Dashboard charting. 
 import { ChartsModule } from 'ng2-charts';
@@ -78,8 +77,7 @@ import { VendorService as VendorApi } from "./client/api/api";
         PricesComponent,
         PricesHostsComponent,
         VendorsComponent,
-        ErrorModalComponent,
-        AboutComponent
+        ErrorModalComponent
     ],
     imports: [
         BrowserAnimationsModule,

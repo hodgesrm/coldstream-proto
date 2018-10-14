@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
     logout_open:Boolean = false;
 
     constructor(
-        private router: Router,
+        public router: Router,
         private configuration: Configuration,
         private authService: AuthService
     ) {}

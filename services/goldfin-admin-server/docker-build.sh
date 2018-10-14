@@ -15,7 +15,7 @@ mvn clean install -DskipTests
 # in-tree for the docker build to work. 
 rm -rf target/ui
 mkdir -p target/ui
-(cd ../goldfin-ui/goldfin-ui-app; ng build --base-href=/ui/ --environment=prod)
+(cd ../goldfin-ui/goldfin-ui-app; ng build --base-href=/ui/ --configuration=production)
 rsync -avr ../goldfin-ui/goldfin-ui-app/dist/ target/ui
 
 # Run 'mvn install' which generates the Docker file for us. (No need to invoke

@@ -4,8 +4,8 @@
 <clr-datagrid [(clrDgSelected)]="selected">
     <clr-dg-action-bar>
         <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-secondary" (click)="analyze_open = true">Analyze Cost Trends</button>
-            <button type="button" class="btn btn-sm btn-secondary" (click)="export_open = true">Export Data</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="onAnalyze()">Analyze Cost Trends</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="onExport()">Export Data</button>
         </div>
     </clr-dg-action-bar>
 
@@ -141,3 +141,5 @@
 
     <clr-dg-footer>{{host_prices.length}} hosts</clr-dg-footer>
 </clr-datagrid>
+
+<error-modal [reporter]="errorReporter"></error-modal>

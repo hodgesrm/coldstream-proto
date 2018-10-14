@@ -58,7 +58,8 @@ export class VendorsComponent implements OnInit {
 
   onUpdate(): void {
     console.log("onUpdate invoked");
-    this.update_open = true;
+    this.errorReporter.error_message = "Vendor edit is not implemented yet";
+    this.errorReporter.error_open = true;
   }
 
   onDelete(): void {
