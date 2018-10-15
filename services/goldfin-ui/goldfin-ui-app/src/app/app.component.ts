@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Configuration } from './client/configuration';
 import { AuthService } from './services/auth.service';
+import { environment } from '../environments/environment';
 
 @Component({
     selector: 'my-app',
@@ -11,6 +12,7 @@ import { AuthService } from './services/auth.service';
 export class AppComponent implements OnInit {
     about_open:Boolean = false;
     logout_open:Boolean = false;
+    VERSION: String = environment.version;
 
     constructor(
         public router: Router,
